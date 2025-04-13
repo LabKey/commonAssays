@@ -26,7 +26,7 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.DOM;
 import org.labkey.api.util.DOM.Attribute;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.Link.LinkBuilder;
+import org.labkey.api.util.LinkBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.writer.HtmlWriter;
 

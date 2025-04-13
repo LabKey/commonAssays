@@ -17,7 +17,7 @@
 %>
 <%@ page import="org.labkey.api.data.DataRegion" %>
 <%@ page import="org.labkey.api.data.DataRegionSelection" %>
-<%@ page import="org.labkey.api.util.Link" %>
+<%@ page import="org.labkey.api.util.LinkBuilder" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -61,7 +61,7 @@
         <% for (GuideSet gs : guideSets) { %>
             <li>
             <%
-                new Link.LinkBuilder("Guide Set " + gs.getGuideSetId() + ": " + gs.getComment())
+                new LinkBuilder("Guide Set " + gs.getGuideSetId() + ": " + gs.getComment())
                     .href("#")
                     .attributes(Map.of(tabindex.name(), "-1"))
                     .onClick("createGuideSetWindow(" + bean.getProtocol().getRowId() + ", " + gs.getGuideSetId() + ", false)")

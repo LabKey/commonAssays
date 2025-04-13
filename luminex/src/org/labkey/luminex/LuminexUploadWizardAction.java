@@ -54,7 +54,7 @@ import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.element.Input;
+import org.labkey.api.util.InputBuilder;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
@@ -438,7 +438,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     TD(
                         at(style, "display:" + (hideCell ? "none" : "table-cell")).
                         name(titrationCellName),
-                        new Input.InputBuilder<>().type("checkbox").name(id).id(id)
+                        InputBuilder.checkbox().name(id).id(id)
                     ).appendTo(out);
 
                     StringBuilder onchange = new StringBuilder("b = this.checked;");

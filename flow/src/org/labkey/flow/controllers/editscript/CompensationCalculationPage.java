@@ -24,7 +24,7 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.json.JSONArray;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.util.element.Select.SelectBuilder;
+import org.labkey.api.util.SelectBuilder;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.AutoCompensationScript;
 import org.labkey.flow.analysis.model.Population;

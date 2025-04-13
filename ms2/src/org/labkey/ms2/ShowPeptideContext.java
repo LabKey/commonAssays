@@ -18,7 +18,7 @@ package org.labkey.ms2;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.security.User;
-import org.labkey.api.util.Link.LinkBuilder;
+import org.labkey.api.util.LinkBuilder;
 import org.labkey.api.view.ActionURL;
 
 public class ShowPeptideContext

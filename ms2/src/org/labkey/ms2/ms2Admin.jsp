@@ -36,19 +36,19 @@
 </tr>
 <tr class="labkey-alternate-row">
     <td style="font-weight: bold;">Successful</td>
-    <td align="right"><%=link(bean.stats.get("successfulRuns"), bean.successfulURL).clearClasses()%></td>
+    <td align="right"><%=simpleLink(bean.stats.get("successfulRuns"), bean.successfulURL)%></td>
     <td align="right"><%=h(bean.stats.get("successfulPeptides"))%></td>
     <td align="right"><%=h(bean.stats.get("successfulSpectra"))%></td>
 </tr>
 <tr class="labkey-row">
     <td style="font-weight: bold;">In-Process</td>
-    <td align="right"><%=link(bean.stats.get("inProcessRuns"), bean.inProcessURL).clearClasses()%></td>
+    <td align="right"><%=simpleLink(bean.stats.get("inProcessRuns"), bean.inProcessURL)%></td>
     <td align="right"><%=h(bean.stats.get("inProcessPeptides"))%></td>
     <td align="right"><%=h(bean.stats.get("inProcessSpectra"))%></td>
 </tr>
 <tr class="labkey-alternate-row">
     <td style="font-weight: bold;">Failed</td>
-    <td align="right"><%=link(bean.stats.get("failedRuns"), bean.failedURL).clearClasses()%></td>
+    <td align="right"><%=simpleLink(bean.stats.get("failedRuns"), bean.failedURL)%></td>
     <td align="right"><%=h(bean.stats.get("failedPeptides"))%></td>
     <td align="right"><%=h(bean.stats.get("failedSpectra"))%></td>
 </tr>
@@ -57,7 +57,7 @@
 </tr>
     <tr class="labkey-alternate-row">
     <td style="font-weight: bold;">Deleted</td>
-    <td align="right"><%=link(bean.stats.get("deletedRuns"), bean.deletedURL).clearClasses()%></td>
+    <td align="right"><%=simpleLink(bean.stats.get("deletedRuns"), bean.deletedURL)%></td>
     <td align="right"><%=h(bean.stats.get("deletedPeptides"))%></td>
     <td align="right"><%=h(bean.stats.get("deletedSpectra"))%></td>
 </tr>
