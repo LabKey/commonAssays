@@ -48,7 +48,7 @@
         %>
         </ul>
         <br>
-        <%=link("Download FCS Files anyway?").href(model.run.urlFor(RunController.DownloadAction.class).addParameter("skipMissing", true))%>
+        <%=link("Download FCS Files anyway?", model.run.urlFor(RunController.DownloadAction.class).addParameter("skipMissing", true))%>
         </p>
 
         <p>

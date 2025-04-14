@@ -662,9 +662,8 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     }
 
                     HtmlString image = HtmlString.unsafe("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
-                    new LinkBuilder(image)
+                    LinkBuilder.simpleLink(image)
                         .onMouseOver("return showHelpDiv(this, 'Titration Curves', " + PageFlowUtil.jsString(PageFlowUtil.filter(sb.toString())) + ");")
-                        .clearClasses()
                         .appendTo(oldWriter);
                 }
             }

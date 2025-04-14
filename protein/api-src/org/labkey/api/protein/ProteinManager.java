@@ -298,7 +298,7 @@ public class ProteinManager
         if (null == url)
             return HtmlString.of(txt);
 
-        return new LinkBuilder(txt).href(url).target(target).clearClasses().getHtmlString();
+        return LinkBuilder.simpleLink(txt, url).target(target).getHtmlString();
     }
 
     public static List<HtmlString> makeFullAnchorLinks(Collection<String> idents, String target, String identType)
