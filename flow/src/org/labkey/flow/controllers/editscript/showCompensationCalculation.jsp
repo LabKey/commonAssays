@@ -58,9 +58,9 @@
     <br/>
     <p>
         This compensation calculation may be edited in a number of ways:<br>
-        <%=link("Upload a FlowJo workspace").href(form.urlFor(ScriptController.UploadCompensationCalculationAction.class))%><br>
-        <%=link("Switch keywords or gates").href(form.urlFor(ScriptController.ChooseCompensationRunAction.class))%><br>
-        <%=link("Rename gates").href(form.getFlowScript().urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.calculateCompensation))%><br>
-        <%=link("Script main page").href(form.urlFor(AnalysisScriptController.BeginAction.class))%>
+        <%=link("Upload a FlowJo workspace", form.urlFor(ScriptController.UploadCompensationCalculationAction.class))%><br>
+        <%=link("Switch keywords or gates", form.urlFor(ScriptController.ChooseCompensationRunAction.class))%><br>
+        <%=link("Rename gates", form.getFlowScript().urlFor(ScriptController.EditGateTreeAction.class, FlowProtocolStep.calculateCompensation))%><br>
+        <%=link("Script main page", form.urlFor(AnalysisScriptController.BeginAction.class))%>
     </p>
 <% } %>

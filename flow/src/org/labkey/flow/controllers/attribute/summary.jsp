@@ -63,7 +63,7 @@
             <% } %>
         </td>
         <td>
-            <%=link("edit").href(editURL.clone().addParameter(AttributeController.Param.rowId, primary._rowId))%>
+            <%=link("edit", editURL.clone().addParameter(AttributeController.Param.rowId, primary._rowId))%>
             <%--<% if (totalCount == 0) { %>--%>
             <%--<labkey:link href='<%=deleteURL.clone().addParameter(AttributeController.Param.rowId, primary._rowId)%>' text="delete"/>--%>
             <%--<% } %>--%>
@@ -86,7 +86,7 @@
             <% } %>
         </td>
         <td>
-            <%=link("edit").href(editURL.clone().addParameter(AttributeController.Param.rowId, alias._rowId))%>
+            <%=link("edit", editURL.clone().addParameter(AttributeController.Param.rowId, alias._rowId))%>
             <%--<labkey:link href='<%=deleteURL.clone().addParameter(AttributeController.Param.rowId, alias._rowId)%>' text="delete"/>--%>
             <%--<labkey:link href='<%=makePrimaryURL.clone().addParameter(AttributeController.Param.rowId, alias._rowId)%>' text="make primary"/>--%>
         </td>
@@ -98,7 +98,7 @@
         <td style="padding-left: 1.5em;">
         </td>
         <td>
-            <%=link("create alias").href(aliasURL.clone().addParameter(AttributeController.Param.rowId, primary._rowId))%>
+            <%=link("create alias", aliasURL.clone().addParameter(AttributeController.Param.rowId, primary._rowId))%>
         </td>
         <td>&nbsp;</td>
     </tr>

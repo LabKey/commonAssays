@@ -112,7 +112,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
             // add onclick handler to call the well exclusion window creation function
             String onClick = "openExclusionsWellWindow(" + _protocolId + ", " + runId + ", " + dataId + ", " +
                 jsString(wellID) + ", " + (description == null ? null : jsString(description)) + ", " + jsString(type) + ");";
-            new LinkBuilder(img).href("#").onClick(onClick).clearClasses().appendTo(oldWriter);
+            LinkBuilder.simpleLink(img).href("#").onClick(onClick).appendTo(oldWriter);
         }
         else
         {

@@ -658,7 +658,7 @@ public class MS2Controller extends SpringActionController
 
         onClick.append(", 100); return false;");
 
-        return PageFlowUtil.link("Show Modifications").onClick(onClick.toString()).id("modificationsLink");
+        return LinkBuilder.labkeyLink("Show Modifications").onClick(onClick.toString()).id("modificationsLink");
     }
 
     private DOM.Renderable appendMods(Map<String, String> mods, String heading)
@@ -826,10 +826,10 @@ public class MS2Controller extends SpringActionController
 
             String nextPrevStr = "";
             if (null != previousURL) {
-                 nextPrevStr += PageFlowUtil.link("Previous").href(previousURL);
+                 nextPrevStr += LinkBuilder.labkeyLink("Previous", previousURL);
             }
             if (null != nextURL) {
-                 nextPrevStr += PageFlowUtil.link("Next").href(nextURL);
+                 nextPrevStr += LinkBuilder.labkeyLink("Next", nextURL);
             }
             if (!nextPrevStr.isEmpty()) {
                 result.addView(HtmlView.unsafe(nextPrevStr));

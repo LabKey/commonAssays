@@ -36,36 +36,36 @@
     Upload sample information and match samples with FCSFiles.<br>
     <% if (sampleType == null) { %>
         No samples have been uploaded in this folder.<br>
-        <%=link("Create new sample type").href(protocol.urlCreateSampleType())%><br>
+        <%=link("Create new sample type", protocol.urlCreateSampleType())%><br>
     <% } else { %>
-        <%=link("Show sample type").href(protocol.getSampleTypeDetailsURL(sampleType, getContainer()))%><br>
-        <%=link("Show samples joined to FCS Files").href(protocol.urlShowSamples())%><br>
-        <%=link("Upload more samples from a spreadsheet").href(protocol.urlUploadSamples())%><br>
-        <% if (protocol.getSampleTypeJoinFields().size() != 0) { %>
-            <%=link("Modify sample join fields").href(protocol.urlFor(JoinSampleTypeAction.class))%><br>
+        <%=link("Show sample type", protocol.getSampleTypeDetailsURL(sampleType, getContainer()))%><br>
+        <%=link("Show samples joined to FCS Files", protocol.urlShowSamples())%><br>
+        <%=link("Upload more samples from a spreadsheet", protocol.urlUploadSamples())%><br>
+        <% if (!protocol.getSampleTypeJoinFields().isEmpty()) { %>
+            <%=link("Modify sample join fields", protocol.urlFor(JoinSampleTypeAction.class))%><br>
         <% } else { %>
-            <%=link("Join samples to FCS File Data").href(protocol.urlFor(JoinSampleTypeAction.class))%><br>
+            <%=link("Join samples to FCS File Data", protocol.urlFor(JoinSampleTypeAction.class))%><br>
         <% } %>
     <% } %>
 </p>
 <p><b>FCS Analysis Display Names</b><br>
     When you analyze an FCS file, the FCS analysis can be given a name composed from keyword values from the FCS file.<br>
-    <%=link("Change FCS Analyses Names").href(protocol.urlFor(ProtocolController.EditFCSAnalysisNameAction.class))%>
+    <%=link("Change FCS Analyses Names", protocol.urlFor(ProtocolController.EditFCSAnalysisNameAction.class))%>
 </p>
 <p><b>FCS Analysis Filter</b><br>
     You can choose to only analyze FCS files where the keywords match certain criteria.<br>
-    <%=link("Edit FCS Analysis Filter").href(protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class))%>
+    <%=link("Edit FCS Analysis Filter", protocol.urlFor(ProtocolController.EditFCSAnalysisFilterAction.class))%>
 </p>
 <p><b>Metadata</b><br>
     Identify participant visit/date columns and
     columns used to subtract background from stimulated wells.<br>
-    <%=link("Edit Metadata").href(protocol.urlFor(ProtocolController.EditICSMetadataAction.class))%>
+    <%=link("Edit Metadata", protocol.urlFor(ProtocolController.EditICSMetadataAction.class))%>
 </p>
 <p><b>Manage Names and Aliases</b><br>
     Create and remove names and aliases for Keywords, Statistics, and Graphs.<br>
-    <%=link("Case sensitivity").href(protocol.urlFor(AttributeController.CaseSensitivityAction.class).addReturnUrl(getActionURL()))%><br/>
-    <%=link("Delete Unused").href(protocol.urlFor(AttributeController.DeleteUnusedAction.class).addReturnUrl(getActionURL()))%><br/>
-    <%=link("Manage Keywords").href(protocol.urlFor(AttributeController.SummaryAction.class).addParameter(AttributeController.Param.type, AttributeType.keyword.name()))%><br/>
-    <%=link("Manage Statistics").href(protocol.urlFor(AttributeController.SummaryAction.class).addParameter(AttributeController.Param.type, AttributeType.statistic.name()))%><br/>
-    <%=link("Manage Graphs").href(protocol.urlFor(AttributeController.SummaryAction.class).addParameter(AttributeController.Param.type, AttributeType.graph.name()))%><br/>
+    <%=link("Case sensitivity", protocol.urlFor(AttributeController.CaseSensitivityAction.class).addReturnUrl(getActionURL()))%><br/>
+    <%=link("Delete Unused", protocol.urlFor(AttributeController.DeleteUnusedAction.class).addReturnUrl(getActionURL()))%><br/>
+    <%=link("Manage Keywords", protocol.urlFor(AttributeController.SummaryAction.class).addParameter(AttributeController.Param.type, AttributeType.keyword.name()))%><br/>
+    <%=link("Manage Statistics", protocol.urlFor(AttributeController.SummaryAction.class).addParameter(AttributeController.Param.type, AttributeType.statistic.name()))%><br/>
+    <%=link("Manage Graphs", protocol.urlFor(AttributeController.SummaryAction.class).addParameter(AttributeController.Param.type, AttributeType.graph.name()))%><br/>
 </p>

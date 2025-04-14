@@ -61,8 +61,7 @@
         <% for (GuideSet gs : guideSets) { %>
             <li>
             <%
-                new LinkBuilder("Guide Set " + gs.getGuideSetId() + ": " + gs.getComment())
-                    .href("#")
+                LinkBuilder.labkeyLink("Guide Set " + gs.getGuideSetId() + ": " + gs.getComment(), "#")
                     .attributes(Map.of(tabindex.name(), "-1"))
                     .onClick("createGuideSetWindow(" + bean.getProtocol().getRowId() + ", " + gs.getGuideSetId() + ", false)")
                     .appendTo(out);
