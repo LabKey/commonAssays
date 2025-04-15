@@ -85,6 +85,7 @@ import org.labkey.flow.script.KeywordsJob;
 import org.labkey.flow.script.WorkspaceJob;
 import org.labkey.flow.util.SampleUtil;
 import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
@@ -910,7 +911,6 @@ public class AnalysisScriptController extends BaseFlowController
             return rt;
         }
 
-
         private void stepSelectAnalysis(ImportAnalysisForm form, BindException errors)
         {
             WorkspaceData workspaceData = form.getWorkspace();
@@ -922,18 +922,14 @@ public class AnalysisScriptController extends BaseFlowController
                 return;
             }
 
-            PipeRoot root = null;
+            PipeRoot root = getPipeRoot();
             String path = workspaceData.getPath();
-            File workspaceFile = null;
-            if (path != null)
-            {
-                root = getPipeRoot();
-                workspaceFile = root.resolvePath(path);
-            }
+            FileLike workspaceFL = root.resolvePathToFileLike(path);
 
             RunType rt = RunType.None;
-            if (workspaceFile != null && form.getSelectFCSFilesOption() == null && form.getKeywordDir() == null)
+            if (workspaceFL != null && form.getSelectFCSFilesOption() == null && form.getKeywordDir() == null)
             {
+                File workspaceFile = FileSystemLike.toFile(workspaceFL);
                 rt = hasExistingRuns(workspaceFile);
                 if (rt != RunType.None)
                 {
@@ -945,9 +941,10 @@ public class AnalysisScriptController extends BaseFlowController
                 {
                     // Next, guess the FCS files are in the same directory as the workspace, but not analyzed yet.
                     File keywordDir = null;
+                    File sampleDir = workspaceFile.getParentFile();
                     for (ISampleInfo sampleInfo : samples)
                     {
-                        File sampleFile = FileUtil.appendName(new File(workspaceFile.getParent()),sampleInfo.getLabel());
+                        File sampleFile = FileUtil.appendName(sampleDir, sampleInfo.getLabel());
                         if (sampleFile.exists())
                         {
                             keywordDir = workspaceFile.getParentFile();
