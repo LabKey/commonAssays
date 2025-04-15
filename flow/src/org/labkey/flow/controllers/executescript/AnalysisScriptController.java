@@ -924,7 +924,7 @@ public class AnalysisScriptController extends BaseFlowController
 
             PipeRoot root = getPipeRoot();
             String path = workspaceData.getPath();
-            FileLike workspaceFL = root.resolvePathToFileLike(path);
+            FileLike workspaceFL = path != null ? root.resolvePathToFileLike(path) : null;
 
             RunType rt = RunType.None;
             if (workspaceFL != null && form.getSelectFCSFilesOption() == null && form.getKeywordDir() == null)
