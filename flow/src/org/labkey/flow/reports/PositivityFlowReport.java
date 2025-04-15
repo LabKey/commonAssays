@@ -41,6 +41,7 @@ import org.labkey.flow.controllers.ReportsController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.ICSMetadata;
+import org.labkey.flow.persist.FlowManager;
 import org.springframework.beans.PropertyValues;
 import org.springframework.validation.BindException;
 
@@ -137,7 +138,7 @@ public class PositivityFlowReport extends FilterFlowReport
 
         for (FieldKey fieldKey : getMetadataColumns(metadata))
         {
-            String alias = AliasManager.makeLegalName(fieldKey, null, false);
+            String alias = AliasManager.makeLegalName(fieldKey, FlowManager.get().getSchema().getSqlDialect());
             query.append("  ").append(tableName).append(".").append(toSQL(fieldKey)).append(" AS ").append(alias).append(",\n");
         }
 
@@ -145,7 +146,7 @@ public class PositivityFlowReport extends FilterFlowReport
         SubsetSpec subsetParent = getSubsetParent();
 
         String stat = subset + ":Count";
-        String parentStat = subsetParent == null ? "Count" : subsetParent.toString() + ":Count";
+        String parentStat = subsetParent == null ? "Count" : subsetParent + ":Count";
 
         query.append("  ").append(tableName).append(".Statistic(").append(toSQL(stat)).append(") AS stat,\n");
         query.append("  ").append(tableName).append(".Background(").append(toSQL(stat)).append(") AS stat_bg,\n");
