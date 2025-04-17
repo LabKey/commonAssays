@@ -28,6 +28,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.module.Module;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryDefinition;
@@ -301,6 +302,9 @@ public class FlowController extends BaseFlowController
         @Override
         public void validateCommand(FlowAdminForm form, Errors errors)
         {
+            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+            if (root == null)
+                errors.rejectValue("root", ERROR_MSG, "Pipeline root not found for the current container.");
         }
 
         @Override
@@ -313,12 +317,13 @@ public class FlowController extends BaseFlowController
         @Override
         public boolean handlePost(FlowAdminForm form, BindException errors)
         {
-            if (form.getWorkingDirectory() != null && PipelineService.get().findPipelineRoot(getContainer()).getRootFileLike().isDescendant(FileUtil.createUri(form.getWorkingDirectory()) ))
-            {
-                FileLike dir = new FileSystemLike.Builder(FileUtil.stringToPath(getContainer(), form.getWorkingDirectory()))
-                        .readonly().root();
+            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
 
-                if (!dir.exists())
+            if (form.getWorkingDirectory() != null && root.getRootFileLike().isDescendant(FileUtil.createUri(form.getWorkingDirectory())))
+            {
+                FileLike dir = root.resolvePathToFileLike(form.getWorkingDirectory());
+
+                if (dir == null || !dir.exists())
                 {
                     errors.rejectValue("workingDirectory", ERROR_MSG, "Path does not exist: " + form.getWorkingDirectory());
                     return false;
