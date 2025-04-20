@@ -132,7 +132,7 @@ public class PositivityFlowReport extends FilterFlowReport
 
         for (FieldKey fieldKey : getMetadataColumns(metadata))
         {
-            String alias = FlowManager.get().getSchema().getSqlDialect().makeLegalName(fieldKey);
+            String alias = FlowManager.get().getSchema().getSqlDialect().makeLegalName(fieldKey, 0);
             query.append("  ").append(tableName).append(".").append(toSQL(fieldKey)).append(" AS ").append(alias).append(",\n");
         }
 
