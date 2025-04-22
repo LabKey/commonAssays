@@ -240,6 +240,14 @@ public final class LuminexUploadAndLinkTest extends LuminexTest
         clickButton("Next", 60000);
         clickButton("Save and Finish");
 
+        // try forcing an immediate stats update to prompt a better query plan selection - hopefully avoids test timeouts
+        startSystemMaintenance("Database");
+        waitForSystemMaintenanceCompletion();
+
+        // return to the assay runs page
+        goToProjectHome(TEST_ASSAY_PRJ_LUMINEX);
+        clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM));
+
         clickAndWait(Locator.linkWithText("raw and summary"), longWaitForPage);
         // make sure the Summary, StdDev, and DV columns are visible
         _customizeViewsHelper.openCustomizeViewPanel();
