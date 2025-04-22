@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.element.Option" %>
+<%@ page import="org.labkey.api.util.OptionBuilder" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.flow.analysis.web.GraphSpec" %>
@@ -141,7 +141,7 @@
             <td>
                 <%=select().name(FlowParam.actionSequence.name())
                         .className(null)
-                        .addOptions(steps.stream().map(s->new Option.OptionBuilder(s.getLabel(), s.getDefaultActionSequence()).selected(s == finalStep)))
+                        .addOptions(steps.stream().map(s->new OptionBuilder(s.getLabel(), s.getDefaultActionSequence()).selected(s == finalStep)))
                         .onChange("this.form.submit();")
                 %>
             </td>

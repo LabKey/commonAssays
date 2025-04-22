@@ -448,12 +448,12 @@ public class ScriptController extends BaseFlowController
             List<PopulationName> ret = new ArrayList<>();
             for (Analysis analysis : form._workspaceObject.getGroupAnalyses().values())
             {
-                if (analysis.getPopulations().size() > 0)
+                if (!analysis.getPopulations().isEmpty())
                 {
                     ret.add(analysis.getName());
                 }
             }
-            return ret.toArray(new PopulationName[ret.size()]);
+            return ret.toArray(new PopulationName[0]);
         }
 
         public Map<String, String> getSampleAnalysisNames()
@@ -466,7 +466,7 @@ public class ScriptController extends BaseFlowController
             for (Workspace.SampleInfo sample : form._workspaceObject.getSamplesComplete())
             {
                 Analysis analysis = form._workspaceObject.getSampleAnalysis(sample);
-                if (analysis.getPopulations().size() > 0)
+                if (!analysis.getPopulations().isEmpty())
                 {
                     ret.put(sample.getSampleId(), sample.getLabel());
                 }

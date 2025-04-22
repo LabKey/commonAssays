@@ -126,17 +126,17 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Formats;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.HtmlStringBuilder;
-import org.labkey.api.util.Link.LinkBuilder;
+import org.labkey.api.util.LinkBuilder;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.OptionBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.ReturnURLString;
 import org.labkey.api.util.SafeToRenderEnum;
+import org.labkey.api.util.SelectBuilder;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.util.URLHelper;
-import org.labkey.api.util.element.Option.OptionBuilder;
-import org.labkey.api.util.element.Select.SelectBuilder;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
 import org.labkey.api.view.GridView;
@@ -658,7 +658,7 @@ public class MS2Controller extends SpringActionController
 
         onClick.append(", 100); return false;");
 
-        return PageFlowUtil.link("Show Modifications").onClick(onClick.toString()).id("modificationsLink");
+        return LinkBuilder.labkeyLink("Show Modifications").onClick(onClick.toString()).id("modificationsLink");
     }
 
     private DOM.Renderable appendMods(Map<String, String> mods, String heading)
@@ -826,10 +826,10 @@ public class MS2Controller extends SpringActionController
 
             String nextPrevStr = "";
             if (null != previousURL) {
-                 nextPrevStr += PageFlowUtil.link("Previous").href(previousURL);
+                 nextPrevStr += LinkBuilder.labkeyLink("Previous", previousURL);
             }
             if (null != nextURL) {
-                 nextPrevStr += PageFlowUtil.link("Next").href(nextURL);
+                 nextPrevStr += LinkBuilder.labkeyLink("Next", nextURL);
             }
             if (!nextPrevStr.isEmpty()) {
                 result.addView(HtmlView.unsafe(nextPrevStr));

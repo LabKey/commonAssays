@@ -26,6 +26,7 @@ import org.labkey.api.exp.PropertyType;
 import org.labkey.api.query.AliasManager;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.reports.report.ReportDescriptor;
+import org.labkey.api.util.LinkBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Tuple3;
 import org.labkey.api.view.ActionURL;
@@ -178,7 +179,7 @@ public class PositivityFlowReport extends FilterFlowReport
 
             return HtmlView.unsafe(
                     "<p class='labkey-error'>Positivity report requires configuring flow experiment metadata for study and background information before running.</p>" +
-                    PageFlowUtil.link("Edit Metadata").href(editICSMetadataURL));
+                    LinkBuilder.labkeyLink("Edit Metadata", editICSMetadataURL));
         }
         else
         {

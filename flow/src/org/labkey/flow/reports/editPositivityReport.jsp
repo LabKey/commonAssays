@@ -70,7 +70,7 @@
   The positivity report requires metadata describing the sample and background information
   of the flow experiment before it can be run.
   <br>
-  <%=link("Edit Metadata").href(editICSMetadataURL)%>
+  <%=link("Edit Metadata", editICSMetadataURL)%>
   </p>
 <% } %>
 

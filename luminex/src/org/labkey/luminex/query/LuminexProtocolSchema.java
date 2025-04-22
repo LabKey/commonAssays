@@ -62,7 +62,7 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.Dataset;
 import org.labkey.api.study.publish.StudyPublishService;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.Link.LinkBuilder;
+import org.labkey.api.util.LinkBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -662,9 +662,8 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     }
 
                     HtmlString image = HtmlString.unsafe("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
-                    new LinkBuilder(image)
+                    LinkBuilder.simpleLink(image)
                         .onMouseOver("return showHelpDiv(this, 'Titration Curves', " + PageFlowUtil.jsString(PageFlowUtil.filter(sb.toString())) + ");")
-                        .clearClasses()
                         .appendTo(oldWriter);
                 }
             }
