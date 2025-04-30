@@ -119,8 +119,8 @@ public class FastaDbHelper
                 "entry_date " + _dialect.getDefaultDateTimeDataType() + " NULL" +
                 ")");
 
-        c.createStatement().execute("CREATE INDEX IX_" + AliasManager.makeLegalName(_seqTableName,null) + "_HASH_ORGID_SROWID ON " + _seqTableName + "(hash, orgId, srowid)");
-        c.createStatement().execute("CREATE INDEX IX_" + AliasManager.makeLegalName(_seqTableName,null) + "_ORGID ON " + _seqTableName + "(orgId)");
+        c.createStatement().execute("CREATE INDEX IX_" + AliasManager.makeLegalName(_seqTableName, _dialect) + "_HASH_ORGID_SROWID ON " + _seqTableName + "(hash, orgId, srowid)");
+        c.createStatement().execute("CREATE INDEX IX_" + AliasManager.makeLegalName(_seqTableName, _dialect) + "_ORGID ON " + _seqTableName + "(orgId)");
  
         c.createStatement().execute("CREATE " + _dialect.getTempTableKeyword() + " TABLE " + _identTableName + " ( " +
                 "Identifier varchar(50)  NOT NULL, " +
@@ -130,7 +130,7 @@ public class FastaDbHelper
                 "entry_date " + _dialect.getDefaultDateTimeDataType() + " NULL" +
                 ")");
 
-        c.createStatement().execute("CREATE INDEX IX_" + AliasManager.makeLegalName(_identTableName,null) + " ON " + _identTableName + "(Identifier,IdentTypeId,SeqId)");
+        c.createStatement().execute("CREATE INDEX IX_" + AliasManager.makeLegalName(_identTableName, _dialect) + " ON " + _identTableName + "(Identifier,IdentTypeId,SeqId)");
 
         _addSeqStmt = c.prepareStatement("INSERT INTO " + _seqTableName +
                 " (ProtSequence,hash,description,mass,length,best_name,fname,lookup,genus,species,fullOrg,entry_date) " +

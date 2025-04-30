@@ -51,6 +51,7 @@ import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.ICSMetadata;
+import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.springframework.beans.PropertyValue;
@@ -195,7 +196,7 @@ public abstract class FilterFlowReport extends FlowReport
     // Copied from ScriptEngineReport.
     private String oldLegalName(FieldKey fkey)
     {
-        String r = AliasManager.makeLegalName(StringUtils.join(fkey.getParts(), "_"), null, false, false);
+        String r = AliasManager.makeLegalName(StringUtils.join(fkey.getParts(), "_"), FlowManager.get().getSchema().getSqlDialect(), false);
         return ColumnInfo.propNameFromName(r).toLowerCase();
     }
 

@@ -496,7 +496,7 @@ public class CompareQuery extends SQLFragment
     protected DisplayColumn createColumn(ActionURL linkURL, RunColumn column, String columnName, TableInfo ti, ResultSetMetaData md, CompareDataRegion rgn)
         throws SQLException
     {
-        var ci = new BaseColumnInfo(columnName);
+        var ci = new BaseColumnInfo(columnName, ti, null);
         ci.setParentTable(ti);
         ci.setSqlTypeName(md.getColumnTypeName(rgn.getResultSet().findColumn(columnName)));
         ci.setLabel(column.getLabel());
