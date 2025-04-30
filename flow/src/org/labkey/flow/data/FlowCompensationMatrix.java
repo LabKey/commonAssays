@@ -25,6 +25,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryRowReference;
 import org.labkey.api.security.User;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.CompensationMatrix;
@@ -38,9 +39,7 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,7 +88,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
             {
                 data = svc.createData(container, FlowDataType.CompensationMatrix, name);
             }
-            data.setDataFileURI(new File(FlowSettings.getWorkingDirectory(), "compensation." + FlowDataHandler.EXT_DATA).toURI());
+            data.setDataFileURI(FileUtil.appendName(FlowSettings.getWorkingDirectory(), "compensation." + FlowDataHandler.EXT_DATA).toURI());
             data.save(user);
             AttributeSetHelper.doSave(attrs, user, data, log);
             flowComp = (FlowCompensationMatrix) FlowDataObject.fromData(data);
@@ -105,8 +104,8 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
 
     static public CompensationMatrix getCompensationMatrix(String name, AttributeSet attrs)
     {
-        TreeSet<String> channelNames = new TreeSet();
-        Map<String, Double> values = new HashMap();
+        TreeSet<String> channelNames = new TreeSet<>();
+        Map<String, Double> values = new HashMap<>();
         for (Map.Entry<StatisticSpec, Double> entry : attrs.getStatistics().entrySet())
         {
             StatisticSpec spec = entry.getKey();
@@ -119,20 +118,20 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
             channelNames.add(strChannel);
             values.put(spec.getParameter(), entry.getValue());
         }
-        if (channelNames.size() == 0)
+        if (channelNames.isEmpty())
             return null;
         CompensationMatrix ret = new CompensationMatrix(name);
-        String[] arrChannelNames = channelNames.toArray(new String[channelNames.size()]);
+        String[] arrChannelNames = channelNames.toArray(new String[0]);
 
-        for (int iChannel = 0; iChannel < arrChannelNames.length; iChannel ++)
+        for (String arrChannelName : arrChannelNames)
         {
-            Map<String, Double> channelValues = new TreeMap();
-            for (int iChannelValue = 0; iChannelValue < arrChannelNames.length; iChannelValue ++)
+            Map<String, Double> channelValues = new TreeMap<>();
+            for (String channelName : arrChannelNames)
             {
-                String key = arrChannelNames[iChannel] + ":" + arrChannelNames[iChannelValue];
-                channelValues.put(arrChannelNames[iChannelValue], values.get(key));
+                String key = arrChannelName + ":" + channelName;
+                channelValues.put(channelName, values.get(key));
             }
-            ret.setChannel(arrChannelNames[iChannel], channelValues);
+            ret.setChannel(arrChannelName, channelValues);
         }
         return ret;
     }
@@ -195,15 +194,17 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
     {
         return (List) FlowDataObject.fromDataType(container, FlowDataType.CompensationMatrix);
     }
-    static public List<FlowCompensationMatrix> getUploadedCompensationMatrices(Container container)
-    {
-        List<FlowCompensationMatrix> all = getCompensationMatrices(container);
-        List<FlowCompensationMatrix> ret = new ArrayList();
-        for (FlowCompensationMatrix comp : all)
-        {
-            if (comp.getRun() == null)
-                ret.add(comp);
-        }
-        return ret;
-    }
+
+    //TODO remove?
+//    static public List<FlowCompensationMatrix> getUploadedCompensationMatrices(Container container)
+//    {
+//        List<FlowCompensationMatrix> all = getCompensationMatrices(container);
+//        List<FlowCompensationMatrix> ret = new ArrayList<>();
+//        for (FlowCompensationMatrix comp : all)
+//        {
+//            if (comp.getRun() == null)
+//                ret.add(comp);
+//        }
+//        return ret;
+//    }
 }

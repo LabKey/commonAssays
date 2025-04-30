@@ -28,6 +28,8 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.module.Module;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.query.QueryDefinition;
 import org.labkey.api.query.QueryParseException;
@@ -41,6 +43,7 @@ import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.settings.AdminConsole;
 import org.labkey.api.settings.AdminConsole.SettingsLinkType;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.TestContext;
 import org.labkey.api.view.ActionURL;
@@ -64,11 +67,12 @@ import org.labkey.flow.query.FlowQuerySettings;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.File;
 import java.net.URI;
 
 @Marshal(Marshaller.Jackson)
@@ -298,6 +302,9 @@ public class FlowController extends BaseFlowController
         @Override
         public void validateCommand(FlowAdminForm form, Errors errors)
         {
+            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+            if (root == null)
+                errors.rejectValue("root", ERROR_MSG, "Pipeline root not found for the current container.");
         }
 
         @Override
@@ -310,10 +317,13 @@ public class FlowController extends BaseFlowController
         @Override
         public boolean handlePost(FlowAdminForm form, BindException errors)
         {
-            if (form.getWorkingDirectory() != null)
+            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
+
+            if (form.getWorkingDirectory() != null && root.getRootFileLike().isDescendant(FileUtil.createUri(form.getWorkingDirectory())))
             {
-                File dir = new File(form.getWorkingDirectory());
-                if (!dir.exists())
+                FileLike dir = root.resolvePathToFileLike(form.getWorkingDirectory());
+
+                if (dir == null || !dir.exists())
                 {
                     errors.rejectValue("workingDirectory", ERROR_MSG, "Path does not exist: " + form.getWorkingDirectory());
                     return false;
