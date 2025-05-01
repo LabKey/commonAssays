@@ -226,18 +226,18 @@ public class PeptideManager
     public static void addRunCondition(SimpleFilter filter, @Nullable String runTableName, MS2Run... runs)
     {
         String columnName = (runTableName == null ? "Run" : runTableName + ".Run");
-        StringBuilder sb = new StringBuilder();
-        sb.append(columnName);
-        sb.append(" IN (");
+        SQLFragment sql = new SQLFragment();
+        sql.append(columnName);
+        sql.append(" IN (");
         String separator = "";
         for (MS2Run run : runs)
         {
-            sb.append(separator);
+            sql.append(separator);
             separator = ", ";
-            sb.append(run.getRun());
+            sql.appendValue(run.getRun());
         }
-        sb.append(")");
-        filter.addWhereClause(sb.toString(), new Object[0], FieldKey.fromString("Run"));
+        sql.append(")");
+        filter.addWhereClause(sql, FieldKey.fromString("Run"));
     }
 
     // TODO: runTableName is null in all cases... remove parameter?
@@ -393,11 +393,10 @@ public class PeptideManager
         public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
         {
             ColumnInfo colInfo = columnMap != null ? columnMap.get(_fieldKey) : null;
-            String name = colInfo != null ? colInfo.getAlias() : _fieldKey.getName();
-            String alias = dialect.getColumnSelectName(name);
+            var alias = SimpleFilter.getAliasForColumnFilter(dialect, colInfo, _fieldKey);
 
             SQLFragment sql = new SQLFragment();
-            sql.append(alias);
+            sql.appendIdentifier(alias);
             sql.append(" >= CASE Charge");
 
             for (int i = 0; i < _values.length; i++)

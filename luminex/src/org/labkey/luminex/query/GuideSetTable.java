@@ -620,10 +620,10 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             inClauseSql.append(ExperimentService.get().getTinfoAssayQCFlag(), "qc");
             inClauseSql.append(" ON a.AnalyteId = qc.IntKey1 AND a.").append(colName).append(" = qc.IntKey2 ");
             inClauseSql.append(" WHERE a.GuideSetId = ? AND qc.FlagType = ?)");
-            Object[] params = new Object[]{guideSetRowId, flagType};
+            inClauseSql.addAll(guideSetRowId, flagType);
 
             SimpleFilter filter = new SimpleFilter();
-            filter.addWhereClause(inClauseSql.getSQL(), params, FieldKey.fromParts("RowId"));
+            filter.addWhereClause(inClauseSql, FieldKey.fromParts("RowId"));
             Table.delete(ExperimentService.get().getTinfoAssayQCFlag(), filter);
         }
     }

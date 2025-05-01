@@ -90,19 +90,19 @@ public class PeptideSequenceFilter extends SimpleFilter.FilterClause
     @Override
     public SQLFragment toSQLFragment(Map<FieldKey, ? extends ColumnInfo> columnMap, SqlDialect dialect)
     {
-        if(null == _sequences)
+        if (null == _sequences)
             return null;
 
         // OR together the sequence conditions
-        StringBuilder sql = new StringBuilder();
-        for(int idx = 0; idx < _sequences.length; ++idx)
+        SQLFragment sql = new SQLFragment();
+        for (int idx = 0; idx < _sequences.length; ++idx)
         {
             if(idx > 0)
                 sql.append(" OR ");
 
             sql.append(genSeqPredicate(_sequences[idx], null));
         }
-        return new SQLFragment(sql.toString());
+        return sql;
     }
 
     @Override
@@ -111,13 +111,13 @@ public class PeptideSequenceFilter extends SimpleFilter.FilterClause
         throw new UnsupportedOperationException();
     }
 
-    private String genSeqPredicate(String sequence, String pepDataAlias)
+    private SQLFragment genSeqPredicate(String sequence, String pepDataAlias)
     {
         //force sequence to upper-case for case-sensitive DBs like PostgreSQL
         sequence = sequence.toUpperCase();
 
         //always add a condition for pd.TrimmedPeptide using normalized version of sequence
-        StringBuilder sql = new StringBuilder(null == pepDataAlias ? "(" + _sequenceColumnName
+        SQLFragment sql = new SQLFragment(null == pepDataAlias ? "(" + _sequenceColumnName
                 : "(" + pepDataAlias + "." + _sequenceColumnName);
 
         if (_exact)
@@ -143,6 +143,6 @@ public class PeptideSequenceFilter extends SimpleFilter.FilterClause
 
         sql.append(")");
 
-        return sql.toString();
+        return sql;
     }
 }

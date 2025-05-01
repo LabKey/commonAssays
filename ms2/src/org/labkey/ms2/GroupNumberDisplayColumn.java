@@ -94,17 +94,13 @@ public class GroupNumberDisplayColumn extends DataColumn
             }
             else
             {
-                if (row.get(_collectionIdColumn.getAlias()) == null)
-                {
-                    return HtmlString.EMPTY_STRING;
-                }
-                Number collectionIdObject = (Number) row.get(_collectionIdColumn.getAlias());
+                Number collectionIdObject = (Number) _collectionIdColumn.getValue(row);
                 if (collectionIdObject == null)
                 {
                     return HtmlString.EMPTY_STRING;
                 }
                 collectionId = collectionIdObject.longValue();
-                Number groupNumberObject = (Number) row.get(getColumnInfo().getAlias());
+                Number groupNumberObject = (Number) getColumnInfo().getValue(row);
                 if (groupNumberObject == null)
                 {
                     return HtmlString.EMPTY_STRING;

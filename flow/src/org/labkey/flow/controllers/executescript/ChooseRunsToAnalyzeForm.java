@@ -21,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.Filter;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.query.FieldKey;
@@ -226,7 +227,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
 
             List<FlowRun> runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
             int runCount = 0;
-            StringBuilder sql = new StringBuilder("RowId IN (");
+            SQLFragment sql = new SQLFragment("RowId IN (");
             String comma = "";
             for (FlowRun run : runs)
             {
@@ -234,17 +235,17 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
                     continue;
                 sql.append(comma);
                 comma = ",";
-                sql.append(run.getRunId());
+                sql.appendValue(run.getRunId());
                 runCount ++;
             }
             sql.append(")");
             if (runCount == 0)
             {
-                ret.addWhereClause("1 = 0", null);
+                ret.addWhereClause(new SQLFragment("1 = 0"));
             }
             else
             {
-                ret.addWhereClause(sql.toString(), new Object[0], FieldKey.fromParts("RowId"));
+                ret.addWhereClause(sql, FieldKey.fromParts("RowId"));
             }
             return ret;
         }

@@ -23,11 +23,9 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.PropertyType;
-import org.labkey.api.query.AliasManager;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.reports.report.ReportDescriptor;
 import org.labkey.api.util.LinkBuilder;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Tuple3;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HtmlView;
@@ -41,6 +39,7 @@ import org.labkey.flow.controllers.ReportsController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.ICSMetadata;
+import org.labkey.flow.persist.FlowManager;
 import org.springframework.beans.PropertyValues;
 import org.springframework.validation.BindException;
 
@@ -50,10 +49,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * User: kevink
- * Date: 5/26/11
- */
 public class PositivityFlowReport extends FilterFlowReport
 {
     public static final String TYPE = "Flow.PositivityReport";
@@ -137,7 +132,7 @@ public class PositivityFlowReport extends FilterFlowReport
 
         for (FieldKey fieldKey : getMetadataColumns(metadata))
         {
-            String alias = AliasManager.makeLegalName(fieldKey, null, false);
+            String alias = FlowManager.get().getSchema().getSqlDialect().makeLegalName(fieldKey, 0);
             query.append("  ").append(tableName).append(".").append(toSQL(fieldKey)).append(" AS ").append(alias).append(",\n");
         }
 
@@ -145,7 +140,7 @@ public class PositivityFlowReport extends FilterFlowReport
         SubsetSpec subsetParent = getSubsetParent();
 
         String stat = subset + ":Count";
-        String parentStat = subsetParent == null ? "Count" : subsetParent.toString() + ":Count";
+        String parentStat = subsetParent == null ? "Count" : subsetParent + ":Count";
 
         query.append("  ").append(tableName).append(".Statistic(").append(toSQL(stat)).append(") AS stat,\n");
         query.append("  ").append(tableName).append(".Background(").append(toSQL(stat)).append(") AS stat_bg,\n");

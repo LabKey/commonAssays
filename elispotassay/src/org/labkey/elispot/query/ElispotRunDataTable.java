@@ -219,8 +219,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
                 ColumnInfo plateReaderColumn = ctx.getFieldMap().get(FieldKey.fromParts("Run", "PlateReader"));
                 if (null != plateReaderColumn)
                 {
-                    String readerAlias = plateReaderColumn.getAlias();
-                    Object readerName = ctx.getRow().get(readerAlias);
+                    Object readerName = plateReaderColumn.getValue(ctx);
 
                     if (readerName != null)
                     {
