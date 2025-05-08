@@ -36,6 +36,7 @@ import org.labkey.ms2.query.SpectraCountConfiguration;
 import org.springframework.validation.BindException;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -70,9 +71,9 @@ public class SpectraCountQueryView extends QueryView
     }
 
     @Override
-    public ExcelWriter getExcelWriter(ExcelWriter.ExcelDocumentType docType) throws IOException
+    public ExcelWriter getExcelWriter(ExcelWriter.ExcelDocumentType docType, @Nullable Map<String, String> renameColumnMap) throws IOException
     {
-        ExcelWriter result = super.getExcelWriter(docType);
+        ExcelWriter result = super.getExcelWriter(docType, renameColumnMap);
         String header = getExportHeader();
         if (header != null)
         {
