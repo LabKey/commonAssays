@@ -475,7 +475,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ValidationException setValidationAndAnalysisScripts(ExpProtocol protocol, @NotNull List<AnalysisScript> scripts)
+    public Pair<ValidationException, String> setValidationAndAnalysisScripts(ExpProtocol protocol, @NotNull List<AnalysisScript> scripts)
     {
         throw new UnsupportedOperationException();
     }
