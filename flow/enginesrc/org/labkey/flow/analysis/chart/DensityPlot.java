@@ -65,29 +65,70 @@ public class DensityPlot extends ContourPlot
 
     protected void drawLine(Graphics2D g2, Rectangle2D dataArea, double x1, double y1, double x2, double y2)
     {
-        int prevX, prevY, nextX, nextY;
-        if (x1 == x2 || y1 == y2)
+        // quick bail on far out rectangle gate edges
+        if (x1 == x2 && Math.abs(x1) >= Float.MAX_VALUE || y1 == y2 && Math.abs(y1) >= Float.MAX_VALUE)
+            return;
+
+        double xmin = Math.min(x1, x2);
+        double xmax = Math.max(x1, x2);
+
+        int X1 = constrain(getDomainAxis().valueToJava2D(x1, dataArea, RectangleEdge.BOTTOM));
+        int Y1 = constrain(getRangeAxis().valueToJava2D(y1, dataArea, RectangleEdge.LEFT));
+        int X2 = constrain(getDomainAxis().valueToJava2D(x2, dataArea, RectangleEdge.BOTTOM));
+        int Y2 = constrain(getRangeAxis().valueToJava2D(y2, dataArea, RectangleEdge.LEFT));
+
+        // straight lines (I added the x1==x2 check to avoid any to avoid any possible /0 below)
+        if (X1 == X2 || Y1 == Y2 || x1==x2)
         {
-            // quick bail on far out rectangle gate edges
-            if (x1==x2 && Math.abs(x1) >= Float.MAX_VALUE || y1==y2 && Math.abs(y1) >= Float.MAX_VALUE)
-                return;
-            prevX = constrain(getDomainAxis().valueToJava2D(x1, dataArea, RectangleEdge.BOTTOM));
-            prevY = constrain(getRangeAxis().valueToJava2D(y1, dataArea, RectangleEdge.LEFT));
-            nextX = constrain(getDomainAxis().valueToJava2D(x2, dataArea, RectangleEdge.BOTTOM));
-            nextY = constrain(getRangeAxis().valueToJava2D(y2, dataArea, RectangleEdge.LEFT));
-            g2.drawLine(prevX, prevY, nextX, nextY);
+            g2.drawLine(X1, Y1, X2, Y2);
             return;
         }
 
-        int nSegments = 10;
-        prevX = (int)getDomainAxis().valueToJava2D(x1, dataArea, RectangleEdge.BOTTOM);
-        prevY = (int)getRangeAxis().valueToJava2D(y1, dataArea, RectangleEdge.LEFT);
-        for (int i = 1; i <= nSegments; i ++)
+        // Somebody knows if these axes are linear or not, but I don't seem to know (sad face)
+
+        // If either axis is non-linear, then dividing this line into "equal" length segments is not
+        // going to end well.  We want to divide it into equal segments in the transformed plot space.
+
+        // create a list of X values between x1 and x2 to plot
+
+        // evenly spaced between x1 and x2 (untransformed)
+        List<Double> xValues = new ArrayList<>(30);
+        for (int i = 0 ; i <= 10 ; i ++)
+            xValues.add(x2 * i / 10.0 + x1 * (10 - i) / 10.0);
+
+        // evenly spaced between X1 and X2 (transformed)
+        // NOTE we could switch this around based on whether the line is more horizontal or more vertical, but let's see if this is good enough
+        for (int i = 1 ; i <= 9 ; i ++)
         {
-            double x = x2 * i / nSegments + x1 * (nSegments - i) / nSegments;
-            double y = y2 * i / nSegments + y1 * (nSegments - i) / nSegments;
-            nextX = (int)getDomainAxis().valueToJava2D(x, dataArea, RectangleEdge.BOTTOM);
-            nextY = (int)getRangeAxis().valueToJava2D(y, dataArea, RectangleEdge.LEFT);
+            double plotX = (double)X2 * i / 10.0 + (double)X1 * (10 - i) / 10.0;
+            double x = getDomainAxis().java2DToValue(plotX, dataArea, RectangleEdge.BOTTOM);
+            if (xmin <= x && x <= xmax)
+                xValues.add(x);
+        }
+
+        // y = mx + b
+        double m = (y2-y1)/(x2-x1);
+        double b = y1 - m*x1;
+
+        // Biexponential xform gets wierd for small numbers.  Let's throw in points for zero-crossings.
+        if (xmin < 0.0 && 0.0 < xmax)
+            xValues.add(0.0);
+        double zeroX = -b / m;
+        if (xmin < zeroX && zeroX < xmax)
+            xValues.add(zeroX);
+        xValues.sort(Double::compareTo);
+
+        // now draw the segments
+        double x = xValues.get(0);
+        double y = m*x + b;
+        int prevX = (int)getDomainAxis().valueToJava2D(x, dataArea, RectangleEdge.BOTTOM);
+        int prevY = (int)getRangeAxis().valueToJava2D(y, dataArea, RectangleEdge.LEFT);
+        for (int i = 1; i < xValues.size(); i ++)
+        {
+            x = xValues.get(i);
+            y = m*x + b;
+            int nextX = (int)getDomainAxis().valueToJava2D(x, dataArea, RectangleEdge.BOTTOM);
+            int nextY = (int)getRangeAxis().valueToJava2D(y, dataArea, RectangleEdge.LEFT);
             g2.drawLine(prevX, prevY, nextX, nextY);
             prevX = nextX;
             prevY = nextY;
