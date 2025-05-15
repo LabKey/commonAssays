@@ -21,6 +21,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.LinkBuilder;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.writer.HtmlWriter;
@@ -260,7 +261,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
     private void writeInfo(ProteinSummary summary, HtmlWriter out, ActionURL url, int groupId)
     {
         _sequenceColumn.writeInfo(summary, out, url, groupId);
-        out.write("<br/>");
+        out.write(HtmlString.BR);
     }
 
     public void setColumnInfo(ColumnInfo colInfo)
