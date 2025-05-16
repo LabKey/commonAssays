@@ -280,7 +280,7 @@ public class PlotFactory
         ValueAxis xAxis = getValueAxis(getLabel(subset, axis), fn);
 
         ValueAxis yAxis = new NumberAxis("Count");
-        double yMax = 0;
+        double yMax = 10;
         for (int i = 1; i < dataset.getItemCount(0) - 1; i ++)
         {
             yMax = Math.max(dataset.getY(0, i), yMax);
