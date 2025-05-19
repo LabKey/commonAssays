@@ -77,7 +77,8 @@ public class DensityPlot extends ContourPlot
         int X2 = constrain(getDomainAxis().valueToJava2D(x2, dataArea, RectangleEdge.BOTTOM));
         int Y2 = constrain(getRangeAxis().valueToJava2D(y2, dataArea, RectangleEdge.LEFT));
 
-        // straight lines (I added the x1==x2 check to avoid any to avoid any possible /0 below)
+        // straight lines (I added the x1==x2 check to avoid any possible /0 below)
+
         if (X1 == X2 || Y1 == Y2 || x1==x2)
         {
             g2.drawLine(X1, Y1, X2, Y2);
