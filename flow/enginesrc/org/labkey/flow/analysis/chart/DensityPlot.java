@@ -111,7 +111,8 @@ public class DensityPlot extends ContourPlot
         double m = (y2-y1)/(x2-x1);
         double b = y1 - m*x1;
 
-        // Biexponential xform gets wierd for small numbers.  Let's throw in points for zero-crossings.
+        // Biexponential xform gets weird for small numbers.  Let's throw in points for zero-crossings.
+
         if (xmin < 0.0 && 0.0 < xmax)
             xValues.add(0.0);
         double zeroX = -b / m;
