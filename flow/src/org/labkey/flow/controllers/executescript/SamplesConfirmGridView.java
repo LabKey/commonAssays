@@ -44,10 +44,10 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.InputBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SimpleNamedObject;
 import org.labkey.api.util.StringExpression;
-import org.labkey.api.util.InputBuilder;
 import org.labkey.api.view.GridView;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.flow.analysis.model.ISampleInfo;
@@ -58,8 +58,6 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.util.KeywordUtil;
 import org.springframework.validation.Errors;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,6 +69,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.labkey.api.util.DOM.Attribute.src;
+import static org.labkey.api.util.DOM.IMG;
+import static org.labkey.api.util.DOM.at;
 
 public class SamplesConfirmGridView extends GridView
 {
@@ -368,23 +370,23 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+        public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
         {
             Boolean match = ctx.get(MATCHED_FLAG_FIELD_KEY, Boolean.class);
             if (match != null)
             {
-                oldWriter.write("<img src=\"");
-                oldWriter.write(AppProps.getInstance().getContextPath());
+                IMG(
+                    at(src, AppProps.getInstance().getContextPath() + (match ? "/_images/check.png" : "/_images/cancel.png"))
+                ).appendTo(out);
+
                 if (match)
                 {
-                    oldWriter.write("/_images/check.png\" />");
                     String fileName = ctx.get(SAMPLE_NAME_FIELD_KEY, String.class);
-                    PageFlowUtil.popupHelp(HtmlString.of("Matched the previously imported FCS file '" + fileName + "'"), "Matched").appendTo(oldWriter);
+                    out.write(PageFlowUtil.popupHelp(HtmlString.of("Matched the previously imported FCS file '" + fileName + "'"), "Matched"));
                 }
                 else
                 {
-                    oldWriter.write("/_images/cancel.png\" />");
-                    PageFlowUtil.popupHelp(HtmlString.of("Failed to match a previously imported FCS file. Please manually select a matching FCS file or skip importing this row."), "Not matched").appendTo(oldWriter);
+                    out.write(PageFlowUtil.popupHelp(HtmlString.of("Failed to match a previously imported FCS file. Please manually select a matching FCS file or skip importing this row."), "Not matched"));
                 }
             }
         }

@@ -16,6 +16,8 @@
 package org.labkey.luminex.query;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.assay.AssaySchema;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -48,8 +50,6 @@ import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
-import org.labkey.api.assay.AssaySchema;
-import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexDataHandler;
@@ -57,8 +57,6 @@ import org.labkey.luminex.model.AnalyteSinglePointControl;
 import org.labkey.luminex.model.AnalyteTitration;
 import org.labkey.luminex.model.GuideSet;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -150,12 +148,12 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
             {
                 return new DataColumn(colInfo){
                     @Override
-                    public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+                    public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                     {
                         if ( (Boolean)ctx.get(this.getColumnInfo().getFieldKey()) )
-                            oldWriter.write("Value-based");
+                            out.write("Value-based");
                         else
-                            oldWriter.write("Run-based");
+                            out.write("Run-based");
                     }
                 };
             }
