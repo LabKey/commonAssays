@@ -121,7 +121,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
             return new JavaScriptDisplayColumn(colInfo, List.of("clientapi/ext3", "vis/vis", "luminex/LeveyJenningsPlotHelpers.js", "luminex/LeveyJenningsReport.css"))
             {
                 @Override
-                public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out)
+                public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                 {
                     int protocolId = schema.getProtocol().getRowId();
                     int analyte = (int)ctx.get("analyte");
@@ -131,7 +131,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
 
                     HtmlString html = HtmlString.unsafe(String.format("<img src='%s' width='27' height='20'>", AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png"));
 
-                    renderLink(oldWriter, html, onClick, null);
+                    renderLink(out, html, onClick, null);
                 }
 
                 @Override

@@ -16,6 +16,7 @@
 
 package org.labkey.flow.query;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +26,28 @@ import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
-import org.labkey.api.data.*;
+import org.labkey.api.data.AbstractTableInfo;
+import org.labkey.api.data.BaseColumnInfo;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DataColumn;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DisplayColumn;
+import org.labkey.api.data.DisplayColumnFactory;
+import org.labkey.api.data.FilterInfo;
+import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.MaterializedQueryHelper;
+import org.labkey.api.data.MutableColumnInfo;
+import org.labkey.api.data.NullColumnInfo;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SimpleFilter;
+import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.Table;
+import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.WrappedColumnInfo;
 import org.labkey.api.exp.PropertyColumn;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.DataType;
@@ -70,6 +92,8 @@ import org.labkey.api.study.assay.FileLinkDisplayColumn;
 import org.labkey.api.study.assay.SpecimenForeignKey;
 import org.labkey.api.study.publish.StudyPublishService;
 import org.labkey.api.util.ContainerContext;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.LinkBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.view.ActionURL;
@@ -100,10 +124,7 @@ import org.labkey.flow.reports.FlowReportManager;
 import org.labkey.flow.view.FlowQueryView;
 import org.springframework.validation.BindException;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.beans.PropertyChangeEvent;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -447,37 +468,26 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         return ret;
     }
 
-    private static final DisplayColumnFactory _targetStudyDisplayColumnFactory = new DisplayColumnFactory()
+    private static final DisplayColumnFactory _targetStudyDisplayColumnFactory = colInfo -> new DataColumn(colInfo)
     {
         @Override
-        public DisplayColumn createRenderer(ColumnInfo colInfo)
+        public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
         {
-            return new DataColumn(colInfo)
+            String targetStudyId = (String)getBoundColumn().getValue(ctx);
+            if (targetStudyId != null && !targetStudyId.isEmpty())
             {
-                @Override
-                public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+                Container c = ContainerManager.getForId(targetStudyId);
+                if (c != null)
                 {
-                    String targetStudyId = (String)getBoundColumn().getValue(ctx);
-                    if (targetStudyId != null && targetStudyId.length() > 0)
+                    var ss = StudyService.get();
+                    Study study = null == ss ? null : ss.getStudy(c);
+                    var urlProvider = PageFlowUtil.urlProvider(ProjectUrls.class);
+                    if (study != null && urlProvider != null)
                     {
-                        Container c = ContainerManager.getForId(targetStudyId);
-                        if (c != null)
-                        {
-                            var ss = StudyService.get();
-                            Study study = null == ss ? null : ss.getStudy(c);
-                            var urlProvider = PageFlowUtil.urlProvider(ProjectUrls.class);
-                            if (study != null && urlProvider != null)
-                            {
-                                oldWriter.write("<a href=\"");
-                                oldWriter.write(PageFlowUtil.filter(urlProvider.getBeginURL(c)));
-                                oldWriter.write("\">");
-                                oldWriter.write(study.getLabel().replaceAll(" ", "&nbsp;"));
-                                oldWriter.write("</a>");
-                            }
-                        }
+                        LinkBuilder.simpleLink(HtmlString.unsafe(PageFlowUtil.filter(study.getLabel()).replaceAll(" ", "&nbsp;")), urlProvider.getBeginURL(c)).appendTo(out);
                     }
                 }
-            };
+            }
         }
     };
 
@@ -487,6 +497,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
      *
      *  basically rejoins what is effectively a vertically partitioned table (ACKK)
      */
+    // TODO: Delete this? Unused!
     class JoinFlowDataTable extends AbstractTableInfo implements ExpDataTable
     {
         final ExpDataTable _expData;
@@ -882,12 +893,12 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
                         }
 
                         @Override
-                        public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+                        public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                         {
                             String url = renderURL(ctx);
                             if (url != null)
                             {
-                                oldWriter.write(PageFlowUtil.iconLink("fa fa-download", null).href(url).toString());
+                                out.write(PageFlowUtil.iconLink("fa fa-download", null).href(url));
                             }
                         }
                     };

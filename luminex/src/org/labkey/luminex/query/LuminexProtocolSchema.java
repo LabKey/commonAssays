@@ -85,6 +85,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.labkey.api.util.DOM.Attribute.src;
+import static org.labkey.api.util.DOM.IMG;
+import static org.labkey.api.util.DOM.at;
+
 /**
  * Maps to a single assay design for schema tables/queries (batch, run, data, analyte, titration, curve fit, etc.)
  */
@@ -624,7 +628,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             }
 
             @Override
-            public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+            public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
             {
                 Map<Integer, String> pdfs = new HashMap<>();
                 for (Map.Entry<FieldKey, FieldKey> entry : _pdfColumns.entrySet())
@@ -642,9 +646,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     {
                         ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
                         url.addParameter("rowId", entry.getKey().toString());
-                        oldWriter.write("<a href=\"" + url + "\">");
-                        oldWriter.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
-                        oldWriter.write("</a>");
+                        LinkBuilder.simpleLink(IMG(at(src, AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png")), url).appendTo(out);
                     }
                 }
                 else if (pdfs.size() > 1)
@@ -664,7 +666,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     HtmlString image = HtmlString.unsafe("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
                     LinkBuilder.simpleLink(image)
                         .onMouseOver("return showHelpDiv(this, 'Titration Curves', " + PageFlowUtil.jsString(PageFlowUtil.filter(sb.toString())) + ");")
-                        .appendTo(oldWriter);
+                        .appendTo(out);
                 }
             }
         };

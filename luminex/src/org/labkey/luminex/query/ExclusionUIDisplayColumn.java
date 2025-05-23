@@ -89,7 +89,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
     }
 
     @Override
-    public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+    public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
     {
         String type = (String)ctx.get(_typeFieldKey);
         String description = (String)ctx.get(_descriptionFieldKey);
@@ -112,11 +112,11 @@ public class ExclusionUIDisplayColumn extends DataColumn
             // add onclick handler to call the well exclusion window creation function
             String onClick = "openExclusionsWellWindow(" + _protocolId + ", " + runId + ", " + dataId + ", " +
                 jsString(wellID) + ", " + (description == null ? null : jsString(description)) + ", " + jsString(type) + ");";
-            LinkBuilder.simpleLink(img).href("#").onClick(onClick).appendTo(oldWriter);
+            LinkBuilder.simpleLink(img).href("#").onClick(onClick).appendTo(out);
         }
         else
         {
-            oldWriter.write(img.toString());
+            out.write(img);
         }
     }
 

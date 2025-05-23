@@ -648,17 +648,16 @@ public class MS2Controller extends SpringActionController
                 fixed.put(mod.getAminoAcid(), Formats.f3.format(mod.getMassDiff()));
         }
 
-        StringBuilder onClick = new StringBuilder("showHelpDiv(this, 'Modifications', ");
-        onClick.append(PageFlowUtil.jsString(
-                DOM.createHtml(TABLE(
-                        var.isEmpty() && fixed.isEmpty() ? TR(TD(at(DOM.Attribute.colspan, 2), STRONG("None"))) : null,
-                        appendMods(fixed, "Fixed"),
-                        !var.isEmpty() && !fixed.isEmpty() ? TR(TD(HtmlString.NBSP)) : null,
-                        appendMods(var, "Variable")))));
+        String onClick = "showHelpDiv(this, 'Modifications', " + PageFlowUtil.jsString(
+            DOM.createHtml(TABLE(
+                var.isEmpty() && fixed.isEmpty() ? TR(TD(at(DOM.Attribute.colspan, 2), STRONG("None"))) : null,
+                appendMods(fixed, "Fixed"),
+                !var.isEmpty() && !fixed.isEmpty() ? TR(TD(HtmlString.NBSP)) : null,
+                appendMods(var, "Variable"))
+            )) +
+            ", 100); return false;";
 
-        onClick.append(", 100); return false;");
-
-        return LinkBuilder.labkeyLink("Show Modifications").onClick(onClick.toString()).id("modificationsLink");
+        return LinkBuilder.labkeyLink("Show Modifications").onClick(onClick).id("modificationsLink");
     }
 
     private DOM.Renderable appendMods(Map<String, String> mods, String heading)
