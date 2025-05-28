@@ -90,7 +90,7 @@ public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    Domain domain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+                    Domain domain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP, false);
                     return new ElispotRunAntigenTable(_userSchema, getLookupContainerFilter(), domain, _protocol);
                 }
             };

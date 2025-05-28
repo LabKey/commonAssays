@@ -109,7 +109,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     @Override
     protected void addRunActionButtons(LuminexRunUploadForm newRunForm, InsertView insertView, ButtonBar bbar)
     {
-        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE, false);
         List<? extends DomainProperty> analyteColumns = analyteDomain.getProperties();
         if (analyteColumns.isEmpty())
         {
@@ -157,7 +157,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         for (String analyte : analyteNames)
             view.getDataRegion().addHiddenFormField("analyteNames", analyte);
 
-        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE, false);
         List<? extends DomainProperty> analyteColumns = analyteDomain.getProperties();
         Set<String> initNegativeControlAnalytes = new TreeSet<>();
         List<String> negativeBeadDefaultValues = AnalyteDefaultValueService.getAnalyteProperty(Arrays.asList(analyteNames), getContainer(), _protocol, LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);

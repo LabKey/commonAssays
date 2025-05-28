@@ -168,7 +168,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
     @Override
     protected void addRunActionButtons(ElispotRunUploadForm newRunForm, InsertView insertView, ButtonBar bbar)
     {
-        Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+        Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP, false);
         List<? extends DomainProperty> antigenColumns = antigenDomain.getProperties();
         if (antigenColumns.isEmpty())
         {
@@ -338,7 +338,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 }
             }
 
-            Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(form.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+            Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(form.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP, false);
             List<? extends DomainProperty> antigenColumns = antigenDomain.getProperties();
             if (antigenColumns.isEmpty())
             {

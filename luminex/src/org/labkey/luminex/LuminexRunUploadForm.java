@@ -118,7 +118,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
     @Override
     public Map<DomainProperty, String> getAnalyteProperties(String analyteName)
     {
-        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE, false);
         List<? extends DomainProperty> domainProperties = analyteDomain.getProperties();
         return getAnalytePropertyMapFromRequest(domainProperties, analyteName);
     }
