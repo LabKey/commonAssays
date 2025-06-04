@@ -37,6 +37,7 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.statistics.StatsService;
+import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
@@ -429,7 +430,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    protected void moveAssayResults(List<ExpRun> runs, ExpProtocol protocol, Container sourceContainer, Container targetContainer, User user, AssayMoveData assayMoveData)
+    protected void moveAssayResults(List<ExpRun> runs, ExpProtocol protocol, Container sourceContainer, Container targetContainer, User user, AssayMoveData assayMoveData) throws ExperimentException
     {
         super.moveAssayResults(runs, protocol, sourceContainer, targetContainer, user, assayMoveData); // assay results
         List<Integer> runRowIds = runs.stream().map(ExpRun::getRowId).toList();
