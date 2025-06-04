@@ -291,7 +291,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
 
         DisplayColumnFactory factory = colInfo -> {
             _userSchema.getProteinGroupProteins().setRuns(_userSchema.getRuns());
-            ProteinListDisplayColumn result = new ProteinListDisplayColumn(colInfo.getColumnName(), _userSchema.getProteinGroupProteins());
+            ProteinListDisplayColumn result = new ProteinListDisplayColumn(colInfo.getName(), _userSchema.getProteinGroupProteins());
             result.setColumnInfo(colInfo);
             return result;
         };

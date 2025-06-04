@@ -327,7 +327,7 @@ public class NabRunDataTable extends NabBaseTable
 
         for (ColumnInfo columnInfo : _rootTable.getColumns())
         {
-            String columnName = columnInfo.getColumnName().toLowerCase();
+            String columnName = columnInfo.getName().toLowerCase();
             if (columnName.contains("auc_") || columnName.equals("fiterror") || columnName.equals(FIT_PARAMETERS_PROPERTY_NAME.toLowerCase()))
             {
                 addWrapColumn(columnInfo);

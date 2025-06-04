@@ -57,7 +57,7 @@ public class StatisticMethod extends AbstractTableMethodInfo
         ret.append("\nINNER JOIN flow.StatisticAttr ON flow.statistic.statisticid = flow.StatisticAttr.id AND flow.StatisticAttr.name = ");
         ret.append(arguments[0]);
         // The objectId column will be aliased as "Statistic" when used in the FCSAnalysis table and as "Value" when used in the CompensationMatrices table
-        ret.append("\nWHERE flow.statistic.objectId = ").append(tableAlias).append(".").append(_objectIdColumn.getColumnName());
+        ret.append("\nWHERE flow.statistic.objectId = ").append(tableAlias).append(".").append(_objectIdColumn.getName());
         ret.append(" AND flow.StatisticAttr.container = ?");
         ret.add(_container.getId());
         ret.append(")");
