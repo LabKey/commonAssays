@@ -163,11 +163,11 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public Domain getResultsDomain(ExpProtocol protocol)
+    public Domain getResultsDomain(ExpProtocol protocol, boolean forUpdate)
     {
         try
         {
-            return getDomainByPrefix(protocol, ASSAY_DOMAIN_CUSTOM_DATA);
+            return getDomainByPrefix(protocol, ASSAY_DOMAIN_CUSTOM_DATA, forUpdate);
         }
         catch (IllegalArgumentException e)
         {
@@ -177,7 +177,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
             addResultsDomain(protocol);
             // Clear the cache so we can find the domain we just created
             protocol.setObjectProperties(null);
-            return getDomainByPrefix(protocol, ASSAY_DOMAIN_CUSTOM_DATA);
+            return getDomainByPrefix(protocol, ASSAY_DOMAIN_CUSTOM_DATA, forUpdate);
         }
     }
 
@@ -485,7 +485,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
 
     public static Domain getExcelRunDomain(ExpProtocol protocol)
     {
-        return AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN);
+        return AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_EXCEL_RUN, false);
     }
 
     @Override

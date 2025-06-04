@@ -202,7 +202,7 @@ public class FlowReportManager
             domain.setDescription("Domain for " + report.getDescriptor().getDescriptorType() + " reports on flow table " + tableType);
             domain.save(user);
 
-            domain = PropertyService.get().getDomain(domain.getTypeId());
+            domain = PropertyService.get().getDomain(domain.getTypeId(), true);
 
             for (PropertyDescriptor prop : properties)
             {

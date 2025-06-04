@@ -84,7 +84,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
     {
         if (name.equalsIgnoreCase(ANTIGEN_TABLE_NAME))
         {
-            Domain domain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+            Domain domain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP, false);
             if (null != domain)
                 return new ElispotRunAntigenTable(this, cf, domain, getProtocol());
         }

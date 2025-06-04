@@ -199,11 +199,17 @@ public class FlowAssayProvider extends AbstractAssayProvider
     @Override
     public Domain getBatchDomain(ExpProtocol protocol)
     {
+        return getBatchDomain(protocol, false);
+    }
+
+    @Override
+    public Domain getBatchDomain(ExpProtocol protocol, boolean forUpdate)
+    {
         return null;
     }
 
     @Override
-    public Domain getResultsDomain(ExpProtocol protocol)
+    public Domain getResultsDomain(ExpProtocol protocol, boolean forUpdate)
     {
         return null;
     }

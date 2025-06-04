@@ -337,7 +337,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     public Domain getVirusWellGroupDomain(ExpProtocol protocol)
     {
         if (supportsMultiVirusPlate())
-            return getDomainByPrefixIfExists(protocol, ASSAY_DOMAIN_VIRUS_WELLGROUP);
+            return getDomainByPrefixIfExists(protocol, ASSAY_DOMAIN_VIRUS_WELLGROUP, false);
         else
             return null;
     }

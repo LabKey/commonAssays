@@ -173,7 +173,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         List<Map<String, Object>> rows = errorReshow ? form.getResultProperties(errors) : form.getParsedResultData();
         Map<String, Map<String, Object>> reRunResults = form.getReRunResults();
 
-        Domain resultDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ExpProtocol.ASSAY_DOMAIN_DATA);
+        Domain resultDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ExpProtocol.ASSAY_DOMAIN_DATA, false);
         List<? extends DomainProperty> resultDomainProperties = resultDomain.getProperties();
         String lsidCol = "RowID";
         InsertView view = createInsertView(ViabilitySchema.getTableInfoResults(), lsidCol, resultDomainProperties, errorReshow, ResultsStepHandler.NAME, form, errors);

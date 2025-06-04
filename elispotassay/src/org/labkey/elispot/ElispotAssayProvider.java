@@ -222,7 +222,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
     }
 
     @Override
-    public Domain getResultsDomain(ExpProtocol protocol)
+    public Domain getResultsDomain(ExpProtocol protocol, boolean forUpdate)
     {
         return null;
     }
@@ -350,12 +350,12 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
 
     public Domain getAntigenWellGroupDomain(ExpProtocol protocol)
     {
-        return getDomainByPrefix(protocol, ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+        return getDomainByPrefix(protocol, ASSAY_DOMAIN_ANTIGEN_WELLGROUP, false);
     }
 
     public Domain getAnalyteDomain(ExpProtocol protocol)
     {
-        return getDomainByPrefix(protocol, ASSAY_DOMAIN_ANALYTE);
+        return getDomainByPrefix(protocol, ASSAY_DOMAIN_ANALYTE, false);
     }
 
     @Override

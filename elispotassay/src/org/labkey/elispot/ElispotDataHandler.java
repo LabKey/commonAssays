@@ -265,7 +265,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         {
             Container container = run.getContainer();
 
-            Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(run.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+            Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(run.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP, false);
             DomainProperty cellWellProp = antigenDomain.getPropertyByName(ElispotAssayProvider.CELLWELL_PROPERTY_NAME);
 
             List<? extends ExpData> data = run.getOutputDatas(ElispotDataHandler.ELISPOT_DATA_TYPE);
@@ -324,7 +324,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         {
             Container container = run.getContainer();
 
-            Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(run.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+            Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(run.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP, false);
             List<? extends DomainProperty> antigenProps = antigenDomain.getProperties();
             DomainProperty cellWellProp = antigenDomain.getPropertyByName(ElispotAssayProvider.CELLWELL_PROPERTY_NAME);
 

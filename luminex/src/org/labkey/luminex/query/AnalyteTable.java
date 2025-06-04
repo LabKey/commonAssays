@@ -41,7 +41,6 @@ import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.assay.AbstractAssayProvider;
-import org.labkey.api.assay.AssaySchema;
 import org.labkey.luminex.LuminexAssayProvider;
 import org.labkey.luminex.model.Analyte;
 
@@ -115,7 +114,7 @@ public class AnalyteTable extends AbstractLuminexTable
         lsidColumn.setShownInUpdateView(false);
 
         var colProperty = wrapColumn("Properties", getRealTable().getColumn("LSID"));
-        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_userSchema.getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(_userSchema.getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE, false);
         Map<String, PropertyDescriptor> map = new TreeMap<>();
         for(DomainProperty pd : analyteDomain.getProperties())
         {

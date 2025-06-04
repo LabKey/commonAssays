@@ -410,7 +410,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
 
     public Domain getConcentrationWellGroupDomain(ExpProtocol protocol)
     {
-        return getDomainByPrefix(protocol, ASSAY_DOMAIN_DATA);
+        return getDomainByPrefix(protocol, ASSAY_DOMAIN_DATA, false);
     }
 
     @Override

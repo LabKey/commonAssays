@@ -31,11 +31,9 @@ import org.labkey.api.assay.actions.AssayRunUploadForm;
 import org.labkey.api.assay.actions.UploadWizardAction;
 import org.labkey.api.assay.AssayDataCollector;
 import org.labkey.api.assay.AssayFileWriter;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.vfs.FileLike;
 import org.springframework.validation.Errors;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
