@@ -27,6 +27,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
@@ -110,7 +111,7 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
         }
 
         @Override
-        protected void renderView(Object model, PrintWriter out)
+        protected void renderView(Object model, PrintWriter oldWriter, HtmlWriter out)
         {
             ViewContext context = getViewContext();
             if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
@@ -121,7 +122,7 @@ public class SequestPipelineProvider extends AbstractMS2SearchPipelineProvider<S
             html.append("<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;")
                 .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
                 .append(" - Specify the default XML parameters file for Sequest.</td></tr></table>");
-            out.write(html.toString());
+            oldWriter.write(html.toString());
         }
     }
 

@@ -26,6 +26,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
+import org.labkey.api.writer.HtmlWriter;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
@@ -107,7 +108,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         }
 
         @Override
-        protected void renderView(Object model, PrintWriter out)
+        protected void renderView(Object model, PrintWriter oldWriter, HtmlWriter out)
         {
             ViewContext context = getViewContext();
             if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
@@ -123,7 +124,7 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
                     .append("<a href=\"").append(configMascotURL.getLocalURIString()).append("\">Configure Mascot Server</a>")
                     .append(" - Specify connection information for the Mascot Server.</td></tr>");
             html.append("</table>");
-            out.write(html.toString());
+            oldWriter.write(html.toString());
         }
     }
 

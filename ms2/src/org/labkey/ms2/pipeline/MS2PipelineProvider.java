@@ -25,6 +25,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
+import org.labkey.api.writer.HtmlWriter;
 
 import java.io.PrintWriter;
 
@@ -66,7 +67,7 @@ public class MS2PipelineProvider extends PipelineProvider
         }
 
         @Override
-        protected void renderView(Object model, PrintWriter out)
+        protected void renderView(Object model, PrintWriter oldWriter, HtmlWriter out)
         {
             ViewContext context = getViewContext();
             if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
@@ -79,7 +80,7 @@ public class MS2PipelineProvider extends PipelineProvider
                     .append(" - Specify the location on the web server where FASTA sequence files will be located.</td></tr>");
 
             html.append("</table>");
-            out.write(html.toString());
+            oldWriter.write(html.toString());
         }
     }
 }
