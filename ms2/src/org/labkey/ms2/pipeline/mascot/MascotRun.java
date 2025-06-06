@@ -35,8 +35,9 @@ import org.labkey.ms2.peptideview.MS2RunViewType;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.PrintWriter;
 import java.util.Map;
+
+import static org.labkey.api.util.DOM.DIV;
 
 public class MascotRun extends MS2Run
 {
@@ -147,11 +148,13 @@ public class MascotRun extends MS2Run
         }
         else
         {
-            return new WebPartView(title) {
+            return new WebPartView<>(title) {
                 @Override
-                protected void renderView(Object model, PrintWriter oldWriter, HtmlWriter out)
+                protected void renderView(Object model, HtmlWriter out)
                 {
-                    oldWriter.write("<div>Use the 'Standard' grouping to view this information.</div>");
+                    DIV(
+                        "Use the 'Standard' grouping to view this information."
+                    ).appendTo(out);
                 }
             };
         }

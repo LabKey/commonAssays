@@ -21,7 +21,6 @@ import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
-import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
@@ -31,20 +30,14 @@ import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
+import org.labkey.ms2.pipeline.MS2PipelineProvider;
+import org.labkey.ms2.pipeline.MS2PipelineProvider.Setting;
 import org.labkey.ms2.pipeline.PipelineController;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * MascotCPipelineProvider class
- * <p/>
- * Created: Nov 1, 2005
- *
- * @author bmaclean
- */
 public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<MascotSearchTask.Factory>
 {
     public static String name = "Mascot";
@@ -108,23 +101,15 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
         }
 
         @Override
-        protected void renderView(Object model, PrintWriter oldWriter, HtmlWriter out)
+        protected void renderView(Object model, HtmlWriter out)
         {
             ViewContext context = getViewContext();
-            if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
-                return;
-            StringBuilder html = new StringBuilder();
-            html.append("<table><tr><td style=\"font-weight:bold;\">Mascot specific settings:</td></tr>");
             ActionURL setDefaultsURL = new ActionURL(PipelineController.SetMascotDefaultsAction.class, context.getContainer());
-            html.append("<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;")
-                    .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
-                    .append(" - Specify the default XML parameters file for Mascot.</td></tr>");
             ActionURL configMascotURL = new ActionURL(MS2Controller.MascotConfigAction.class, context.getContainer());
-            html.append("<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;")
-                    .append("<a href=\"").append(configMascotURL.getLocalURIString()).append("\">Configure Mascot Server</a>")
-                    .append(" - Specify connection information for the Mascot Server.</td></tr>");
-            html.append("</table>");
-            oldWriter.write(html.toString());
+            MS2PipelineProvider.renderSettings(context, "Mascot", out,
+                new Setting(setDefaultsURL, "Mascot"),
+                new Setting(configMascotURL, "Configure Mascot Server", "Specify connection information for the Mascot Server.")
+            );
         }
     }
 
@@ -142,5 +127,4 @@ public class MascotCPipelineProvider extends AbstractMS2SearchPipelineProvider<M
             throw new IOException("Mascot Server has not been configured.");
         return config;
     }
-
 }

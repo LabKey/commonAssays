@@ -22,7 +22,6 @@ import org.labkey.api.module.Module;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineActionConfig;
 import org.labkey.api.pipeline.PipelineDirectory;
-import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
@@ -31,16 +30,13 @@ import org.labkey.api.writer.HtmlWriter;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineProvider;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
+import org.labkey.ms2.pipeline.MS2PipelineProvider;
+import org.labkey.ms2.pipeline.MS2PipelineProvider.Setting;
 import org.labkey.ms2.pipeline.PipelineController;
 
-import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * User: jeckels
- * Date: September 17, 2013
- */
 public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<CometSearchTask.Factory>
 {
     private static final String ACTION_LABEL = "Comet Peptide Search";
@@ -99,18 +95,11 @@ public class CometPipelineProvider extends AbstractMS2SearchPipelineProvider<Com
         }
 
         @Override
-        protected void renderView(Object model, PrintWriter oldWriter, HtmlWriter out)
+        protected void renderView(Object model, HtmlWriter out)
         {
             ViewContext context = getViewContext();
-            if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
-                return;
-            StringBuilder html = new StringBuilder();
-            html.append("<table><tr><td style=\"font-weight:bold;\">Comet specific settings:</td></tr>");
             ActionURL setDefaultsURL = new ActionURL(PipelineController.SetCometDefaultsAction.class, context.getContainer());
-            html.append("<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;")
-                .append("<a href=\"").append(setDefaultsURL.getLocalURIString()).append("\">Set defaults</a>")
-                .append(" - Specify the default XML parameters file for Comet.</td></tr></table>");
-            oldWriter.write(html.toString());
+            MS2PipelineProvider.renderSettings(context, "Comet", out, new Setting(setDefaultsURL, "Comet"));
         }
     }
 

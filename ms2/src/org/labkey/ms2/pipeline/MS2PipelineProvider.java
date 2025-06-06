@@ -15,22 +15,28 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.labkey.api.pipeline.PipelineDirectory;
-import org.labkey.api.pipeline.PipelineProvider;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.view.HttpView;
-import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.WebPartView;
 import org.labkey.api.data.Container;
 import org.labkey.api.module.Module;
+import org.labkey.api.pipeline.PipeRoot;
+import org.labkey.api.pipeline.PipelineDirectory;
+import org.labkey.api.pipeline.PipelineProvider;
+import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.LinkBuilder;
+import org.labkey.api.view.ActionURL;
+import org.labkey.api.view.HttpView;
+import org.labkey.api.view.ViewContext;
+import org.labkey.api.view.WebPartView;
 import org.labkey.api.writer.HtmlWriter;
 
-import java.io.PrintWriter;
+import java.util.Arrays;
 
-/**
- */
+import static org.labkey.api.util.DOM.Attribute.style;
+import static org.labkey.api.util.DOM.TABLE;
+import static org.labkey.api.util.DOM.TD;
+import static org.labkey.api.util.DOM.TR;
+import static org.labkey.api.util.DOM.at;
+
 public class MS2PipelineProvider extends PipelineProvider
 {
     static String name = "MS2";
@@ -67,20 +73,44 @@ public class MS2PipelineProvider extends PipelineProvider
         }
 
         @Override
-        protected void renderView(Object model, PrintWriter oldWriter, HtmlWriter out)
+        protected void renderView(Object model, HtmlWriter out)
         {
             ViewContext context = getViewContext();
-            if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
-                return;
-            StringBuilder html = new StringBuilder();
-            html.append("<table><tr><td style=\"font-weight:bold;\">MS2 specific settings:</td></tr>");
             ActionURL buttonURL = new ActionURL(PipelineController.SetupClusterSequenceDBAction.class, context.getContainer());
-            html.append("<tr><td>&nbsp;&nbsp;&nbsp;&nbsp;")
-                    .append("<a href=\"").append(buttonURL.getLocalURIString()).append("\">Set FASTA root</a>")
-                    .append(" - Specify the location on the web server where FASTA sequence files will be located.</td></tr>");
-
-            html.append("</table>");
-            oldWriter.write(html.toString());
+            renderSettings(context, "MS2", out, new Setting(buttonURL, "Set FASTA root", "Specify the location on the web server where FASTA sequence files will be located."));
         }
+    }
+
+    public record Setting(ActionURL url, String text, String description)
+    {
+        // Standard "Set defaults" setting
+        public Setting(ActionURL url, String name)
+        {
+            this(url, "Set defaults", "Specify the default XML parameters file for " + name + ".");
+        }
+    }
+
+    public static void renderSettings(ViewContext context, String name, HtmlWriter out, Setting... settings)
+    {
+        if (!context.getContainer().hasPermission(context.getUser(), InsertPermission.class))
+            return;
+
+        TABLE(
+            TR(TD(
+                at(style, "font-weight:bold;"),
+                name + "-specific settings:"
+            )),
+            Arrays.stream(settings)
+                .map(setting ->
+                    TR(TD(
+                        HtmlString.NBSP,
+                        HtmlString.NBSP,
+                        HtmlString.NBSP,
+                        HtmlString.NBSP,
+                        LinkBuilder.simpleLink(setting.text(), setting.url()),
+                        " - " + setting.description()
+                    ))
+                )
+        ).appendTo(out);
     }
 }
