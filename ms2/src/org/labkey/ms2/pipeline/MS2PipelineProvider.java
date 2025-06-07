@@ -21,6 +21,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineDirectory;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.security.permissions.InsertPermission;
+import org.labkey.api.util.DOM;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.LinkBuilder;
 import org.labkey.api.view.ActionURL;
@@ -88,6 +89,18 @@ public class MS2PipelineProvider extends PipelineProvider
         {
             this(url, "Set defaults", "Specify the default XML parameters file for " + name + ".");
         }
+
+        // Render this Setting as a Renderable
+        private DOM.Renderable renderable()
+        {
+            return TR(TD(
+                HtmlString.NBSP,
+                HtmlString.NBSP,
+                HtmlString.NBSP,
+                HtmlString.NBSP,
+                LinkBuilder.simpleLink(text(), url()), " - " + description()
+            ));
+        }
     }
 
     public static void renderSettings(ViewContext context, String name, HtmlWriter out, Setting... settings)
@@ -101,16 +114,7 @@ public class MS2PipelineProvider extends PipelineProvider
                 name + "-specific settings:"
             )),
             Arrays.stream(settings)
-                .map(setting ->
-                    TR(TD(
-                        HtmlString.NBSP,
-                        HtmlString.NBSP,
-                        HtmlString.NBSP,
-                        HtmlString.NBSP,
-                        LinkBuilder.simpleLink(setting.text(), setting.url()),
-                        " - " + setting.description()
-                    ))
-                )
+                .map(Setting::renderable)
         ).appendTo(out);
     }
 }
