@@ -60,7 +60,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
 
     private final ViewContext _context;
 
-    private DecimalFormat MODIFICATION_MASS_FORMAT = new DecimalFormat("0.0");
+    private final DecimalFormat MODIFICATION_MASS_FORMAT = new DecimalFormat("0.0");
 
     private static final int UNKNOWN_SCORE_TYPE = 0;
 
@@ -178,7 +178,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                             }
                             catch (URISyntaxException e)
                             {
-                                throw new UnexpectedException(e);
+                                throw UnexpectedException.wrap(e);
                             }
                         }
 
@@ -286,7 +286,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
         }
         catch (ClassNotFoundException e)
         {
-            throw new UnexpectedException(e);
+            throw UnexpectedException.wrap(e);
         }
         catch (SQLException e)
         {
@@ -386,26 +386,26 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
 
             peptideMods.clear();
             assertEquals("ABFDSC[+57.0]CC[+57.0]", renderer.getExportModifiedSequence("X.ABFDSC*CC*.X", Arrays.asList(mod1), peptideMods));
-            assertEquals(peptideMods.size(), 2);
+            assertEquals(2, peptideMods.size());
             assertEquals(57.0f, peptideMods.get(6), 0.0);
             assertEquals(57.0f, peptideMods.get(8), 0.0);
 
             peptideMods.clear();
             assertEquals("ABFDSC[+57.0]CC[+57.0]", renderer.getExportModifiedSequence("X.ABFDSC*CC*.X", Arrays.asList(mod1, mod2), peptideMods));
-            assertEquals(peptideMods.size(), 2);
+            assertEquals(2, peptideMods.size());
             assertEquals(57.0f, peptideMods.get(6), 0.0);
             assertEquals(57.0f, peptideMods.get(8), 0.0);
 
             peptideMods.clear();
             assertEquals("A[-40.3]BFDSC[+57.0]CC[+57.0]", renderer.getExportModifiedSequence("X.A'BFDSC*CC*.X", Arrays.asList(mod1, mod2), peptideMods));
-            assertEquals(peptideMods.size(), 3);
+            assertEquals(3, peptideMods.size());
             assertEquals(-40.3f, peptideMods.get(1), 0.0);
             assertEquals(57.0f, peptideMods.get(6), 0.0);
             assertEquals(57.0f, peptideMods.get(8), 0.0);
 
             peptideMods.clear();
             assertEquals("A[-40.3]BFDSC[+57.0]CL[+17.0]", renderer.getExportModifiedSequence("X.A'BFDSC*CL'.X", Arrays.asList(mod1, mod2, mod3), peptideMods));
-            assertEquals(peptideMods.size(), 3);
+            assertEquals(3, peptideMods.size());
             assertEquals(-40.3f, peptideMods.get(1), 0.0);
             assertEquals(57.0f, peptideMods.get(6), 0.0);
             assertEquals(17.0f, peptideMods.get(8), 0.0);

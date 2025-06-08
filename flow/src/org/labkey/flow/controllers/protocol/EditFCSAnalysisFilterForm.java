@@ -48,8 +48,8 @@ public class EditFCSAnalysisFilterForm extends ProtocolForm
             ops.add(parts[1]);
             values.add(entry.getValue());
         }
-        ff_field = fields.toArray(new FieldKey[fields.size()]);
-        ff_op = ops.toArray(new String[ops.size()]);
+        ff_field = fields.toArray(new FieldKey[0]);
+        ff_op = ops.toArray(new String[0]);
         ff_value = values.toArray(new String[ops.size()]);
     }
 
@@ -83,7 +83,7 @@ public class EditFCSAnalysisFilterForm extends ProtocolForm
             String clause = PageFlowUtil.encode(ff_field[i].toString()) + "~" + ff_op[i] + "=" + PageFlowUtil.encode(ff_value[i]);
             clauses.add(clause);
         }
-        if (clauses.size() == 0)
+        if (clauses.isEmpty())
             return null;
         return StringUtils.join(clauses.iterator(), "&");
     }

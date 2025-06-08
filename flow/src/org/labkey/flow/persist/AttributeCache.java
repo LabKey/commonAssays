@@ -52,7 +52,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
     private static final Logger LOG = LogManager.getLogger(AttributeCache.class);
 
     // container id -> list of names (sorted)
-    private CacheLoader<String, Attributes<A, E>> BY_CONTAINER_LOADER = new CacheLoader<String, Attributes<A, E>>()
+    private final CacheLoader<String, Attributes<A, E>> BY_CONTAINER_LOADER = new CacheLoader<>()
     {
         @Override
         public Attributes<A, E> load(@NotNull String containerId, @Nullable Object argument)
@@ -330,8 +330,8 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
 
     private static class UncacheTask implements Runnable
     {
-        private Container _c;
-        private @Nullable AttributeCache _cache;
+        private final Container _c;
+        private final @Nullable AttributeCache _cache;
 
         UncacheTask(Container c, @Nullable AttributeCache cache)
         {

@@ -21,7 +21,6 @@ import org.jfree.chart.plot.PlotRenderingInfo;
 import org.jfree.chart.plot.CrosshairState;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.axis.ValueAxis;
-import org.jfree.chart.renderer.xy.XYItemRenderer;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.Range;
@@ -53,9 +52,9 @@ public class HistPlot extends XYPlot
         List<Integer> xValues = new ArrayList();
 
         XYDataset dataset = getDataset();
-        int lastX = -1;
-        int count = 0;
-        double total = 0;
+        int lastX;
+        int count;
+        double total;
         int itemCount = dataset.getItemCount(series);
         if (itemCount == 0)
             return false;

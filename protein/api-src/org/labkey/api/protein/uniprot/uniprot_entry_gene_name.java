@@ -55,10 +55,10 @@ public class uniprot_entry_gene_name extends CharactersParseActions
             throw new SAXException("No current ProtSequences is available");
         }
         _accumulated = _accumulated.trim();
-        if (curType.equalsIgnoreCase("primary") && _accumulated.length() > 0)
+        if (curType.equalsIgnoreCase("primary") && !_accumulated.isEmpty())
         {
             context.getIdentifiers().add(new UniprotIdentifier(IdentifierType.GeneName.toString(), _accumulated, curSeq));
-            if (curSeq.getBestName() == null || curSeq.getBestName().trim().equals(""))
+            if (curSeq.getBestName() == null || curSeq.getBestName().trim().isEmpty())
             {
                 curSeq.setBestName(_accumulated);
             }

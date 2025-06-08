@@ -46,9 +46,8 @@
 
     Map<String, String> groupOptions = new TreeMap<>();
     Map<String, Collection<String[]>> groups = new TreeMap<>();
-    if (workspace instanceof Workspace)
+    if (workspace instanceof Workspace w)
     {
-        Workspace w = (Workspace)workspace;
         for (Workspace.GroupInfo group : w.getGroups())
         {
             Map<String, String[]> groupSamples = new TreeMap<>();

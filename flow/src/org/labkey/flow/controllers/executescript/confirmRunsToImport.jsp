@@ -59,7 +59,7 @@
 
     %><labkey:errors/><%
 
-    if (paths != null && paths.size() != 0)
+    if (paths != null && !paths.isEmpty())
     {
         %><labkey:form method="POST" action="<%=new ActionURL(ImportRunsAction.class, c)%>">
         <input type="hidden" name="path" value="<%=h(form.getPath())%>">

@@ -238,7 +238,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
                 Map<String, Map<DomainProperty, String>> postedProps = helper.getPostedPropertyValues(form.getRequest());
                 form.setConcentrationProperties(postedProps);
 
-                run = saveExperimentRun(form);
+                saveExperimentRun(form);
 
                 for (Map.Entry<String, Map<DomainProperty, String>> entry : postedProps.entrySet())
                     form.saveDefaultValues(entry.getValue(), entry.getKey());

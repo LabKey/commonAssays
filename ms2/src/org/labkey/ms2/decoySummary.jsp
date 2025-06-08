@@ -55,7 +55,7 @@
         isIonCutoff = false;
     }
     String grouping = newURL.getParameter("grouping");
-    boolean isStandardView = false;
+    boolean isStandardView;
     if(null == grouping)
     {
         isStandardView = true;  // no parameter = standard

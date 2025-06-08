@@ -19,7 +19,6 @@ package org.labkey.ms2;
 import org.apache.commons.collections4.OrderedMap;
 import org.apache.commons.collections4.map.ListOrderedMap;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.labkey.api.util.Formats;
 
 /**
@@ -36,7 +35,7 @@ public class CumulativeTimer
     // Map of TimerTask -> Long (cumulative task time)
     private final OrderedMap<TimerTask, Long> _cumulativeTime = new ListOrderedMap<>();
     private Task _currentTask = null;
-    private Logger _log;
+    private final Logger _log;
 
     public CumulativeTimer(Logger log)
     {
@@ -100,9 +99,9 @@ public class CumulativeTimer
 
     private class Task
     {
-        private TimerTask _tt;
+        private final TimerTask _tt;
         private long _startTime;
-        private String _extraDescription;
+        private final String _extraDescription;
 
         private Task(TimerTask tt, String extraDescription)
         {

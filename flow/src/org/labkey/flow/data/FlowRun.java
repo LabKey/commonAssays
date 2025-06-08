@@ -110,9 +110,8 @@ public class FlowRun extends FlowObject<ExpRun>
         List<? extends FlowDataObject> all = getDatas(null);
         for (FlowDataObject obj : all)
         {
-            if (obj instanceof FlowWell)
+            if (obj instanceof FlowWell well)
             {
-                FlowWell well = (FlowWell)obj;
                 if (well.getFCSURI() != null)
                     return true;
             }
@@ -137,9 +136,8 @@ public class FlowRun extends FlowObject<ExpRun>
         List<FlowWell> wells = new ArrayList<>();
         for (FlowDataObject obj : _allDatas)
         {
-            if (obj instanceof FlowWell)
+            if (obj instanceof FlowWell well)
             {
-                FlowWell well = (FlowWell)obj;
                 if (realFiles)
                 {
                     URI uri = well.getFCSURI();
@@ -153,7 +151,7 @@ public class FlowRun extends FlowObject<ExpRun>
                 }
             }
         }
-        FlowWell[] ret = wells.toArray(new FlowWell[wells.size()]);
+        FlowWell[] ret = wells.toArray(new FlowWell[0]);
         Arrays.sort(ret);
         return ret;
     }
@@ -202,7 +200,7 @@ public class FlowRun extends FlowObject<ExpRun>
     public FlowCompensationMatrix getCompensationMatrix()
     {
         List<? extends ExpData> outputs = getExperimentRun().getOutputDatas(FlowDataType.CompensationMatrix);
-        if (outputs.size() > 0)
+        if (!outputs.isEmpty())
         {
             return new FlowCompensationMatrix(outputs.get(0));
         }
@@ -308,7 +306,7 @@ public class FlowRun extends FlowObject<ExpRun>
     public FlowWorkspace getWorkspace()
     {
         List<? extends ExpData> datas = getExperimentRun().getInputDatas(InputRole.Workspace.toString(), ExpProtocol.ApplicationType.ExperimentRun);
-        if (datas.size() == 0)
+        if (datas.isEmpty())
             return null;
         return (FlowWorkspace) FlowDataObject.fromData(datas.get(0));
     }
@@ -436,7 +434,7 @@ public class FlowRun extends FlowObject<ExpRun>
         for (FlowRun run : runs)
         {
             String targetStudy = (String)run.getProperty(FlowProperty.TargetStudy);
-            if (targetStudy != null && targetStudy.length() > 0)
+            if (targetStudy != null && !targetStudy.isEmpty())
                 return targetStudy;
         }
 
@@ -474,9 +472,8 @@ public class FlowRun extends FlowObject<ExpRun>
             while (rs.next())
             {
                 FlowWell well = FlowWell.fromWellId(colRowId.getIntValue(rs));
-                if (well instanceof FlowFCSFile)
+                if (well instanceof FlowFCSFile fcsFile)
                 {
-                    FlowFCSFile fcsFile = (FlowFCSFile) well;
                     if (fcsFile.getFCSURI() != null)
                         ret.add(fcsFile);
                 }

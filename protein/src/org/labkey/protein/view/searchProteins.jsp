@@ -34,7 +34,7 @@
     }
 %>
 <%
-    JspView<ProteinSearchBean> me = (JspView<ProteinSearchBean>) HttpView.currentView();
+    JspView<ProteinSearchBean> me = HttpView.currentView();
     ProteinSearchBean bean = me.getModelBean();
 %>
 <labkey:form action="<%= new ActionURL(DoProteinSearchAction.class, getContainer()) %>">

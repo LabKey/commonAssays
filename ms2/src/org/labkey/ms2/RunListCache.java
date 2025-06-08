@@ -129,7 +129,7 @@ public class RunListCache
 
         MS2Manager.validateRuns(ms2Runs, requireSameType, ctx.getUser());
 
-        ExpExperiment group = ExperimentService.get().createHiddenRunGroup(ctx.getContainer(), ctx.getUser(), expRuns.toArray(new ExpRun[expRuns.size()]));
+        ExpExperiment group = ExperimentService.get().createHiddenRunGroup(ctx.getContainer(), ctx.getUser(), expRuns.toArray(new ExpRun[0]));
 
         return group.getRowId();
     }

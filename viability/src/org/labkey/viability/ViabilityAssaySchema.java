@@ -449,8 +449,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
                 @Override
                 public TableInfo getLookupTableInfo()
                 {
-                    ResultsTable results = new ResultsTable(getLookupContainerFilter());
-                    return results;
+                    return new ResultsTable(getLookupContainerFilter());
                 }
             });
 

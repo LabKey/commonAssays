@@ -170,7 +170,7 @@ public class ProteinGroupProteins
 
     private boolean runsMatch(List<MS2Run> runs)
     {
-        if (_runs != null && _runs.size() != 0)
+        if (_runs != null && !_runs.isEmpty())
         {
             return _runs == runs || new HashSet<>(runs).equals(new HashSet<>(_runs));
         }

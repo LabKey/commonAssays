@@ -28,7 +28,7 @@
 %>
 <labkey:errors/>
 <%
-    if (model.missing.size() > 0)
+    if (!model.missing.isEmpty())
     {
         Container container = getContainer();
         PipelineService pipeService = PipelineService.get();

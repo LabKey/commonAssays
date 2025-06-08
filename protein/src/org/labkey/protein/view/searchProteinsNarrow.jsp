@@ -24,7 +24,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-    JspView<ProteinSearchBean> me = (JspView<ProteinSearchBean>) HttpView.currentView();
+    JspView<ProteinSearchBean> me = HttpView.currentView();
     ProteinSearchBean bean = me.getModelBean();
 
     ActionURL url = new ActionURL(ProteinController.DoProteinSearchAction.class, getContainer());

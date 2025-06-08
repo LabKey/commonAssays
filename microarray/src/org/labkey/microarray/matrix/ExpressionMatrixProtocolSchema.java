@@ -21,14 +21,13 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
 import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.matrix.AbstractMatrixProtocolSchema;
 import org.labkey.microarray.MicroarrayManager;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 public class ExpressionMatrixProtocolSchema extends AbstractMatrixProtocolSchema
@@ -46,7 +45,7 @@ public class ExpressionMatrixProtocolSchema extends AbstractMatrixProtocolSchema
     }
     
     @Override
-    public FilteredTable createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
+    public FeatureDataTable createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
         FeatureDataTable result = new FeatureDataTable(this, cf);
         result.setName(AssayProtocolSchema.DATA_TABLE_NAME);
@@ -66,11 +65,9 @@ public class ExpressionMatrixProtocolSchema extends AbstractMatrixProtocolSchema
     }
 
     @Override
-    public List<Map> getDistinctSampleIds()
+    public Collection<Map<String, Object>> getDistinctSampleIds()
     {
-        List<Map> distinctSampleIds = null;
-        distinctSampleIds = MicroarrayManager.get().getDistinctSamples(getProtocol());
-        return distinctSampleIds;
+        return MicroarrayManager.get().getDistinctSamples(getProtocol());
     }
 
     @Override

@@ -277,7 +277,7 @@ public class AttributeSet implements Serializable
             return Collections.emptyList();
 
         Set<String> aliases = _keywordAliases.get(spec);
-        if (aliases == null || aliases.size() == 0)
+        if (aliases == null || aliases.isEmpty())
             return Collections.emptyList();
 
         return Collections.unmodifiableCollection(aliases);
@@ -303,7 +303,7 @@ public class AttributeSet implements Serializable
         {
             StatisticSpec existing = _statisticNames.put(stat.toString(), stat);
             if (existing != null && !existing.toString().equals(stat.toString()))
-                LOG.warn("Duplicate statistic '" + existing + "' and '" + stat.toString() + "'");
+                LOG.warn("Duplicate statistic '" + existing + "' and '" + stat + "'");
             _statistics.put(stat, value);
         }
     }
@@ -323,7 +323,7 @@ public class AttributeSet implements Serializable
             return Collections.emptyList();
 
         Set<StatisticSpec> aliases = _statisticAliases.get(spec);
-        if (aliases == null || aliases.size() == 0)
+        if (aliases == null || aliases.isEmpty())
             return Collections.emptyList();
 
         //ArrayList<String> strings = new ArrayList<String>(aliases.size());
@@ -345,7 +345,7 @@ public class AttributeSet implements Serializable
 
         GraphSpec existing = _graphNames.put(graph.toString(), graph);
         if (existing != null && !existing.toString().equals(graph.toString()))
-            LOG.warn("Duplicate graph '" + existing + "' and '" + graph.toString() + "'");
+            LOG.warn("Duplicate graph '" + existing + "' and '" + graph + "'");
 
         _graphs.put(graph, data);
     }
@@ -372,7 +372,7 @@ public class AttributeSet implements Serializable
             return Collections.emptyList();
 
         Set<GraphSpec> aliases = _graphAliases.get(spec);
-        if (aliases == null || aliases.size() == 0)
+        if (aliases == null || aliases.isEmpty())
             return Collections.emptyList();
 
         //ArrayList<String> strings = new ArrayList<String>(aliases.size());

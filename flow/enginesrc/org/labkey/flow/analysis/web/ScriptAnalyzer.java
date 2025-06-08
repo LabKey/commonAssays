@@ -318,21 +318,18 @@ public class ScriptAnalyzer
 
     static public void fillGate(GateDef gateDef, Gate gate)
     {
-        if (gate instanceof PolygonGate)
+        if (gate instanceof PolygonGate polygonGate)
         {
-            PolygonGate polygonGate = (PolygonGate) gate;
             PolygonDef polygonDef = gateDef.addNewPolygon();
             fillPolygonGate(polygonDef, polygonGate);
         }
-        else if (gate instanceof IntervalGate)
+        else if (gate instanceof IntervalGate intervalGate)
         {
-            IntervalGate intervalGate = (IntervalGate) gate;
             IntervalDef intervalDef = gateDef.addNewInterval();
             fillIntervalGate(intervalDef, intervalGate);
         }
-        else if (gate instanceof EllipseGate)
+        else if (gate instanceof EllipseGate ellipseGate)
         {
-            EllipseGate ellipseGate = (EllipseGate) gate;
             EllipseDef ellipseDef = gateDef.addNewEllipse();
             fillEllipseGate(ellipseDef, ellipseGate);
         }
@@ -438,7 +435,7 @@ public class ScriptAnalyzer
         {
             for (Analysis analysisTry : workspace.getGroupAnalyses().values())
             {
-                if (analysisTry.getPopulations().size() > 0)
+                if (!analysisTry.getPopulations().isEmpty())
                 {
                     if (analysis != null)
                         throw new RuntimeException("There is more than one group analysis in this workspace.  Please specify which one to use.");
@@ -452,7 +449,7 @@ public class ScriptAnalyzer
                     Analysis analysisTry = workspace.getSampleAnalysis(sample);
                     if (analysisTry == null)
                         continue;
-                    if (analysisTry.getPopulations().size() > 0)
+                    if (!analysisTry.getPopulations().isEmpty())
                     {
                         if (analysis != null)
                             throw new RuntimeException("There is more than one sample analysis in this workspace.  Please specify which one to use.");
@@ -576,7 +573,7 @@ public class ScriptAnalyzer
 
     static public Collection<SubsetSpec> getSubsets(String script, boolean includeAnalysis, boolean includeCompensation, boolean includeBooleans)
     {
-        if (script == null || script.length() == 0)
+        if (script == null || script.isEmpty())
             return Collections.emptyList();
         try
         {

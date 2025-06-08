@@ -41,7 +41,7 @@ public final class LuminexJavaTransformTest extends LuminexTest
     @BeforeClass
     public static void updateAssayDefinition()
     {
-        LuminexJavaTransformTest init = (LuminexJavaTransformTest)getCurrentTest();
+        LuminexJavaTransformTest init = getCurrentTest();
         init.goToTestAssayHome();
         ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
 

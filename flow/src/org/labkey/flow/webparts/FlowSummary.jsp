@@ -221,7 +221,7 @@
         </div>
     <% } %><%-- end if (_compensationMatrixCount > 0) --%>
 
-    <% if (_sampleTypeSamples != null && _sampleTypeSamples.size() > 0) { %>
+    <% if (_sampleTypeSamples != null && !_sampleTypeSamples.isEmpty()) { %>
         <script type="text/javascript" nonce="<%=getScriptNonce()%>">
         Ext.onReady(function () {
             var tip = new LABKEY.ext.CalloutTip({

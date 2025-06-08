@@ -72,7 +72,7 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
     @Override
     public String[] getAnalyteNames()
     {
-        return _analytes.keySet().toArray(new String[_analytes.size()]);
+        return _analytes.keySet().toArray(new String[0]);
     }
 
     @Override

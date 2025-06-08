@@ -211,7 +211,7 @@ abstract public class FlowJoWorkspace extends Workspace
     protected void addSampleAnalysisResults(AttributeSet results, String sampleId)
     {
         final Map<StatisticSpec, Double> statistics = results.getStatistics();
-        if (statistics.size() > 0)
+        if (!statistics.isEmpty())
         {
             // Issue 19117: FlowJo 10.0.6 saves total count as -1
             // If the statistic "count" is unavailable, try to get it from the '$TOT" keyword.
@@ -299,9 +299,8 @@ abstract public class FlowJoWorkspace extends Workspace
         for (int i = 0; i < nl.getLength(); i ++)
         {
             Node node = nl.item(i);
-            if (!(node instanceof Element))
+            if (!(node instanceof Element child))
                 continue;
-            Element child = (Element) node;
             if (child.getTagName().equals(tagName))
                 ret.add(child);
         }
@@ -314,9 +313,8 @@ abstract public class FlowJoWorkspace extends Workspace
         for (int i = 0; i < nl.getLength(); i ++)
         {
             Node node = nl.item(i);
-            if (!(node instanceof Element))
+            if (!(node instanceof Element child))
                 continue;
-            Element child = (Element) node;
             if (child.getTagName().equals(tagName))
                 return child;
         }
@@ -639,8 +637,6 @@ abstract public class FlowJoWorkspace extends Workspace
 
     /**
      * There are some
-     * @param axis
-     * @param values
      */
     protected void scaleValues(String axis, List<Double> values)
     {

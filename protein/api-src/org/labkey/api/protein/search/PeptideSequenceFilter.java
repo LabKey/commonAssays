@@ -34,7 +34,7 @@ public class PeptideSequenceFilter extends SimpleFilter.FilterClause
     private final String _sequenceColumnName;
     private final String _exactSequenceColumnName;
 
-    private boolean _exact = false;
+    private boolean _exact;
 
     public PeptideSequenceFilter(String sequenceList, boolean exact, String sequenceColumnName, String exactSequenceColumnName)
     {

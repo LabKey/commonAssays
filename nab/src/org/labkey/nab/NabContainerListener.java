@@ -17,10 +17,7 @@ package org.labkey.nab;
 
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.security.User;
-
-import java.sql.SQLException;
 
 /**
  * User: adam

@@ -29,8 +29,8 @@ import java.io.PrintWriter;
  */
 public class MS2GZFileRenderer extends GZFileRenderer
 {
-    private String _searchFilename;
-    private String _oldFormatSearchFilename;
+    private final String _searchFilename;
+    private final String _oldFormatSearchFilename;
 
     public MS2GZFileRenderer(MS2Peptide peptide, String extension)
     {

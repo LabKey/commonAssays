@@ -512,7 +512,7 @@ public abstract class FilterFlowReport extends FlowReport
 
         private static CompareType fromDisplayValue(String displayValue)
         {
-            if (displayValue == null || displayValue.length() == 0)
+            if (displayValue == null || displayValue.isEmpty())
                 return null;
 
             for (CompareType ct : CompareType.values())

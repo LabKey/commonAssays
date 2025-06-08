@@ -16,7 +16,6 @@
 package org.labkey.viability;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.BaseSelector;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
@@ -53,7 +52,7 @@ public class ViabilitySpecimenChangeListener implements SpecimenChangeListener
         SqlExecutor executor = new SqlExecutor(resultsTable.getSchema());
 
         final List<Integer> protocolIds = new ArrayList<>();
-        executor.executeWithResults(frag, new BaseSelector.ResultSetHandler<Object>()
+        executor.executeWithResults(frag, new BaseSelector.ResultSetHandler<>()
         {
             @Override
             public Object handle(ResultSet rs, Connection conn) throws SQLException

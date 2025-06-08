@@ -58,6 +58,7 @@ import org.labkey.api.view.HttpView;
 import org.labkey.elispot.plate.AIDPlateReader;
 import org.labkey.elispot.query.ElispotAntigenDomainKind;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -102,10 +103,10 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         AID("AID", AIDPlateReader.class),
         ZEISS("Zeiss", TextPlateReader.class);
 
-        private String _label;
-        private Class _class;
+        private final String _label;
+        private final Class<? extends PlateReader> _class;
 
-        PlateReaderType(String label, Class cls)
+        PlateReaderType(String label, Class<? extends PlateReader> cls)
         {
             _label = label;
             _class = cls;
@@ -120,9 +121,9 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         {
             try
             {
-                return (PlateReader)_class.newInstance();
+                return _class.getDeclaredConstructor().newInstance();
             }
-            catch (InstantiationException | IllegalAccessException x)
+            catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException x)
             {
                 throw new RuntimeException(x);
             }
@@ -238,7 +239,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
     }
     
     @Override
-    public HttpView getDataDescriptionView(AssayRunUploadForm form)
+    public HttpView<?> getDataDescriptionView(AssayRunUploadForm form)
     {
         return HtmlView.of("The data file is the output file from the plate reader that has been selected.");
     }

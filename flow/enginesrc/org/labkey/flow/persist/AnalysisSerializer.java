@@ -18,7 +18,6 @@ package org.labkey.flow.persist;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
@@ -732,7 +731,6 @@ public class AnalysisSerializer
                     foundValueColumn = true;
                 else
                 {
-                    foundExtraColumns = true;
 
                     // assume any other column is a String keyword value
                     col.clazz = String.class;
@@ -1344,7 +1342,7 @@ public class AnalysisSerializer
             results = writeStatisticsGroupedBySamplePopulation(analysis, shortStatNames);
 
         // write the tsv file
-        if (results.second.size() > 0)
+        if (!results.second.isEmpty())
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(STATISTICS_FILENAME);
 
@@ -1470,7 +1468,7 @@ public class AnalysisSerializer
             results = writeKeywordsGroupedBySample(keywords);
 
         // write the tsv file
-        if (results.second.size() > 0)
+        if (!results.second.isEmpty())
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(KEYWORDS_FILENAME);
 
@@ -1518,7 +1516,7 @@ public class AnalysisSerializer
         }
 
         // write the tsv file
-        if (rows.size() > 0)
+        if (!rows.isEmpty())
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(COMPENSATION_FILENAME);
 
@@ -1625,7 +1623,7 @@ public class AnalysisSerializer
         }
 
         // write the graphs.tsv
-        if (rows.size() > 0)
+        if (!rows.isEmpty())
         {
             OutputStream statisticsFile = _rootDir.getOutputStream(GRAPHS_FILENAME);
 

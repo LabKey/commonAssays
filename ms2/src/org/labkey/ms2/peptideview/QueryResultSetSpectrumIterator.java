@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class QueryResultSetSpectrumIterator extends ResultSetSpectrumIterator
 {
-    private SQLFragment _sql;
+    private final SQLFragment _sql;
 
     public QueryResultSetSpectrumIterator(List<MS2Run> runs, SQLFragment sql)
     {

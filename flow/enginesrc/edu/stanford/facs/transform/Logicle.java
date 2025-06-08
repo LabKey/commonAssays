@@ -164,8 +164,6 @@ public class Logicle
 	/**
 	 * Solve f(d;w,b) = 2 * (ln(d) - ln(b)) + w * (d + b) = 0 for d, given b and w
 	 * 
-	 * @param b
-	 * @param w
 	 * @return double root d
 	 */
 	protected static double solve (double b, double w)
@@ -242,10 +240,10 @@ public class Logicle
 	/**
 	 * Computes the slope of the biexponential function at a scale value.
 	 * 
-	 * @param scale
 	 * @return The slope of the biexponential at the scale point
 	 */
-	protected double slope (double scale)
+	@Override
+    protected double slope (double scale)
 	{
 		// reflect negative scale regions
 		if (scale < x1)
@@ -258,7 +256,6 @@ public class Logicle
 	/**
 	 * Computes the value of Taylor series at a point on the scale
 	 * 
-	 * @param scale
 	 * @return value of the biexponential function
 	 */
 	protected double seriesBiexponential (double scale)
@@ -280,7 +277,8 @@ public class Logicle
 	 *          a data value
 	 * @return the double Logicle scale value
 	 */
-	public double scale (double value)
+	@Override
+    public double scale (double value)
 	{
 		// handle true zero separately
 		if (value == 0)
@@ -352,7 +350,8 @@ public class Logicle
 	 *          a double scale value
 	 * @return the double data value
 	 */
-	public double inverse (double scale)
+	@Override
+    public double inverse (double scale)
 	{
 		// reflect negative scale regions
 		boolean negative = scale < x1;
@@ -380,7 +379,8 @@ public class Logicle
 	 * 
 	 * @return a double array of data values
 	 */
-	public double[] axisLabels ()
+	@Override
+    public double[] axisLabels ()
 	{
 		// number of decades in the positive logarithmic region
 		double p = M - 2 * W;

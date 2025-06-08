@@ -63,10 +63,9 @@ public class NotGate extends Gate implements SubsetExpressionGate
         if (equals(other))
             return true;
 
-        if (!(other instanceof NotGate))
+        if (!(other instanceof NotGate notGate))
             return false;
 
-        NotGate notGate = (NotGate) other;
         return _gate.isSimilar(notGate._gate);
     }
 

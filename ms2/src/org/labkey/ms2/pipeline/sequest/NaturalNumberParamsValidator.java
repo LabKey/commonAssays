@@ -39,7 +39,7 @@ public class NaturalNumberParamsValidator implements IParamsValidator
         String parserError = "";
         int i;
         String value = spp.getValue();
-        if (value == null || value.equals(""))
+        if (value == null || value.isEmpty())
         {
             parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a natural number(" + value + ").\n";
             return parserError;

@@ -96,7 +96,7 @@ public class PlateConcentrationPropertyHelper extends SamplePropertyHelper<WellG
     @Override
     public List<String> getSampleNames()
     {
-        return Arrays.asList(_controlNames.toArray(new String[_controlNames.size()]));
+        return Arrays.asList(_controlNames.toArray(new String[0]));
     }
 
     @Override

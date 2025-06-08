@@ -286,7 +286,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 return true;
 
             iSample++;
-            String description = "sample " + iSample + "/" + sampleIDs.size() + ": " + sample.toString();
+            String description = "sample " + iSample + "/" + sampleIDs.size() + ": " + sample;
             addStatus("Preparing " + description);
 
             AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, null);
@@ -369,11 +369,11 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                 }
                 else
                 {
-                    debug("No sample analysis for " + sample.toString());
+                    debug("No sample analysis for " + sample);
                 }
 
                 debug("Analysis results contains " + results.getStatistics().size() + " statistics, " + results.getGraphs().size() + " graphs");
-                if (results.getStatistics().size() == 0)
+                if (results.getStatistics().isEmpty())
                     warn("No sample analysis results for '" + sample + "'.  The sample may be marked as deleted in the FlowJo workspace or has no gating and statistics");
                 else if (results.getStatistics().size() == 1)
                     warn("Analysis results only contains '" + results.getStatistics().keySet().iterator().next() + "' statistic for '" + sample + "'.");
@@ -383,7 +383,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
             }
             else
             {
-                warn("No sample analysis results for '" + sample.toString() + "'.  The sample may be marked as deleted in the FlowJo workspace or has no gating and statistics");
+                warn("No sample analysis results for '" + sample + "'.  The sample may be marked as deleted in the FlowJo workspace or has no gating and statistics");
             }
 
             if (comp != null)

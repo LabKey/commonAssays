@@ -106,9 +106,8 @@ public class FieldSubstitution
         for (Object part : _parts)
         {
             Object value;
-            if (part instanceof FieldKey)
+            if (part instanceof FieldKey field)
             {
-                FieldKey field = (FieldKey) part;
                 ColumnInfo column = columns.get(field);
                 if (column == null)
                 {

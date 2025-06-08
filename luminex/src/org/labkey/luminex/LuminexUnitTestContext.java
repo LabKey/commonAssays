@@ -46,8 +46,8 @@ import java.util.Set;
 
 public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvider> implements LuminexRunContext
 {
-    private List<Titration> _titrations = new ArrayList<>();
-    private List<SinglePointControl> _singlePointControls = new ArrayList<>();
+    private final List<Titration> _titrations = new ArrayList<>();
+    private final List<SinglePointControl> _singlePointControls = new ArrayList<>();
 
     public LuminexUnitTestContext()
     {

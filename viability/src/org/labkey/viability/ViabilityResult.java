@@ -18,12 +18,10 @@ package org.labkey.viability;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 
 import java.util.*;
-import java.sql.SQLException;
 
 /**
  * User: kevink

@@ -41,15 +41,15 @@ public class EditElutionGraphContext
         return _maxHeavyIntensity;
     }
 
-    private float _maxLightIntensity;
-    private float _maxHeavyIntensity;
+    private final float _maxLightIntensity;
+    private final float _maxHeavyIntensity;
 
     public PeptideQuantitation getQuantitation()
     {
         return _quantitation;
     }
 
-    private PeptideQuantitation _quantitation;
+    private final PeptideQuantitation _quantitation;
 
     public EditElutionGraphContext(List<PeptideQuantitation.ScanInfo> lightElutionProfile, List<PeptideQuantitation.ScanInfo> heavyElutionProfile, PeptideQuantitation quant, ActionURL url, MS2Peptide peptide)
     {

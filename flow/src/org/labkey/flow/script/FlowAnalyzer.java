@@ -25,9 +25,7 @@ import org.labkey.flow.data.*;
 
 import java.io.File;
 import java.net.URI;
-import java.sql.SQLException;
 import java.util.*;
-import java.util.List;
 
 public class FlowAnalyzer
 {

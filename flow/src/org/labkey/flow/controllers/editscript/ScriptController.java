@@ -106,7 +106,7 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleViewAction<EditScriptForm>
+    public static class BeginAction extends SimpleViewAction<EditScriptForm>
     {
         @Override
         public ModelAndView getView(EditScriptForm form, BindException errors)
@@ -126,7 +126,7 @@ public class ScriptController extends BaseFlowController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class DownloadAction extends SimpleViewAction<EditScriptForm>
+    public static class DownloadAction extends SimpleViewAction<EditScriptForm>
     {
         @Override
         public ModelAndView getView(EditScriptForm form, BindException errors) throws Exception
@@ -251,7 +251,7 @@ public class ScriptController extends BaseFlowController
 
         protected ActionURL createScript(NewProtocolForm form, BindException errors)
         {
-            if (form.ff_name == null || form.ff_name.length() == 0)
+            if (form.ff_name == null || form.ff_name.isEmpty())
             {
                 errors.reject(ERROR_MSG, "The name cannot be blank.");
                 return null;
@@ -538,7 +538,7 @@ public class ScriptController extends BaseFlowController
             AnalysisDef analysisElement = doc.getScript().getAnalysis();
             if (analysisElement == null)
             {
-                analysisElement = doc.getScript().addNewAnalysis();
+                doc.getScript().addNewAnalysis();
             }
 
             try
@@ -731,7 +731,7 @@ public class ScriptController extends BaseFlowController
                 groupName = PopulationName.fromString(form.selectGroupName);
             WorkspaceCompensation calculator = new WorkspaceCompensation(workspace);
             CompensationCalculation calc = calculator.makeCompensationCalculation(dataMap, groupName, errorslist);
-            if (errorslist.size() > 0)
+            if (!errorslist.isEmpty())
             {
                 for (String error : errorslist)
                 {
@@ -1057,7 +1057,7 @@ public class ScriptController extends BaseFlowController
         if (settingsDef == null)
             settingsDef = doc.getScript().addNewSettings();
 
-        FiltersDef filtersDef = null;
+        FiltersDef filtersDef;
         XmlCursor cur = null;
         try
         {

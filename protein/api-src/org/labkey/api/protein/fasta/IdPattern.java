@@ -77,7 +77,6 @@ public class IdPattern
      * @param following  an optional type name of an identifier that normally follows this type of identifier.  Used
      *                  for example for Swissprot syntax of <accessionId>|<sprot_name>
      *
-     * @throws PatternSyntaxException
      */
     public IdPattern(String type, String match, String replace, String following) throws PatternSyntaxException
     {

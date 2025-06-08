@@ -535,7 +535,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
             int retainedWellExclusions = getRetainedWellExclusions(form);
 
-            long retainedRunExclusionCount = LuminexManager.get().getRetainedRunExclusionCount(form.getReRun().getRowId(), new HashSet<String>(Arrays.asList(analyteNames)));
+            long retainedRunExclusionCount = LuminexManager.get().getRetainedRunExclusionCount(form.getReRun().getRowId(), new HashSet<>(Arrays.asList(analyteNames)));
 
             form.setLostExclusions(exclusionCount - retainedWellExclusions - retainedRunExclusionCount);
             form.setRetainExclusions(true); //Default to true
@@ -676,7 +676,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         {
             names.add(analyte.getName());
         }
-        return names.toArray(new String[names.size()]);
+        return names.toArray(new String[0]);
     }
 
     @Override
@@ -801,7 +801,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 for (final Map.Entry<String, Titration> titrationEntry : form.getParser().getTitrationsWithTypes().entrySet())
                 {
                     String propertyName;
-                    Boolean value;
+                    boolean value;
 
                     // add the name/value pairs for the titration well role definition section
                     if (!titrationEntry.getValue().isUnknown())
@@ -846,7 +846,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 {
                     // add the name/value pairs for the singlePointControl well role definition section
                     String propertyName = getSinglePointControlCheckboxName(singlePointControl);
-                    Boolean value = getViewContext().getRequest().getParameter(propertyName).equals("true");
+                    boolean value = getViewContext().getRequest().getParameter(propertyName).equals("true");
                     defaultWellRoleValues.put(propertyName, Boolean.toString(value));
                 }
 

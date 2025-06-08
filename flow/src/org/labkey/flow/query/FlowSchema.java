@@ -1001,7 +1001,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
             SQLFragment where = new SQLFragment();
             SQLFragment filter = _filter.getSQLFragment(getSqlDialect());
             String and = " WHERE ";
-            if (filter.getFilterText().length() > 0)
+            if (!filter.getFilterText().isEmpty())
             {
                 where.append(" ").append(filter);
                 and = " AND ";
@@ -1275,7 +1275,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         @Override
         public FieldKey getContainerFieldKey()
         {
-            return ((AbstractTableInfo)_expData).getContainerFieldKey();
+            return _expData.getContainerFieldKey();
         }
 
         @Override
@@ -1940,7 +1940,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
     static public int getIntParam(HttpServletRequest request, FlowParam param)
     {
         String str = request.getParameter(param.toString());
-        if (str == null || str.length() == 0)
+        if (str == null || str.isEmpty())
             return 0;
         try
         {
@@ -2101,7 +2101,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
             filter.addCondition(bgMap.get(f.getField()), value, f.getOp());
         }
         SQLFragment bgSQL = Table.getSelectSQL(bg, bgFields, null, null);
-        if (filter.getClauses().size() > 0)
+        if (!filter.getClauses().isEmpty())
         {
             Map<FieldKey, ColumnInfo> columnMap = Table.createColumnMap(bg, bgFields);
             SQLFragment filterFrag = filter.getSQLFragment(flow.getSqlDialect(), "_filter", columnMap);

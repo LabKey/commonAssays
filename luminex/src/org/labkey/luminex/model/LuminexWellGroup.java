@@ -37,7 +37,7 @@ import java.util.Set;
  */
 public class LuminexWellGroup implements WellGroup
 {
-    private List<LuminexWell> _wells;
+    private final List<LuminexWell> _wells;
     private boolean _containsSummaryData = false;
     private boolean _containsRawData = false;
 

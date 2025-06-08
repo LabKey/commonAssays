@@ -44,7 +44,7 @@ public class MS2ImportPipelineJob extends PipelineJob
 {
     protected final File _file;
     private final String _description;
-    private MS2Importer.RunInfo _runInfo;
+    private final MS2Importer.RunInfo _runInfo;
 
     @JsonCreator
     protected MS2ImportPipelineJob(

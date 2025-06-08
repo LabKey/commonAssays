@@ -1117,11 +1117,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = -2.08995 + (29934.1 + 2.08995) / ((1 + (Conc / 2.49287)^-4.99651))^0.215266");
             assertNotNull("Couldn't parse standard curve", params);
-            assertEquals(params.asymmetry, 0.215266, DELTA);
-            assertEquals(params.min, -2.08995, DELTA);
-            assertEquals(params.max, 29936.18995, DELTA);
-            assertEquals(params.inflection, 2.49287, DELTA);
-            assertEquals(params.slope, -4.99651, DELTA);
+            assertEquals(0.215266, params.asymmetry, DELTA);
+            assertEquals(-2.08995, params.min, DELTA);
+            assertEquals(29936.18995, params.max, DELTA);
+            assertEquals(2.49287, params.inflection, DELTA);
+            assertEquals(-4.99651, params.slope, DELTA);
         }
 
         @Test
@@ -1136,11 +1136,11 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         {
             FitParameters params = new LuminexDataHandler().parseBioPlexStdCurve("FI = -0.723451 + (2.48266E+006 + 0.723451) / ((1 + (Conc / 21.932)^-0.192152))^10");
             assertNotNull("Couldn't parse standard curve", params);
-            assertEquals(params.asymmetry, 10.0, DELTA);
-            assertEquals(params.min, -0.723451, DELTA);
-            assertEquals(params.max, 2482660.723451, DELTA);
-            assertEquals(params.inflection, 21.932, DELTA);
-            assertEquals(params.slope, -0.192152, DELTA);
+            assertEquals(10.0, params.asymmetry, DELTA);
+            assertEquals(-0.723451, params.min, DELTA);
+            assertEquals(2482660.723451, params.max, DELTA);
+            assertEquals(21.932, params.inflection, DELTA);
+            assertEquals(-0.192152, params.slope, DELTA);
         }
 
         @Test

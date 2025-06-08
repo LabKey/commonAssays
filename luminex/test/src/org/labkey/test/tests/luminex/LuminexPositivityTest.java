@@ -66,7 +66,7 @@ public final class LuminexPositivityTest extends LuminexTest
         PerlHelper perlHelper = new PerlHelper(getCurrentTest());
         perlHelper.ensurePerlConfig();
 
-        LuminexTest init = (LuminexTest)getCurrentTest();
+        LuminexTest init = getCurrentTest();
         init.goToTestAssayHome();
         ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
 

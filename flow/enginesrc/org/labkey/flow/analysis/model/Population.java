@@ -16,7 +16,6 @@
 
 package org.labkey.flow.analysis.model;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 

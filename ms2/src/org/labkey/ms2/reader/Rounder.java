@@ -31,9 +31,6 @@ public class Rounder
     /**
      * Round the double <n> to <places> decimal places.  If <places> is negative or greater than 9,
      * round to 9 decimal places
-     * @param n
-     * @param places
-     * @return
      */
     public static double round(double n, int places)
     {

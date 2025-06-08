@@ -88,7 +88,7 @@ abstract public class FlowReport extends AbstractReport
         if (pv != null)
             reportName = String.valueOf(pv.getValue());
 
-        if (reportName == null || reportName.length() == 0)
+        if (reportName == null || reportName.isEmpty())
         {
             errors.rejectValue(ERROR_MSG, "Report name is required");
             return;
@@ -201,7 +201,6 @@ abstract public class FlowReport extends AbstractReport
 
     /**
      * Delete all previous saved results in the Container for all FlowTableType Domains.
-     * @param container
      */
     public void deleteSavedResults(Container container)
     {

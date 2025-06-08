@@ -47,7 +47,7 @@ public class ViabilityController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleRedirectAction
+    public static class BeginAction extends SimpleRedirectAction<Object>
     {
         @Override
         public ActionURL getRedirectURL(Object o)
@@ -57,7 +57,7 @@ public class ViabilityController extends SpringActionController
     }
 
     @RequiresSiteAdmin
-    public class RecalculateSpecimenAggregatesAction extends ConfirmAction<ProtocolIdForm>
+    public static class RecalculateSpecimenAggregatesAction extends ConfirmAction<ProtocolIdForm>
     {
         @Override
         public ModelAndView getConfirmView(ProtocolIdForm protocolIdForm, BindException errors)

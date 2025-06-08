@@ -32,7 +32,7 @@
 %>
 
 <%
-    JspView<UploadAnnotationsForm> me = (JspView<UploadAnnotationsForm>) HttpView.currentView();
+    JspView<UploadAnnotationsForm> me = HttpView.currentView();
     UploadAnnotationsForm bean = me.getModelBean();
 %>
 

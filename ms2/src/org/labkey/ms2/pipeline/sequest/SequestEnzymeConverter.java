@@ -28,10 +28,9 @@ public class SequestEnzymeConverter implements IInputXMLConverter
     public String convert(Param param, String commentPrefix)
     {
         SequestParam sequestParam = (SequestParam) param;
-        StringBuilder sb = new StringBuilder();
-        sb.append(sequestParam.getComment());
-        sb.append(sequestParam.getValue());
-        return sb.toString();
+        String sb = sequestParam.getComment() +
+                sequestParam.getValue();
+        return sb;
     }
 
 }

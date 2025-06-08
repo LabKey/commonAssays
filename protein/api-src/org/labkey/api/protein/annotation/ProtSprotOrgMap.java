@@ -134,7 +134,7 @@ public class ProtSprotOrgMap
             }
             catch (IOException e)
             {
-                throw new UnexpectedException(e, "Problem loading ProtSprotOrgMap on line " + (orgLineCount + 1));
+                throw UnexpectedException.wrap(e, "Problem loading ProtSprotOrgMap on line " + (orgLineCount + 1));
             }
 
             _log.info("Finished reloading ProtSprotOrgMap in " + (System.currentTimeMillis() - start)/1000.0 + " seconds");

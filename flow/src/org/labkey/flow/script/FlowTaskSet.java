@@ -21,8 +21,8 @@ import java.util.Arrays;
 
 public class FlowTaskSet
 {
-    private LinkedList<Runnable> _pendingTasks;
-    private LinkedList<Runnable> _runningTasks;
+    private final LinkedList<Runnable> _pendingTasks;
+    private final LinkedList<Runnable> _runningTasks;
 
     public FlowTaskSet(Runnable[] tasks)
     {

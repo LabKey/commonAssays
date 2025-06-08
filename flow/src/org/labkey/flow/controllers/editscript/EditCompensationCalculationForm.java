@@ -20,7 +20,6 @@ import org.fhcrc.cpas.flow.script.xml.ChannelDef;
 import org.fhcrc.cpas.flow.script.xml.ChannelSubsetDef;
 import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
 import org.fhcrc.cpas.flow.script.xml.CriteriaDef;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SessionHelper;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.flow.analysis.model.Workspace;

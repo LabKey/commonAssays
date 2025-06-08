@@ -532,7 +532,7 @@ public class CompareQuery extends SQLFragment
             errors.addError(new LabKeyError("You must select at least one run."));
             return;
         }
-        if (getGridColumns().size() == 0)
+        if (getGridColumns().isEmpty())
         {
             errors.addError(new LabKeyError("You must choose at least one comparison column to display in the grid."));
             return;

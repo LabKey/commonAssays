@@ -18,9 +18,7 @@ package org.labkey.flow.script;
 
 import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.CompensationCalculation;
-import org.labkey.flow.analysis.web.CompensationResult;
 import org.labkey.flow.analysis.web.*;
-import org.labkey.flow.analysis.web.CompSign;
 import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
 import org.fhcrc.cpas.flow.script.xml.SettingsDef;
 import org.labkey.flow.data.*;
@@ -75,7 +73,7 @@ public class CompensationCalculationHandler extends BaseHandler
                 addDataLSID(app.getInputRefs(), dbtComp.getAbout(), InputRole.CompensationMatrix);
             }
             List<FCSAnalyzer.Result> wellResults = result.getResults();
-            if (wellResults.size() != 0)
+            if (!wellResults.isEmpty())
             {
                 DataBaseType dbtWell = duplicateWell(app, well, FlowDataType.CompensationControl);
                 String name = result.getChannelName();

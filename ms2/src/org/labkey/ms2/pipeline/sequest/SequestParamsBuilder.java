@@ -62,7 +62,7 @@ public abstract class SequestParamsBuilder
     protected HashMap<String, String> supportedEnzymes = new HashMap<>();
     protected final AbstractSequestParams _params;
     protected final AbstractSequestParams.Variant _variant;
-    private List<File> _databaseFiles;
+    private final List<File> _databaseFiles;
 
     public SequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot)
     {
@@ -154,7 +154,7 @@ public abstract class SequestParamsBuilder
         {
             databaseFiles = new ArrayList<>();
             String value = sequestInputParams.get("pipeline, database");
-            if (value == null || value.equals(""))
+            if (value == null || value.isEmpty())
             {
                 return Collections.singletonList("pipeline, database; No value entered for database.");
             }
@@ -222,7 +222,7 @@ public abstract class SequestParamsBuilder
             return Collections.singletonList("Sequest does not support asymmetric parent error ranges (minus=" +
                 minusValueString + " plus=" + plusValueString + ").");
         }
-        if (plusValueString.equals("") && minusValueString.equals(""))
+        if (plusValueString.isEmpty() && minusValueString.isEmpty())
         {
             return Collections.singletonList("No values were entered for spectrum, parent monoisotopic mass error minus/plus.");
         }
@@ -304,22 +304,21 @@ public abstract class SequestParamsBuilder
             return errors;
         }
 
-        StringBuilder sb = new StringBuilder().
-            append(neutralLossA).append(" ").
-            append(neutralLossB).append(" ").
-            append(neutralLossY).append(" ").
-            append(ionA).append(" ").
-            append(ionB).append(" ").
-            append(ionC).append(" ").
-            append(ionD).append(" ").
-            append(ionV).append(" ").
-            append(ionW).append(" ").
-            append(ionX).append(" ").
-            append(ionY).append(" ").
-            append(ionZ);
+        String sb = neutralLossA + " " +
+                neutralLossB + " " +
+                neutralLossY + " " +
+                ionA + " " +
+                ionB + " " +
+                ionC + " " +
+                ionD + " " +
+                ionV + " " +
+                ionW + " " +
+                ionX + " " +
+                ionY + " " +
+                ionZ;
 
         Param pepTol = _params.getParam("ion_series");
-        pepTol.setValue(sb.toString());
+        pepTol.setValue(sb);
         return Collections.emptyList();
     }
 
@@ -329,7 +328,7 @@ public abstract class SequestParamsBuilder
     {
         String inputXmlEnzyme = sequestInputParams.get(ParameterNames.ENZYME);
         if (inputXmlEnzyme == null) return Collections.emptyList();
-        if (inputXmlEnzyme.equals(""))
+        if (inputXmlEnzyme.isEmpty())
         {
             return Collections.singletonList(ParameterNames.ENZYME + " did not contain a value.");
         }
@@ -350,7 +349,7 @@ public abstract class SequestParamsBuilder
         try
         {
             String supportedEnzyme = getSupportedEnzyme(enzyme);
-            if(supportedEnzyme.equals("")) return Collections.singletonList(inputXmlEnzyme + " is not a pipeline supported enzyme.");
+            if(supportedEnzyme.isEmpty()) return Collections.singletonList(inputXmlEnzyme + " is not a pipeline supported enzyme.");
         }
         catch(SequestParamsException e)
         {
@@ -492,7 +491,7 @@ public abstract class SequestParamsBuilder
 
         //write combined enzyme definition
         StringBuilder returnString = new StringBuilder();
-        if(block1.size() == 0)
+        if(block1.isEmpty())
         {
           returnString.append("[X]|");
         }
@@ -507,7 +506,7 @@ public abstract class SequestParamsBuilder
             returnString.append('|');
         }
 
-        if(block2.size() == 0)
+        if(block2.isEmpty())
         {
           returnString.append("[X]");
         }
@@ -537,7 +536,7 @@ public abstract class SequestParamsBuilder
         defaultMods.add('Y');
 
         String mods = sequestInputParams.get(ParameterNames.DYNAMIC_MOD);
-        if (mods == null || mods.equals("")) return Collections.emptyList();
+        if (mods == null || mods.isEmpty()) return Collections.emptyList();
         mods = removeWhiteSpace(mods);
         ArrayList<Character> residues = new ArrayList<>();
         ArrayList<String> masses = new ArrayList<>();
@@ -614,7 +613,7 @@ public abstract class SequestParamsBuilder
 
     protected List<String> parseMods(String mods, List<Character> residues, List<String> masses)
     {
-        if (mods == null || mods.equals("")) return Collections.emptyList();
+        if (mods == null || mods.isEmpty()) return Collections.emptyList();
 
         StringTokenizer st = new StringTokenizer(mods, ",");
         while (st.hasMoreTokens())
@@ -625,7 +624,7 @@ public abstract class SequestParamsBuilder
             {
                 return Collections.singletonList("modification mass contained an invalid value(" + mods + ").");
             }
-            Character residue = Character.toUpperCase(token.charAt(token.length() - 1));
+            char residue = Character.toUpperCase(token.charAt(token.length() - 1));
             if (!isValidResidue(residue))
             {
                 return Collections.singletonList("modification mass contained an invalid residue(" + residue + ").");
@@ -675,7 +674,7 @@ public abstract class SequestParamsBuilder
         {
             return Collections.emptyList();
         }
-        if (massType.equals(""))
+        if (massType.isEmpty())
         {
             return Collections.singletonList("\"" + value.getKey() + "\" contains no value.");
         }
@@ -698,11 +697,11 @@ public abstract class SequestParamsBuilder
     List<String> initMassUnits()
     {
         String pepMassUnit = sequestInputParams.get("spectrum, parent mass error units");
-        if(pepMassUnit == null || pepMassUnit.equals(""))
+        if(pepMassUnit == null || pepMassUnit.isEmpty())
         {
             //Check deprecated param
             pepMassUnit = sequestInputParams.get("spectrum, parent monoisotopic mass error units");
-            if(pepMassUnit == null || pepMassUnit.equals(""))
+            if(pepMassUnit == null || pepMassUnit.isEmpty())
                 return Collections.emptyList();
         }
         if(pepMassUnit.equalsIgnoreCase("daltons") || pepMassUnit.equalsIgnoreCase("amu"))
@@ -768,7 +767,7 @@ public abstract class SequestParamsBuilder
             String defaultValue = passThrough.getValue();
             passThrough.setValue(value);
             String errorString = passThrough.validate();
-            if(errorString.length() > 0 )
+            if(!errorString.isEmpty())
             {
                 passThrough.setValue(defaultValue);
                 parserError.add(errorString);
@@ -802,7 +801,7 @@ public abstract class SequestParamsBuilder
         {
             return;
         }
-        if (iPValue.equals(""))
+        if (iPValue.isEmpty())
         {
             errors.add(xmlLabel + " did not contain a value.");
             return;
@@ -927,7 +926,7 @@ public abstract class SequestParamsBuilder
                 if (matches &&
                     lookUpBlocks.length() == blockSites.length())
                 {
-                    if (blockSites.length() == 0) break;
+                    if (blockSites.isEmpty()) break;
                     for (int i = 0; i < blockSites.length(); i++)
                     {
                         if (lookUpBlocks.indexOf(blockSites.charAt(i)) < 0)
@@ -1016,7 +1015,7 @@ public abstract class SequestParamsBuilder
         @Override
         public int hashCode()
         {
-            int result = (int) res;
+            int result = res;
             result = 31 * result + weight.hashCode();
             return result;
         }

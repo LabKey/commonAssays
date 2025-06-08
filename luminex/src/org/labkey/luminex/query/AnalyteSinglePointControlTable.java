@@ -52,7 +52,6 @@ import org.labkey.luminex.model.AnalyteSinglePointControl;
 import org.labkey.luminex.model.GuideSet;
 import org.labkey.luminex.model.SinglePointControl;
 
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -193,7 +192,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
     public QueryUpdateService getUpdateService()
     {
         // Pair<Integer, Integer> is analyteid/singlePointControlId combo
-        return new AbstractLuminexControlUpdateService<AnalyteSinglePointControl>(this, AnalyteSinglePointControl.class)
+        return new AbstractLuminexControlUpdateService<>(this, AnalyteSinglePointControl.class)
         {
             @Override
             protected AnalyteSinglePointControl createNewBean()

@@ -83,7 +83,7 @@ public class FeatureAnnotationSetController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleRedirectAction
+    public static class BeginAction extends SimpleRedirectAction<Object>
     {
         @Override
         public URLHelper getRedirectURL(Object o)
@@ -93,7 +93,7 @@ public class FeatureAnnotationSetController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class ManageAction extends SimpleViewAction
+    public static class ManageAction extends SimpleViewAction<Object>
     {
         @Override
         public ModelAndView getView(Object o, BindException errors)
@@ -113,13 +113,12 @@ public class FeatureAnnotationSetController extends SpringActionController
     }
 
     @RequiresPermission(DeletePermission.class)
-    public class DeleteAction extends FormViewAction<DeleteFeatureAnnotationSetForm>
+    public static class DeleteAction extends FormViewAction<DeleteFeatureAnnotationSetForm>
     {
         @Override
         public boolean handlePost(DeleteFeatureAnnotationSetForm form, BindException errors)
         {
             DbSchema schema = MicroarrayUserSchema.getSchema();
-            DbScope scope = schema.getScope();
 
             int rowsDeleted = MicroarrayManager.get().deleteFeatureAnnotationSet(form.getIds(false));
 
@@ -157,7 +156,7 @@ public class FeatureAnnotationSetController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
-    public class UploadAction extends FormViewAction<FeatureAnnotationSetForm>
+    public static class UploadAction extends FormViewAction<FeatureAnnotationSetForm>
     {
         @Override
         public void validateCommand(FeatureAnnotationSetForm form, Errors errors)
@@ -272,7 +271,7 @@ public class FeatureAnnotationSetController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class DetailsAction extends SimpleViewAction<FeatureAnnotationSetForm>
+    public static class DetailsAction extends SimpleViewAction<FeatureAnnotationSetForm>
     {
         @Override
         public ModelAndView getView(FeatureAnnotationSetForm form, BindException errors)

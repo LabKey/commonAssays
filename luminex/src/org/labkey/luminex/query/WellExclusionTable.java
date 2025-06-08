@@ -49,14 +49,11 @@ import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayRunDatabaseContext;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexManager;
 import org.labkey.luminex.LuminexRunCreator;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -163,7 +160,7 @@ public class WellExclusionTable extends AbstractExclusionTable
     {
         return new ExclusionUpdateService(this, getRealTable(), LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "WellExclusionId")
         {
-            private Set<ExpRun> _runsToRefresh = new HashSet<>();
+            private final Set<ExpRun> _runsToRefresh = new HashSet<>();
 
             private Integer getDataId(Map<String, Object> rowMap) throws QueryUpdateServiceException
             {

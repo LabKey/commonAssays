@@ -26,7 +26,6 @@ abstract public class SubsetExpression implements SubsetPart
      * Parses a string into a SubsetSpec.
      * 
      * @param subsetAndExpression The subset and expression (eg., "X/Y/(A&B)" or "(A&B)")
-     * @return
      */
     static public SubsetSpec subset(String subsetAndExpression)
     {
@@ -38,7 +37,6 @@ abstract public class SubsetExpression implements SubsetPart
      * Parses a string into a SubsetExpression.
      *
      * @param expression The expression portion of a subset (eg., "(A&B)")
-     * @return
      */
     static public SubsetExpression expression(String expression)
     {
@@ -290,10 +288,9 @@ abstract public class SubsetExpression implements SubsetPart
             {
                 Object term = terms[i];
                 // UNDONE: allow populations below boolean expressions
-                if (term instanceof SubsetExpression)
+                if (term instanceof SubsetExpression expr)
                 {
                     assert i == terms.length - 1;
-                    SubsetExpression expr = (SubsetExpression)term;
                     BitSet bits = expr.apply(subset, populationSet);
                     ret.and(bits);
                     return ret;

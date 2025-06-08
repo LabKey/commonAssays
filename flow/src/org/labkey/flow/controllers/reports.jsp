@@ -70,7 +70,7 @@ table.reports td {
 <%
     for (List<FlowReport> rs : reportsByType.values())
     {
-        if (rs.size() == 0)
+        if (rs.isEmpty())
             continue;
 
         %>

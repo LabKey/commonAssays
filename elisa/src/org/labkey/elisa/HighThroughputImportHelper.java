@@ -33,7 +33,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
 {
     private static final Logger LOG = LogManager.getLogger(HighThroughputImportHelper.class);
 
-    private Map<String, AnalytePlate> _plateMap = new HashMap<>();
+    private final Map<String, AnalytePlate> _plateMap = new HashMap<>();
     private Plate _plateTemplate;
 
     public HighThroughputImportHelper(AssayUploadXarContext context, PlateBasedAssayProvider provider, ExpProtocol protocol, File dataFile) throws ExperimentException
@@ -77,7 +77,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
                     }
                 }
                 else
-                    LOG.warn("No well location and plate name for row : " + row.toString());
+                    LOG.warn("No well location and plate name for row : " + row);
             }
         }
         catch (IOException e)
@@ -171,12 +171,12 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
 
     private static class AnalytePlate
     {
-        private Map<Integer, Map<String, Double>> _stdConcentrations = new HashMap<>();
-        private Map<Integer, double[][]> _dataMap = new HashMap<>();
-        private String _plateName;
-        private Plate _plateTemplate;
+        private final Map<Integer, Map<String, Double>> _stdConcentrations = new HashMap<>();
+        private final Map<Integer, double[][]> _dataMap = new HashMap<>();
+        private final String _plateName;
+        private final Plate _plateTemplate;
         // contains the mapping of (well/analyte) to extra row data to merge during data import
-        private Map<String, Map<String, Object>> _extraWellData = new HashMap<>();
+        private final Map<String, Map<String, Object>> _extraWellData = new HashMap<>();
         public static final String CONTROL_ID_COLUMN = "Sample";
 
         public AnalytePlate(String plateName, Plate plateTemplate)

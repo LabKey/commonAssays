@@ -111,7 +111,7 @@ public class FlowProtocolStep implements Serializable
     static public FlowProtocolStep fromRequest(HttpServletRequest request)
     {
         String strActionSequence = request.getParameter("actionSequence");
-        if (strActionSequence == null || strActionSequence.length() == 0)
+        if (strActionSequence == null || strActionSequence.isEmpty())
             return null;
         try
         {

@@ -142,9 +142,8 @@ public class NabManager extends AbstractNabManager
             if (dataset.isPublishedData() && dataset.canRead(user))
             {
                 ExpObject source = dataset.resolvePublishSource();
-                if (source instanceof ExpProtocol)
+                if (source instanceof ExpProtocol protocol)
                 {
-                    ExpProtocol protocol = (ExpProtocol)source;
                     if (AssayService.get().getProvider(protocol) instanceof NabAssayProvider)
                         dataTables.put(dataset.getTableInfo(user), protocol);
                 }
@@ -164,7 +163,7 @@ public class NabManager extends AbstractNabManager
             TableInfo dataTable = entry.getKey();
             final ExpProtocol protocol = entry.getValue();
             TableSelector selector = new TableSelector(dataTable, PageFlowUtil.set("RowId", "Lsid"), filter, null);
-            selector.forEach(rs -> readableObjectIds.put(new Pair<Integer, String>(rs.getInt("RowId"), rs.getString("Lsid")), protocol));
+            selector.forEach(rs -> readableObjectIds.put(new Pair<>(rs.getInt("RowId"), rs.getString("Lsid")), protocol));
         }
         return readableObjectIds;
     }

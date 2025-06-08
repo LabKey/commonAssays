@@ -145,7 +145,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
             FlowScript[] protocols = FlowScript.getScripts(getContainer());
             for (FlowScript analysisScript : protocols)
             {
-                if (getAvailableSteps(analysisScript).size() > 0)
+                if (!getAvailableSteps(analysisScript).isEmpty())
                 {
                     ret.add(analysisScript);
                 }
@@ -174,7 +174,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
             }
         }
         Collection<FlowScript> availableProtocols = Arrays.asList(FlowScript.getScripts(getContainer()));
-        if (availableProtocols.size() == 0)
+        if (availableProtocols.isEmpty())
         {
             errors.reject(SpringActionController.ERROR_MSG, "There are no analysis or compensation protocols in this folder.");
         }

@@ -319,17 +319,17 @@ public class DataFrame
     /** Represents a parameter in the FCS file. */
     public static class Field
     {
-        private String _name;
-        private String _baseName;
+        private final String _name;
+        private final String _baseName;
         private String _prefix;
         private String _suffix;
         private Set<String> _aliases;
         private String _description;
         /** The parameter index is 0-based. */
-        private int _index;
-        private int _origIndex;
+        private final int _index;
+        private final int _origIndex;
 
-        private int _range;
+        private final int _range;
         /** Function to transform raw data in FCS file. */
         private ScalingFunction _scalingFunction;
 

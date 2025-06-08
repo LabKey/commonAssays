@@ -27,7 +27,6 @@ import org.jfree.data.contour.ContourDataset;
 import org.jfree.data.Range;
 
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.Point2D;
 
 import org.labkey.flow.analysis.model.Polygon;
 import java.awt.*;
@@ -235,14 +234,14 @@ public class DensityPlot extends ContourPlot
         assert contourData instanceof DensityDataset;
         DensityDataset data = (DensityDataset) contourData;
         // setup for collecting optional entity info...
-        Rectangle2D.Double entityArea = null;
+        Rectangle2D.Double entityArea;
         EntityCollection entities = null;
         if (info != null)
         {
             entities = info.getOwner().getEntityCollection();
         }
 
-        Rectangle2D.Double rect = null;
+        Rectangle2D.Double rect;
         rect = new Rectangle2D.Double();
 
         //turn off anti-aliasing when filling rectangles
@@ -255,7 +254,7 @@ public class DensityPlot extends ContourPlot
         boolean horizInverted = false;
         if (horizontalAxis instanceof NumberAxis)
         {
-            horizInverted = horizontalAxis.isInverted();
+            horizontalAxis.isInverted();
         }
         double[] arrX = data.getPossibleXValues();
         double[] arrY = data.getPossibleYValues();

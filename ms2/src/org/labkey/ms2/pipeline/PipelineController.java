@@ -253,7 +253,7 @@ public class PipelineController extends SpringActionController
     }
 
     @RequiresPermission(AdminPermission.class)
-    public class SetTandemDefaultsAction extends SetDefaultsActionBase
+    public static class SetTandemDefaultsAction extends SetDefaultsActionBase
     {
         @Override
         public String getProviderName()
@@ -281,7 +281,7 @@ public class PipelineController extends SpringActionController
     }
 
     @RequiresPermission(AdminPermission.class)
-    public class SetMascotDefaultsAction extends SetDefaultsActionBase
+    public static class SetMascotDefaultsAction extends SetDefaultsActionBase
     {
         @Override
         public String getProviderName()
@@ -309,7 +309,7 @@ public class PipelineController extends SpringActionController
     }
 
     @RequiresPermission(AdminPermission.class)
-    public class SetSequestDefaultsAction extends SetDefaultsActionBase
+    public static class SetSequestDefaultsAction extends SetDefaultsActionBase
     {
         @Override
         public String getProviderName()
@@ -337,7 +337,7 @@ public class PipelineController extends SpringActionController
     }
 
     @RequiresPermission(AdminPermission.class)
-    public class SetCometDefaultsAction extends SetDefaultsActionBase
+    public static class SetCometDefaultsAction extends SetDefaultsActionBase
     {
         @Override
         public String getProviderName()

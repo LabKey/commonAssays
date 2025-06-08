@@ -45,7 +45,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
     @BeforeClass
     public static void updateAssayDefinition()
     {
-        LuminexExclusionRetentionTest init = (LuminexExclusionRetentionTest)getCurrentTest();
+        LuminexExclusionRetentionTest init = getCurrentTest();
         init.goToTestAssayHome();
         ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);

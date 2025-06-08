@@ -269,7 +269,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     // check file data: all rows must have PoolID
     public static void validateData(List<Map<String, Object>> rows, boolean requireSpecimens) throws ExperimentException
     {
-        if (rows == null || rows.size() == 0)
+        if (rows == null || rows.isEmpty())
             throw new ExperimentException("No rows found.");
 
         for (ListIterator<Map<String, Object>> it = rows.listIterator(); it.hasNext();)

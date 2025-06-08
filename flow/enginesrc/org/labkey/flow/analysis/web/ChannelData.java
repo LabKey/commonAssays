@@ -23,7 +23,7 @@ import java.util.List;
 
 class ChannelData
 {
-    static private SubsetSpec compSubset = SubsetSpec.fromEscapedString("comp");
+    static private final SubsetSpec compSubset = SubsetSpec.fromEscapedString("comp");
 
     // Returns the SSC-H field, or whatever field is appropriate for histogram data
     /*public DataFrame.Field findHistogramField(DataFrame data)
@@ -123,9 +123,8 @@ class ChannelData
         List<Polygon> polys = new ArrayList();
         if (!compensated)
         {
-            if (_populationSet instanceof Population)
+            if (_populationSet instanceof Population positivePop)
             {
-                Population positivePop = (Population) _populationSet;
                 for (Gate gate : positivePop.getGates())
                 {
                     gate.getPolygons(polys, getChannelName(), getChannelName());
@@ -133,7 +132,7 @@ class ChannelData
             }
         }
         List<Polygon> displayPolys = new ArrayList();
-        if (polys.size() > 0)
+        if (!polys.isEmpty())
         {
             double xMin = Float.MAX_VALUE;
             double xMax = -Float.MAX_VALUE;

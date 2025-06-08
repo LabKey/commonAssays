@@ -52,7 +52,7 @@ public class StatusJsonHelper
                 break;
             }
          }
-         if(stringBuilder.length() > 0)
+         if(!stringBuilder.isEmpty())
          {
              ObjectMapper mapper = JsonUtil.createDefaultMapper();
              mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);

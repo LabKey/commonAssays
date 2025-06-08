@@ -31,7 +31,7 @@ public class Out2XmlConverter implements IInputXMLConverter
     public String convert(Param out2XmlParam, String commentPrefix)
     {
         String value = out2XmlParam.getValue();
-        if (value.equals("")) return "";
+        if (value.isEmpty()) return "";
         if (out2XmlParam.getValidator() instanceof BooleanParamsValidator)
         {
             Boolean b = (Boolean) ConvertUtils.convert(value, Boolean.class);

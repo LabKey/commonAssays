@@ -55,7 +55,7 @@
     else
     {
         Map<String, String> sampleAnalyses = this.getSampleAnalysisNames();
-        if (sampleAnalyses.size() > 0)
+        if (!sampleAnalyses.isEmpty())
         {
     %>
     <p>Which sample do you want to use?<br>

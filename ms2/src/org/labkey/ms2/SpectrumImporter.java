@@ -40,17 +40,17 @@ import java.util.Set;
  */
 public class SpectrumImporter
 {
-    private static Logger _systemLog = LogManager.getLogger(SpectrumImporter.class);
+    private static final Logger _systemLog = LogManager.getLogger(SpectrumImporter.class);
     private static final int SQL_BATCH_SIZE = 100;
 
-    private Logger _log = null;
-    private MS2Importer.MS2Progress _progress = null;
-    private Set _scans = null;
-    private int _fractionId;
+    private Logger _log;
+    private MS2Importer.MS2Progress _progress;
+    private Set _scans;
+    private final int _fractionId;
     private SimpleScanIterator _scanIterator;
     private File _file = null;
-    private boolean _shouldImportSpectra;
-    private boolean _shouldImportRetentionTime;
+    private final boolean _shouldImportSpectra;
+    private final boolean _shouldImportRetentionTime;
 
 
     protected SpectrumImporter(String gzFileName, String dtaFileNamePrefix, File mzXmlFile, Set scans, MS2Importer.MS2Progress progress, int fractionId, Logger log, boolean shouldImportSpectra, boolean shouldImportRetentionTime)
@@ -92,7 +92,7 @@ public class SpectrumImporter
         }
         catch (IOException x)
         {
-            _log.warn("Spectra were not imported: " + x.toString());  // Note: x.getMessage() has just the file name
+            _log.warn("Spectra were not imported: " + x);  // Note: x.getMessage() has just the file name
         }
         catch (XMLStreamException x)
         {
@@ -206,12 +206,7 @@ public class SpectrumImporter
                 _log.warn("Could not find spectra for " + _scans.size() + " scans.");
             }
         }
-        catch (IOException e)
-        {
-            _log.error(e);
-            _systemLog.error(e);
-        }
-        catch (SQLException e)
+        catch (IOException | SQLException e)
         {
             _log.error(e);
             _systemLog.error(e);

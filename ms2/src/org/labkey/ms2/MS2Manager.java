@@ -711,7 +711,7 @@ public class MS2Manager
 
     public static void renameRun(int runId, String newDescription)
     {
-        if (newDescription == null || newDescription.length() == 0)
+        if (newDescription == null || newDescription.isEmpty())
             return;
 
         new SqlExecutor(getSchema()).execute("UPDATE " + getTableInfoRuns() + " SET Description=? WHERE Run = ?", newDescription, runId);
@@ -911,7 +911,7 @@ public class MS2Manager
 
     private static class MS2Purger implements Runnable
     {
-        private Integer[] _runIds;
+        private final Integer[] _runIds;
 
         private MS2Purger(Integer[] runIds)
         {
@@ -1174,7 +1174,7 @@ public class MS2Manager
     }
 
 
-    private static DecimalFormat df = new DecimalFormat("#,##0");
+    private static final DecimalFormat df = new DecimalFormat("#,##0");
 
     public static Map<String, String> getStats(int days)
     {
