@@ -378,7 +378,7 @@ public class CompareQuery extends SQLFragment
         {
             sort.deleteSortColumn(sort.getSortList().size() - 1);
         }
-        append(sort.getOrderByClause(MS2Manager.getSqlDialect()));
+        append(sort.getOrderByClauseUnchecked(MS2Manager.getSqlDialect()));
     }
 
     protected void appendNewLine()
