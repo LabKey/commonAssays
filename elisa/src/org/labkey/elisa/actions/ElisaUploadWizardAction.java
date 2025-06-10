@@ -29,7 +29,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.query.PropertyValidationError;
@@ -117,7 +116,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
             }
 
             @Override
-            public ModelAndView getNextStep(ElisaRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+            public ModelAndView getNextStep(ElisaRunUploadForm form, BindException errors) throws ExperimentException
             {
                 if (form.isResetDefaultValues() || errors.hasErrors())
                     return getRunPropertiesView(form, !form.isResetDefaultValues(), false, errors);
@@ -230,7 +229,6 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
         @Override
         public boolean executeStep(ElisaRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
         {
-            ExpRun run;
             try
             {
                 PlateConcentrationPropertyHelper helper = createConcentrationPropertyHelper(form.getContainer(), form.getProtocol(), form.getProvider());
@@ -263,7 +261,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
         }
 
         @Override
-        public ModelAndView getNextStep(ElisaRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public ModelAndView getNextStep(ElisaRunUploadForm form, BindException errors) throws ExperimentException
         {
             if (form.isResetDefaultValues() || errors.hasErrors())
                 return getConcentrationsView(form, !form.isResetDefaultValues(), errors);
