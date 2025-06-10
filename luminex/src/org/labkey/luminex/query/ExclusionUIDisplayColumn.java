@@ -101,7 +101,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         boolean canEdit = _container.hasPermission(_user, UpdatePermission.class);
         Boolean excluded = (Boolean)ctx.get(getColumnInfo().getFieldKey());
 
-        HtmlString img = excluded.booleanValue() ?
+        DOM.Renderable img = excluded.booleanValue() ?
             getImgTag("excluded.png", exclusionComment, id, canEdit) :
             getImgTag("included.png", "Click to add a well or replicate group exclusion", id, canEdit);
 
@@ -118,7 +118,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         }
     }
 
-    private HtmlString getImgTag(String png, String titleAlt, String id, boolean canEdit)
+    private DOM.Renderable getImgTag(String png, String titleAlt, String id, boolean canEdit)
     {
         DOM._Attributes att = at(src, AppProps.getInstance().getContextPath() + "/luminex/exclusion/" + png)
             .at(height, 16)
@@ -128,6 +128,6 @@ public class ExclusionUIDisplayColumn extends DataColumn
         if (canEdit)
             att.at(title, titleAlt).at(alt, titleAlt);
 
-        return DOM.createHtmlFragment(IMG(att));
+        return IMG(att);
     }
 }
