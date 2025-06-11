@@ -224,7 +224,7 @@ public class AnalyteDefaultValueService
                 {
                     String analyte = key.substring(0, key.indexOf("_" + propertyName));
                     if (!analyteMap.containsKey(analyte))
-                        analyteMap.put(analyte, new HashMap<String, String>());
+                        analyteMap.put(analyte, new HashMap<>());
 
                     analyteMap.get(analyte).put(propertyName, defaultValueEntry.getValue());
                 }

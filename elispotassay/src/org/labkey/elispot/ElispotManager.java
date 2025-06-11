@@ -160,7 +160,7 @@ public class ElispotManager
                 if (null != antigenHeading)
                 {
                     if (!antigenHeadingMap.containsKey(antigenHeading))
-                        antigenHeadingMap.put(antigenHeading, new HashSet<Integer>());
+                        antigenHeadingMap.put(antigenHeading, new HashSet<>());
                     antigenHeadingMap.get(antigenHeading).add((Integer)object.get("RunId"));
                 }
             });

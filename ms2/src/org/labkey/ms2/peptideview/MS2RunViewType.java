@@ -18,7 +18,6 @@ package org.labkey.ms2.peptideview;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.view.ViewContext;
-import org.labkey.api.view.WebPartView;
 import org.labkey.ms2.MS2Run;
 
 import java.util.ArrayList;
@@ -62,7 +61,7 @@ public enum MS2RunViewType
     private final String _name;
     private final String _urlName;
 
-    private MS2RunViewType(String name, String urlName)
+    MS2RunViewType(String name, String urlName)
     {
         _name = name;
         _urlName = urlName;

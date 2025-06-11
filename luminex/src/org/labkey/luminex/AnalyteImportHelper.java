@@ -21,7 +21,6 @@ import org.labkey.luminex.model.Analyte;
 
 import java.util.Map;
 import java.util.Collection;
-import java.sql.SQLException;
 
 /**
  * User: jeckels

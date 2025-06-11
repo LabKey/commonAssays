@@ -29,7 +29,7 @@ import java.util.Collections;
 */
 public class RunListException extends Exception
 {
-    private Collection<String> _messages;
+    private final Collection<String> _messages;
 
     public RunListException(String message)
     {

@@ -127,7 +127,7 @@ public class SensitivitySummary
         return _error;
     }
 
-    protected class ProbabilityInfo implements Comparable
+    protected static class ProbabilityInfo implements Comparable
     {
         private final float _probability;
         private final float _sensitivity;

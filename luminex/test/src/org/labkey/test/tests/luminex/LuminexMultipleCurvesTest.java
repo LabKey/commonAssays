@@ -126,7 +126,6 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
      * Verify that the "set this  as standard" checkboxes exist and can be checked for the given standard names
      * preconditions:  at analyte properties page
      * postconditions:  unchanged
-     * @param standardsNames
      */
     private void checkStandardsCheckBoxesExist(String[] standardsNames)
     {
@@ -289,7 +288,7 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
 
     private enum WellRole {STANDARD,QC_CONTROL,OTHER_CONTROL}
 
-    private WellRole[] validRoles = {WellRole.STANDARD, WellRole.QC_CONTROL, WellRole.OTHER_CONTROL};
+    private final WellRole[] validRoles = {WellRole.STANDARD, WellRole.QC_CONTROL, WellRole.OTHER_CONTROL};
 
     private Locator getWellRoleCheckboxLoc(String description, WellRole role)
     {

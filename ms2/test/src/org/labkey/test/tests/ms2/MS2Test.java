@@ -721,7 +721,7 @@ public class MS2Test extends AbstractMS2ImportTest
         assertTextPresent("gi|15645924|ribosomal_protein",
                 "7,683");
         String selectedValue = getSelectedOptionValue(Locator.name("allPeps"));
-        boolean userPref = selectedValue == null || "".equals(selectedValue) || "false".equals(selectedValue);
+        boolean userPref = selectedValue == null || selectedValue.isEmpty() || "false".equals(selectedValue);
         if (!userPref)
         {
             // User last viewed all peptides, regardless of search engine assignment, so flip to the other option

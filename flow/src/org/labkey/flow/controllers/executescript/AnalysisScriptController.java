@@ -874,7 +874,7 @@ public class AnalysisScriptController extends BaseFlowController
             Local,
             Existing,
             None
-        };
+        }
 
         private RunType hasExistingRuns(File workspaceFile)
         {

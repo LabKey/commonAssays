@@ -551,7 +551,7 @@ public class Comet2014ParamsBuilder extends SequestParamsBuilder
         ArrayList<ResidueMod> workList = new ArrayList<>();
 
         String mods = sequestInputParams.get(ParameterNames.DYNAMIC_MOD);
-        if (mods == null || mods.equals("")) return Collections.emptyList();
+        if (mods == null || mods.isEmpty()) return Collections.emptyList();
         mods = removeWhiteSpace(mods);
         ArrayList<Character> residues = new ArrayList<>();
         ArrayList<String> masses = new ArrayList<>();
@@ -572,7 +572,8 @@ public class Comet2014ParamsBuilder extends SequestParamsBuilder
                 workList.add(new ResidueMod(res, masses.get(i)));
             }
         }
-        if(workList.size() > MAX_VARIABLE_MODIFICATIONS) Collections.singletonList("Comet will only accept a max of " + MAX_VARIABLE_MODIFICATIONS + " variable modifications.");
+        if(workList.size() > MAX_VARIABLE_MODIFICATIONS)
+            return Collections.singletonList("Comet will only accept a max of " + MAX_VARIABLE_MODIFICATIONS + " variable modifications.");
         int index = 1;
         for (ResidueMod mod : workList)
         {

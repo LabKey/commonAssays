@@ -27,13 +27,11 @@ public interface PlateInfo
      * Returns the type of measurement the corresponding plate contains
      * @return the measurement name
      */
-    @NotNull
-    public String getMeasurement();
+    @NotNull String getMeasurement();
 
     /**
      * Returns the name of the analyte used for a corresponding plate data
      * @return the name of the analyte
      */
-    @Nullable
-    public String getAnalyte();
+    @Nullable String getAnalyte();
 }

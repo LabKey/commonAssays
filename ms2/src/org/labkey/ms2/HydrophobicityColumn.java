@@ -27,7 +27,7 @@ import java.util.Set;
  */
 public class HydrophobicityColumn extends AbstractPeptideDisplayColumn
 {
-    private ColumnInfo _colInfo;
+    private final ColumnInfo _colInfo;
 
     public HydrophobicityColumn(ColumnInfo colInfo)
     {

@@ -55,7 +55,7 @@ public class LibraTest extends MS2TestBase
     @BeforeClass
     public static void doSetup()
     {
-        LibraTest init = (LibraTest)getCurrentTest();
+        LibraTest init = getCurrentTest();
         init.configure();
     }
 

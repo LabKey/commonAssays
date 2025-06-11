@@ -109,7 +109,7 @@ function Form_onCancel()
 function Form_onDelete()
 {
    <%
-   ActionURL url = null;
+   ActionURL url  ;
    if (d.getReportId() != null)
    {
        url = urlFor(DeleteAction.class).addParameter("reportId", report.getReportId().toString());

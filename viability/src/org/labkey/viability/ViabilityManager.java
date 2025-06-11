@@ -704,7 +704,7 @@ public class ViabilityManager
             // verify
             {
                 Map<String, Object> properties = OntologyManager.getProperties(c, objectURI);
-                assertTrue(properties.size() == 0);
+                assertTrue(properties.isEmpty());
 
                 String[] specimens = ViabilityManager.getSpecimens(resultId);
                 assertTrue(specimens.length == 0);

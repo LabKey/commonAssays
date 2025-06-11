@@ -89,7 +89,7 @@ public class ElispotController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleViewAction
+    public static class BeginAction extends SimpleViewAction<Object>
     {
         @Override
         public ModelAndView getView(Object o, BindException errors)
@@ -255,7 +255,7 @@ public class ElispotController extends SpringActionController
         url.addFilter(ElispotProtocolSchema.ANTIGEN_STATS_TABLE_NAME, provider.getTableMetadata(protocol).getRunRowIdFieldKeyFromResults(), CompareType.EQUAL, rowId);
     }
 
-    private class ElispotDetailsHeaderView extends AssayHeaderView
+    private static class ElispotDetailsHeaderView extends AssayHeaderView
     {
         List<NavTree> _links = new ArrayList<>();
 
@@ -341,7 +341,7 @@ public class ElispotController extends SpringActionController
                     }
                 }
                 response.put("summary", rows);
-                if (analyteMap.size() > 0)
+                if (!analyteMap.isEmpty())
                 {
                     response.put("analytes", analyteMap.keySet());
                     response.put("analyteMap", analyteMap);
@@ -374,9 +374,9 @@ public class ElispotController extends SpringActionController
         private String _spotSize = "";
         private String _activity = "";
         private String _intensity = "";
-        private Map<String, ObjectProperty> _wellProperties = new LinkedHashMap<>();
+        private final Map<String, ObjectProperty> _wellProperties = new LinkedHashMap<>();
         private final RunDataRow _runDataRow;
-        private Position _position;
+        private final Position _position;
 
         public WellInfo(@Nullable RunDataRow runDataRow, Position position)
         {
@@ -530,7 +530,7 @@ public class ElispotController extends SpringActionController
     }
 
     @RequiresPermission(InsertPermission.class)
-    public class BackgroundSubtractionAction extends FormHandlerAction<Object>
+    public static class BackgroundSubtractionAction extends FormHandlerAction<Object>
     {
         @Override
         public void validateCommand(Object target, Errors errors)

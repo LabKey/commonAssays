@@ -19,8 +19,6 @@ package org.labkey.flow.analysis.chart;
 import org.jfree.data.xy.AbstractXYDataset;
 import org.labkey.flow.analysis.model.DataFrame;
 
-import java.util.BitSet;
-
 /**
  */
 public class DataFrameXYDataset extends AbstractXYDataset

@@ -224,7 +224,7 @@ public class MacWorkspace extends FlowJoWorkspace
             else
             {
                 // get int from gateCode
-                Integer i = Integer.parseInt(gateCode.substring(1));
+                int i = Integer.parseInt(gateCode.substring(1));
                 if (i != gateCount)
                 {
                     System.err.println(String.format("%s\t%s\t%s", _name==null ? "" : _name, fullGateName, specification));
@@ -310,9 +310,8 @@ public class MacWorkspace extends FlowJoWorkspace
             for (int iNode = 0; iNode < nl.getLength(); iNode ++)
             {
                 Node node = nl.item(iNode);
-                if (!(node instanceof Element))
+                if (!(node instanceof Element el))
                     continue;
-                Element el = (Element) node;
                 boolean invert = "1".equals(el.getAttribute("negated")) || "0".equals(el.getAttribute("eventsInside"));
                 if ("Polygon".equals(el.getTagName()) || "PolyRect".equals(el.getTagName()))
                 {

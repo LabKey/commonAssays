@@ -20,8 +20,6 @@ import org.labkey.api.webdav.WebdavResource;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.IOException;
-
 /**
  * User: jeckels
  * Date: Jul 15, 2010

@@ -15,11 +15,9 @@
  */
 package org.labkey.luminex;
 
-import org.labkey.api.data.Parameter;
 import org.labkey.api.data.ParameterMapStatement;
 import org.labkey.api.exp.OntologyManager;
 
-import java.sql.SQLException;
 import java.util.Map;
 
 /**

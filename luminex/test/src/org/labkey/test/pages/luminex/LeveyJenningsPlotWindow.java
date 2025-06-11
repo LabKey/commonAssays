@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class LeveyJenningsPlotWindow
 {
-    private BaseWebDriverTest _test;
+    private final BaseWebDriverTest _test;
     private final String divCls = "ljplotdiv";
 
     public LeveyJenningsPlotWindow(BaseWebDriverTest test)
@@ -83,7 +83,7 @@ public class LeveyJenningsPlotWindow
         for ( WebElement element : getAxisTextElements(1) )
         {
             String text = element.getText();
-            if (!text.equals(""))
+            if (!text.isEmpty())
                 labels.add(text);
         }
 
@@ -96,7 +96,7 @@ public class LeveyJenningsPlotWindow
         for ( WebElement element : getAxisTextElements(2) )
         {
             String text = element.getText();
-            if (!text.equals(""))
+            if (!text.isEmpty())
                 labels.add(text);
         }
 

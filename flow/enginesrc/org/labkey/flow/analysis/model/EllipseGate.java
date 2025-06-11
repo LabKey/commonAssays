@@ -21,7 +21,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import java.util.*;
-import java.util.List;
 import java.io.Serializable;
 
 public class EllipseGate extends RegionGate

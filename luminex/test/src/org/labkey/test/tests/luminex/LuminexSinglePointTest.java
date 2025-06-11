@@ -57,7 +57,7 @@ public class LuminexSinglePointTest extends LuminexTest
     @BeforeClass
     public static void configurePerl()
     {
-        LuminexTest init = (LuminexTest)getCurrentTest();
+        LuminexTest init = getCurrentTest();
         init.goToTestAssayHome();
         ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
         assayDesigner.setBackgroundImport(true);
@@ -114,7 +114,7 @@ public class LuminexSinglePointTest extends LuminexTest
         // check LJ plots column
         tbl.link(0, 2).click();
         ljp.waitTillReady();
-        assertEquals(ljp.getXTickTagElementText(), "Notebook1");
+        assertEquals("Notebook1", ljp.getXTickTagElementText());
         assertEquals(Arrays.asList("Notebook1", "Notebook2"), ljp.getXAxis());
         ljp.closeWindow();
 

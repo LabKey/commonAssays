@@ -19,7 +19,6 @@ package org.labkey.flow.analysis.chart;
 import org.jfree.chart.plot.*;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.axis.ColorBar;
-import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.entity.EntityCollection;
 import org.jfree.chart.entity.ContourEntity;
 import org.jfree.ui.RectangleEdge;
@@ -27,7 +26,6 @@ import org.jfree.data.contour.ContourDataset;
 import org.jfree.data.Range;
 
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.Point2D;
 
 import org.labkey.flow.analysis.model.Polygon;
 import java.awt.*;
@@ -51,7 +49,7 @@ public class DensityPlot extends ContourPlot
         Polygon _poly;
     }
 
-    List _polyDatas = new ArrayList();
+    List<PolygonData> _polyDatas = new ArrayList<>();
 
     public DensityPlot(DensityDataset dataset, ValueAxis domainAxis, ValueAxis rangeAxis, ColorBar colorBar)
     {
@@ -158,9 +156,8 @@ public class DensityPlot extends ContourPlot
     {
         super.render(g2, dataArea, info, crosshairState);
         g2.setColor(PlotFactory.COLOR_GATE);
-        for (Iterator it = _polyDatas.iterator(); it.hasNext();)
+        for (PolygonData data : _polyDatas)
         {
-            PolygonData data = (PolygonData) it.next();
             drawPolygon(g2, dataArea, data);
         }
     }
@@ -235,28 +232,20 @@ public class DensityPlot extends ContourPlot
         assert contourData instanceof DensityDataset;
         DensityDataset data = (DensityDataset) contourData;
         // setup for collecting optional entity info...
-        Rectangle2D.Double entityArea = null;
+        Rectangle2D.Double entityArea;
         EntityCollection entities = null;
         if (info != null)
         {
             entities = info.getOwner().getEntityCollection();
         }
 
-        Rectangle2D.Double rect = null;
+        Rectangle2D.Double rect;
         rect = new Rectangle2D.Double();
 
         //turn off anti-aliasing when filling rectangles
         Object antiAlias = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
-        int[] xIndex = data.indexX();
-        int[] indexX = data.getXIndices();
-        boolean vertInverted = verticalAxis.isInverted();
-        boolean horizInverted = false;
-        if (horizontalAxis instanceof NumberAxis)
-        {
-            horizInverted = horizontalAxis.isInverted();
-        }
         double[] arrX = data.getPossibleXValues();
         double[] arrY = data.getPossibleYValues();
         double[] arrTransX = getTranslatedValues(arrX, horizontalAxis, dataArea, RectangleEdge.BOTTOM);
@@ -338,8 +327,6 @@ public class DensityPlot extends ContourPlot
         }
 
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, antiAlias);
-
-        return;
 
     }
 

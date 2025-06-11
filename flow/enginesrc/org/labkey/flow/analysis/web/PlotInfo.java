@@ -34,7 +34,7 @@ import java.text.DecimalFormat;
 
 public class PlotInfo
 {
-    private ChartRenderingInfo _info;
+    private final ChartRenderingInfo _info;
     BufferedImage _image;
     ValueAxis _domainAxis;
     ValueAxis _rangeAxis;

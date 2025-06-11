@@ -22,7 +22,6 @@ import org.labkey.test.WebTestHelper;
 import org.labkey.test.components.ui.lineage.LineageGraph;
 import org.labkey.test.util.PipelineAnalysisHelper;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.support.ui.Select;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

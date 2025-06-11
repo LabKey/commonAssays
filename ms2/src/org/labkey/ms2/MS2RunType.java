@@ -221,7 +221,7 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
 
     public String getPeptideTableName()
     {
-        return this.toString() + "Peptides";
+        return this + "Peptides";
     }
 
     public boolean isPeptideTableHidden()

@@ -56,7 +56,7 @@ public class FeatureAnnotationSetTable extends SimpleUserSchema.SimpleTable<Micr
         super.applyContainerFilter(new ProjectSharedContainerFilterWrapper(getContainer(), filter));
     }
 
-    class ProjectSharedContainerFilterWrapper extends ContainerFilter
+    static class ProjectSharedContainerFilterWrapper extends ContainerFilter
     {
         final ContainerFilter _inner;
 

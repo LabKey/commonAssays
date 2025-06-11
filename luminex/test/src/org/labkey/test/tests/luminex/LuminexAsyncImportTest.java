@@ -37,7 +37,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
     @BeforeClass
     public static void updateAssayDefinition()
     {
-        LuminexTest init = (LuminexTest)getCurrentTest();
+        LuminexTest init = getCurrentTest();
         init.goToTestAssayHome();
         ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
 

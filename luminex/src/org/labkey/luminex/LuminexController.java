@@ -116,7 +116,7 @@ public class LuminexController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleViewAction
+    public static class BeginAction extends SimpleViewAction<Object>
     {
         @Override
         public ModelAndView getView(Object o, BindException errors)
@@ -132,7 +132,7 @@ public class LuminexController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class ExcludedDataAction extends BaseAssayAction<ProtocolIdForm>
+    public static class ExcludedDataAction extends BaseAssayAction<ProtocolIdForm>
     {
         private ExpProtocol _protocol;
 
@@ -230,7 +230,7 @@ public class LuminexController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class TitrationQcReportAction extends BaseAssayAction<ProtocolIdForm>
+    public static class TitrationQcReportAction extends BaseAssayAction<ProtocolIdForm>
     {
         private ExpProtocol _protocol;
 
@@ -261,7 +261,7 @@ public class LuminexController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class SinglePointControlQcReportAction extends BaseAssayAction<ProtocolIdForm>
+    public static class SinglePointControlQcReportAction extends BaseAssayAction<ProtocolIdForm>
     {
         private ExpProtocol _protocol;
 
@@ -323,7 +323,7 @@ public class LuminexController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class LeveyJenningsMenuAction extends SimpleViewAction<ProtocolIdForm>
+    public static class LeveyJenningsMenuAction extends SimpleViewAction<ProtocolIdForm>
     {
         private ProtocolIdForm _form;
 
@@ -424,7 +424,7 @@ public class LuminexController extends SpringActionController
 
         for (Map<String, String> analyteProperities : adt.getAnalyteMap().values())
         {
-            if(analyteProperities.size() > 0) only_analytes = false;
+            if(!analyteProperities.isEmpty()) only_analytes = false;
 
             String positivityThreshold = analyteProperities.get(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
             try {
@@ -437,7 +437,7 @@ public class LuminexController extends SpringActionController
             }
         }
 
-        if(only_analytes && adt.getAnalytes().size() != 0)
+        if(only_analytes && !adt.getAnalytes().isEmpty())
             errors.addRowError(new ValidationException("The uploaded file only contains a column of analyte names without any analyte properities."));
 
         return errors;
@@ -539,7 +539,7 @@ public class LuminexController extends SpringActionController
                 }
             }
 
-            if (analytes.size() == 0)
+            if (analytes.isEmpty())
             {
                 errors.addRowError(new ValidationException("The uploaded data doesn't appear to have any analyte properities to parse"));
                 return -1;
@@ -548,7 +548,7 @@ public class LuminexController extends SpringActionController
             AnalyteDefaultTransformer adt = new AnalyteDefaultTransformer(analytes, positivityThresholds, negativeBeads);
             // NOTE: Watch out! "Only row errors are copied over with the call to addAllErrors"
             List<ValidationException> rowErrors = validateDefaultValues(adt).getRowErrors();
-            if (rowErrors.size() > 0)
+            if (!rowErrors.isEmpty())
             {
                 for (ValidationException validationErrors : rowErrors)
                     errors.addRowError(validationErrors);
@@ -588,7 +588,7 @@ public class LuminexController extends SpringActionController
     }
 
     @RequiresPermission(DesignAssayPermission.class)
-    public class ExportDefaultValuesAction extends ExportAction<ProtocolIdForm>
+    public static class ExportDefaultValuesAction extends ExportAction<ProtocolIdForm>
     {
         @Override
         public void export(ProtocolIdForm form, HttpServletResponse response, BindException errors) throws Exception
@@ -897,7 +897,7 @@ public class LuminexController extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class ManageGuideSetAction extends BaseAssayAction<ProtocolIdForm>
+    public static class ManageGuideSetAction extends BaseAssayAction<ProtocolIdForm>
     {
         private ExpProtocol _protocol;
 

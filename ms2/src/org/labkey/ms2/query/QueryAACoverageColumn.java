@@ -67,7 +67,7 @@ public class QueryAACoverageColumn extends PeptideAggregrationDisplayColumn
     {
         Protein protein = new Protein();
         protein.setSequence((String)_sequenceColumn.getValue(ctx));
-        protein.setPeptides(peptides.toArray(new String[peptides.size()]));
+        protein.setPeptides(peptides.toArray(new String[0]));
         return protein.getAAPercent();
     }
 

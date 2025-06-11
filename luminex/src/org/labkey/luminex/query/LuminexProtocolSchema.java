@@ -75,8 +75,6 @@ import org.labkey.luminex.LuminexDataHandler;
 import org.labkey.luminex.LuminexResultsDataRegion;
 import org.springframework.validation.BindException;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

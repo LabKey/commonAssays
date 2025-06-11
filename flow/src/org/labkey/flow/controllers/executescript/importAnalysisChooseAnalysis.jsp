@@ -94,7 +94,7 @@
             }
         }
 
-        if (keywordDirs.size() > 0)
+        if (!keywordDirs.isEmpty())
         {
             for (FlowExperiment analysis : analyses)
             {
@@ -218,7 +218,7 @@ if (form.getKeywordDir() != null && form.getKeywordDir().length > 0 && StudyPubl
         targetStudies.put(c.getId(), c.getPath() + " (" + study.getLabel() + ")");
     }
 
-    if (validStudies.size() > 0)
+    if (!validStudies.isEmpty())
     {
         // Pre-select the most recent target study
         if (form.getTargetStudy() == null)

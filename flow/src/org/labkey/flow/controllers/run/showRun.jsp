@@ -71,7 +71,7 @@
     }
 
     String targetStudyId = (String)run.getProperty(FlowProperty.TargetStudy);
-    if (targetStudyId != null && targetStudyId.length() > 0)
+    if (targetStudyId != null && !targetStudyId.isEmpty())
     {
         Container c = ContainerManager.getForId(targetStudyId);
         if (c != null)

@@ -948,7 +948,7 @@ public class MS2Schema extends UserSchema
         QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, HiddenTableType.PeptidesFilter.toString());
         SimpleFilter filter = new SimpleFilter();
 
-        if (targetSeqIds != null && targetSeqIds.size() > 0)
+        if (targetSeqIds != null && !targetSeqIds.isEmpty())
         {
             filter.addCondition(PeptideManager.getSequencesFilter(targetSeqIds));
         }
@@ -1163,7 +1163,7 @@ public class MS2Schema extends UserSchema
 
     private static class NormalizedProteinGroupsTracker
     {
-        private String _name;
+        private final String _name;
 
         public NormalizedProteinGroupsTracker(String name)
         {
@@ -1377,7 +1377,7 @@ public class MS2Schema extends UserSchema
                     }
                     catch (URISyntaxException e)
                     {
-                        throw new UnexpectedException(e);
+                        throw UnexpectedException.wrap(e);
                     }
                 }
             }

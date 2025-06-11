@@ -47,7 +47,7 @@ public final class LuminexRTransformTest extends LuminexTest
     @BeforeClass
     public static void updateAssayDefinition()
     {
-        LuminexRTransformTest init = (LuminexRTransformTest)getCurrentTest();
+        LuminexRTransformTest init = getCurrentTest();
 
         // add the R transform script to the assay
         init.goToTestAssayHome();

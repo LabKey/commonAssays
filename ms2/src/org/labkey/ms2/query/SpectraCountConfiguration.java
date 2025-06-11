@@ -72,7 +72,7 @@ public class SpectraCountConfiguration
         if (_groupedByCharge)
         {
             queryName.append("Charge");
-            if (description.length() == 0)
+            if (description.isEmpty())
             {
                 description.append("Peptide charge");
             }

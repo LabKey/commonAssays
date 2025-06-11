@@ -84,7 +84,6 @@ public class AttributeSetHelper
      * Called outside of any transaction, ensures that the necessary entries have been added to the flow.*Attr
      * tables.  That way, we never have to deal with transactions being rolled back and having to remove attribute
      * names from the cache, or two threads each trying to insert the same attribute name.
-     * @throws SQLException
      */
     public static void prepareForSave(String sampleLabel, AttributeSet attrs, Container c, boolean clearCache)
     {
@@ -256,7 +255,7 @@ public class AttributeSetHelper
 
         attrs.setKeywords(keywords);
 
-        if (keywordIDs.size() > 0)
+        if (!keywordIDs.isEmpty())
         {
             String sqlKeywordAliaes = "SELECT A.name AS PreferredName, B.Name AS AliasName\n" +
                     "FROM flow.KeywordAttr A\n" +
@@ -278,13 +277,13 @@ public class AttributeSetHelper
         new SqlSelector(mgr.getSchema(), sqlStatistics, rowId).forEach(rs -> {
             String name = rs.getString(1);
             int preferredId = rs.getInt(2);
-            Double value = rs.getDouble(4);
+            double value = rs.getDouble(4);
 
             statisticIDs.add(preferredId);
             attrs.setStatistic(new StatisticSpec(name), value);
         });
 
-        if (statisticIDs.size() > 0)
+        if (!statisticIDs.isEmpty())
         {
             String sqlStatisticAliaes = "SELECT A.name AS PreferredName, B.Name AS AliasName\n" +
                     "FROM flow.StatisticAttr A\n" +
@@ -332,7 +331,7 @@ public class AttributeSetHelper
 
         });
 
-        if (graphIDs.size() > 0)
+        if (!graphIDs.isEmpty())
         {
             String sqlGraphAliaes = "SELECT A.name AS PreferredName, B.Name AS AliasName\n" +
                     "FROM flow.GraphAttr A\n" +

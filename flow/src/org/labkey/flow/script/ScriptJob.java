@@ -405,7 +405,7 @@ abstract public class ScriptJob extends FlowExperimentJob
             }
             catch (Throwable t)
             {
-                _log.debug("Xar file contents:\n" + xardoc.toString());
+                _log.debug("Xar file contents:\n" + xardoc);
                 error("Error loading XAR", t);
                 throw UnexpectedException.wrap(t);
             }

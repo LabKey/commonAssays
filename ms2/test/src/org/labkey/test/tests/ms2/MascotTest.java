@@ -99,7 +99,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
     @BeforeClass
     public static void setupProject() throws Exception
     {
-        MascotTest init = (MascotTest) getCurrentTest();
+        MascotTest init = getCurrentTest();
 
         init.doSetup();
     }

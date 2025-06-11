@@ -61,7 +61,7 @@
     }
 
     String targetStudyLabel = null;
-    if (form.getTargetStudy() != null && form.getTargetStudy().length() > 0)
+    if (form.getTargetStudy() != null && !form.getTargetStudy().isEmpty())
     {
         Set<Study> studies = StudyService.get().findStudy(form.getTargetStudy(), getUser());
         Study study = studies.iterator().next();

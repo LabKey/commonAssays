@@ -52,7 +52,7 @@ public final class LuminexExcludableWellsTest extends LuminexTest
     @BeforeClass
     public static void updateAssayDefinition()
     {
-        LuminexExcludableWellsTest init = (LuminexExcludableWellsTest)getCurrentTest();
+        LuminexExcludableWellsTest init = getCurrentTest();
         init.goToTestAssayHome();
         ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
@@ -344,8 +344,6 @@ public final class LuminexExcludableWellsTest extends LuminexTest
      * Go through every analyte/well row with an exclusion comment.
      * Verify that the row has the expected comment, well, description, and type values
      *
-     * @param expectedComment
-     * @param analytes
      */
     private void verifyWellGroupExclusion(String expectedComment, Set<String> analytes)
     {
@@ -414,7 +412,6 @@ public final class LuminexExcludableWellsTest extends LuminexTest
      * verify a user can exclude a single analyte for all wells
      * preconditions:  multiple curve data imported, on assay run page
      * post conditions: specified analyte excluded from all wells, with comment "Changed for all analytes"
-     * @param analyte
      */
     private void excludeAnalyteForAllWellsTest(String analyte, int jobCount)
     {

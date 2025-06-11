@@ -412,7 +412,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
                     for (String val : idvals)
                     {
                         // catch blanks before they get into the db
-                        if (val.equals(""))
+                        if (val.isEmpty())
                             continue;
                         transactionCount++;
                         fdbu._addIdentStmt.setString(1, val);

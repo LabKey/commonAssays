@@ -608,40 +608,38 @@ public class ScanHeader implements Serializable
 	 */
 	public String toString()
 	{
-		StringBuffer tmpStrBuffer = new StringBuffer(1000);
-		tmpStrBuffer.append("SCANHEADER\n");
-		tmpStrBuffer.append("==========\n");
-		tmpStrBuffer.append("num = " + num + "\n");
-		tmpStrBuffer.append("msLevel = " + msLevel + "\n");
-		tmpStrBuffer.append("peaksCount = " + peaksCount + "\n");
-		tmpStrBuffer.append("polarity = " + polarity + "\n");
-		tmpStrBuffer.append("scanType = " + scanType + "\n");
-		tmpStrBuffer.append("centroided = " + centroided + "\n");
-		tmpStrBuffer.append("deisotoped = " + deisotoped + "\n");
-		tmpStrBuffer.append(
-				"chargeDeconvoluted = " + chargeDeconvoluted + "\n");
-		tmpStrBuffer.append("retentionTime = " + retentionTime + "\n");
-		tmpStrBuffer.append("startMz = " + startMz + "\n");
-		tmpStrBuffer.append("endMz = " + endMz + "\n");
-		tmpStrBuffer.append("lowMz = " + lowMz + "\n");
-		tmpStrBuffer.append("highMz = " + highMz + "\n");
-		tmpStrBuffer.append("basePeakMz = " + basePeakMz + "\n");
-		tmpStrBuffer.append("basePeakIntensity = " + basePeakIntensity + "\n");
-		tmpStrBuffer.append("totIonCurrent = " + totIonCurrent + "\n");
-	    tmpStrBuffer.append("filterLine = " + filterLine + "\n");
-     	tmpStrBuffer.append("precursorMz = " + precursorMz + "\n");
-		tmpStrBuffer.append("precursorScanNum = " + precursorScanNum + "\n");
-		tmpStrBuffer.append("precursorCharge = " + precursorCharge + "\n");
-		tmpStrBuffer.append("collisionEnergy = " + collisionEnergy + "\n");
-		tmpStrBuffer.append("ionisationEnergy = " + ionisationEnergy + "\n");
-		tmpStrBuffer.append("precision = " + precision + "\n");
-		//add for mzXML_3.0
-		tmpStrBuffer.append("byteOrder = "+ byteOrder + "\n");
-		tmpStrBuffer.append("contentType = " + contentType + "\n");
-		tmpStrBuffer.append("compressionType = " + compressionType + "\n");
-		tmpStrBuffer.append("compressedLen = " + compressedLen + "\n");
+        String tmpStrBuffer = "SCANHEADER\n" +
+                "==========\n" +
+                "num = " + num + "\n" +
+                "msLevel = " + msLevel + "\n" +
+                "peaksCount = " + peaksCount + "\n" +
+                "polarity = " + polarity + "\n" +
+                "scanType = " + scanType + "\n" +
+                "centroided = " + centroided + "\n" +
+                "deisotoped = " + deisotoped + "\n" +
+                "chargeDeconvoluted = " + chargeDeconvoluted + "\n" +
+                "retentionTime = " + retentionTime + "\n" +
+                "startMz = " + startMz + "\n" +
+                "endMz = " + endMz + "\n" +
+                "lowMz = " + lowMz + "\n" +
+                "highMz = " + highMz + "\n" +
+                "basePeakMz = " + basePeakMz + "\n" +
+                "basePeakIntensity = " + basePeakIntensity + "\n" +
+                "totIonCurrent = " + totIonCurrent + "\n" +
+                "filterLine = " + filterLine + "\n" +
+                "precursorMz = " + precursorMz + "\n" +
+                "precursorScanNum = " + precursorScanNum + "\n" +
+                "precursorCharge = " + precursorCharge + "\n" +
+                "collisionEnergy = " + collisionEnergy + "\n" +
+                "ionisationEnergy = " + ionisationEnergy + "\n" +
+                "precision = " + precision + "\n" +
+                //add for mzXML_3.0
+                "byteOrder = " + byteOrder + "\n" +
+                "contentType = " + contentType + "\n" +
+                "compressionType = " + compressionType + "\n" +
+                "compressedLen = " + compressedLen + "\n";
 
-		return (tmpStrBuffer.toString());
+		return (tmpStrBuffer);
 	}	
 
 }

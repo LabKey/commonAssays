@@ -128,12 +128,11 @@ public class StatisticSpec implements SpecBase<StatisticSpec>
 
         // Create regular expression to find the STAT in a statistic spec
         //   start-of-line-or-colon ( stat-names ) open-paren-or-end-of-line
-        StringBuilder sb = new StringBuilder();
-        sb.append("(^|:)");
-        sb.append("(").append(StringUtils.join(stats, "|")).append(")");
-        sb.append("(\\(|$)");
+        String sb = "(^|:)" +
+                "(" + StringUtils.join(stats, "|") + ")" +
+                "(\\(|$)";
 
-        _statPattern = Pattern.compile(sb.toString());
+        _statPattern = Pattern.compile(sb);
     }
 
     public StatisticSpec(SubsetSpec subset, STAT statistic, String parameter)

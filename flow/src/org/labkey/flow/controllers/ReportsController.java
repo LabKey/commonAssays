@@ -256,7 +256,7 @@ public class ReportsController extends BaseFlowController
                 return;
             }
 
-            if (form.getReportName() == null || form.getReportName().length() == 0)
+            if (form.getReportName() == null || form.getReportName().isEmpty())
             {
                 errors.rejectValue("reportName", ERROR_MSG, "Report name must not be empty");
                 return;
@@ -281,7 +281,7 @@ public class ReportsController extends BaseFlowController
                 return new SimpleErrorView(errors);
 
             r = getReport(getViewContext(), form);
-            if (form.getReportName() == null || form.getReportName().length() == 0)
+            if (form.getReportName() == null || form.getReportName().isEmpty())
                 form.setReportName("Copy of " + r.getDescriptor().getReportName());
             getPageConfig().setFocusId("reportName");
             return new JspView<>("/org/labkey/flow/controllers/copyReport.jsp", Pair.of(form, r), errors);
@@ -421,7 +421,7 @@ public class ReportsController extends BaseFlowController
             else
             {
                 // ajax execute report via POST
-                view = new JspView("/org/labkey/flow/controllers/ajaxExecuteReport.jsp", Pair.of(form, r), errors);
+                view = new JspView<>("/org/labkey/flow/controllers/ajaxExecuteReport.jsp", Pair.of(form, r), errors);
             }
 
             return new VBox(new SelectReportView(form), view);
@@ -436,7 +436,7 @@ public class ReportsController extends BaseFlowController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class ExecuteReportAction extends MutatingApiAction<ExecuteForm>
+    public static class ExecuteReportAction extends MutatingApiAction<ExecuteForm>
     {
         @Override
         public Object execute(ExecuteForm form, BindException errors) throws Exception

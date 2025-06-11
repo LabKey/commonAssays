@@ -112,7 +112,7 @@ public class SampleUtil
             List<FlowFCSFile> partialMatches = new ArrayList<>(10);
 
             Map<String, String> keywords = sample.getKeywords();
-            if (keywords.size() == 0)
+            if (keywords.isEmpty())
             {
                 // No keywords available. Match only based on name
                 FlowFCSFile file = originalFileMap.get(sample.getSampleName());
@@ -129,7 +129,7 @@ public class SampleUtil
             {
                 // Match based on keyword values
                 String name = sample.getSampleName();
-                if (name == null || name.length() == 0)
+                if (name == null || name.isEmpty())
                     name = sample.getFilename();
                 String[] values = keywordValues(name, keywords);
 

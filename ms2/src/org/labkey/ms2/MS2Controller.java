@@ -2730,7 +2730,7 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class ShowPeptideProphetDetailsAction extends SimpleViewAction<RunForm>
+    public static class ShowPeptideProphetDetailsAction extends SimpleViewAction<RunForm>
     {
         @Override
         public ModelAndView getView(RunForm form, BindException errors)
@@ -2960,7 +2960,7 @@ public class MS2Controller extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public static class ShowAllRunsAction extends SimpleViewAction
+    public static class ShowAllRunsAction extends SimpleViewAction<Object>
     {
         @Override
         public ModelAndView getView(Object o, BindException errors)
@@ -4377,7 +4377,7 @@ public class MS2Controller extends SpringActionController
     private static final Cache<String, PieJChartHelper> PIE_CHART_CACHE = CacheManager.getSharedCache();
 
     @RequiresPermission(ReadPermission.class)
-    public static class DoOnePeptideChartAction extends ExportAction
+    public static class DoOnePeptideChartAction extends ExportAction<Object>
     {
         @Override
         public void export(Object o, HttpServletResponse response, BindException errors) throws Exception

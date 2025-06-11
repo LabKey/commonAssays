@@ -40,9 +40,11 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
     protected ResultSet _rs;
 
     /** Cache the last 100 spectra loaded, especially useful for Mascot where there many be multiple hits per spectra */
-    private Map<Pair<Integer, Integer>, Pair<float[], float[]>> _lruCache = new LinkedHashMap<Pair<Integer, Integer>, Pair<float[], float[]>>()
+    private final Map<Pair<Integer, Integer>, Pair<float[], float[]>> _lruCache = new LinkedHashMap<>()
     {
-        /** This method is called just after a new entry has been added */
+        /**
+         * This method is called just after a new entry has been added
+         */
         @Override
         public boolean removeEldestEntry(Map.Entry eldest)
         {

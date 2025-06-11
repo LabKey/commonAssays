@@ -23,7 +23,6 @@ import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
-import org.labkey.api.query.FilteredTable;
 import org.labkey.api.security.User;
 import org.labkey.elisa.query.CurveFitTable;
 import org.labkey.elisa.query.ElisaResultsTable;
@@ -67,7 +66,7 @@ public class ElisaProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public FilteredTable createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
+    public ElisaResultsTable createDataTable(ContainerFilter cf, boolean includeLinkedToStudyColumns)
     {
         return new ElisaResultsTable(this, cf, includeLinkedToStudyColumns);
     }

@@ -42,10 +42,10 @@ import java.util.Set;
 public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayProvider> implements LuminexRunContext
 {
     private String[] _analyteNames;
-    private Map<String, Map<Integer, String>> _analytePropertiesById = new HashMap<>();
-    private Map<String, Map<String, String>> _analyteColumnPropertiesByName = new HashMap<>();
-    private Map<String, Map<String, String>> _analytePropertiesByName = new HashMap<>();
-    private Map<String, Set<String>> _titrationsByAnalyte = new HashMap<>();
+    private final Map<String, Map<Integer, String>> _analytePropertiesById = new HashMap<>();
+    private final Map<String, Map<String, String>> _analyteColumnPropertiesByName = new HashMap<>();
+    private final Map<String, Map<String, String>> _analytePropertiesByName = new HashMap<>();
+    private final Map<String, Set<String>> _titrationsByAnalyte = new HashMap<>();
     private List<Titration> _titrations;
     private List<SinglePointControl> _singlePointControls;
     private Boolean _retainExclusions;

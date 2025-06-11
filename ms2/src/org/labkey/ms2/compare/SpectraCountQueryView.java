@@ -46,7 +46,7 @@ public class SpectraCountQueryView extends QueryView
 {
     private final MS2Schema _schema;
     private final SpectraCountConfiguration _config;
-    private MS2Controller.SpectraCountForm _form;
+    private final MS2Controller.SpectraCountForm _form;
 
     public SpectraCountQueryView(MS2Schema schema, QuerySettings settings, @Nullable BindException errors, SpectraCountConfiguration config, MS2Controller.SpectraCountForm form)
     {
@@ -132,6 +132,6 @@ public class SpectraCountQueryView extends QueryView
             sb.append("Peptide filter: ");
             sb.append(filter.getFilterText());
         }
-        return sb.length() == 0 ? null : sb.toString();
+        return sb.isEmpty() ? null : sb.toString();
     }
 }

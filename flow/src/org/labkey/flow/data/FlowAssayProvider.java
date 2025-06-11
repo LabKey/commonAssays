@@ -240,7 +240,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public HttpView getDataDescriptionView(AssayRunUploadForm form)
+    public HttpView<?> getDataDescriptionView(AssayRunUploadForm form)
     {
         return new HtmlView(HtmlString.of("Data files must be FCS file format."));
     }

@@ -258,7 +258,7 @@ public class LuminexManager
             }
         };
 
-        private String _description;
+        private final String _description;
 
         ExclusionType(String description)
         {
@@ -340,7 +340,7 @@ public class LuminexManager
 
     private Collection<Map<String, Object>> getWellExclusions(Set<Integer> dataIds)
     {
-        if(dataIds == null || dataIds.size() == 0)
+        if(dataIds == null || dataIds.isEmpty())
             return null;
 
         //Get full list of exclusions expanded per analyte
@@ -506,7 +506,7 @@ public class LuminexManager
     private SQLFragment appendInClause(SQLFragment sql, String columnExpression, Set set, String closeOutString)
     {
         //Add dataFileHeaderKey filter
-        if (set != null && set.size() > 0)
+        if (set != null && !set.isEmpty())
         {
             sql.append(" AND ").append(columnExpression);
             OntologyManager.getTinfoObject().getSqlDialect().appendInClauseSql(sql, set);

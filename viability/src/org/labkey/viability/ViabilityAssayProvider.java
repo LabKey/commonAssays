@@ -236,7 +236,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public HttpView getDataDescriptionView(AssayRunUploadForm form)
+    public HttpView<?> getDataDescriptionView(AssayRunUploadForm form)
     {
         return new HtmlView(HtmlString.of("Currently the only supported file type is the Guava comma separated values (.csv) file format."));
     }

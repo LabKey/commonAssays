@@ -25,7 +25,6 @@ import org.labkey.api.exp.api.ExperimentListener;
 import org.labkey.api.security.User;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

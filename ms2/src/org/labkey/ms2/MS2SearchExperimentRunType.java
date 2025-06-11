@@ -35,8 +35,8 @@ import org.labkey.ms2.query.MS2Schema;
  */
 public class MS2SearchExperimentRunType extends ExperimentRunType
 {
-    private Priority _priority;
-    private String[] _protocolPrefixes;
+    private final Priority _priority;
+    private final String[] _protocolPrefixes;
 
     public MS2SearchExperimentRunType(String name, String tableName, Priority priority, String... protocolPrefixes)
     {

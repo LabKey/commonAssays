@@ -361,8 +361,8 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
 
     public static class GuideSetTableUpdateService extends RowIdQueryUpdateService<GuideSet>
     {
-        private ExpProtocol _protocol;
-        private LuminexProtocolSchema _userSchema;
+        private final ExpProtocol _protocol;
+        private final LuminexProtocolSchema _userSchema;
 
         public GuideSetTableUpdateService(GuideSetTable guideSetTable)
         {

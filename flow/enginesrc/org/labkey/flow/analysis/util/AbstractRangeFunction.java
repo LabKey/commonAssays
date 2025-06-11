@@ -11,11 +11,13 @@ abstract class AbstractRangeFunction implements RangeFunction
         _max = max;
     }
 
+    @Override
     public double getMin()
     {
         return _min;
     }
 
+    @Override
     public double getMax()
     {
         return _max;

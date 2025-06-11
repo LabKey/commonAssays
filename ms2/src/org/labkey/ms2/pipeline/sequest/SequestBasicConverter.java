@@ -30,7 +30,7 @@ public class SequestBasicConverter implements IInputXMLConverter
         StringBuilder sb = new StringBuilder(sequestParam.getName());
         sb.append(" = ");
         sb.append(sequestParam.getValue());
-        if (sequestParam.getComment() != null && !sequestParam.getComment().equals(""))
+        if (sequestParam.getComment() != null && !sequestParam.getComment().isEmpty())
         {
             int spacer = 10;
             if (sb.length() < 36)

@@ -42,13 +42,13 @@ import java.util.Map;
  */
 public class FCSFileCoalescingColumn extends ExprColumn
 {
-    private boolean _relativeFromFCSFile;
+    private final boolean _relativeFromFCSFile;
 
     private Pair<FieldKey, FieldKey> _specimenIdFieldKeys;
     private Pair<FieldKey, FieldKey> _participantIdFieldKeys;
     private Pair<FieldKey, FieldKey> _visitFieldKeys;
     private Pair<FieldKey, FieldKey> _dateFieldKeys;
-    private Pair<FieldKey, FieldKey> _targetStudyFieldKeys;
+    private final Pair<FieldKey, FieldKey> _targetStudyFieldKeys;
 
     public FCSFileCoalescingColumn(TableInfo parent, FieldKey key, JdbcType type, @Nullable ICSMetadata metadata, boolean relativeFromFCSFile)
     {

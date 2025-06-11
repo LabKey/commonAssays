@@ -182,7 +182,7 @@ public class FlowJo10_0_6Workspace extends PC75Workspace
         }
         catch (XmlException e)
         {
-            throw new UnexpectedException(e);
+            throw UnexpectedException.wrap(e);
         }
         return gate;
     }

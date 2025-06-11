@@ -68,7 +68,6 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.webparts.FlowFolderType;
 import org.labkey.flow.webparts.OverviewWebPart;
 import org.labkey.vfs.FileLike;
-import org.labkey.vfs.FileSystemLike;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -194,7 +193,7 @@ public class FlowController extends BaseFlowController
     }
 
     @RequiresPermission(AdminPermission.class)
-    public class NewFolderAction extends FormViewAction<NewFolderForm>
+    public static class NewFolderAction extends FormViewAction<NewFolderForm>
     {
         Container destContainer;
 
@@ -297,7 +296,7 @@ public class FlowController extends BaseFlowController
 
     @AdminConsoleAction
     @RequiresPermission(AdminOperationsPermission.class)
-    public class FlowAdminAction extends FormViewAction<FlowAdminForm>
+    public static class FlowAdminAction extends FormViewAction<FlowAdminForm>
     {
         @Override
         public void validateCommand(FlowAdminForm form, Errors errors)
@@ -401,7 +400,7 @@ public class FlowController extends BaseFlowController
     }
 
     @RequiresPermission(AdminPermission.class)
-    public class MetricsAction extends ReadOnlyApiAction<Object>
+    public static class MetricsAction extends ReadOnlyApiAction<Object>
     {
         @Override
         public Object execute(Object o, BindException errors) throws Exception
@@ -437,13 +436,13 @@ public class FlowController extends BaseFlowController
 
             // @RequiresPermission(AdminPermission.class)
             assertForAdminPermission(user,
-                controller.new NewFolderAction()
+                    new NewFolderAction()
             );
 
             // @AdminConsoleAction
             // @RequiresPermission(AdminOperationsPermission.class)
             assertForAdminOperationsPermission(ContainerManager.getRoot(), user,
-                controller.new FlowAdminAction()
+                    new FlowAdminAction()
             );
         }
     }

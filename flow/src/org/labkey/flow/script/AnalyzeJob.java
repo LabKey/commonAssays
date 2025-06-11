@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class AnalyzeJob extends ScriptJob
 {
-    private static Logger _log = LogManager.getLogger(AnalyzeJob.class);
+    private static final Logger _log = LogManager.getLogger(AnalyzeJob.class);
 
     int[] _runIds;
 

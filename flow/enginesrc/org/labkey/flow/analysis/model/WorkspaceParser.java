@@ -15,7 +15,6 @@
  */
 package org.labkey.flow.analysis.model;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.parsers.DOMParser;
@@ -396,7 +395,7 @@ public class WorkspaceParser
             if (node instanceof Text)
             {
                 String data = ((Text)node).getData();
-                if (data.length() < 10 && data.trim().length() == 0)
+                if (data.length() < 10 && data.trim().isEmpty())
                     return FILTER_REJECT;
                 else
                     return FILTER_ACCEPT;
@@ -469,11 +468,7 @@ public class WorkspaceParser
                 setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.CONTINUE_AFTER_FATAL_ERROR_FEATURE, true);
                 setErrorHandler(new FJErrorHandler());
             }
-            catch (SAXNotSupportedException x)
-            {
-                throw new RuntimeException(x);
-            }
-            catch (SAXNotRecognizedException x)
+            catch (SAXNotSupportedException | SAXNotRecognizedException x)
             {
                 throw new RuntimeException(x);
             }

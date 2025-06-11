@@ -18,9 +18,7 @@ package org.labkey.ms2.reader;
 import org.labkey.api.search.AbstractDocumentParser;
 import org.labkey.api.webdav.WebdavResource;
 import org.xml.sax.ContentHandler;
-import org.xml.sax.SAXException;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 /**

@@ -69,7 +69,6 @@ public class AnalysisScriptTypeColumn extends DataColumn
         {
             ret += and;
             ret += "Analysis";
-            and = " and ";
         }
         return HtmlString.of(ret);
     }

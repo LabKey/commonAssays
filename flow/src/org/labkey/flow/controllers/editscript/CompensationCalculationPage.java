@@ -132,7 +132,6 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
     /**
      * Walks all of the samples in the workspace, looking for keyword/value pairs that uniquely identify a sample.
      * For each pair that is found, returns the list of subset names.
-     * @param workspace
      * @return Keyword -> Value -> Subsets
      */
     public Map<String, Map<String, List<String>>> getKeywordValueSampleMap(Workspace workspace)

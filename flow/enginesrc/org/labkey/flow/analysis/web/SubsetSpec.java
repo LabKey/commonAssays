@@ -68,8 +68,6 @@ public class SubsetSpec implements Serializable
     /**
      * Creates a new SubsetSpec from raw strings.  The final string may be a boolean expression.
      *
-     * @param rawStrings
-     * @return
      */
     static public SubsetSpec fromParts(String... rawStrings)
     {
@@ -96,8 +94,6 @@ public class SubsetSpec implements Serializable
 
     /**
      * Parses a SubsetSpec from an unesacped string and assumes there are no '/' characters in population names.
-     * @param rawString
-     * @return
      */
     static public SubsetSpec fromUnescapedString(String rawString)
     {
@@ -109,13 +105,11 @@ public class SubsetSpec implements Serializable
      * Parses a SubsetSpec from an escaped string.  Any special characters (e.g., "(" or "/") have been escaped
      * in each population by surrounding the population name with "{}".
      *
-     * @param strSubset
-     * @return
      * @see {@link org.labkey.flow.analysis.model.PopulationName#fromString(String)}.
      */
     static public SubsetSpec fromEscapedString(String strSubset)
     {
-        if (strSubset == null || strSubset.length() == 0)
+        if (strSubset == null || strSubset.isEmpty())
         {
             return null;
         }

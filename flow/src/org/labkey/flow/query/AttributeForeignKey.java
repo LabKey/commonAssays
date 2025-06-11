@@ -16,7 +16,6 @@
 
 package org.labkey.flow.query;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.*;
@@ -30,6 +29,7 @@ import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 
 import java.util.Collection;
+import java.util.Objects;
 
 abstract public class AttributeForeignKey<T extends Comparable<T>> extends AbstractForeignKey
 {
@@ -52,7 +52,7 @@ abstract public class AttributeForeignKey<T extends Comparable<T>> extends Abstr
     @Override
     public TableInfo getLookupTableInfo()
     {
-        VirtualTable ret = new VirtualTable(FlowManager.get().getSchema(), null, (UserSchema)_sourceSchema)
+        VirtualTable<?> ret = new VirtualTable<>(FlowManager.get().getSchema(), null, (UserSchema)_sourceSchema)
         {
             @Override
             protected boolean isCaseSensitive()
@@ -68,7 +68,7 @@ abstract public class AttributeForeignKey<T extends Comparable<T>> extends Abstr
             AttributeCache.Entry preferred = entry.getAliasedEntry();
 
             var column = new BaseColumnInfo(new FieldKey(null, attrName.toString()), ret);
-            String alias = am.decideAlias(StringUtils.defaultString(preferred==null?null:preferred.getName(), attrName.toString()));
+            String alias = am.decideAlias(Objects.toString(preferred==null?null:preferred.getName(), attrName.toString()));
             column.setAlias(alias);
             initColumn(attrName, preferred, column);
             ret.addColumn(column);

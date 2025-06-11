@@ -50,10 +50,10 @@ import javax.xml.stream.events.XMLEvent;
  */
 public class SimpleXMLEventRewriter
 {
-    private static Logger _log = LogManager.getLogger(SimpleXMLEventRewriter.class);
+    private static final Logger _log = LogManager.getLogger(SimpleXMLEventRewriter.class);
 
-    private static XMLEventFactory eventFactory = XMLEventFactory.newInstance();
-    private static DatatypeFactory typeFactory = null;
+    private static final XMLEventFactory eventFactory = XMLEventFactory.newInstance();
+    private static DatatypeFactory typeFactory;
 
     static
     {
@@ -70,8 +70,8 @@ public class SimpleXMLEventRewriter
 
     private InputStream in = null;
     private PrintStream out = null;
-    private String inFileName = null;
-    private String outFileName = null;
+    private String inFileName;
+    private String outFileName;
     private XMLEventReader parser = null;
     private XMLEventWriter writer = null;
 
@@ -256,7 +256,7 @@ public class SimpleXMLEventRewriter
     /**
      * 
      */
-    protected static interface SimpleElement
+    protected interface SimpleElement
     {
         XMLEvent getEvent();
     }
@@ -266,7 +266,7 @@ public class SimpleXMLEventRewriter
      */
     public static class SimpleStartElement implements SimpleElement
     {
-        private String name = null;
+        private String name;
         private ArrayList<Attribute> attrs = null;
 
         /**
@@ -353,7 +353,7 @@ public class SimpleXMLEventRewriter
      */
     public static class SimpleEndElement implements SimpleElement
     {
-        private String name = null;
+        private String name;
 
         /**
          * Create an end element with the given name
@@ -379,7 +379,7 @@ public class SimpleXMLEventRewriter
      */
     public static class SimpleSpaceElement implements SimpleElement
     {
-        private String content = null;
+        private String content;
 
         public SimpleSpaceElement(String content)
         {

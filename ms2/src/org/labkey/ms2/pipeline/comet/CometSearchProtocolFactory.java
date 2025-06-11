@@ -16,7 +16,6 @@
 package org.labkey.ms2.pipeline.comet;
 
 import org.labkey.api.data.Container;
-import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocolFactory;
 
 /**

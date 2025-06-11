@@ -43,7 +43,7 @@ public class TarIterator implements SimpleScanIterator
     private static final Logger _log = LogManager.getLogger(TarIterator.class);
     private static final int STREAM_BUFFER_SIZE = 128 * 1024;
 
-    private String _dtaFileNamePrefix = null;
+    private String _dtaFileNamePrefix;
     private InputStream _is;
     private GZIPInputStream _gzInputStream;
     private TarArchiveInputStream _tis;

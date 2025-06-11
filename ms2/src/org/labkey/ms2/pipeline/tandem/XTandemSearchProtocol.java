@@ -38,7 +38,7 @@ import java.util.Map;
  */
 public class XTandemSearchProtocol extends AbstractMS2SearchProtocol<XTandemPipelineJob>
 {
-    private static Logger _log = LogManager.getLogger(XTandemSearchProtocol.class);
+    private static final Logger _log = LogManager.getLogger(XTandemSearchProtocol.class);
 
     public XTandemSearchProtocol(String name, String description, String xml, Container container)
     {

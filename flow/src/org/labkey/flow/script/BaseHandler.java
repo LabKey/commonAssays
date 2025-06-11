@@ -25,7 +25,6 @@ import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.InputRole;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.List;
 
 abstract public class BaseHandler
@@ -82,14 +81,12 @@ abstract public class BaseHandler
         {
             if (logException(dbt.getAbout(), result))
                 continue;
-            if (result instanceof FCSAnalyzer.StatResult)
+            if (result instanceof FCSAnalyzer.StatResult statResult)
             {
-                FCSAnalyzer.StatResult statResult = (FCSAnalyzer.StatResult) result;
                 attrs.setStatistic(statResult.spec, statResult.value);
             }
-            else if (result instanceof FCSAnalyzer.GraphResult)
+            else if (result instanceof FCSAnalyzer.GraphResult graphResult)
             {
-                FCSAnalyzer.GraphResult graphResult = (FCSAnalyzer.GraphResult) result;
                 attrs.setGraph(graphResult.spec, graphResult.bytes);
             }
         }

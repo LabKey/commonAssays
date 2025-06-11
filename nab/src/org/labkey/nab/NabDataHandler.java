@@ -369,7 +369,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
     protected Pair<Integer, Integer> getWellLocation(File dataFile, String locationColumnHeader, int expectedRows, int expectedCols, Map<String, Object> line, int lineNumber) throws ExperimentException
     {
         Object locationValue = line.get(locationColumnHeader);
-        if (!(locationValue instanceof String location) || ((String) locationValue).length() < 2)
+        if (!(locationValue instanceof String location) || location.length() < 2)
             //throw createWellLocationParseError(dataFile, locationColumnHeader, lineNumber, locationValue);
             return null;
 

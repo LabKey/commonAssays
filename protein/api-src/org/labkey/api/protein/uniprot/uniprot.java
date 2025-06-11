@@ -39,7 +39,7 @@ import java.util.Date;
 public class uniprot extends ParseActions
 {
     private final Logger _log;
-    private static SqlDialect _dialect = CoreSchema.getInstance().getSqlDialect();
+    private static final SqlDialect _dialect = CoreSchema.getInstance().getSqlDialect();
     private long _startTime;
 
     private static final int TRANSACTION_ROW_COUNT = 100;

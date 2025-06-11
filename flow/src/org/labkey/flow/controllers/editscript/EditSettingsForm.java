@@ -78,7 +78,7 @@ public class EditSettingsForm extends EditScriptForm
             }
         }
 
-        ff_parameter = parameters.keySet().toArray(new String[parameters.size()]);
+        ff_parameter = parameters.keySet().toArray(new String[0]);
         ff_minValue = new String[ff_parameter.length];
         for (int i = 0; i < ff_parameter.length; i ++)
         {

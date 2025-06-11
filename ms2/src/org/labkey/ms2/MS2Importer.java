@@ -81,7 +81,7 @@ public abstract class MS2Importer
 
     // Use passed in logger for import status, information, and file format problems.  This should
     // end up in the pipeline log.
-    protected Logger _log = null;
+    protected Logger _log;
 
     // Use system logger for bugs & system problems, and in cases where we don't have a pipeline logger
     protected static Logger _systemLog = LogManager.getLogger(MS2Importer.class);
@@ -441,7 +441,7 @@ public abstract class MS2Importer
     }
 
 
-    private static String _updateSwissProtSeqIdSql;
+    private static final String _updateSwissProtSeqIdSql;
 
     static
     {
@@ -486,7 +486,7 @@ public abstract class MS2Importer
         _updateSwissProtSeqIdSql = sql.getSQL();
     }
 
-    private static String _updateSeqIdEndOfLookupStringSql;
+    private static final String _updateSeqIdEndOfLookupStringSql;
 
     static
     {
@@ -680,7 +680,7 @@ public abstract class MS2Importer
     }
 
 
-    private static String _updateCountsSql = "UPDATE " + MS2Manager.getTableInfoRuns() +
+    private static final String _updateCountsSql = "UPDATE " + MS2Manager.getTableInfoRuns() +
             " SET PeptideCount = (SELECT COUNT(*) AS PepCount FROM " + MS2Manager.getTableInfoPeptides() + " pep WHERE pep.run = " + MS2Manager.getTableInfoRuns() + ".run), " +
                 " NegativeHitCount = (SELECT COUNT(*) AS NegHitCount FROM " + MS2Manager.getTableInfoPeptides() + " pep WHERE pep.run = " + MS2Manager.getTableInfoRuns() + ".run AND pep.Protein LIKE ?) " +
             " WHERE Run = ?";
@@ -777,7 +777,7 @@ public abstract class MS2Importer
         UpdateCounts("update peptide and spectrum counts"),
         ClearRun("clear out any previously imported data");
 
-        private String _action;
+        private final String _action;
 
         Tasks(String action)
         {
@@ -816,7 +816,7 @@ public abstract class MS2Importer
 
         private Integer _previous = null;
 
-        private CumulativeTimer _timer = new CumulativeTimer(_log);
+        private final CumulativeTimer _timer = new CumulativeTimer(_log);
 
         public CumulativeTimer getCumulativeTimer()
         {

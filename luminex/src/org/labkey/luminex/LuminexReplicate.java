@@ -23,9 +23,9 @@ import org.labkey.luminex.model.LuminexWell;
  */
 public class LuminexReplicate
 {
-    private String _description;
-    private Double _dilution;
-    private int _dataId;
+    private final String _description;
+    private final Double _dilution;
+    private final int _dataId;
     private Double _expConc;
     private String _type;
 

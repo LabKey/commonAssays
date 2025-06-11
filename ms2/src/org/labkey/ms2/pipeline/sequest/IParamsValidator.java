@@ -23,5 +23,5 @@ package org.labkey.ms2.pipeline.sequest;
  */
 public interface IParamsValidator
 {
-    public String validate(Param spp);
+    String validate(Param spp);
 }

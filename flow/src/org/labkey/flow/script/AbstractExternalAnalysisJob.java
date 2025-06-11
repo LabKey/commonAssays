@@ -291,7 +291,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         try
         {
             // Create a new keyword run job for the selected FCS file directory
-            if (getKeywordDirectories() != null && getKeywordDirectories().size() > 0)
+            if (getKeywordDirectories() != null && !getKeywordDirectories().isEmpty())
             {
                 // CONSIDER: Only import FCSFiles in keyword directories that are in selectedFCSFiles if not null
                 List<FlowRun> runs = KeywordsTask.importFlowRuns(this, _protocol, getKeywordDirectories(), getTargetStudy());
@@ -304,9 +304,8 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                 {
                     for (FlowWell well : run.getWells())
                     {
-                        if (well instanceof FlowFCSFile)
+                        if (well instanceof FlowFCSFile file)
                         {
-                            FlowFCSFile file = (FlowFCSFile)well;
                             if (file.isOriginalFCSFile())
                                 newWells.add(file);
                         }
@@ -389,7 +388,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
         // Prepare comp matrices for saving
         Map<CompensationMatrix, AttributeSet> compMatrixMap = new HashMap<>();
         Set<CompensationMatrix> comps = new HashSet<>(sampleCompMatrixMap.values());
-        if (comps.size() > 0)
+        if (!comps.isEmpty())
             info("Preparing " + comps.size() + " comp. matrices...");
         for (CompensationMatrix comp : comps)
         {
@@ -433,7 +432,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                     return null;
 
                 Collection<String> sampleNames = sampleIdToNameMap.get(sampleId);
-                if (sampleNames.size() == 0)
+                if (sampleNames.isEmpty())
                 {
                     error("Sample name not found for id '" + sampleId + "'.");
                     continue;

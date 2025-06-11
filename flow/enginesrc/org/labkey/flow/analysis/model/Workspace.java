@@ -124,7 +124,7 @@ public abstract class Workspace extends BaseWorkspace<Workspace.SampleInfo> impl
         double version = 0;
         try
         {
-            if (versionString != null && versionString.length() > 0)
+            if (versionString != null && !versionString.isEmpty())
                 version = Double.parseDouble(versionString);
         }
         catch (NumberFormatException nfe)
@@ -248,13 +248,13 @@ public abstract class Workspace extends BaseWorkspace<Workspace.SampleInfo> impl
     {
         StringBuilder sb = new StringBuilder();
         if (sample != null)
-            sb.append("Sample ").append(sample.toString()).append(": ");
+            sb.append("Sample ").append(sample).append(": ");
 
         if (name != null)
-            sb.append(name.toString()).append(": ");
+            sb.append(name).append(": ");
 
         if (subset != null)
-            sb.append(subset.toString()).append(": ");
+            sb.append(subset).append(": ");
 
         sb.append(msg);
         warning(sb.toString());
@@ -401,7 +401,7 @@ public abstract class Workspace extends BaseWorkspace<Workspace.SampleInfo> impl
             allSamples = allSamplesGroup.getSampleInfos();
 
         // No "All Samples" group found or it was empty. Return all sample IDs in the workspace.
-        if (allSamples == null || allSamples.size() == 0)
+        if (allSamples == null || allSamples.isEmpty())
             allSamples = getSamplesComplete();
 
         return allSamples;
@@ -427,7 +427,7 @@ public abstract class Workspace extends BaseWorkspace<Workspace.SampleInfo> impl
     public List<String> getSampleLabels()
     {
         List<SampleInfo> allSamples = getSamples();
-        if (allSamples == null || allSamples.size() == 0)
+        if (allSamples == null || allSamples.isEmpty())
             return Collections.emptyList();
 
         List<String> allSampleLabels = new ArrayList<>(allSamples.size());
@@ -589,7 +589,7 @@ public abstract class Workspace extends BaseWorkspace<Workspace.SampleInfo> impl
                 return CompensationMatrix.fromSpillKeyword(_keywords);
             }
 
-            if (_compensationMatrices.size() == 0)
+            if (_compensationMatrices.isEmpty())
             {
                 return null;
             }
@@ -639,7 +639,7 @@ public abstract class Workspace extends BaseWorkspace<Workspace.SampleInfo> impl
 
         public List<String> getSampleIds()
         {
-            if (_sampleIds.size() == 0 && isAllSamples())
+            if (_sampleIds.isEmpty() && isAllSamples())
                 return new ArrayList<>(Workspace.this.getSampleIdsComplete());
             return _sampleIds;
         }

@@ -18,7 +18,6 @@ package org.labkey.ms2.pipeline;
 import org.labkey.api.pipeline.file.FileAnalysisJobSupport;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * <code>MS2PipelineJobSupport</code> Interface for providing MS2 search support to

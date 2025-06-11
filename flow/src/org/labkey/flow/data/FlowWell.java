@@ -132,7 +132,6 @@ public class FlowWell extends FlowDataObject
 
     /**
      * Get the FlowFCSFile DataInput of this FCSAnalysis (or fake FCSFile.)
-     * @return
      */
     public FlowFCSFile getFCSFileInput()
     {
@@ -172,7 +171,6 @@ public class FlowWell extends FlowDataObject
 
     /**
      * Get all FlowFCSFile wells that are DataOutputs of this 'fake' FCSFile well.
-     * @return
      */
     public List<FlowFCSFile> getFCSFileOutputs()
     {
@@ -186,7 +184,6 @@ public class FlowWell extends FlowDataObject
 
     /**
      * Get all FlowFCSAnalysis wells that are DataOutputs of this FCSFile well.
-     * @return
      */
     public List<FlowFCSAnalysis> getFCSAnalysisOutputs()
     {
@@ -211,7 +208,6 @@ public class FlowWell extends FlowDataObject
     /**
      * Get only the requested keyword values.
      * @param keywords The set of keywords to fetch.
-     * @return
      */
     public Map<String, String> getKeywords(String... keywords)
     {

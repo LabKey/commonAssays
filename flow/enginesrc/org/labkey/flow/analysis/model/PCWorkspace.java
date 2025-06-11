@@ -208,7 +208,7 @@ public class PCWorkspace extends FlowJoWorkspace
             }
         }
 
-        if (gates.size() > 0)
+        if (!gates.isEmpty())
         {
             Gate gate = null;
             String tagName = elBoolNode.getTagName();

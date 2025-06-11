@@ -109,7 +109,7 @@ public class WellController extends BaseFlowController
     }
 
     @RequiresNoPermission
-    public class BeginAction extends SimpleViewAction
+    public static class BeginAction extends SimpleViewAction<Object>
     {
         @Override
         public ModelAndView getView(Object o, BindException errors)
@@ -198,7 +198,7 @@ public class WellController extends BaseFlowController
         {
             Page page = getPage("/org/labkey/flow/controllers/well/showWell.jsp");
             _well = page.getWell();
-            JspView v = new JspView(page);
+            JspView v = new JspView<>(page);
             v.setClientDependencies(page.getClientDependencies());
             return v;
         }
@@ -279,7 +279,7 @@ public class WellController extends BaseFlowController
                 {
                     _wells = getWells(form.ff_isBulkEdit);
                 }
-                if (_wells == null || _wells.size() == 0)
+                if (_wells == null || _wells.isEmpty())
                 {
                     Set<String> selected = DataRegionSelection.getSelected(form.getViewContext(), null, false);
                     _wells = new ArrayList<>();
@@ -663,7 +663,7 @@ public class WellController extends BaseFlowController
 
 
     @RequiresPermission(AdminPermission.class)
-    public class BulkUpdateKeywordsAction extends FormViewAction<UpdateKeywordsForm>
+    public static class BulkUpdateKeywordsAction extends FormViewAction<UpdateKeywordsForm>
     {
         private Integer _keywordid = null;
 
@@ -869,7 +869,7 @@ public class WellController extends BaseFlowController
 
 
     @RequiresPermission(AdminPermission.class)
-    public class SetFileDateAction extends MutatingApiAction<Object>
+    public static class SetFileDateAction extends MutatingApiAction<Object>
     {
         @Override
         public Object execute(Object o, BindException errors)

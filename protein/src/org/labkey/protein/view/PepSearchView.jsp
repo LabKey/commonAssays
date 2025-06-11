@@ -22,7 +22,7 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<PepSearchModel> me = (JspView<PepSearchModel>) HttpView.currentView();
+    JspView<PepSearchModel> me = HttpView.currentView();
     PepSearchModel model = me.getModelBean();
 %>
 <% if (model.hasErrorMsg()) { %>

@@ -78,7 +78,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
             {
                 throw new NotFoundException("scriptId required");
             }
-            int scriptId = 0;
+            int scriptId;
             try
             {
                 scriptId = Integer.parseInt(scriptIdStr);
@@ -199,7 +199,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
         try
         {
             List matrices = FlowCompensationMatrix.getCompensationMatrices(getContainer());
-            if (matrices.size() == 0)
+            if (matrices.isEmpty())
                 return null;
             _comp = (FlowCompensationMatrix) matrices.get(0);
         }
@@ -310,7 +310,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
             _log.error("Error", t);
         }
 
-        String[] ret = keywords.toArray(new String[keywords.size()]);
+        String[] ret = keywords.toArray(new String[0]);
         Arrays.sort(ret);
         return ret;
     }

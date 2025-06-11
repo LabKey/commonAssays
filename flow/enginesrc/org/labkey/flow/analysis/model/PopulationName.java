@@ -41,7 +41,7 @@ public class PopulationName implements SubsetPart, Comparable<PopulationName>
     public static final Character MAC_EMDASH = (char)209;
 
     // Characters not allowed to appear within a top-level population name.
-    private static Set<Character> illegalTopLevelChars = new HashSet<>();
+    private static final Set<Character> illegalTopLevelChars = new HashSet<>();
     static
     {
         illegalTopLevelChars.add('/');
@@ -50,7 +50,7 @@ public class PopulationName implements SubsetPart, Comparable<PopulationName>
     }
 
     // Characters not allowed to appear within a population name inside of boolean expression.
-    private static Set<Character> illegalExpressionChars = new HashSet<>();
+    private static final Set<Character> illegalExpressionChars = new HashSet<>();
     static
     {
         illegalExpressionChars.add('(');
@@ -71,7 +71,7 @@ public class PopulationName implements SubsetPart, Comparable<PopulationName>
 
     public static PopulationName fromString(String str)
     {
-        if (str == null || str.length() == 0)
+        if (str == null || str.isEmpty())
             return null;
 
         // replace MacRoman em-dash and en-dash

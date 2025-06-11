@@ -151,7 +151,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
 
         SampleIdMap<FlowFCSFile> selectedFCSFiles = resolveSelectedFCSFiles(workspace, getSelectedFCSFiles(), getNewlyImportedFCSFiles());
 
-        if (keywordsMap.size() > 0)
+        if (!keywordsMap.isEmpty())
             info("Preparing keywords for " + (selectedFCSFiles != null ? selectedFCSFiles.size() : keywordsMap.size()) + " samples...");
         for (String id : keywordsMap.idSet())
         {
@@ -192,7 +192,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             AttributeSetHelper.prepareForSave(sampleLabel, keywordAttrs, getContainer(), false);
         }
 
-        if (resultsMap.size() > 0)
+        if (!resultsMap.isEmpty())
             info("Preparing results for " + (selectedFCSFiles != null ? selectedFCSFiles.size() : resultsMap.size()) + " samples...");
         for (String id : resultsMap.idSet())
         {

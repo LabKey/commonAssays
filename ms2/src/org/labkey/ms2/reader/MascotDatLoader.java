@@ -191,16 +191,16 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     }
 
     private String _boundaryMarker = null;
-    private BufferedReader _reader = null;
+    private BufferedReader _reader;
     private String _currentLine = null;
     private Section _currentSection = null;
     private Integer _currentQueryNum = null;
 
     private long _charactersRead = 0L; // used for indicating progress; not exact, but probably close enough
 
-    private Set<Section> _loadedSections = new HashSet<>();
+    private final Set<Section> _loadedSections = new HashSet<>();
 
-    private Map<String, Float> _masses = new HashMap<>();
+    private final Map<String, Float> _masses = new HashMap<>();
 
     private static final String _nonStandardAminoAcids = "BJOUXZ";
 
@@ -423,7 +423,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                 }
                 else if ((matcher = MASS_FIXED_MOD_LINE.matcher(_currentLine)).matches()) // these are static mods
                 {
-                    Float massDelta = Float.parseFloat(matcher.group(MASS_DELTA_GROUP_NUM));
+                    float massDelta = Float.parseFloat(matcher.group(MASS_DELTA_GROUP_NUM));
                     String residues = matcher.group(MASS_RESIDUES_GROUP_NUM);
                     residues = residues.replace("N-term", "");
                     residues = residues.replace("C-term", "");
@@ -445,7 +445,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
 
                     if (massName.length() == 1)
                     {
-                        Float mass = Float.parseFloat(matcher.group(KV_VALUE_GROUP_NUM));
+                        float mass = Float.parseFloat(matcher.group(KV_VALUE_GROUP_NUM));
                         _masses.put(massName, mass);
                         if (_nonStandardAminoAcids.contains(massName)) // These are the fixed mods
                         {
@@ -571,7 +571,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                     peptide.setScore(IDENTITY_SCORE, "100.0");
                 else
                 {
-                    Float matchValue = Float.valueOf(matcher.group(KV_VALUE_GROUP_NUM));
+                    float matchValue = Float.parseFloat(matcher.group(KV_VALUE_GROUP_NUM));
                     double valueLog10 = 10 * Math.log10(matchValue);
                     peptide.setScore(IDENTITY_SCORE, String.format("%.2f", valueLog10));
                 }
@@ -726,7 +726,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
         Double retentionTime = null;
 
         String scanPrefix = "scansinrange";
-        Integer rangePosition = title.indexOf(scanPrefix); //sum of several scans
+        int rangePosition = title.indexOf(scanPrefix); //sum of several scans
 
         // get end scan if we haven't already
         if (rangePosition != -1) {  // was scansinrange: end scan after 'to'
@@ -890,7 +890,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
 
         private int _index;
         // The DatPeptide itself will have the properties for hitRank == 1; hit ranks > 1 are stored in this member list
-        private List<DatPeptide> otherHitRanks = new ArrayList<>();
+        private final List<DatPeptide> otherHitRanks = new ArrayList<>();
 
         public int getIndex()
         {
@@ -1068,7 +1068,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     public class PeptideIterator implements Iterator<DatPeptide>
     {
         private DatPeptide _peptide = null;
-        private PeptideFraction _fraction = null;
+        private PeptideFraction _fraction;
 
         public PeptideIterator(PeptideFraction fraction)
         {

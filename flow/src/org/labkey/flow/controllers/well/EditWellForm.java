@@ -73,7 +73,7 @@ public class EditWellForm extends ViewForm
     public void setWells(List<FlowWell> wells, boolean isBulkEdit)
     {
         _wells = wells;
-        if (wells != null && wells.size() > 0)
+        if (wells != null && !wells.isEmpty())
         {
             setFormKeywords(wells);
 

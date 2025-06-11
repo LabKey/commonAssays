@@ -102,7 +102,7 @@ public class ElisaController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class GetCurveFitXYPairs extends ReadOnlyApiAction<GetCurveFitXYPairsForm>
+    public static class GetCurveFitXYPairs extends ReadOnlyApiAction<GetCurveFitXYPairsForm>
     {
         ExpRun _run;
 

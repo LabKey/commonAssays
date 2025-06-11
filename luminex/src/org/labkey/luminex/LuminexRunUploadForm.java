@@ -107,7 +107,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         {
             String value = getRequest().getParameter(AnalyteDefaultValueService.getAnalytePropertyName(analyteName, dp));
             if (dp.isRequired() && dp.getPropertyDescriptor().getPropertyType() == PropertyType.BOOLEAN &&
-                    (value == null || value.length() == 0))
+                    (value == null || value.isEmpty()))
                 value = Boolean.FALSE.toString();
             value = StringUtils.trimToNull(value);
             properties.put(dp, value);

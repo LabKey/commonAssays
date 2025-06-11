@@ -103,7 +103,7 @@
                     <td class="labkey-form-label">Fraction</td><td><%= h(fraction.getFileName()) %></td>
                 </tr>
                 <tr>
-                    <% if (run.getRunType().getScoreColumnList().size() >= 1) { %>
+                    <% if (!run.getRunType().getScoreColumnList().isEmpty()) { %>
                         <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(0)) %></td><td><%= h(p.getRawScore() == null ? "" : Formats.f3.format(p.getRawScore())) %></td>
                     <% } %>
                     <td class="labkey-form-label">PeptideProphet</td><td><%= h((p.getPeptideProphet() == null) ? "" : Formats.f2.format(p.getPeptideProphet())) %></td>

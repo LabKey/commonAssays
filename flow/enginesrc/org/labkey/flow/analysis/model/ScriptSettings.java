@@ -144,7 +144,7 @@ public class ScriptSettings implements Serializable
             }
         }
 
-        if (_filters.size() > 0)
+        if (!_filters.isEmpty())
         {
             FiltersDef filtersDef = ret.addNewFilters();
             for (FilterInfo filter : _filters.values())

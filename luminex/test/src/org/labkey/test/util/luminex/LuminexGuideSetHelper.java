@@ -42,7 +42,7 @@ public class LuminexGuideSetHelper
     private static final Locator GS_WINDOW_LOC =
             Locator.tag("div").withClasses("x-window", "leveljenningsreport");
     public static final String[] GUIDE_SET_ANALYTE_NAMES = {"GS Analyte A", "GS Analyte B"};
-    private static Map<Integer, String> timestamps = new HashMap<>();
+    private static final Map<Integer, String> timestamps = new HashMap<>();
     final LuminexTest _test;
     
     public Calendar TESTDATE = Calendar.getInstance();

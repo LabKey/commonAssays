@@ -48,7 +48,7 @@ public class FCSHeader
 
     private static final Logger LOG = LogManager.getLogger(FCSHeader.class);
 
-    private Map<String, String> keywords = new CaseInsensitiveHashMap<>();
+    private final Map<String, String> keywords = new CaseInsensitiveHashMap<>();
     int dataLast;
     int dataOffset;
     int textOffset;
@@ -489,7 +489,7 @@ public class FCSHeader
                 String strValue = fullText.substring(ichMid + 1, ichEnd);
                 // FCS format encodes empty keyword values as a single space character -- convert it to null.
                 strValue = strValue.trim();
-                if (strValue.length() == 0)
+                if (strValue.isEmpty())
                     strValue = null;
                 if (keywords.containsKey(strKey))
                     LOG.warn("Duplicate key '" + strKey + "'");

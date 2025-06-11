@@ -86,7 +86,6 @@ public class ExpressionMatrixRunCreator extends AbstractMatrixRunCreator<Express
      * @param runPath Path under the pipeline root to look for the featureSet, when featureSet is a path.
      * @param featureSet The feature set id, name, or file path.
      * @return The feature annotation set id only if it needs to be saved back to the 'featureSet' property; otherwise null.
-     * @throws ValidationException
      */
     @Override
     public Integer ensureSet(@NotNull AssayRunUploadContext<ExpressionMatrixAssayProvider> context, @Nullable File runPath, @NotNull String featureSet) throws ValidationException

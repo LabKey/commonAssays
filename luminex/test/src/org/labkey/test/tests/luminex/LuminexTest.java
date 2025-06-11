@@ -61,7 +61,6 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.labkey.test.params.FieldDefinition.DOMAIN_TRICKY_CHARACTERS;
 import static org.labkey.test.util.TestDataGenerator.DOMAIN_SPECIAL_STRING;
 
 @BaseWebDriverTest.ClassTimeout(minutes = 40)
@@ -363,7 +362,6 @@ public abstract class LuminexTest extends BaseWebDriverTest
      * click on the exclusion icon associated with the particular well
      * preconditions:  at Test Result page
      * postconditions: at Test Result Page with exclude Replicate Group From Analysis window up
-     * @param wellName
      */
     protected void clickExclusionMenuIconForWell(String wellName, boolean selectReplicateGroups)
     {
@@ -572,7 +570,6 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
     /**
      * Cleanup entry point.
-     * @param afterTest
      */
     @Override
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
@@ -682,7 +679,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
         //verify expected values in column
         List<String> var = new DataRegionTable("Runs", getDriver()).getFullColumnValues("QC Flags").get(0);
-        String[] flags = var.toArray(new String[var.size()]);
+        String[] flags = var.toArray(new String[0]);
         for (int i=0; i<flags.length; i++)
         {
             assertEquals(expectedFlags[i], flags[i].trim());
@@ -737,10 +734,10 @@ public abstract class LuminexTest extends BaseWebDriverTest
         assertTextPresent("Titration QC Report");
         DataRegionTable drt = new DataRegionTable("AnalyteTitration", this);
         String isotype = drt.getDataAsText(0, "Isotype");
-        if (isotype.length() == 0)
+        if (isotype.isEmpty())
             isotype = "[None]";
         String conjugate = drt.getDataAsText(0, "Conjugate");
-        if (conjugate.length() == 0)
+        if (conjugate.isEmpty())
             conjugate =  "[None]";
 
         log("verify the calculation failure flag");

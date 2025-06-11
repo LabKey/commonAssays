@@ -27,10 +27,10 @@ import java.util.Map;
  */
 public class ParserTree
 {
-    private ParserTreeNode _root = new ParserTreeNode(null, "ROOT");
+    private final ParserTreeNode _root = new ParserTreeNode(null, "ROOT");
     private ParserTreeNode _currentNode = _root;
 
-    private Logger _log;
+    private final Logger _log;
 
     public ParserTree(Logger log)
     {
@@ -111,7 +111,7 @@ public class ParserTree
             StringBuilder sb = new StringBuilder();
             while (node != _root)
             {
-                if (sb.length() > 0)
+                if (!sb.isEmpty())
                 {
                     sb.insert(0, "_");
                 }

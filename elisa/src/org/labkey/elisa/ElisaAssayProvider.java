@@ -71,6 +71,7 @@ import org.labkey.elisa.actions.ElisaUploadWizardAction;
 import org.labkey.elisa.plate.BioTekPlateReader;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -141,10 +142,10 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     {
         BIOTEK(BioTekPlateReader.LABEL, BioTekPlateReader.class);
 
-        private String _label;
-        private Class _class;
+        private final String _label;
+        private final Class<? extends PlateReader> _class;
 
-        private PlateReaderType(String label, Class cls)
+        PlateReaderType(String label, Class<? extends PlateReader> cls)
         {
             _label = label;
             _class = cls;
@@ -159,9 +160,9 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         {
             try
             {
-                return (PlateReader)_class.newInstance();
+                return _class.getDeclaredConstructor().newInstance();
             }
-            catch (InstantiationException | IllegalAccessException x)
+            catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException x)
             {
                 throw new RuntimeException(x);
             }
@@ -295,11 +296,11 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     }
 
     @Override
-    public HttpView getDataDescriptionView(AssayRunUploadForm form)
+    public HttpView<?> getDataDescriptionView(AssayRunUploadForm form)
     {
-        if (form instanceof ElisaRunUploadForm)
+        if (form instanceof ElisaRunUploadForm eForm)
         {
-            if (((ElisaRunUploadForm)form).getSampleMetadataInputFormat() == SampleMetadataInputFormat.COMBINED)
+            if (eForm.getSampleMetadataInputFormat() == SampleMetadataInputFormat.COMBINED)
                 return new JspView<>("/org/labkey/assay/view/tsvDataDescription.jsp", form);
         }
         return new HtmlView(HtmlString.of("The ELISA data files must be in the BioTek Microplate Reader Excel file format (.xls or .xlsx extension)."));
@@ -438,7 +439,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
         // move specimen
         String tableName = AssayProtocolSchema.DATA_TABLE_NAME;
         AssaySchema schema = createProtocolSchema(user, targetContainer, protocol, null);
-        FilteredTable assayResultTable = (FilteredTable) schema.getTable(tableName);
+        FilteredTable<?> assayResultTable = (FilteredTable<?>) schema.getTable(tableName);
         if (assayResultTable != null)
         {
             TableInfo expMaterialTable = ExperimentService.get().getTinfoMaterial();

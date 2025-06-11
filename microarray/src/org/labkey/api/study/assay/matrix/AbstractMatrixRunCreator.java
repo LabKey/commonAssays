@@ -106,7 +106,6 @@ public abstract class AbstractMatrixRunCreator <ProviderType extends AbstractAss
      * @param runPath Path under the pipeline root to look for the set, when set is a path.
      * @param idNameOrFilePath The set id, name, or file path.
      * @return The set id only if it needs to be saved back to the "set" property; otherwise null.
-     * @throws ValidationException
      */
     //TODO: may not need this
     public abstract Integer ensureSet(@NotNull AssayRunUploadContext<ProviderType> context, @Nullable File runPath, @NotNull String idNameOrFilePath) throws ValidationException, ExperimentException;

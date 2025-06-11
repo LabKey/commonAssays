@@ -22,7 +22,7 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<LoadAnnotForm> me = (JspView<LoadAnnotForm>) HttpView.currentView();
+    JspView<LoadAnnotForm> me = HttpView.currentView();
     LoadAnnotForm bean = me.getModelBean();
 %>
 <labkey:errors />

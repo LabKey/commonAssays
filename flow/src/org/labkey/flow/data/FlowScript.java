@@ -105,7 +105,7 @@ public class FlowScript extends FlowDataObject
                 continue;
             ret.add(script);
         }
-        return ret.toArray(new FlowScript[ret.size()]);
+        return ret.toArray(new FlowScript[0]);
     }
 
     static public FlowScript[] getAnalysisScripts(Container container)
@@ -254,7 +254,7 @@ public class FlowScript extends FlowDataObject
             {
                 ret.add(channel.getName());
             }
-            return ret.toArray(new String[ret.size()]);
+            return ret.toArray(new String[0]);
         }
         catch (Exception e)
         {

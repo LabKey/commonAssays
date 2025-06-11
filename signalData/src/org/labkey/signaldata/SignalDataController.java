@@ -68,7 +68,7 @@ public class SignalDataController extends SpringActionController
      * Meant to mimic PipelineController.getPipelineContainerAction but with the incorporated SignalData path context
      */
     @RequiresPermission(ReadPermission.class)
-    public class getSignalDataPipelineContainerAction extends ReadOnlyApiAction
+    public static class getSignalDataPipelineContainerAction extends ReadOnlyApiAction<Object>
     {
         @Override
         public ApiResponse execute(Object form, BindException errors) throws Exception
@@ -127,7 +127,7 @@ public class SignalDataController extends SpringActionController
 
 
     @RequiresPermission(ReadPermission.class)
-    public class getSignalDataResourceAction extends MutatingApiAction<SignalDataResourceForm>
+    public static class getSignalDataResourceAction extends MutatingApiAction<SignalDataResourceForm>
     {
         @Override
         public ApiResponse execute(SignalDataResourceForm form, BindException errors)

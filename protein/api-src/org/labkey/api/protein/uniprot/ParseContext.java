@@ -27,12 +27,12 @@ import java.util.Map;
 public class ParseContext
 {
     private uniprot _uniprotRoot;
-    private List<UniprotAnnotation> _annotations = new ArrayList<>();
-    private List<UniprotIdentifier> _identifiers = new ArrayList<>();
-    private Map<String, UniprotSequence> _sequences = new HashMap<>();
+    private final List<UniprotAnnotation> _annotations = new ArrayList<>();
+    private final List<UniprotIdentifier> _identifiers = new ArrayList<>();
+    private final Map<String, UniprotSequence> _sequences = new HashMap<>();
     private UniprotSequence _currentSequence;
     private UniprotOrganism _currentOrganism;
-    private Map<String, UniprotOrganism> _organisms = new HashMap<>();
+    private final Map<String, UniprotOrganism> _organisms = new HashMap<>();
     private final Connection _conn;
     private boolean _clearExisting;
 

@@ -131,7 +131,7 @@ public class PC75Workspace extends PCWorkspace
     protected Gate readGate(Element elGate, SubsetSpec subset, Analysis analysis, String sampleId)
     {
         List<Element> elChildren = getElements(elGate);
-        if (elChildren.size() == 0)
+        if (elChildren.isEmpty())
         {
             warnOnce(sampleId, analysis.getName(), subset, "No gate found");
             return null;
@@ -145,9 +145,9 @@ public class PC75Workspace extends PCWorkspace
         if (gate != null)
         {
             String id = gate.getId();
-            if (id == null || "".equals(id))
+            if (id == null || id.isEmpty())
                 id = elGate.getAttributeNS(GATING_1_5_NS, "id");
-            if (id == null || "".equals(id))
+            if (id == null || id.isEmpty())
                 id = elGate.getAttributeNS(GATING_2_0_NS, "id");
 
             if (invert)
@@ -196,7 +196,7 @@ public class PC75Workspace extends PCWorkspace
         }
         catch (XmlException e)
         {
-            throw new UnexpectedException(e);
+            throw UnexpectedException.wrap(e);
         }
         return gate;
     }

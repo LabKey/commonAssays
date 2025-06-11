@@ -54,7 +54,6 @@ public class PlotFactory
      * @param maxValue max value
      * @param bucketCount The maximum number of buckets
      * @param fn function used to space the buckets
-     * @return
      */
     static public double[] getPossibleValues(double minValue, double maxValue, int bucketCount, RangeFunction fn)
     {

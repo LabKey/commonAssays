@@ -32,7 +32,6 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.view.ViewContext;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,9 +78,8 @@ public class ElispotDataExchangeHandler extends PlateBasedDataExchangeHandler
     ) throws Exception
     {
         AssayProvider provider = AssayService.get().getProvider(protocol);
-        if (provider instanceof ElispotAssayProvider)
+        if (provider instanceof ElispotAssayProvider plateProvider)
         {
-            ElispotAssayProvider plateProvider = (ElispotAssayProvider)provider;
             Plate template = plateProvider.getPlate(viewContext.getContainer(), protocol);
             if (template != null)
             {
