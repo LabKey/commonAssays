@@ -26,6 +26,7 @@ import org.labkey.api.data.DataColumn;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.ExcelWriter;
+import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -48,8 +49,11 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -68,7 +72,7 @@ public class CompareQuery extends SQLFragment
     private String _header;
     protected final User _user;
 
-    private final Set<FieldKey> _columns = new HashSet<>();
+    private final Map<FieldKey, ColumnInfo> _columns = new HashMap<>();
     protected static final String HEADER_PREFIX = "Numbers below represent ";
 
     public CompareQuery(ActionURL currentUrl, List<MS2Run> runs, User user)
@@ -153,7 +157,12 @@ public class CompareQuery extends SQLFragment
 
     protected void addColumn(String name)
     {
-        _columns.add(FieldKey.fromParts(name));
+        // Fake up a column map so we can use Sort.getOrderByClause()
+        FieldKey fk = FieldKey.fromParts(name);
+        BaseColumnInfo col = new BaseColumnInfo(fk, JdbcType.VARCHAR);
+        col.setSortFieldKeys(Collections.singletonList(fk));
+        col.setAlias(MS2Manager.getSqlDialect().makeDatabaseIdentifier(name));
+        _columns.put(fk, col);
     }
 
     protected void selectColumns()
@@ -357,20 +366,6 @@ public class CompareQuery extends SQLFragment
         Sort sort = new Sort("-RunCount,-Pattern," + getLabelColumn());
         sort.addURLSort(_currentUrl, MS2Manager.getDataRegionNameCompare());
 
-        // Filter out bogus URL sort columns
-        int index = 0;
-        while (sort.getSortList().size() > index)
-        {
-            if (!_columns.contains(sort.getSortList().get(index).getFieldKey()))
-            {
-                sort.deleteSortColumn(index);
-            }
-            else
-            {
-                index++;
-            }
-        }
-
         // TODO: If there are more than three columns in the sort list, then it may be that "BestName" and "Protein"
         // are in the list, in which case SQL server will fail to execute the query.  Therefore, we restrict the number
         // of columns you can sort on to 3.
@@ -378,7 +373,7 @@ public class CompareQuery extends SQLFragment
         {
             sort.deleteSortColumn(sort.getSortList().size() - 1);
         }
-        append(sort.getOrderByClauseUnchecked(MS2Manager.getSqlDialect()));
+        append(sort.getOrderByClause(MS2Manager.getSqlDialect(), _columns));
     }
 
     protected void appendNewLine()

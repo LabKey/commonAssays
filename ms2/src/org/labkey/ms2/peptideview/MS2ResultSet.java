@@ -19,15 +19,12 @@ package org.labkey.ms2.peptideview;
 import org.labkey.api.data.ResultSetWrapper;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Sort;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * User: adam
@@ -37,20 +34,10 @@ import java.util.List;
 public abstract class MS2ResultSet extends ResultSetWrapper
 {
     protected Iterator<MS2Run> _iter;
-    protected SimpleFilter _filter;
-    protected Sort _sort;
 
     protected MS2ResultSet()
     {
         super(null);
-    }
-
-    MS2ResultSet(List<MS2Run> runs, SimpleFilter filter, Sort sort)
-    {
-        super(null);
-        _iter = runs.iterator();
-        _filter = filter;
-        _sort = sort;
     }
 
     // Subclasses should call at the end of their constructors -- this pre-fetches the first result set which ensures
@@ -91,7 +78,6 @@ public abstract class MS2ResultSet extends ResultSetWrapper
 
     /**
      * Wraps the join of Peptides, PeptidesData, & SpectraData in a subselect to disambiguate scan & fraction column references in filters/sorts
-     *
      */
     protected SQLFragment getBaseResultSetSql()
     {

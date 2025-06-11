@@ -17,15 +17,9 @@
 package org.labkey.ms2.peptideview;
 
 import org.labkey.api.data.RuntimeSQLException;
-import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.SimpleFilter;
-import org.labkey.api.data.Sort;
-import org.labkey.api.data.SqlSelector;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.ResultSetUtil;
 import org.labkey.ms2.MS2Manager;
-import org.labkey.ms2.MS2Run;
-import org.labkey.ms2.PeptideManager;
 import org.labkey.ms2.Spectrum;
 import org.labkey.ms2.SpectrumException;
 import org.labkey.ms2.SpectrumImporter;
@@ -34,7 +28,6 @@ import org.labkey.ms2.SpectrumIterator;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -59,11 +52,6 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
 
     protected ResultSetSpectrumIterator()
     {
-    }
-
-    public ResultSetSpectrumIterator(List<MS2Run> runs, SimpleFilter filter, Sort sort)
-    {
-        _rs = new SpectrumResultSet(runs, filter, sort);
     }
 
     @Override
@@ -300,29 +288,6 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
             {
                 throw new RuntimeSQLException(e);
             }
-        }
-    }
-
-
-    private static class SpectrumResultSet extends MS2ResultSet
-    {
-        public SpectrumResultSet(List<MS2Run> runs, SimpleFilter filter, Sort sort)
-        {
-            super(runs, filter, sort);
-        }
-
-        @Override
-        public ResultSet getNextResultSet()
-        {
-            PeptideManager.replaceRunCondition(_filter, null, _iter.next());
-
-            SQLFragment sql = getBaseResultSetSql();
-            sql.append(") X\n");
-            sql.append(_filter.getWhereSQL(MS2Manager.getTableInfoPeptides()));
-            sql.append('\n');
-            sql.append(_sort.getOrderByClauseUnchecked(MS2Manager.getSqlDialect()));
-
-            return new SqlSelector(MS2Manager.getSchema(), sql.getSQL(), _filter.getWhereParams(MS2Manager.getTableInfoPeptides())).getResultSet(false);
         }
     }
 }
