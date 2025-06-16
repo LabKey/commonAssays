@@ -71,13 +71,11 @@ public class MS2Test extends AbstractMS2ImportTest
     protected void verifyMS2()
     {
         verifyFirstRun();
-
         validateSecondRun();
-
         validateRunGroups();
-
         queryValidationTest();
         pepXMLtest();
+        validateContainerFilter();
     }
 
     private void verifyFirstRun()
@@ -921,7 +919,7 @@ public class MS2Test extends AbstractMS2ImportTest
         verifyGroupAudit();
     }
 
-        //verify audit trail registers runs added to or removed from groups.
+    //verify audit trail registers runs added to or removed from groups.
     private void verifyGroupAudit()
     {
         List<Map<String, Object>> rows = executeSelectRowCommand("auditLog", "ExperimentAuditEvent").getRows();
@@ -1223,5 +1221,34 @@ public class MS2Test extends AbstractMS2ImportTest
             result.add(element.getText().trim());
         }
         return result;
+    }
+
+    /**
+     * Issue 52245 - container filter not getting propagated to run group lookup
+     */
+    private void validateContainerFilter()
+    {
+        // create a run group at the project level
+        goToProjectHome(getProjectName());
+        clickAndWait(Locator.linkWithText("Run Groups"));
+        clickButton("Create Run Group");
+        setFormElement(Locator.name("name"), RUN_GROUP3_NAME);
+        clickButton("Submit");
+
+        navigateToFolder(FOLDER_NAME);
+        DataRegionTable runsTable = new DataRegionTable(REGION_NAME_SEARCH_RUNS, this);
+        runsTable.checkAllOnPage();
+        runsTable.clickHeaderMenu("Add to run group", RUN_GROUP3_NAME);
+
+        goToProjectHome(getProjectName());
+        goToSchemaBrowser();
+        DataRegionTable dataTable = viewQueryData("ms2", "XTandemPeptides");
+        dataTable.setContainerFilter(DataRegionTable.ContainerFilterType.CURRENT_AND_SUBFOLDERS);
+
+        _customizeViewsHelper.openCustomizeViewPanel();
+        _customizeViewsHelper.addColumn(new String[]{"Fraction", "Run", "ExperimentRunLSID", "RunGroups"});
+        _customizeViewsHelper.applyCustomView();
+        dataTable.setFilter("Fraction/Run/ExperimentRunLSID/RunGroups", "Is Blank");
+        assertEquals("All rows should have a value for the run group", 0, dataTable.getDataRowCount());
     }
 }
