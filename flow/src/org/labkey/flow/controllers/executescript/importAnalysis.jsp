@@ -44,6 +44,10 @@
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
     Container container = getContainer();
     ActionURL cancelUrl = urlProvider(ProjectUrls.class).getStartURL(container);
+    // we are only posting files for the first step of the wizard
+    String enctype = form.getStep() > AnalysisScriptController.ImportAnalysisStep.SELECT_ANALYSIS.getNumber()
+            ? "application/x-www-form-urlencoded"
+            : "multipart/form-data";
 %>
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
     function endsWith(a,b)
@@ -85,7 +89,7 @@
 
 <labkey:errors/>
 
-<labkey:form name="<%=ImportAnalysisForm.NAME%>" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="multipart/form-data">
+<labkey:form name="<%=ImportAnalysisForm.NAME%>" action="<%=new ActionURL(AnalysisScriptController.ImportAnalysisAction.class, container)%>" method="POST" enctype="<%=enctype%>">
     <input type="hidden" name="step" value="<%=form.getStep()%>">
     <%
         for (Map.Entry<String, String> entry : form.getWorkspace().getHiddenFields(getViewContext()).entrySet())
