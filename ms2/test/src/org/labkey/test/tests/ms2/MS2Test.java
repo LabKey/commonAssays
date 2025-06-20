@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 @Category({MS2.class, Daily.class})
@@ -1251,6 +1252,5 @@ public class MS2Test extends AbstractMS2ImportTest
         assertNotEquals("All rows should have a value for the run group", 0, dataTable.getDataRowCount());
         dataTable.setFilter("Fraction/Run/ExperimentRunLSID/RunGroups", "Is Blank");
         assertEquals("All rows should have a value for the run group", 0, dataTable.getDataRowCount());
-
     }
 }
