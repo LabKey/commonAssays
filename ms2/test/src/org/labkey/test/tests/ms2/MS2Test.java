@@ -1248,7 +1248,9 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.addColumn(new String[]{"Fraction", "Run", "ExperimentRunLSID", "RunGroups"});
         _customizeViewsHelper.applyCustomView();
+        assertNotEquals("All rows should have a value for the run group", 0, dataTable.getDataRowCount());
         dataTable.setFilter("Fraction/Run/ExperimentRunLSID/RunGroups", "Is Blank");
         assertEquals("All rows should have a value for the run group", 0, dataTable.getDataRowCount());
+
     }
 }
