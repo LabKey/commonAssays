@@ -1250,6 +1250,12 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.addColumn(new String[]{"Fraction", "Run", "ExperimentRunLSID", "RunGroups"});
         _customizeViewsHelper.applyCustomView();
         assertNotEquals("All rows should have a value for the run group", 0, dataTable.getDataRowCount());
+
+        // validate a single run group with the expected label
+        Set<String> runGroups = new HashSet<>(dataTable.getColumnDataAsText("RunGroups"));
+        assertEquals("Incorrect number of run groups", 1, runGroups.size());
+        assertEquals("Invalid run group label", RUN_GROUP3_NAME, runGroups.iterator().next());
+
         dataTable.setFilter("Fraction/Run/ExperimentRunLSID/RunGroups", "Is Blank");
         assertEquals("All rows should have a value for the run group", 0, dataTable.getDataRowCount());
     }
