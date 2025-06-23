@@ -82,7 +82,7 @@ abstract public class MS2TestBase extends BaseWebDriverTest
 
     protected void createProjectAndFolder()
     {
-        _containerHelper.createProject(getProjectName(), null);
+        _containerHelper.createProject(getProjectName(), "MS2");
         _containerHelper.createSubfolder(getProjectName(), FOLDER_NAME, "MS2");
 
         log("Set bad pipeline root.");
