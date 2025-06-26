@@ -331,8 +331,6 @@ public class NabAssayController extends SpringActionController
         return assay;
     }
 
-    private static final String LAST_NAB_RUN_KEY = NabAssayController.class.getName() + "/LastNAbRun";
-
     @RequiresPermission(ReadPermission.class)
     @ContextualRoles(RunDatasetContextualRoles.class)
     public class DetailsAction extends RunDetailsAction<RenderAssayBean>

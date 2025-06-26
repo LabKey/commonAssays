@@ -48,8 +48,7 @@ public class MascotRun extends MS2Run
     public void adjustScores(Map<String, String> map)
     {
         // Mascot exported pepXML can exclude "homologyscore"
-        if (null == map.get("homologyscore"))
-            map.put("homologyscore", "-1");
+        map.putIfAbsent("homologyscore", "-1");
         // Issue 30322 - ProteomeDiscoverer pep.xml files use a different name for the score value
         if (null == map.get("ionscore") && map.containsKey("Ions Score"))
             map.put("ionscore", map.get("Ions Score"));
