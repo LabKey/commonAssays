@@ -502,12 +502,6 @@ public class NabAssayController extends SpringActionController
         {
             return _getNabAssayRun(run, fit, user);
         }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            throw new UnsupportedOperationException();
-        }
     }
 
     public static class SampleSpreadsheetForm
