@@ -23,8 +23,8 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
+import org.labkey.test.components.assay.AssayConstants;
 import org.labkey.test.pages.ReactAssayDesignerPage;
-import org.labkey.test.tests.study.AssayTest;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LogMethod;
 
@@ -139,7 +139,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
                                              String testDate, File file, int i)
     {
         // verify that all old values from the first imported run are present
-        assertEquals(runId, getFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR));
+        assertEquals(runId, getFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR));
         assertEquals(isotype, getFormElement(Locator.name("isotype")));
         assertEquals(conjugate, getFormElement(Locator.name("conjugate")));
         assertEquals(stndCurveFitInput, getFormElement(Locator.name("stndCurveFitInput")));

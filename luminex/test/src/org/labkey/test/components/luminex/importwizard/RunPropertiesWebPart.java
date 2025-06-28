@@ -17,7 +17,7 @@ package org.labkey.test.components.luminex.importwizard;
 
 import org.labkey.test.Locator;
 import org.labkey.test.components.WebPartPanel;
-import org.labkey.test.tests.study.AssayTest;
+import org.labkey.test.components.assay.AssayConstants;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -67,7 +67,7 @@ public class RunPropertiesWebPart extends WebPartPanel
 
     public void setRunId(String runId)
     {
-        getWrapper().setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, runId);
+        getWrapper().setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, runId);
     }
 
     public static class RunPropertiesWebPartFinder extends WebPartFinder<RunPropertiesWebPart, RunPropertiesWebPartFinder>

@@ -22,7 +22,7 @@ import org.labkey.test.Locator;
 import org.labkey.test.Locators;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
-import org.labkey.test.tests.study.AssayTest;
+import org.labkey.test.components.assay.AssayConstants;
 import org.labkey.test.util.DataRegionTable;
 
 import java.io.File;
@@ -89,7 +89,7 @@ public final class LuminexExcludedTitrationTest extends LuminexTest
 
         String runName = "Cross Plate titration";
         waitForElement(Locators.panelWebpartTitle.withText("Run Properties"));
-        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, runName);
+        setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, runName);
 
         uploadAssayFiles(files);
         clickButton("Next");

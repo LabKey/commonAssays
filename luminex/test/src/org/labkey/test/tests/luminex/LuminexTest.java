@@ -35,11 +35,11 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
+import org.labkey.test.components.assay.AssayConstants;
 import org.labkey.test.components.html.BootstrapMenu;
 import org.labkey.test.components.html.Checkbox;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.pages.luminex.LuminexImportWizard;
-import org.labkey.test.tests.study.AssayTest;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.LogMethod;
@@ -561,7 +561,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         wiz.startImport();
         wiz.checkParticipantVisitResolver();
         clickButtonContainingText("Next");
-        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, runId);
+        setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, runId);
     }
 
     public void goToQCAnalysisPage(String assayName, String submenuText)
@@ -608,7 +608,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
                                            String unkCurveFitInput, String notebookNo, String assayType, String expPerformer,
                                            String testDate, File file, int i, boolean expectDuplicateFile)
     {
-            setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, runId);
+            setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, runId);
             setFormElement(Locator.name("isotype"), isotype);
             setFormElement(Locator.name("conjugate"), conjugate);
             setFormElement(Locator.name("stndCurveFitInput"), stndCurveFitInput);

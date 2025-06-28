@@ -23,7 +23,7 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.categories.Study;
-import org.labkey.test.tests.study.AssayTest;
+import org.labkey.test.components.assay.AssayConstants;
 import org.labkey.test.util.DataRegionTable;
 
 import static org.junit.Assert.assertEquals;
@@ -67,7 +67,7 @@ public final class LuminexUploadAndLinkTest extends LuminexTest
         clickButton("Import Data");
         setFormElement(SPECIES_LOCATOR, TEST_ASSAY_LUM_SET_PROP_SPECIES);
         clickButton("Next");
-        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, TEST_ASSAY_LUM_RUN_NAME);
+        setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, TEST_ASSAY_LUM_RUN_NAME);
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE1);
         clickButton("Next", 60000);
         clickButton("Save and Import Another Run");
@@ -77,7 +77,7 @@ public final class LuminexUploadAndLinkTest extends LuminexTest
         assertEquals(TEST_ASSAY_LUM_SET_PROP_SPECIES, getFormElement(SPECIES_LOCATOR));
         setFormElement(SPECIES_LOCATOR, TEST_ASSAY_LUM_SET_PROP_SPECIES2);
         clickButton("Next");
-        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, TEST_ASSAY_LUM_RUN_NAME2);
+        setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, TEST_ASSAY_LUM_RUN_NAME2);
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE2);
         clickButton("Next", 60000);
         setFormElement(Locator.name("_analyte_IL-1b_StandardName"), "StandardName1b");
@@ -173,7 +173,7 @@ public final class LuminexUploadAndLinkTest extends LuminexTest
         _ext4Helper.selectComboBoxItem(Locator.id("thawListQueryName"), THAW_LIST_NAME);
 
         clickButton("Next");
-        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, TEST_ASSAY_LUM_RUN_NAME4);
+        setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, TEST_ASSAY_LUM_RUN_NAME4);
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE3);
         waitForText("A file with name '" + TEST_ASSAY_LUM_FILE3.getName() + "' already exists");
         clickButton("Next", 60000);
@@ -236,7 +236,7 @@ public final class LuminexUploadAndLinkTest extends LuminexTest
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM));
         clickButton("Import Data");
         clickButton("Next");
-        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, "raw and summary");
+        setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, "raw and summary");
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE10);
         clickButton("Next", 60000);
         clickButton("Save and Finish");

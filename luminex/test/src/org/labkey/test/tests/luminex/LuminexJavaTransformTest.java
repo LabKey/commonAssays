@@ -23,8 +23,8 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
+import org.labkey.test.components.assay.AssayConstants;
 import org.labkey.test.pages.ReactAssayDesignerPage;
-import org.labkey.test.tests.study.AssayTest;
 import org.labkey.test.util.DataRegionTable;
 
 import static org.junit.Assert.assertEquals;
@@ -59,7 +59,7 @@ public final class LuminexJavaTransformTest extends LuminexTest
         clickButton("Import Data");
         setFormElement(Locator.name("Species"), TEST_ASSAY_LUM_SET_PROP_SPECIES);
         clickButton("Next");
-        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, "transformed assayId");
+        setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, "transformed assayId");
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE1);
         clickButton("Next", 60000);
         clickButton("Save and Finish");

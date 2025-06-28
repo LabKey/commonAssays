@@ -23,6 +23,7 @@ import org.labkey.test.Locator;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
+import org.labkey.test.components.assay.AssayConstants;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.LoggedParam;
 import org.openqa.selenium.WebElement;
@@ -146,7 +147,7 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
             clickButtonContainingText("Re-import run");
             checkCheckbox(Locator.radioButtonByNameAndValue("ParticipantVisitResolver", "SampleInfo"));
             clickButtonContainingText("Next");
-            setFormElement(Locator.name(ASSAY_ID_FIELD), MULTIPLE_CURVE_ASSAY_RUN_NAME);
+            setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, MULTIPLE_CURVE_ASSAY_RUN_NAME);
             clickButtonContainingText("Next");
         for(String desc : wellRoleMap.keySet())
         {
