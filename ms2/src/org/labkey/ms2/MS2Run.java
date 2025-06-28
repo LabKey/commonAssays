@@ -18,10 +18,12 @@ package org.labkey.ms2;
 
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.protein.MassType;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.util.GUID;
 import org.labkey.api.util.MemTracker;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ViewContext;
@@ -41,7 +43,7 @@ public abstract class MS2Run implements Serializable
     protected final static String[] EMPTY_STRING_ARRAY = new String[0];
 
     protected int run;
-    protected Container container;
+    protected GUID containerId;
     protected String description;
     protected String path;
     protected String fileName;
@@ -252,13 +254,13 @@ public abstract class MS2Run implements Serializable
 
     public Container getContainer()
     {
-        return container;
+        return ContainerManager.getForId(containerId);
     }
 
 
     public void setContainer(Container container)
     {
-        this.container = container;
+        this.containerId = container.getEntityId();
     }
 
 
