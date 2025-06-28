@@ -609,14 +609,14 @@ public abstract class LuminexTest extends BaseWebDriverTest
                                            String testDate, File file, int i, boolean expectDuplicateFile)
     {
             setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, runId);
-            setFormElement(Locator.name("isotype"), isotype);
-            setFormElement(Locator.name("conjugate"), conjugate);
-            setFormElement(Locator.name("stndCurveFitInput"), stndCurveFitInput);
-            setFormElement(Locator.name("unkCurveFitInput"), unkCurveFitInput);
-            setFormElement(Locator.name("notebookNo"), notebookNo);
-            setFormElement(Locator.name("assayType"), assayType);
-            setFormElement(Locator.name("expPerformer"), expPerformer);
-            setFormElement(Locator.name("testDate"), testDate);
+            setFormElement(Locator.name("Isotype"), isotype);
+            setFormElement(Locator.name("Conjugate"), conjugate);
+            setFormElement(Locator.name("StndCurveFitInput"), stndCurveFitInput);
+            setFormElement(Locator.name("UnkCurveFitInput"), unkCurveFitInput);
+            setFormElement(Locator.name("NotebookNo"), notebookNo);
+            setFormElement(Locator.name("AssayType"), assayType);
+            setFormElement(Locator.name("ExpPerformer"), expPerformer);
+            setFormElement(Locator.name("TestDate"), testDate);
             setFormElement(Locator.name("__primaryFile__"), file);
 
             if (expectDuplicateFile)
