@@ -25,6 +25,7 @@ import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.params.FieldDefinition;
+import org.labkey.test.tests.study.AssayTest;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.LogMethod;
@@ -181,7 +182,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         String wikiName = "LuminexGuideSetTestWiki";
         portalHelper.addWebPart("Wiki");
         wikiHelper.createNewWikiPage("HTML");
-        setFormElement(Locator.name("name"), wikiName);
+        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, wikiName);
         wikiHelper.setWikiBody("Placeholder text.");
         wikiHelper.saveWikiPage();
         File guideSetWiki = TestFileUtils.getSampleData("luminex/views/LuminexGuideSet.html");

@@ -24,6 +24,7 @@ import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.pages.ReactAssayDesignerPage;
+import org.labkey.test.tests.study.AssayTest;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LabKeyExpectedConditions;
 import org.labkey.test.util.LogMethod;
@@ -121,7 +122,7 @@ public final class LuminexRTransformTest extends LuminexTest
         clickButton("Import Data");
         clickButton("Next");
 
-        setFormElement(Locator.name("name"), "r script transformed assayId");
+        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, "r script transformed assayId");
         checkCheckbox(Locator.name("subtNegativeFromAll"));
         setFormElement(Locator.name("stndCurveFitInput"), "FI");
         setFormElement(Locator.name("unkCurveFitInput"), "FI-Bkgd-Neg");
@@ -158,7 +159,7 @@ public final class LuminexRTransformTest extends LuminexTest
         clickButton("Import Data");
         clickButton("Next");
         String assayRunId = "negative bead assayId";
-        setFormElement(Locator.name("name"), assayRunId);
+        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, assayRunId);
         uncheckCheckbox(Locator.name("subtNegativeFromAll"));
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE4);
         waitForElement(Locator.id("file-upload-tbl").containing(TEST_ASSAY_LUM_FILE4.getName()));

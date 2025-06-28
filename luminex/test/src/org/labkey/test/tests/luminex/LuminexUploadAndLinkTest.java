@@ -23,6 +23,7 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.categories.Study;
+import org.labkey.test.tests.study.AssayTest;
 import org.labkey.test.util.DataRegionTable;
 
 import static org.junit.Assert.assertEquals;
@@ -64,19 +65,19 @@ public final class LuminexUploadAndLinkTest extends LuminexTest
         assertTextPresent("No runs to show. To add new runs, use the Import Data button.");
         log("Uploading Luminex Runs");
         clickButton("Import Data");
-        setFormElement(Locator.name("species"), TEST_ASSAY_LUM_SET_PROP_SPECIES);
+        setFormElement(SPECIES_LOCATOR, TEST_ASSAY_LUM_SET_PROP_SPECIES);
         clickButton("Next");
-        setFormElement(Locator.name("name"), TEST_ASSAY_LUM_RUN_NAME);
+        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, TEST_ASSAY_LUM_RUN_NAME);
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE1);
         clickButton("Next", 60000);
         clickButton("Save and Import Another Run");
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM));
 
         clickButton("Import Data");
-        assertEquals(TEST_ASSAY_LUM_SET_PROP_SPECIES, getFormElement(Locator.name("species")));
-        setFormElement(Locator.name("species"), TEST_ASSAY_LUM_SET_PROP_SPECIES2);
+        assertEquals(TEST_ASSAY_LUM_SET_PROP_SPECIES, getFormElement(SPECIES_LOCATOR));
+        setFormElement(SPECIES_LOCATOR, TEST_ASSAY_LUM_SET_PROP_SPECIES2);
         clickButton("Next");
-        setFormElement(Locator.name("name"), TEST_ASSAY_LUM_RUN_NAME2);
+        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, TEST_ASSAY_LUM_RUN_NAME2);
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE2);
         clickButton("Next", 60000);
         setFormElement(Locator.name("_analyte_IL-1b_StandardName"), "StandardName1b");
@@ -86,8 +87,8 @@ public final class LuminexUploadAndLinkTest extends LuminexTest
 
         // Upload another run using a thaw list pasted in as a TSV
         clickButton("Import Data");
-        assertEquals(TEST_ASSAY_LUM_SET_PROP_SPECIES2, getFormElement(Locator.name("species")));
-        checkCheckbox(Locator.radioButtonByNameAndValue("participantVisitResolver", "Lookup"));
+        assertEquals(TEST_ASSAY_LUM_SET_PROP_SPECIES2, getFormElement(SPECIES_LOCATOR));
+        checkCheckbox(Locator.radioButtonByNameAndValue("ParticipantVisitResolver", "Lookup"));
         checkCheckbox(Locator.radioButtonByNameAndValue("ThawListType", "Text"));
         setFormElement(Locator.id("ThawListTextArea"), "Index\tSpecimenID\tParticipantID\tVisitID\n" +
                 "1\tSpecimenID1\tParticipantID1\t1.1\n" +
@@ -161,8 +162,8 @@ public final class LuminexUploadAndLinkTest extends LuminexTest
 
         // Upload another run using a thaw list that pointed at the list we uploaded earlier
         clickButton("Import Data");
-        assertEquals(TEST_ASSAY_LUM_SET_PROP_SPECIES2, getFormElement(Locator.name("species")));
-        assertRadioButtonSelected(Locator.radioButtonByNameAndValue("participantVisitResolver", "Lookup"));
+        assertEquals(TEST_ASSAY_LUM_SET_PROP_SPECIES2, getFormElement(SPECIES_LOCATOR));
+        assertRadioButtonSelected(Locator.radioButtonByNameAndValue("ParticipantVisitResolver", "Lookup"));
         assertRadioButtonSelected(Locator.radioButtonByNameAndValue("ThawListType", "Text"));
 
         checkCheckbox(Locator.radioButtonByNameAndValue("ThawListType", "List"));
@@ -172,7 +173,7 @@ public final class LuminexUploadAndLinkTest extends LuminexTest
         _ext4Helper.selectComboBoxItem(Locator.id("thawListQueryName"), THAW_LIST_NAME);
 
         clickButton("Next");
-        setFormElement(Locator.name("name"), TEST_ASSAY_LUM_RUN_NAME4);
+        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, TEST_ASSAY_LUM_RUN_NAME4);
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE3);
         waitForText("A file with name '" + TEST_ASSAY_LUM_FILE3.getName() + "' already exists");
         clickButton("Next", 60000);
@@ -235,7 +236,7 @@ public final class LuminexUploadAndLinkTest extends LuminexTest
         clickAndWait(Locator.linkWithText(TEST_ASSAY_LUM));
         clickButton("Import Data");
         clickButton("Next");
-        setFormElement(Locator.name("name"), "raw and summary");
+        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, "raw and summary");
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE10);
         clickButton("Next", 60000);
         clickButton("Save and Finish");

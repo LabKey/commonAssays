@@ -67,6 +67,6 @@ public class BatchPropertiesWebPart extends WebPartPanel<BatchPropertiesWebPart.
 
     public static class Locators
     {
-        protected static final Locator sampleInfoRadio = Locator.radioButtonByNameAndValue("participantVisitResolver", "SampleInfo");
+        protected static final Locator sampleInfoRadio = Locator.radioButtonByNameAndValue("ParticipantVisitResolver", "SampleInfo");
     }
 }

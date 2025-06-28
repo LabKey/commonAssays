@@ -22,6 +22,7 @@ import org.labkey.test.components.luminex.importwizard.BatchPropertiesWebPart;
 import org.labkey.test.components.luminex.importwizard.DefineWellRoleWebPart;
 import org.labkey.test.components.luminex.importwizard.RunPropertiesWebPart;
 import org.labkey.test.pages.LabKeyPage;
+import org.labkey.test.tests.study.AssayTest;
 
 import java.io.File;
 import java.util.function.Consumer;
@@ -36,9 +37,6 @@ import static org.labkey.test.components.luminex.importwizard.RunPropertiesWebPa
  */
 public class LuminexImportWizard extends LabKeyPage<LuminexImportWizard.Elements>
 {
-    public static final String ASSAY_ID_FIELD  = "name";
-
-
     Elements _elements;
     public LuminexImportWizard(WebDriverWrapper driver)
     {
@@ -129,7 +127,7 @@ public class LuminexImportWizard extends LabKeyPage<LuminexImportWizard.Elements
             step1.accept(this);
         clickNext();
 
-        setFormElement(Locator.name(ASSAY_ID_FIELD), runId);
+        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, runId);
         if (step2 != null)
             step2.accept(this);
         clickNext();

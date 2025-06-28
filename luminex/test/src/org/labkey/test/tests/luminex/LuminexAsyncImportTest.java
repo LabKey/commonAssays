@@ -24,11 +24,14 @@ import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.pages.ReactAssayDesignerPage;
+import org.labkey.test.tests.study.AssayTest;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LogMethod;
 
 import java.io.File;
 import java.util.Calendar;
+
+import static org.junit.Assert.assertEquals;
 
 @Category({Daily.class, Assays.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 7)
@@ -136,15 +139,15 @@ public final class LuminexAsyncImportTest extends LuminexTest
                                              String testDate, File file, int i)
     {
         // verify that all old values from the first imported run are present
-        assertFormElementEquals(Locator.name("name"), runId);
-        assertFormElementEquals(Locator.name("isotype"), isotype);
-        assertFormElementEquals(Locator.name("conjugate"), conjugate);
-        assertFormElementEquals(Locator.name("stndCurveFitInput"), stndCurveFitInput);
-        assertFormElementEquals(Locator.name("unkCurveFitInput"), unkCurveFitInput);
-        assertFormElementEquals(Locator.name("notebookNo"), notebookNo);
-        assertFormElementEquals(Locator.name("assayType"), assayType);
-        assertFormElementEquals(Locator.name("expPerformer"), expPerformer);
-        assertFormElementEquals(Locator.name("testDate"), testDate);
+        assertEquals(runId, getFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR));
+        assertEquals(isotype, getFormElement(Locator.name("isotype")));
+        assertEquals(conjugate, getFormElement(Locator.name("conjugate")));
+        assertEquals(stndCurveFitInput, getFormElement(Locator.name("stndCurveFitInput")));
+        assertEquals(unkCurveFitInput, getFormElement(Locator.name("unkCurveFitInput")));
+        assertEquals(notebookNo, getFormElement(Locator.name("notebookNo")));
+        assertEquals(assayType, getFormElement(Locator.name("assayType")));
+        assertEquals(expPerformer, getFormElement(Locator.name("expPerformer")));
+        assertEquals(testDate, getFormElement(Locator.name("testDate")));
         click(Locator.xpath("//a[contains(@class, 'labkey-file-add-icon-enabled')]"));
         setFormElement(Locator.name("__primaryFile__"), file);
         waitForText("A file with name '" + file.getName() + "' already exists");

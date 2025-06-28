@@ -39,6 +39,7 @@ import org.labkey.test.components.html.BootstrapMenu;
 import org.labkey.test.components.html.Checkbox;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.pages.luminex.LuminexImportWizard;
+import org.labkey.test.tests.study.AssayTest;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.LogMethod;
@@ -68,6 +69,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 {
     protected final static String TEST_ASSAY_PRJ_LUMINEX = "LuminexTest Project";
     protected final static String TEST_ASSAY_SUBFOLDER = "Subfolder";//project for luminex test
+
 
     // Issue 51845:
     //  - Luminex assay not working well when assay name contains dot (.)
@@ -102,7 +104,6 @@ public abstract class LuminexTest extends BaseWebDriverTest
     public static final File RTRANSFORM_SCRIPT_FILE_LABKEY = new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/labkey_luminex_transform.R");
     public static final File RTRANSFORM_SCRIPT_FILE_LAB =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/tomaras_luminex_transform.R");
 
-    public static final String ASSAY_ID_FIELD  = "name";
     public static final String ASSAY_DATA_FILE_LOCATION_MULTIPLE_FIELD = "__primaryFile__";
 
     public static final String DATA_TABLE_NAME = "Data";
@@ -120,6 +121,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
     public static final String isotype = "IgG ></% 1";// put back TRICKY_CHARACTERS_NO_QUOTES when issue 20061 is resolved
     public static final String conjugate = "PE ></% 1";// put back TRICKY_CHARACTERS_NO_QUOTES when issue 20061 is resolved
+    public static final Locator.XPathLocator SPECIES_LOCATOR = Locator.name("Species");
 
     public LuminexTest()
     {
@@ -559,7 +561,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         wiz.startImport();
         wiz.checkParticipantVisitResolver();
         clickButtonContainingText("Next");
-        setFormElement(Locator.name(ASSAY_ID_FIELD), runId);
+        setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, runId);
     }
 
     public void goToQCAnalysisPage(String assayName, String submenuText)
@@ -606,7 +608,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
                                            String unkCurveFitInput, String notebookNo, String assayType, String expPerformer,
                                            String testDate, File file, int i, boolean expectDuplicateFile)
     {
-            setFormElement(Locator.name("name"), runId);
+            setFormElement(AssayTest.ASSAY_NAME_FIELD_LOCATOR, runId);
             setFormElement(Locator.name("isotype"), isotype);
             setFormElement(Locator.name("conjugate"), conjugate);
             setFormElement(Locator.name("stndCurveFitInput"), stndCurveFitInput);

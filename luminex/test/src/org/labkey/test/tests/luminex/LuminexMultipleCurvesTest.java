@@ -144,7 +144,7 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
         goToTestAssayHome();
         click(Locator.linkContainingText(MULTIPLE_CURVE_ASSAY_RUN_NAME));
             clickButtonContainingText("Re-import run");
-            checkCheckbox(Locator.radioButtonByNameAndValue("participantVisitResolver", "SampleInfo"));
+            checkCheckbox(Locator.radioButtonByNameAndValue("ParticipantVisitResolver", "SampleInfo"));
             clickButtonContainingText("Next");
             setFormElement(Locator.name(ASSAY_ID_FIELD), MULTIPLE_CURVE_ASSAY_RUN_NAME);
             clickButtonContainingText("Next");
