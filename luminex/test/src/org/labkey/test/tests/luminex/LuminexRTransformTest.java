@@ -123,8 +123,8 @@ public final class LuminexRTransformTest extends LuminexTest
         clickButton("Next");
 
         setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, "r script transformed assayId");
-        checkCheckbox(Locator.name("subtNegativeFromAll"));
-        setFormElement(Locator.name("stndCurveFitInput"), "FI");
+        checkCheckbox(Locator.name("SubtNegativeFromAll"));
+        setFormElement(Locator.name("StndCurveFitInput"), "FI");
         setFormElement(Locator.name("unkCurveFitInput"), "FI-Bkgd-Neg");
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE4);
         clickButton("Next", defaultWaitForPage * 2);
@@ -160,12 +160,12 @@ public final class LuminexRTransformTest extends LuminexTest
         clickButton("Next");
         String assayRunId = "negative bead assayId";
         setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, assayRunId);
-        uncheckCheckbox(Locator.name("subtNegativeFromAll"));
+        uncheckCheckbox(Locator.name("SubtNegativeFromAll"));
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE4);
         waitForElement(Locator.id("file-upload-tbl").containing(TEST_ASSAY_LUM_FILE4.getName()));
         clickButton("Next", defaultWaitForPage * 2);
 
-        // uncheck all of the titration well role types
+        // uncheck all the titration well role types
         uncheckCheckbox(Locator.name("_titrationRole_standard_Standard1"));
         uncheckCheckbox(Locator.name("_titrationRole_qccontrol_Standard1"));
 

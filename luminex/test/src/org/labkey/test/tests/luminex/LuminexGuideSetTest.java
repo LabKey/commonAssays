@@ -182,7 +182,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         String wikiName = "LuminexGuideSetTestWiki";
         portalHelper.addWebPart("Wiki");
         wikiHelper.createNewWikiPage("HTML");
-        setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, wikiName);
+        setFormElement(Locator.name("name"), wikiName);
         wikiHelper.setWikiBody("Placeholder text.");
         wikiHelper.saveWikiPage();
         File guideSetWiki = TestFileUtils.getSampleData("luminex/views/LuminexGuideSet.html");

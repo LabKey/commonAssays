@@ -640,9 +640,9 @@ public abstract class LuminexTest extends BaseWebDriverTest
     public DataRegionTable uploadPositivityFile(String assayName, @LoggedParam String assayRunId, @LoggedParam File file, String baseVisit, String foldChange, boolean isBackgroundUpload, boolean expectDuplicateFile)
     {
         createNewAssayRun(assayName, assayRunId);
-        checkCheckbox(Locator.name("calculatePositivity"));
-        setFormElement(Locator.name("baseVisit"), baseVisit);
-        setFormElement(Locator.name("positivityFoldChange"), foldChange);
+        checkCheckbox(Locator.name("CalculatePositivity"));
+        setFormElement(Locator.name("BaseVisit"), baseVisit);
+        setFormElement(Locator.name("PositivityFoldChange"), foldChange);
         selectPositivityFile(file, expectDuplicateFile);
         setAnalytePropertyValues();
         finishUploadPositivityFile(assayRunId, isBackgroundUpload);

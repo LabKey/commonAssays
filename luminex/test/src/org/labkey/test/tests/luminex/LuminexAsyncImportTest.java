@@ -140,14 +140,14 @@ public final class LuminexAsyncImportTest extends LuminexTest
     {
         // verify that all old values from the first imported run are present
         assertEquals(runId, getFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR));
-        assertEquals(isotype, getFormElement(Locator.name("isotype")));
-        assertEquals(conjugate, getFormElement(Locator.name("conjugate")));
-        assertEquals(stndCurveFitInput, getFormElement(Locator.name("stndCurveFitInput")));
-        assertEquals(unkCurveFitInput, getFormElement(Locator.name("unkCurveFitInput")));
-        assertEquals(notebookNo, getFormElement(Locator.name("notebookNo")));
-        assertEquals(assayType, getFormElement(Locator.name("assayType")));
-        assertEquals(expPerformer, getFormElement(Locator.name("expPerformer")));
-        assertEquals(testDate, getFormElement(Locator.name("testDate")));
+        assertEquals(isotype, getFormElement(Locator.name("Isotype")));
+        assertEquals(conjugate, getFormElement(Locator.name("Conjugate")));
+        assertEquals(stndCurveFitInput, getFormElement(Locator.name("StndCurveFitInput")));
+        assertEquals(unkCurveFitInput, getFormElement(Locator.name("UnkCurveFitInput")));
+        assertEquals(notebookNo, getFormElement(Locator.name("NotebookNo")));
+        assertEquals(assayType, getFormElement(Locator.name("AssayType")));
+        assertEquals(expPerformer, getFormElement(Locator.name("ExpPerformer")));
+        assertEquals(testDate, getFormElement(Locator.name("TestDate")));
         click(Locator.xpath("//a[contains(@class, 'labkey-file-add-icon-enabled')]"));
         setFormElement(Locator.name("__primaryFile__"), file);
         waitForText("A file with name '" + file.getName() + "' already exists");
@@ -184,7 +184,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
     {
         goToTestAssayHome();
         clickButton("Import Data");
-        setFormElement(Locator.name("network"), "NETWORK" + (i + 1));
+        setFormElement(Locator.name("Network"), "NETWORK" + (i + 1));
         clickButton("Next");
 
         testDate.add(Calendar.DATE, 1);
