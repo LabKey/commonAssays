@@ -1249,7 +1249,7 @@ public class MS2Test extends AbstractMS2ImportTest
         dataTable.setContainerFilter(DataRegionTable.ContainerFilterType.CURRENT_AND_SUBFOLDERS);
 
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addColumn(new String[]{"Fraction", "Run", "ExperimentRunLSID", "RunGroups"});
+        _customizeViewsHelper.addColumn(FieldKey.fromParts("Fraction", "Run", "ExperimentRunLSID", "RunGroups"));
         _customizeViewsHelper.applyCustomView();
         assertNotEquals("All rows should have a value for the run group", 0, dataTable.getDataRowCount());
 

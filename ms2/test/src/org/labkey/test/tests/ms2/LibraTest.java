@@ -26,6 +26,7 @@ import org.labkey.test.categories.Daily;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.components.CustomizeView;
 import org.labkey.test.ms2.MS2TestBase;
+import org.labkey.test.params.FieldKey;
 import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.TextSearcher;
@@ -127,9 +128,9 @@ public class LibraTest extends MS2TestBase
         // Customize view to pull in other columns
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.addColumn("TrimmedPeptide");
-        _customizeViewsHelper.addColumn(new String[] {"Protein", "ProtSequence"});
-        _customizeViewsHelper.addColumn(new String[] {"Protein", "BestName"});
-        _customizeViewsHelper.addColumn(new String[] {"Protein", "Mass"});
+        _customizeViewsHelper.addColumn(FieldKey.fromParts("Protein", "ProtSequence"));
+        _customizeViewsHelper.addColumn(FieldKey.fromParts("Protein", "BestName"));
+        _customizeViewsHelper.addColumn(FieldKey.fromParts("Protein", "Mass"));
         _customizeViewsHelper.saveDefaultView();
         assertTextPresent("84731", "MPEETQAQDQPMEEEEVETFAFQAEIAQLM");
 
