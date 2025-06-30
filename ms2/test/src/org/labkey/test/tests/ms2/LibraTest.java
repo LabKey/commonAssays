@@ -142,7 +142,7 @@ public class LibraTest extends MS2TestBase
         clickAndWait(Locator.linkWithText("Spectra Count Options"));
         click(Locator.linkWithText("Create or Edit View"));
         findButton("Save");
-        _customizeViewsHelper.addFilter("Hyper", "Hyper", "Is Greater Than", "250");
+        _customizeViewsHelper.addFilter("Hyper", "Is Greater Than", "250");
         assertRadioButtonSelected(Locator.radioButtonByNameAndValue("spectraConfig", "SpectraCountPeptide"));
         _customizeViewsHelper.saveCustomView("HyperFilter");
         click(Locator.radioButtonById("SpectraCountPeptideCharge"));
@@ -219,7 +219,7 @@ public class LibraTest extends MS2TestBase
     {
         for (int i = 1; i <= normalizationCount; i++)
         {
-            customizeView.addColumn("iTRAQQuantitation/Normalized" + i, "Normalized " + i);
+            customizeView.addColumn("iTRAQQuantitation/Normalized" + i);
         }
     }
 
@@ -231,7 +231,7 @@ public class LibraTest extends MS2TestBase
 
         for (int i = 1; i <= normalizationCount; i++)
         {
-            customizeView.addColumn("ProteinProphetData/ProteinGroupId/iTRAQQuantitation/Ratio" + i, "Ratio " + i);
+            customizeView.addColumn("ProteinProphetData/ProteinGroupId/iTRAQQuantitation/Ratio" + i);
         }
         addNormalizationCount(customizeView);
         customizeView.saveCustomView(proteinProphetView);

@@ -69,8 +69,8 @@ public class SequestImportTest extends BaseWebDriverTest
         viewsHelper.addColumn(UNIQUE_PEPTIDES_FIELD_KEY);
 
         // Add a filter so that we can check the values were calculated and shown correctly
-        viewsHelper.addFilter(TOTAL_PEPTIDES_FIELD_KEY, "Total Peptides", "Equals", "2");
-        viewsHelper.addFilter(UNIQUE_PEPTIDES_FIELD_KEY, "Distinct Peptides", "Equals", "1");
+        viewsHelper.addFilter(TOTAL_PEPTIDES_FIELD_KEY, "Equals", "2");
+        viewsHelper.addFilter(UNIQUE_PEPTIDES_FIELD_KEY, "Equals", "1");
         viewsHelper.saveDefaultView();
 
         // Make sure that our run is still showing
