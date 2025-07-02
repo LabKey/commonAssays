@@ -42,12 +42,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/*
- * User: brittp
- * Date: Dec 9, 2008
- * Time: 5:43:01 PM
- */
-
 public abstract class NabAssayRun extends DilutionAssayRun
 {
     public NabAssayRun(DilutionAssayProvider<?> provider, ExpRun run,
@@ -119,7 +113,7 @@ public abstract class NabAssayRun extends DilutionAssayRun
             if (null == outputObject)
                 throw new IllegalStateException("Expected a single data file output for this NAb run, but none matching the expected datatype found. Found a total of " + outputDatas.size());
 
-            AssayProtocolSchema schema = _provider.createProtocolSchema(_user, _run.getContainer(), _protocol, null);
+            AssayProtocolSchema schema = _provider.createProtocolSchema(getUser(), _run.getContainer(), _protocol, null);
             TableInfo virusTable = schema.createTable(DilutionManager.VIRUS_TABLE_NAME, null);
 
             Map<String, Map<PropertyDescriptor, Object>> samplePropertiesMap = getSampleProperties();

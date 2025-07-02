@@ -55,10 +55,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * User: klum
- * Date: May 15, 2009
- */
 public abstract class NabDataHandler extends DilutionDataHandler
 {
     public static final Logger LOG = LogManager.getLogger(NabDataHandler.class);
@@ -146,7 +142,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
      * Calculates cutoff and AUC information from the passed in raw data and optionally saves the data to the
      * specific tables.
      *
-     * @param commitData true to persist dilution and well level data
+     * @param commitData true to persist dilution and well-level data
      * @param specimenRows if commitData is false, then specimen data will be returned in this collection
      * @param cutoffRows if commitData is false, then cutoff data will be returned in this collection
      */
@@ -268,7 +264,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
         {
             NabManager.get().deleteRunData(datas);
         }
-        catch(SQLException e)
+        catch (SQLException e)
         {
             throw new ExperimentException(e);
         }
