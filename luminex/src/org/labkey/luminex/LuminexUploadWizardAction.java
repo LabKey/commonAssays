@@ -432,6 +432,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 public void writeSameCheckboxCell(RenderContext ctx, HtmlWriter out)
                 {
                     String titrationCellName = PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName()));
+                    // Use propName because ids can't have spaces
                     String groupName = ColumnInfo.propNameFromName(getColumns().get(0).getFormFieldName(ctx));
                     String id = groupName + "CheckBox";
 

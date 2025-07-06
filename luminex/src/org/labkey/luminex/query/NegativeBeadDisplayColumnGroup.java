@@ -44,6 +44,7 @@ public class NegativeBeadDisplayColumnGroup extends DisplayColumnGroup
     {
         TD(
             isCopyable() ? (DOM.Renderable) ret -> {
+                // Use propName because ids can't have spaces
                 String inputName = ColumnInfo.propNameFromName(_inputName);
                 String id = inputName + "CheckBox";
                 InputBuilder.checkbox().name(id).id(id).appendTo(out);
