@@ -125,7 +125,7 @@ public final class LuminexRTransformTest extends LuminexTest
         setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, "r script transformed assayId");
         checkCheckbox(Locator.name("SubtNegativeFromAll"));
         setFormElement(Locator.name("StndCurveFitInput"), "FI");
-        setFormElement(Locator.name("unkCurveFitInput"), "FI-Bkgd-Neg");
+        setFormElement(Locator.name("UnkCurveFitInput"), "FI-Bkgd-Neg");
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE4);
         clickButton("Next", defaultWaitForPage * 2);
 
