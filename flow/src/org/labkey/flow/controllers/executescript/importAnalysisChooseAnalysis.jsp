@@ -233,11 +233,8 @@ if (form.getKeywordDir() != null && form.getKeywordDir().length > 0 && StudyPubl
         <div style="padding-left: 2em; padding-bottom: 1em;">
             <br>
             Choose a target study folder:<br>
-            <%=select().name("targetStudy").className(null).addOptions(targetStudies).selected(unsafe(form.getTargetStudy())).onChange("document.getElementById('studyChanged').value = true;")
+            <%=select().name("TargetStudy").className(null).addOptions(targetStudies).selected(unsafe(form.getTargetStudy())).onChange("document.getElementById('studyChanged').value = true;")
             %>
-<%--            <select id="targetStudy" name="targetStudy">--%>
-<%--                <labkey:options value="<%=text(form.getTargetStudy())%>" map="<%=targetStudies%>"/>--%>
-<%--            </select>--%>
             <br><br>
         </div>
         <%

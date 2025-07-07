@@ -562,7 +562,7 @@ public final class LuminexGuideSetTest extends LuminexTest
 
         goToTestAssayHome();
         clickButton("Import Data");
-        setFormElement(Locator.name("network"), "NETWORK" + (10));
+        setFormElement(Locator.name("Network"), "NETWORK" + (10));
         clickButton("Next");
 
         importLuminexRunPageTwo("Reload guide set 5", isotype, conjugate, "", "", "Notebook" + 11,

@@ -105,7 +105,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
         int i = index;
         goToTestAssayHome();
         clickButton("Import Data");
-        setFormElement(Locator.name("network"), "NEWNET" + (i + 1));
+        setFormElement(Locator.name("Network"), "NEWNET" + (i + 1));
         clickButton("Next");
         testDate.add(Calendar.DATE, 1);
         importLuminexRunPageTwo("Guide Set plate " + (i+1), "new"+isotype, "new"+conjugate, "", "", "NewNote" + (i+1),

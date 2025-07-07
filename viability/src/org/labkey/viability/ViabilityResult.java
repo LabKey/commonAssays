@@ -18,6 +18,7 @@ package org.labkey.viability;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 
@@ -97,8 +98,8 @@ public class ViabilityResult
                 throw new IllegalArgumentException("Expected comma separated list or a collecting of specimen IDs");
         }
 
-        if (base.get("targetStudy") instanceof String)
-            result.setTargetStudy((String)base.get("targetStudy"));
+        if (base.get(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME) instanceof String s)
+            result.setTargetStudy(s);
 
         if (extra != null)
             result.setProperties(extra);
@@ -130,7 +131,7 @@ public class ViabilityResult
         // NOTE: The 'list' version of 'SpecimenIDs' is used when the guava file is parsed.
         ret.put("specimenIDs", getSpecimenIDList());
 
-        ret.put("targetStudy", getTargetStudy());
+        ret.put(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, getTargetStudy());
 
         ret.putAll(getStringProperties());
         return ret;

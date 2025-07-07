@@ -93,7 +93,7 @@
 <input type="hidden" name="existingAnalysisId" id="existingAnalysisId" value="<%=form.getExistingAnalysisId()%>">
 <% } %>
 
-<input type="hidden" name="targetStudy" id="targetStudy" value="<%=h(form.getTargetStudy())%>">
+<input type="hidden" name="TargetStudy" id="TargetStudy" value="<%=h(form.getTargetStudy())%>">
 
 <p>You are about to import the analysis from the workspace with the following settings:</p>
 <%

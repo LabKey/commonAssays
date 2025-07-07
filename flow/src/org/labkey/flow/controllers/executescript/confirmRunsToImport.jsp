@@ -86,8 +86,8 @@
                 to look up specimen information from the target study's specimen repository.
             </p>
             <p class="labkey-indented">
-                <label for="targetStudy">Optionally, choose a target study folder:</label><br>
-                <select id="targetStudy" name="targetStudy">
+                <label for="TargetStudy">Optionally, choose a target study folder:</label><br>
+                <select id="TargetStudy" name="TargetStudy">
                     <labkey:options value="<%=unsafe(form.getTargetStudy())%>" map="<%=targetStudies%>"/>
                 </select>
             </p>
