@@ -26,6 +26,7 @@ import org.labkey.test.categories.Daily;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.components.CustomizeView;
 import org.labkey.test.ms2.MS2TestBase;
+import org.labkey.test.params.FieldKey;
 import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.TextSearcher;
@@ -127,9 +128,9 @@ public class LibraTest extends MS2TestBase
         // Customize view to pull in other columns
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.addColumn("TrimmedPeptide");
-        _customizeViewsHelper.addColumn(new String[] {"Protein", "ProtSequence"});
-        _customizeViewsHelper.addColumn(new String[] {"Protein", "BestName"});
-        _customizeViewsHelper.addColumn(new String[] {"Protein", "Mass"});
+        _customizeViewsHelper.addColumn(FieldKey.fromParts("Protein", "ProtSequence"));
+        _customizeViewsHelper.addColumn(FieldKey.fromParts("Protein", "BestName"));
+        _customizeViewsHelper.addColumn(FieldKey.fromParts("Protein", "Mass"));
         _customizeViewsHelper.saveDefaultView();
         assertTextPresent("84731", "MPEETQAQDQPMEEEEVETFAFQAEIAQLM");
 
@@ -142,7 +143,7 @@ public class LibraTest extends MS2TestBase
         clickAndWait(Locator.linkWithText("Spectra Count Options"));
         click(Locator.linkWithText("Create or Edit View"));
         findButton("Save");
-        _customizeViewsHelper.addFilter("Hyper", "Hyper", "Is Greater Than", "250");
+        _customizeViewsHelper.addFilter("Hyper", "Is Greater Than", "250");
         assertRadioButtonSelected(Locator.radioButtonByNameAndValue("spectraConfig", "SpectraCountPeptide"));
         _customizeViewsHelper.saveCustomView("HyperFilter");
         click(Locator.radioButtonById("SpectraCountPeptideCharge"));
@@ -219,7 +220,7 @@ public class LibraTest extends MS2TestBase
     {
         for (int i = 1; i <= normalizationCount; i++)
         {
-            customizeView.addColumn("iTRAQQuantitation/Normalized" + i, "Normalized " + i);
+            customizeView.addColumn("iTRAQQuantitation/Normalized" + i);
         }
     }
 
@@ -231,7 +232,7 @@ public class LibraTest extends MS2TestBase
 
         for (int i = 1; i <= normalizationCount; i++)
         {
-            customizeView.addColumn("ProteinProphetData/ProteinGroupId/iTRAQQuantitation/Ratio" + i, "Ratio " + i);
+            customizeView.addColumn("ProteinProphetData/ProteinGroupId/iTRAQQuantitation/Ratio" + i);
         }
         addNormalizationCount(customizeView);
         customizeView.saveCustomView(proteinProphetView);

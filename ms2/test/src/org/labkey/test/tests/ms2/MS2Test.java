@@ -24,10 +24,10 @@ import org.labkey.test.SortDirection;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.categories.MS2;
+import org.labkey.test.params.FieldKey;
 import org.labkey.test.util.AbstractDataRegionExportOrSignHelper.ColumnHeaderType;
 import org.labkey.test.util.DataRegionExportHelper;
 import org.labkey.test.util.DataRegionTable;
-import org.labkey.test.util.EscapeUtil;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.TextSearcher;
 import org.openqa.selenium.WebElement;
@@ -397,21 +397,22 @@ public class MS2Test extends AbstractMS2ImportTest
         log("Check that saved view is working");
         assertTextNotPresent("K.KTEENYTLVFIVDVK.A");
 
+        DataRegionTable innerTable = DataRegionTable.DataRegion(getDriver()).withName(REGION_NAME_PEPTIDES).find(peptidesTable);
         log("Test adding a sort and a filter");
-        peptidesTable.setFilter("Hyper", "Is Greater Than", "10.6");
+        innerTable.setFilter("Hyper", "Is Greater Than", "10.6");
         assertTextNotPresent("K.RFSGTVKLK.Y");
-        peptidesTable.setSort("Next", SortDirection.ASC);
+        innerTable.setSort("Next", SortDirection.ASC);
         // Explicitly clear out the sorts, since we want to be just dealing with the ones set in Customize View
-        peptidesTable.clearSort("Next");
-        peptidesTable.clearSort("Scan");
+        innerTable.clearSort("Next");
+        innerTable.clearSort("Scan");
 
         log("Test customize view");
         peptidesTable.clearAllFilters();
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addSort("Charge", "Z", SortDirection.DESC);
-        _customizeViewsHelper.addSort("Mass", "CalcMH+", SortDirection.DESC);
-        _customizeViewsHelper.addFilter("DeltaMass", "dMass", "Is Less Than", "0");
-        _customizeViewsHelper.addColumn("NextAA", "Next AA");
+        _customizeViewsHelper.addSort("Charge", SortDirection.DESC);
+        _customizeViewsHelper.addSort("Mass", SortDirection.DESC);
+        _customizeViewsHelper.addFilter("DeltaMass", "Is Less Than", "0");
+        _customizeViewsHelper.addColumn("NextAA");
         _customizeViewsHelper.removeColumn("Expect");
         _customizeViewsHelper.removeColumn("ProteinHits");
         _customizeViewsHelper.saveCustomView(VIEW4);
@@ -515,8 +516,8 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.clearFilters();
         _customizeViewsHelper.clearSorts();
-        _customizeViewsHelper.addSort("DeltaMass", "dMass", SortDirection.ASC);
-        _customizeViewsHelper.addFilter("Mass", "CalcMH+", "Is Greater Than", "1000");
+        _customizeViewsHelper.addSort("DeltaMass", SortDirection.ASC);
+        _customizeViewsHelper.addFilter("Mass", "Is Greater Than", "1000");
         _customizeViewsHelper.addColumn("Fraction");
         _customizeViewsHelper.removeColumn("IonPercent");
         _customizeViewsHelper.saveDefaultView();
@@ -551,14 +552,14 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test Protein Prophet view in Query - Peptides grouping");
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/Group", "Group");
-        _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/TotalNumberPeptides", "Peptides");
-        _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/GroupProbability", "Prob");
-        _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/BestName", "Best Name");
+        _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/Group");
+        _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/TotalNumberPeptides");
+        _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/GroupProbability");
+        _customizeViewsHelper.addColumn("ProteinProphetData/ProteinGroupId/BestName");
         _customizeViewsHelper.removeColumn("Mass");
-        _customizeViewsHelper.addFilter("DeltaMass", "dMass", "Is Greater Than", "0");
-        _customizeViewsHelper.addFilter("ProteinProphetData/ProteinGroupId/GroupProbability", "Prob", "Is Greater Than", "0.7");
-        _customizeViewsHelper.addSort("ProteinProphetData/ProteinGroupId/GroupProbability", "Prob", SortDirection.ASC);
+        _customizeViewsHelper.addFilter("DeltaMass", "Is Greater Than", "0");
+        _customizeViewsHelper.addFilter("ProteinProphetData/ProteinGroupId/GroupProbability", "Is Greater Than", "0.7");
+        _customizeViewsHelper.addSort("ProteinProphetData/ProteinGroupId/GroupProbability", SortDirection.ASC);
         _customizeViewsHelper.saveCustomView(VIEW4);
 
         log("Test that Protein Prophet view is displayed and that it sorts and filters correctly");
@@ -621,9 +622,9 @@ public class MS2Test extends AbstractMS2ImportTest
         log("Test customize view");
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.removeColumn("UniquePeptidesCount");
-        _customizeViewsHelper.addColumn("Proteins/Protein/ProtSequence", "Protein Sequence");
-        _customizeViewsHelper.addFilter("GroupProbability", "Prob", "Is Greater Than", "0.7");
-        _customizeViewsHelper.addSort("ErrorRate", "Error", SortDirection.DESC);
+        _customizeViewsHelper.addColumn("Proteins/Protein/ProtSequence");
+        _customizeViewsHelper.addFilter("GroupProbability", "Is Greater Than", "0.7");
+        _customizeViewsHelper.addSort("ErrorRate", SortDirection.DESC);
         _customizeViewsHelper.saveCustomView(VIEW4);
 
         log("Test that sorting, filtering, and columns are correct");
@@ -833,13 +834,14 @@ public class MS2Test extends AbstractMS2ImportTest
         setFormElement(Locator.name("name"), RUN_GROUP1_NAME2);
         clickButton("Submit");
 
+        FieldKey runGroupFK = FieldKey.fromParts("RunGroupToggle");
         log("Test customizing view to include the run groups");
         navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithText("MS2 Runs"));
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addColumn(new String[] { "RunGroupToggle", EscapeUtil.fieldKeyEncodePart(RUN_GROUP1_NAME2) }, RUN_GROUP1_NAME2);
-        _customizeViewsHelper.addColumn(new String[]{"RunGroupToggle", RUN_GROUP2_NAME}, "Run Groups " + RUN_GROUP2_NAME);
-        _customizeViewsHelper.addColumn(new String[]{"RunGroupToggle", "Default Experiment"}, "Run Groups Default Experiment");
+        _customizeViewsHelper.addColumn(runGroupFK.child(RUN_GROUP1_NAME2));
+        _customizeViewsHelper.addColumn(runGroupFK.child(RUN_GROUP2_NAME));
+        _customizeViewsHelper.addColumn(runGroupFK.child("Default Experiment"));
         _customizeViewsHelper.applyCustomView();
 
         assertTextPresent(new TextSearcher(this).setSearchTransformer(TextSearcher.TextTransformers.FIELD_LABEL),
@@ -876,8 +878,8 @@ public class MS2Test extends AbstractMS2ImportTest
 
         log("Test Customize View");
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addColumn("SeqId/Mass", "Protein Mass");
-        _customizeViewsHelper.addFilter("SeqId/Mass", "Protein Mass", "Is Less Than", "30000");
+        _customizeViewsHelper.addColumn("SeqId/Mass");
+        _customizeViewsHelper.addFilter("SeqId/Mass", "Is Less Than", "30000");
         _customizeViewsHelper.saveCustomView(VIEW5);
 
         DataRegionTable peptidesTable = new DataRegionTable("query", this);
@@ -1110,7 +1112,7 @@ public class MS2Test extends AbstractMS2ImportTest
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.addColumn("CTAGG_AVG_XCorr");
         _customizeViewsHelper.removeColumn("InstanceCount");
-        _customizeViewsHelper.addFilter("CTAGG_AVG_XCorr", "Avg XCorr", "Is Greater Than", "10");
+        _customizeViewsHelper.addFilter("CTAGG_AVG_XCorr", "Is Greater Than", "10");
         _customizeViewsHelper.saveCustomView();
 
         log("Check filtering and columns were added correctly");
@@ -1246,17 +1248,18 @@ public class MS2Test extends AbstractMS2ImportTest
         DataRegionTable dataTable = viewQueryData("ms2", "XTandemPeptides");
         dataTable.setContainerFilter(DataRegionTable.ContainerFilterType.CURRENT_AND_SUBFOLDERS);
 
+        FieldKey runGroupsFk = FieldKey.fromParts("Fraction", "Run", "ExperimentRunLSID", "RunGroups");
         _customizeViewsHelper.openCustomizeViewPanel();
-        _customizeViewsHelper.addColumn(new String[]{"Fraction", "Run", "ExperimentRunLSID", "RunGroups"});
+        _customizeViewsHelper.addColumn(runGroupsFk);
         _customizeViewsHelper.applyCustomView();
         assertNotEquals("All rows should have a value for the run group", 0, dataTable.getDataRowCount());
 
         // validate a single run group with the expected label
-        Set<String> runGroups = new HashSet<>(dataTable.getColumnDataAsText("RunGroups"));
+        Set<String> runGroups = new HashSet<>(dataTable.getColumnDataAsText(runGroupsFk));
         assertEquals("Incorrect number of run groups", 1, runGroups.size());
         assertEquals("Invalid run group label", RUN_GROUP3_NAME, runGroups.iterator().next());
 
-        dataTable.setFilter("Fraction/Run/ExperimentRunLSID/RunGroups", "Is Blank");
+        dataTable.setFilter(runGroupsFk, "Is Blank");
         assertEquals("All rows should have a value for the run group", 0, dataTable.getDataRowCount());
     }
 }
