@@ -65,7 +65,7 @@ export class CalibrationCurvePanel extends PureComponent<Props, State> {
 
     render() {
         return (
-            <div className="panel panel-default">
+            <div className="panel panel-default calibration-curve-panel">
                 <div className="panel-heading">
                     Calibration Curve
                 </div>

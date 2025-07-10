@@ -37,7 +37,7 @@ export class DataSelectionsPanel extends PureComponent<Props> {
         const { plates, spots, samples, controls, plotOptions, setPlotOption } = this.props;
 
         return (
-            <div className="panel panel-default">
+            <div className="panel panel-default data-selections-panel">
                 <div className="panel-heading">
                     Data Selections
                 </div>
