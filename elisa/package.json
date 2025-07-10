@@ -12,34 +12,6 @@
     "clean": "rimraf resources/web/elisa/gen && rimraf resources/web/gen",
     "test": "cross-env NODE_ENV=test jest --silent"
   },
-  "jest": {
-    "globals": {
-      "LABKEY": {
-        "contextPath": ""
-      }
-    },
-    "moduleFileExtensions": [
-      "tsx",
-      "ts",
-      "js"
-    ],
-    "preset": "ts-jest",
-    "setupFilesAfterEnv": [
-      "<rootDir>/test/js/setup.ts"
-    ],
-    "testEnvironment": "jsdom",
-    "testMatch": null,
-    "testRegex": "(\\.(test))\\.(ts|tsx)$",
-    "testResultsProcessor": "jest-teamcity-reporter",
-    "transform": {
-      "^.+\\.tsx?$": [
-        "ts-jest",
-        {
-          "tsconfig": "node_modules/@labkey/build/webpack/tsconfig.test.json"
-        }
-      ]
-    }
-  },
   "dependencies": {
     "@labkey/components": "6.54.3-fb-nodejs-22.0"
   },
