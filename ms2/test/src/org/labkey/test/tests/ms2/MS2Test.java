@@ -799,11 +799,11 @@ public class MS2Test extends AbstractMS2ImportTest
         clickAndWait(Locator.linkWithImage(WebTestHelper.getContextPath() + "/experiment/images/graphIcon.gif"));
         clickAndWait(Locator.id("expandCollapse-experimentRunGroup"), 0);
         clickButton("Create new group");
-        setFormElement(Locator.name("name"), RUN_GROUP1_NAME1);
-        setFormElement(Locator.name("contactId"), RUN_GROUP1_CONTACT);
-        setFormElement(Locator.name("experimentDescriptionURL"), RUN_GROUP1_DESCRIPTION);
-        setFormElement(Locator.name("hypothesis"), RUN_GROUP1_HYPOTHESIS);
-        setFormElement(Locator.name("comments"), RUN_GROUP1_COMMENTS);
+        setFormElement(Locator.name("Name"), RUN_GROUP1_NAME1);
+        setFormElement(Locator.name("ContactId"), RUN_GROUP1_CONTACT);
+        setFormElement(Locator.name("ExperimentDescriptionURL"), RUN_GROUP1_DESCRIPTION);
+        setFormElement(Locator.name("Hypothesis"), RUN_GROUP1_HYPOTHESIS);
+        setFormElement(Locator.name("Comments"), RUN_GROUP1_COMMENTS);
         clickButton("Submit");
         clickAndWait(Locator.id("expandCollapse-experimentRunGroup"), 0);
         assertTextPresent(RUN_GROUP1_NAME1,
@@ -815,11 +815,11 @@ public class MS2Test extends AbstractMS2ImportTest
         clickAndWait(Locator.linkWithText("Run Groups"));
         clickButton("Create Run Group");
         clickButton("Submit");
-        setFormElement(Locator.name("name"), RUN_GROUP3_NAME);
+        setFormElement(Locator.name("Name"), RUN_GROUP3_NAME);
         clickButton("Submit");
 
         clickButton("Create Run Group");
-        setFormElement(Locator.name("name"), RUN_GROUP2_NAME);
+        setFormElement(Locator.name("Name"), RUN_GROUP2_NAME);
         clickButton("Submit");
 
         log("Test editing run group info");
@@ -831,7 +831,7 @@ public class MS2Test extends AbstractMS2ImportTest
                 RUN_GROUP1_HYPOTHESIS,
                 RUN_GROUP1_COMMENTS);
         clickButton("Edit");
-        setFormElement(Locator.name("name"), RUN_GROUP1_NAME2);
+        setFormElement(Locator.name("Name"), RUN_GROUP1_NAME2);
         clickButton("Submit");
 
         FieldKey runGroupFK = FieldKey.fromParts("RunGroupToggle");
@@ -1235,7 +1235,7 @@ public class MS2Test extends AbstractMS2ImportTest
         goToProjectHome(getProjectName());
         clickAndWait(Locator.linkWithText("Run Groups"));
         clickButton("Create Run Group");
-        setFormElement(Locator.name("name"), RUN_GROUP3_NAME);
+        setFormElement(Locator.name("Name"), RUN_GROUP3_NAME);
         clickButton("Submit");
 
         navigateToFolder(FOLDER_NAME);
