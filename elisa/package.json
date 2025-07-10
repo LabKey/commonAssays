@@ -14,7 +14,9 @@
   },
   "jest": {
     "globals": {
-      "LABKEY": {}
+      "LABKEY": {
+        "contextPath": ""
+      }
     },
     "moduleFileExtensions": [
       "tsx",
@@ -27,14 +29,13 @@
     ],
     "testEnvironment": "jsdom",
     "testMatch": null,
-    "testRegex": "(\\.(test|spec))\\.(ts|tsx)$",
+    "testRegex": "(\\.(test))\\.(ts|tsx)$",
     "testResultsProcessor": "jest-teamcity-reporter",
     "transform": {
       "^.+\\.tsx?$": [
         "ts-jest",
         {
-          "isolatedModules": true,
-          "tsconfig": "node_modules/@labkey/build/webpack/tsconfig.json"
+          "tsconfig": "node_modules/@labkey/build/webpack/tsconfig.test.json"
         }
       ]
     }
