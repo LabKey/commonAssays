@@ -18,7 +18,7 @@ import {
     parsePlotDataFromResponse,
     shouldReloadCurveFitData
 } from "./utils";
-import { getCurveFitXYPairs } from "./actions";
+import { GetCurveFitXYPairs, getCurveFitXYPairs } from './actions';
 import { CalibrationCurvePanel } from "./components/CalibrationCurvePanel";
 import { DataSelectionsPanel } from "./components/DataSelectionsPanel";
 import { PlotOptionsPanel } from "./components/PlotOptionsPanel";
@@ -138,6 +138,7 @@ export class RunDetails extends PureComponent<Props, State> {
 interface ImplProps extends CommonRunProps {
     data: any[],
     columnInfo: {[key: string]: any},
+    getCurveFitXYPairs?: GetCurveFitXYPairs;
     measures: string[]
 }
 
@@ -153,6 +154,10 @@ interface ImplState {
 
 // exported just for jest testing
 export class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
+    static defaultProps = {
+        getCurveFitXYPairs: getCurveFitXYPairs,
+    };
+
     constructor(props: ImplProps) {
         super(props);
 
@@ -188,7 +193,7 @@ export class RunDetailsImpl extends PureComponent<ImplProps, ImplState> {
         const { plotOptions } = this.state;
         const filteredData = filterDataByPlotOptions(data, [], [], plotOptions, false);
 
-        getCurveFitXYPairs(protocolId, runId, plotOptions.plateName, plotOptions.spot, filteredData)
+        this.props.getCurveFitXYPairs(protocolId, runId, plotOptions.plateName, plotOptions.spot, filteredData)
             .then(curveFitData => {
                 this.setState(() => ({ curveFitData }));
             })

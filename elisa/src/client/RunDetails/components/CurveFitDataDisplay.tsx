@@ -13,7 +13,7 @@ export class CurveFitDataDisplay extends PureComponent<Props> {
         const hasFitParams = curveFitData.fitParameters?.startsWith('{');
 
         return (
-            <>
+            <div className="curve-fit-data-display">
                 {curveFitData.error &&
                     <Alert>{curveFitData.error}</Alert>
                 }
@@ -26,7 +26,7 @@ export class CurveFitDataDisplay extends PureComponent<Props> {
                 {hasFitParams &&
                     <pre>{JSON.stringify(JSON.parse(curveFitData.fitParameters), null, 2)}</pre>
                 }
-            </>
+            </div>
         )
     }
 }
