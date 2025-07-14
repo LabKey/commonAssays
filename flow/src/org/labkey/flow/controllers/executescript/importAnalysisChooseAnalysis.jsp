@@ -234,7 +234,7 @@ if (form.getKeywordDir() != null && form.getKeywordDir().length > 0 && StudyPubl
         <div style="padding-left: 2em; padding-bottom: 1em;">
             <br>
             Choose a target study folder:<br>
-            <%=select().name(<%= h(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)%>).className(null).addOptions(targetStudies).selected(unsafe(form.getTargetStudy())).onChange("document.getElementById('studyChanged').value = true;")
+            <%=select().name(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME).className(null).addOptions(targetStudies).selected(unsafe(form.getTargetStudy())).onChange("document.getElementById('studyChanged').value = true;")
             %>
             <br><br>
         </div>

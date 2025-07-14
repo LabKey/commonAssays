@@ -60,6 +60,7 @@ import org.labkey.api.view.InsertView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewServlet;
+import org.labkey.api.view.template.PageConfig;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.model.Analyte;
 import org.labkey.luminex.model.SinglePointControl;
@@ -324,7 +325,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             }
 
             Titration existingTitration = existingTitrations.get(titrationEntry.getKey());
-            String propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
+            String propertyName = getTitrationTypeCheckboxNameAndId(Titration.Type.standard, titrationEntry.getValue());
             // If we have an existing titration as a baseline from the run we're replacing, use its value
             String defVal = existingTitration == null ? defaultWellRoleValues.get(propertyName) : Boolean.toString(existingTitration.isStandard());
 
@@ -359,7 +360,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
             if (!titrationEntry.getValue().isUnknown())
             {
-                propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
+                propertyName = getTitrationTypeCheckboxNameAndId(Titration.Type.standard, titrationEntry.getValue());
                 // If we have an existing titration as a baseline from the run we're replacing, use its value
                 defVal = existingTitration == null ? defaultWellRoleValues.get(propertyName) : Boolean.toString(existingTitration.isStandard());
                 value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isStandard()) ? "true" : "";
@@ -369,13 +370,13 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 value = toShowStandardCheckboxColumn(errorReshow, standardTitrations, titrationEntry.getValue()) ? "true" : "";
                 view.getDataRegion().addHiddenFormField(getShowStandardCheckboxColumnName(titrationEntry.getValue()), value);
 
-                propertyName = getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
+                propertyName = getTitrationTypeCheckboxNameAndId(Titration.Type.qccontrol, titrationEntry.getValue());
                 // If we have an existing titration as a baseline from the run we're replacing, use its value
                 defVal = existingTitration == null ? defaultWellRoleValues.get(propertyName) : Boolean.toString(existingTitration.isQcControl());
                 value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isQcControl()) ? "true" : "";
                 view.getDataRegion().addHiddenFormField(propertyName, value);
 
-                propertyName = getTitrationTypeCheckboxName(Titration.Type.othercontrol, titrationEntry.getValue());
+                propertyName = getTitrationTypeCheckboxNameAndId(Titration.Type.othercontrol, titrationEntry.getValue());
                 // If we have an existing titration as a baseline from the run we're replacing, use its value
                 defVal = existingTitration == null ? defaultWellRoleValues.get(propertyName) : Boolean.toString(existingTitration.isOtherControl());
                 value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isOtherControl()) ? "true" : "";
@@ -383,7 +384,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             }
             else
             {
-                propertyName = getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue());
+                propertyName = getTitrationTypeCheckboxNameAndId(Titration.Type.unknown, titrationEntry.getValue());
                 // If we have an existing titration as a baseline from the run we're replacing, use its value
                 defVal = existingTitration == null ? defaultWellRoleValues.get(propertyName) : Boolean.toString(existingTitration.isUnknown());
                 value = setInitialTitrationInput(errorReshow, propertyName, defVal, titrationEntry.getValue().isUnknown()) ? "true" : "";
@@ -400,7 +401,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
             boolean existingSinglePointControl = existingSinglePointControls.contains(singlePointControl);
 
-            propertyName = getSinglePointControlCheckboxName(singlePointControl);
+            propertyName = getSinglePointControlCheckboxNameAndId(singlePointControl);
             // If we have an existing singlePointControl as a baseline from the run we're replacing, use its value
             defVal = existingSinglePointControl ? "true" : defaultWellRoleValues.get(propertyName);
             value = setInitialSinglePointControlInput(errorReshow, propertyName, defVal) ? "true" : "";
@@ -431,9 +432,9 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 @Override
                 public void writeSameCheckboxCell(RenderContext ctx, HtmlWriter out)
                 {
-                    String titrationCellName = PageFlowUtil.filter(getTitrationColumnCellName(titrationEntry.getValue().getName()));
-                    // Use propName because ids can't have spaces
-                    String groupName = ColumnInfo.propNameFromName(getColumns().get(0).getFormFieldName(ctx));
+                    String titrationCellName = PageFlowUtil.filter(getTitrationColumnCellNameAndId(titrationEntry.getValue().getName()));
+                    // DOM ids and JS function names can't have spaces
+                    String groupName = PageConfig.makeIdFromName(getColumns().get(0).getFormFieldName(ctx));
                     String id = groupName + "CheckBox";
 
                     TD(
@@ -454,7 +455,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 @Override
                 public void writeCopyableJavaScript(RenderContext ctx, Writer out) throws IOException
                 {
-                    String groupName = ColumnInfo.propNameFromName(getColumns().get(0).getFormFieldName(ctx));
+                    // DOM ids and JS function names can't have spaces
+                    String groupName = PageConfig.makeIdFromName(getColumns().get(0).getFormFieldName(ctx));
                     out.write("function " + groupName + "Updated() {\n");
                     out.write("  if (document.getElementById('" + groupName + "CheckBox') != null && document.getElementById('" + groupName + "CheckBox').checked) {\n");
                     out.write("    var v = document.getElementsByName('" + getColumns().get(0).getFormFieldName(ctx) + "')[0].checked;\n");
@@ -551,7 +553,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     private String getShowStandardCheckboxColumnName(Titration standard)
     {
-        String titrationCheckboxName = getTitrationTypeCheckboxName(Titration.Type.standard, standard);
+        String titrationCheckboxName = getTitrationTypeCheckboxNameAndId(Titration.Type.standard, standard);
         return titrationCheckboxName + "_showcol";
     }
 
@@ -692,19 +694,22 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         return new LuminexRunStepHandler();
     }
 
-    public static String getTitrationTypeCheckboxName(Titration.Type type, Titration titration)
+    public static String getTitrationTypeCheckboxNameAndId(Titration.Type type, Titration titration)
     {
-        return ColumnInfo.propNameFromName("_titrationRole_" + type + "_" + titration.getName());
+        // DOM ids and JS function names can't have spaces
+        return PageConfig.makeIdFromName("_titrationRole_" + type + "_" + titration.getName());
     }
 
-    public static String getSinglePointControlCheckboxName(String singlePointControl)
+    public static String getSinglePointControlCheckboxNameAndId(String singlePointControl)
     {
-        return ColumnInfo.propNameFromName("_singlePointControl_" + singlePointControl);
+        // DOM ids and JS function names can't have spaces
+        return PageConfig.makeIdFromName("_singlePointControl_" + singlePointControl);
     }
 
-    public static String getTitrationColumnCellName(String titrationName)
+    public static String getTitrationColumnCellNameAndId(String titrationName)
     {
-        return ColumnInfo.propNameFromName("_titrationcell_" + titrationName);
+        // DOM ids and JS function names can't have spaces
+        return PageConfig.makeIdFromName("_titrationcell_" + titrationName);
     }
 
     protected class LuminexRunStepHandler extends RunStepHandler
@@ -807,21 +812,21 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     // add the name/value pairs for the titration well role definition section
                     if (!titrationEntry.getValue().isUnknown())
                     {
-                        propertyName = getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
+                        propertyName = getTitrationTypeCheckboxNameAndId(Titration.Type.standard, titrationEntry.getValue());
                         value = getViewContext().getRequest().getParameter(propertyName).equals("true");
                         defaultWellRoleValues.put(propertyName, Boolean.toString(value));
 
-                        propertyName = getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
+                        propertyName = getTitrationTypeCheckboxNameAndId(Titration.Type.qccontrol, titrationEntry.getValue());
                         value = getViewContext().getRequest().getParameter(propertyName).equals("true");
                         defaultWellRoleValues.put(propertyName, Boolean.toString(value));
 
-                        propertyName = getTitrationTypeCheckboxName(Titration.Type.othercontrol, titrationEntry.getValue());
+                        propertyName = getTitrationTypeCheckboxNameAndId(Titration.Type.othercontrol, titrationEntry.getValue());
                         value = getViewContext().getRequest().getParameter(propertyName).equals("true");
                         defaultWellRoleValues.put(propertyName, Boolean.toString(value));
                     }
                     else
                     {
-                        propertyName = getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue());
+                        propertyName = getTitrationTypeCheckboxNameAndId(Titration.Type.unknown, titrationEntry.getValue());
                         value = getViewContext().getRequest().getParameter(propertyName).equals("true");
                         defaultWellRoleValues.put(propertyName, Boolean.toString(value));
                     }
@@ -846,7 +851,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 for (String singlePointControl : form.getParser().getSinglePointControls())
                 {
                     // add the name/value pairs for the singlePointControl well role definition section
-                    String propertyName = getSinglePointControlCheckboxName(singlePointControl);
+                    String propertyName = getSinglePointControlCheckboxNameAndId(singlePointControl);
                     boolean value = getViewContext().getRequest().getParameter(propertyName).equals("true");
                     defaultWellRoleValues.put(propertyName, Boolean.toString(value));
                 }

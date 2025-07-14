@@ -22,6 +22,7 @@ import org.labkey.api.data.RenderContext;
 import org.labkey.api.util.DOM;
 import org.labkey.api.util.InputBuilder;
 import org.labkey.api.view.HttpView;
+import org.labkey.api.view.template.PageConfig;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexDataHandler;
 
@@ -44,8 +45,8 @@ public class NegativeBeadDisplayColumnGroup extends DisplayColumnGroup
     {
         TD(
             isCopyable() ? (DOM.Renderable) ret -> {
-                // Use propName because ids can't have spaces
-                String inputName = ColumnInfo.propNameFromName(_inputName);
+                // DOM ids and JS function names can't have spaces
+                String inputName = PageConfig.makeIdFromName(_inputName);
                 String id = inputName + "CheckBox";
                 InputBuilder.checkbox().name(id).id(id).appendTo(out);
                 StringBuilder onChange = new StringBuilder("b = this.checked;\n");
