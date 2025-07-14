@@ -7,6 +7,7 @@ module.exports = {
     apps: [{
         name: 'runDetails',
         title: 'ELISA Run Details',
+        dependencies: ['vis/vis', 'vis/genericChart/genericChartHelper.js'],
         path: './src/client/RunDetails',
         generateLib: true // used by runDetailsView.jsp
     }]
