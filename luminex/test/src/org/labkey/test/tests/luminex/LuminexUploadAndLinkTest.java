@@ -88,8 +88,8 @@ public final class LuminexUploadAndLinkTest extends LuminexTest
         // Upload another run using a thaw list pasted in as a TSV
         clickButton("Import Data");
         assertEquals(TEST_ASSAY_LUM_SET_PROP_SPECIES2, getFormElement(SPECIES_LOCATOR));
-        checkCheckbox(Locator.radioButtonByNameAndValue("ParticipantVisitResolver", "Lookup"));
-        checkCheckbox(Locator.radioButtonByNameAndValue("ThawListType", "Text"));
+        checkCheckbox(Locator.radioButtonByNameAndValue(AssayConstants.PARTICIPANT_VISIT_RESOLVER_FIELD_NAME, "Lookup"));
+        checkCheckbox(Locator.radioButtonByNameAndValue(AssayConstants.THAW_LIST_TYPE_FIELD_NAME, "Text"));
         setFormElement(Locator.id("ThawListTextArea"), "Index\tSpecimenID\tParticipantID\tVisitID\n" +
                 "1\tSpecimenID1\tParticipantID1\t1.1\n" +
                 "2\tSpecimenID2\tParticipantID2\t1.2\n" +
@@ -163,10 +163,10 @@ public final class LuminexUploadAndLinkTest extends LuminexTest
         // Upload another run using a thaw list that pointed at the list we uploaded earlier
         clickButton("Import Data");
         assertEquals(TEST_ASSAY_LUM_SET_PROP_SPECIES2, getFormElement(SPECIES_LOCATOR));
-        assertRadioButtonSelected(Locator.radioButtonByNameAndValue("ParticipantVisitResolver", "Lookup"));
-        assertRadioButtonSelected(Locator.radioButtonByNameAndValue("ThawListType", "Text"));
+        assertRadioButtonSelected(Locator.radioButtonByNameAndValue(AssayConstants.PARTICIPANT_VISIT_RESOLVER_FIELD_NAME, "Lookup"));
+        assertRadioButtonSelected(Locator.radioButtonByNameAndValue(AssayConstants.THAW_LIST_TYPE_FIELD_NAME, "Text"));
 
-        checkCheckbox(Locator.radioButtonByNameAndValue("ThawListType", "List"));
+        checkCheckbox(Locator.radioButtonByNameAndValue(AssayConstants.THAW_LIST_TYPE_FIELD_NAME, "List"));
         waitForElement(Locator.css(".schema-loaded-marker"));
         _ext4Helper.selectComboBoxItem(Locator.id("thawListSchemaName"), "lists");
         waitForElement(Locator.css(".query-loaded-marker"));

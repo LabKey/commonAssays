@@ -16,6 +16,7 @@
 
 package org.labkey.flow.data;
 
+import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.property.SystemProperty;
 
@@ -35,7 +36,7 @@ abstract public class FlowProperty
     static public final SystemProperty AnalysisEngine = new SystemProperty(PROPERTY_BASE + "AnalysisEngine", PropertyType.STRING);
 
     // Property on FlowRun ExpRun object: container id of target study
-    static public final SystemProperty TargetStudy = new SystemProperty(PROPERTY_BASE + "TargetStudy", PropertyType.STRING);
+    static public final SystemProperty TargetStudy = new SystemProperty(PROPERTY_BASE + AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, PropertyType.STRING);
 
     // Property on FlowFCSFile ExpData object: true when the FlowFCSFile was created from an external analysis (extracted from FlowJo workspace or analysis archive)
     //static public final SystemProperty ExtraKeywordsFCSFile = new SystemProperty(PROPERTY_BASE + "ExtraKeywordsFCSFile", PropertyType.BOOLEAN);

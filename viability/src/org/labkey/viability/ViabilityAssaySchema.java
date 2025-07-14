@@ -362,7 +362,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
 
         private MutableColumnInfo createTargetStudyCol()
         {
-            var col = wrapColumn(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, getRealTable().getColumn("TargetStudy"));
+            var col = wrapColumn(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, getRealTable().getColumn(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME));
             fixupRenderers(col, col);
             col.setUserEditable(false);
             col.setReadOnly(true);
