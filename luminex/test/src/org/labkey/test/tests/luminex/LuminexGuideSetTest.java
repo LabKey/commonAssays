@@ -23,6 +23,7 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
+import org.labkey.test.components.assay.AssayConstants;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.params.FieldDefinition;
 import org.labkey.test.util.DataRegionTable;
@@ -561,7 +562,7 @@ public final class LuminexGuideSetTest extends LuminexTest
 
         goToTestAssayHome();
         clickButton("Import Data");
-        setFormElement(Locator.name("network"), "NETWORK" + (10));
+        setFormElement(Locator.name("Network"), "NETWORK" + (10));
         clickButton("Next");
 
         importLuminexRunPageTwo("Reload guide set 5", isotype, conjugate, "", "", "Notebook" + 11,

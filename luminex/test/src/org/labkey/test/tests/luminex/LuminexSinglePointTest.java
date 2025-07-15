@@ -190,7 +190,7 @@ public class LuminexSinglePointTest extends LuminexTest
 
         goToTestAssayHome();
         clickButton("Import Data");
-        setFormElement(Locator.name("network"), "NETWORK" + runNumber);
+        setFormElement(Locator.name("Network"), "NETWORK" + runNumber);
         clickButton("Next");
 
         Calendar testDate = Calendar.getInstance();

@@ -23,12 +23,15 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
+import org.labkey.test.components.assay.AssayConstants;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LogMethod;
 
 import java.io.File;
 import java.util.Calendar;
+
+import static org.junit.Assert.assertEquals;
 
 @Category({Daily.class, Assays.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 7)
@@ -102,7 +105,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
         int i = index;
         goToTestAssayHome();
         clickButton("Import Data");
-        setFormElement(Locator.name("network"), "NEWNET" + (i + 1));
+        setFormElement(Locator.name("Network"), "NEWNET" + (i + 1));
         clickButton("Next");
         testDate.add(Calendar.DATE, 1);
         importLuminexRunPageTwo("Guide Set plate " + (i+1), "new"+isotype, "new"+conjugate, "", "", "NewNote" + (i+1),
@@ -120,7 +123,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
         goToTestAssayHome();
         new DataRegionTable("Runs", getDriver()).checkCheckbox(1);
         clickButton("Re-import run");
-        Assert.assertEquals("Form did not remember values from first import", "NETWORK1", getFormElement(Locator.name("network")));
+        Assert.assertEquals("Form did not remember values from first import", "NETWORK1", getFormElement(Locator.name("Network")));
         clickButton("Next");
         testDate.add(Calendar.DATE, 1);
         reimportLuminexRunPageTwo("Guide Set plate " + (i+1), isotype, conjugate, "", "", "Notebook" + (i+1),
@@ -136,15 +139,15 @@ public final class LuminexAsyncImportTest extends LuminexTest
                                              String testDate, File file, int i)
     {
         // verify that all old values from the first imported run are present
-        assertFormElementEquals(Locator.name("name"), runId);
-        assertFormElementEquals(Locator.name("isotype"), isotype);
-        assertFormElementEquals(Locator.name("conjugate"), conjugate);
-        assertFormElementEquals(Locator.name("stndCurveFitInput"), stndCurveFitInput);
-        assertFormElementEquals(Locator.name("unkCurveFitInput"), unkCurveFitInput);
-        assertFormElementEquals(Locator.name("notebookNo"), notebookNo);
-        assertFormElementEquals(Locator.name("assayType"), assayType);
-        assertFormElementEquals(Locator.name("expPerformer"), expPerformer);
-        assertFormElementEquals(Locator.name("testDate"), testDate);
+        assertEquals(runId, getFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR));
+        assertEquals(isotype, getFormElement(Locator.name("Isotype")));
+        assertEquals(conjugate, getFormElement(Locator.name("Conjugate")));
+        assertEquals(stndCurveFitInput, getFormElement(Locator.name("StndCurveFitInput")));
+        assertEquals(unkCurveFitInput, getFormElement(Locator.name("UnkCurveFitInput")));
+        assertEquals(notebookNo, getFormElement(Locator.name("NotebookNo")));
+        assertEquals(assayType, getFormElement(Locator.name("AssayType")));
+        assertEquals(expPerformer, getFormElement(Locator.name("ExpPerformer")));
+        assertEquals(testDate, getFormElement(Locator.name("TestDate")));
         click(Locator.xpath("//a[contains(@class, 'labkey-file-add-icon-enabled')]"));
         setFormElement(Locator.name("__primaryFile__"), file);
         waitForText("A file with name '" + file.getName() + "' already exists");
@@ -181,7 +184,7 @@ public final class LuminexAsyncImportTest extends LuminexTest
     {
         goToTestAssayHome();
         clickButton("Import Data");
-        setFormElement(Locator.name("network"), "NETWORK" + (i + 1));
+        setFormElement(Locator.name("Network"), "NETWORK" + (i + 1));
         clickButton("Next");
 
         testDate.add(Calendar.DATE, 1);

@@ -16,6 +16,7 @@
 package org.labkey.flow.query;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
@@ -74,7 +75,7 @@ public class FCSFileCoalescingColumn extends ExprColumn
                 _dateFieldKeys = Pair.of(dateFieldKey, FlowSchema.rewriteAsOriginalFCSFile(dateFieldKey));
         }
 
-        FieldKey targetStudyFieldKey = relativeFromFCSFile ? FieldKey.fromParts("Run", "TargetStudy") : FieldKey.fromParts("FCSFile", "Run", "TargetStudy");
+        FieldKey targetStudyFieldKey = relativeFromFCSFile ? FieldKey.fromParts("Run", AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME) : FieldKey.fromParts("FCSFile", "Run", "TargetStudy");
         _targetStudyFieldKeys = Pair.of(targetStudyFieldKey, FlowSchema.rewriteAsOriginalFCSFile(targetStudyFieldKey));
     }
 

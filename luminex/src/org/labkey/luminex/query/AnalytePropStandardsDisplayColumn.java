@@ -121,7 +121,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     @Override
     public DOM._Attributes getInputAttributes()
     {
-        String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName());
+        String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellNameAndId(_titration.getName());
 
         return at(style, "display:" + (_hideCell ? "none" : "table-cell"), name, titrationCellName);
     }
@@ -129,7 +129,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     @Override
     public void renderDetailsCaptionCell(RenderContext ctx, HtmlWriter out, @Nullable String cls)
     {
-        String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName());
+        String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellNameAndId(_titration.getName());
 
         TD(
             cl(cls).at(style, "display:" + (_hideCell ? "none" : "table-cell") + ";").name(titrationCellName),
