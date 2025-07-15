@@ -29,7 +29,7 @@ export class PlotOptionsPanel extends PureComponent<Props> {
         const { plotOptions, measures, columnInfo, setPlotOption } = this.props;
 
         return (
-            <div className="panel panel-default">
+            <div className="panel panel-default plot-options-panel">
                 <div className="panel-heading">
                     Plot Options
                 </div>
