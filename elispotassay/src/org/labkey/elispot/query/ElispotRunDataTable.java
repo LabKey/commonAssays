@@ -170,7 +170,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         FieldKey runPropFieldKey = FieldKey.fromParts("Run");
         fieldKeys.add(FieldKey.fromParts(runPropFieldKey, FieldKey.fromString("ProtocolName")));
         fieldKeys.add(FieldKey.fromParts(runPropFieldKey, FieldKey.fromString("PlateReader")));
-        fieldKeys.add(FieldKey.fromParts(runPropFieldKey,  FieldKey.fromString("Batch"), FieldKey.fromString("TargetStudy")));
+        fieldKeys.add(FieldKey.fromParts(runPropFieldKey,  FieldKey.fromString("Batch"), FieldKey.fromString(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)));
         return fieldKeys;
     }
 

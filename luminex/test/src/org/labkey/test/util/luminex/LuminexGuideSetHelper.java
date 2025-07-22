@@ -59,9 +59,9 @@ public class LuminexGuideSetHelper
     {
         _test.goToTestAssayHome(assayName);
         _test.clickButton("Import Data");
-        _test.setFormElement(Locator.name("network"), "NETWORK" + (_runNumber));
-        if (_test.isElementPresent(Locator.name("customProtocol")))
-            _test.setFormElement(Locator.name("customProtocol"), "PROTOCOL" + (_runNumber));
+        _test.setFormElement(Locator.name("Network"), "NETWORK" + (_runNumber));
+        if (_test.isElementPresent(Locator.name("CustomProtocol")))
+            _test.setFormElement(Locator.name("CustomProtocol"), "PROTOCOL" + (_runNumber));
         _test.clickButton("Next");
 
         TESTDATE.add(Calendar.DATE, 1);

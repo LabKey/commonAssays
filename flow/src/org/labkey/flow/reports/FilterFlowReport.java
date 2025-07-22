@@ -197,7 +197,7 @@ public abstract class FilterFlowReport extends FlowReport
     private String oldLegalName(FieldKey fkey)
     {
         String r = AliasManager.makeLegalName(StringUtils.join(fkey.getParts(), "_"), FlowManager.get().getSchema().getSqlDialect(), false);
-        return ColumnInfo.propNameFromName(r).toLowerCase();
+        return ColumnInfo.legalNameFromName(r).toLowerCase();
     }
 
     protected void convertDateColumn(CachedResultSet rs, String fromCol, String toCol) throws SQLException

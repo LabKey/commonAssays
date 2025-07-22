@@ -268,7 +268,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
             titration.setName(titrationName);
             for (Titration.Type type : Titration.Type.values())
             {
-                String propertyName = LuminexUploadWizardAction.getTitrationTypeCheckboxName(type, titration);
+                String propertyName = LuminexUploadWizardAction.getTitrationTypeCheckboxNameAndId(type, titration);
                 if (getViewContext().getRequest().getParameter(propertyName) != null)
                 {
                     String hiddenValue = getViewContext().getRequest().getParameter(propertyName);
@@ -293,7 +293,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         {
             SinglePointControl singlePointControl = new SinglePointControl();
             singlePointControl.setName(singlePointControlName);
-            String propertyName = LuminexUploadWizardAction.getSinglePointControlCheckboxName(singlePointControlName);
+            String propertyName = LuminexUploadWizardAction.getSinglePointControlCheckboxNameAndId(singlePointControlName);
             if (StringUtils.isNotBlank(getViewContext().getRequest().getParameter(propertyName)))
             {
                 result.add(singlePointControl);

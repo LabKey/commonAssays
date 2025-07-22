@@ -17,6 +17,7 @@ package org.labkey.test.components.luminex.importwizard;
 
 import org.labkey.test.Locator;
 import org.labkey.test.components.WebPartPanel;
+import org.labkey.test.components.assay.AssayConstants;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -25,7 +26,6 @@ import java.io.File;
 public class RunPropertiesWebPart extends WebPartPanel
 {
     private static final String TITLE = "Run Properties";
-    public static final String ASSAY_ID_FIELD  = "name";
     public static final String ASSAY_DATA_FILE_LOCATION_MULTIPLE_FIELD = "__primaryFile__";
 
     protected RunPropertiesWebPart(WebElement componentElement, WebDriver driver)
@@ -67,7 +67,7 @@ public class RunPropertiesWebPart extends WebPartPanel
 
     public void setRunId(String runId)
     {
-        getWrapper().setFormElement(Locator.inputById(ASSAY_ID_FIELD), runId);
+        getWrapper().setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, runId);
     }
 
     public static class RunPropertiesWebPartFinder extends WebPartFinder<RunPropertiesWebPart, RunPropertiesWebPartFinder>

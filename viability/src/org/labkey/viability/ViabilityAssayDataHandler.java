@@ -366,7 +366,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             // If the property is on the result domain, it's already in the base map.
             if (batchOrRunTargetStudy != null)
             {
-                base.put("targetStudy", batchOrRunTargetStudy);
+                base.put(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, batchOrRunTargetStudy);
             }
 
             ViabilityResult result = ViabilityResult.fromMap(base, extra);
