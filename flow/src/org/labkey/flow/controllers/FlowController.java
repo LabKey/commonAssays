@@ -361,7 +361,7 @@ public class FlowController extends BaseFlowController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class SavePreferencesAction extends SimpleViewAction
+    public class SavePreferencesAction extends SimpleViewAction<Object>
     {
         @Override
         public ModelAndView getView(Object o, BindException errors) throws Exception
