@@ -1029,9 +1029,9 @@ public class FlowManager
     }
 
     
-    public AttrObject createAttrObject(ExpData data, ObjectType type, URI uri)
+    public AttrObject createAttrObject(@NotNull ExpData data, ObjectType type, URI uri)
     {
-        if (FlowDataHandler.instance.getPriority(ExperimentService.get().getExpData(data.getRowId())) != Handler.Priority.HIGH)
+        if (FlowDataHandler.instance.getPriority(data) != Handler.Priority.HIGH)
         {
             // Need to make sure the right ExperimentDataHandler is associated with this data file, otherwise, you
             // won't be able to delete it because of the foreign key constraint from the flow.object table.
