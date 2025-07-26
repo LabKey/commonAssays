@@ -139,12 +139,6 @@ public class ProteinModule extends DefaultModule
             }
 
             @Override
-            public List<TableInfo> getTablesToCopy(DbSchema targetSchema)
-            {
-                return super.getTablesToCopy(targetSchema);
-            }
-
-            @Override
             public void afterSchema(DbSchema targetSchema)
             {
                 new SqlExecutor(targetSchema).execute("ALTER TABLE prot.Organisms ADD CONSTRAINT FK_ProtOrganisms_ProtIdentifiers FOREIGN KEY (IdentId) REFERENCES prot.Identifiers (IdentId)");
