@@ -70,7 +70,7 @@ CREATE TABLE prot.InfoSources
 
 /*** Initializations */
 
-@SkipOnEmptySchemasBegin
+-- @SkipOnEmptySchemasBegin
 INSERT INTO prot.InfoSources (Name, Url, InsertDate) VALUES ('Genbank', 'http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?db=protein&cmd=search&term={}', '2005-03-04 12:08:10');
 INSERT INTO prot.InfoSources (Name, Url, InsertDate) VALUES ('NiceProt', 'http://au.expasy.org/cgi-bin/niceprot.pl?{}', '2005-03-04 12:08:10');
 INSERT INTO prot.InfoSources (Name, Url, InsertDate) VALUES ('GeneCards', 'http://www.genecards.org/cgi-bin/carddisp?{}&alias=yes', '2005-03-04 12:08:10');
@@ -81,7 +81,7 @@ UPDATE prot.InfoSources SET Url = 'http://www.genecards.org/cgi-bin/carddisp.pl?
 UPDATE prot.InfoSources SET URL = 'http://www.uniprot.org/uniprot/{}' WHERE Name = 'NiceProt';
 UPDATE prot.InfoSources SET URL = 'http://www.ncbi.nlm.nih.gov/protein/{}' WHERE Name = 'Genbank';
 UPDATE prot.infosources SET url = 'http://amigo.geneontology.org/amigo/term/{}' WHERE Name = 'GO';
-@SkipOnEmptySchemasEnd
+-- @SkipOnEmptySchemasEnd
 
 /****** AnnotationTypes                                 */
 CREATE TABLE prot.AnnotationTypes
@@ -99,7 +99,7 @@ CREATE TABLE prot.AnnotationTypes
 );
 CREATE UNIQUE INDEX UQ_ProtAnnotationTypes ON prot.AnnotationTypes(Name);
 
-@SkipOnEmptySchemasBegin
+-- @SkipOnEmptySchemasBegin
 INSERT INTO prot.AnnotationTypes (Name,SourceId,EntryDate) VALUES ('GO_F',5,'2005-03-04 11:37:15');
 INSERT INTO prot.AnnotationTypes (Name,SourceId,EntryDate) VALUES ('GO_P',5,'2005-03-04 11:37:15');
 INSERT INTO prot.AnnotationTypes (Name,EntryDate) VALUES ('keyword','2005-03-04 11:37:15');
@@ -107,7 +107,7 @@ INSERT INTO prot.AnnotationTypes (Name,EntryDate) VALUES ('feature','2005-03-04 
 INSERT INTO prot.AnnotationTypes (Name,SourceId,EntryDate) VALUES ('GO_C',5,'2005-03-04 11:38:13');
 INSERT INTO prot.AnnotationTypes (Name,EntryDate) VALUES ('FullOrganismName',now());
 INSERT INTO prot.AnnotationTypes (Name,EntryDate) VALUES ('LookupString',now());
-@SkipOnEmptySchemasEnd
+-- @SkipOnEmptySchemasEnd
 
 CREATE INDEX IX_AnnotationTypes_SourceId ON prot.annotationtypes(SourceId);
 
@@ -128,7 +128,7 @@ CREATE TABLE prot.IdentTypes
 CREATE UNIQUE INDEX UQ_ProtIdentTypes ON prot.IdentTypes(Name);
 CREATE INDEX IX_IdentTypes_cannonicalsourceid ON prot.IdentTypes(cannonicalsourceid);
 
-@SkipOnEmptySchemasBegin
+-- @SkipOnEmptySchemasBegin
 INSERT INTO prot.IdentTypes (Name,CannonicalSourceId,EntryDate) VALUES ('Genbank',1,'2005-03-04 11:37:14');
 INSERT INTO prot.IdentTypes (Name,CannonicalSourceId,EntryDate) VALUES ('SwissProt',2,'2005-03-04 11:37:14');
 INSERT INTO prot.IdentTypes (Name,CannonicalSourceId,EntryDate) VALUES ('GeneName',3,'2005-03-04 11:37:14');
@@ -198,7 +198,7 @@ INSERT INTO prot.IdentTypes (Name,EntryDate) VALUES ('PhosSite','2005-03-04 12:4
 INSERT INTO prot.IdentTypes (Name,EntryDate) VALUES ('REBASE','2005-03-04 13:25:29');
 INSERT INTO prot.IdentTypes (Name,EntryDate) VALUES ('Maize-2DPAGE','2005-03-04 15:10:53');
 INSERT INTO prot.IdentTypes (Name,EntryDate) VALUES ('HIV','2005-03-04 22:13:40');
-@SkipOnEmptySchemasEnd
+-- @SkipOnEmptySchemasEnd
 
 /****** Organisms                                       */
 CREATE TABLE prot.Organisms
@@ -215,9 +215,9 @@ CREATE TABLE prot.Organisms
 );
 CREATE UNIQUE INDEX UQ_ProtOrganisms_Genus_Species ON prot.Organisms(Genus, Species);
 
-@SkipOnEmptySchemasBegin
+-- @SkipOnEmptySchemasBegin
 INSERT INTO prot.Organisms (CommonName,Genus,Species,Comments) VALUES ('Unknown organism','Unknown','unknown','Organism is unknown');
-@SkipOnEmptySchemasEnd
+-- @SkipOnEmptySchemasEnd
 
 CREATE INDEX IX_Organisms_IdentId ON prot.Organisms(IdentId);
 
@@ -505,7 +505,7 @@ CREATE FUNCTION prot.drop_go_indexes() RETURNS void AS $$
     END;
     $$ LANGUAGE plpgsql;
 
-@SkipOnEmptySchemasBegin
+-- @SkipOnEmptySchemasBegin
 -- add most common ncbi Taxonomy id's
 
 CREATE TEMPORARY TABLE idents
@@ -577,7 +577,7 @@ UPDATE prot.Organisms
     WHERE i.OrgId = Organisms.OrgId;
 
 DROP TABLE idents;
-@SkipOnEmptySchemasEnd
+-- @SkipOnEmptySchemasEnd
 
 CREATE TABLE prot.FastaSequences
 (
