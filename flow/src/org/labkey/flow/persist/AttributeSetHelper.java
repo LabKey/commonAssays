@@ -153,7 +153,7 @@ public class AttributeSetHelper
                 List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<String, String> entry : keywords.entrySet())
                 {
-                    AttributeCache.Entry a = AttributeCache.KEYWORDS.byAttribute(c, entry.getKey());
+                    AttributeCache.Entry<?, ?> a = AttributeCache.KEYWORDS.byAttribute(c, entry.getKey());
                     assert a != null : "parepareForSave should have created an entry";
                     int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
                     int originalId = a.getRowId();
@@ -174,7 +174,7 @@ public class AttributeSetHelper
                 List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<StatisticSpec, Double> entry : statistics.entrySet())
                 {
-                    AttributeCache.Entry a = AttributeCache.STATS.byAttribute(c, entry.getKey());
+                    AttributeCache.Entry<?, ?> a = AttributeCache.STATS.byAttribute(c, entry.getKey());
                     assert a != null : "parepareForSave should have created an entry";
                     int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
                     int originalId = a.getRowId();
@@ -213,7 +213,7 @@ public class AttributeSetHelper
                 List<List<?>> paramsList = new ArrayList<>();
                 for (Map.Entry<GraphSpec, byte[]> entry : graphs.entrySet())
                 {
-                    AttributeCache.Entry a = AttributeCache.GRAPHS.byAttribute(c, entry.getKey());
+                    AttributeCache.Entry<?, ?> a = AttributeCache.GRAPHS.byAttribute(c, entry.getKey());
                     assert a != null : "parepareForSave should have created an entry";
                     int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
                     int originalId = a.getRowId();
