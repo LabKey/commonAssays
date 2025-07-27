@@ -22,7 +22,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.SqlExecutor;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
@@ -67,7 +66,7 @@ public class ProteinModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 25.000;
+        return 25.001;
     }
 
     @Override
