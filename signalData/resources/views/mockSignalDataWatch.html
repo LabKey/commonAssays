@@ -6,6 +6,7 @@
     (function() {
 
         var RUN_FOLDER = "TestRun001";
+        var SIGNAL_DATA_FILE_ROOT = "SignalDataAssayData/" + RUN_FOLDER + "/";
 
         function getEl(selector) {
             return Ext4.get(Ext4.DomQuery.select(selector)[0]);
@@ -66,7 +67,7 @@
             Ext4.each(fileSet, function(file) {
                 dataRows.push({
                     Name: file.text,
-                    DataFile: file.text,
+                    DataFile: SIGNAL_DATA_FILE_ROOT + file.text,
                     TestType: 'SMP'
                 });
                 dataInputs.push({
