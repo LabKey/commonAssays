@@ -15,7 +15,6 @@
  */
 package org.labkey.test.util.luminex;
 
-import org.labkey.api.collections.IntHashMap;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.Locators;
@@ -43,7 +42,7 @@ public class LuminexGuideSetHelper
     private static final Locator GS_WINDOW_LOC =
             Locator.tag("div").withClasses("x-window", "leveljenningsreport");
     public static final String[] GUIDE_SET_ANALYTE_NAMES = {"GS Analyte A", "GS Analyte B"};
-    private static final Map<Integer, String> timestamps = new IntHashMap<>();
+    private static final Map<Integer, String> timestamps = new HashMap<>();
     final LuminexTest _test;
     
     public Calendar TESTDATE = Calendar.getInstance();
