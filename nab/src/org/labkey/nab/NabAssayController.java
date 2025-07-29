@@ -355,7 +355,7 @@ public class NabAssayController extends SpringActionController
 
     public static class NabGraphSelectedBean extends GraphSelectedBean
     {
-        public NabGraphSelectedBean(ViewContext context, ExpProtocol protocol, int[] cutoffs, int[] dataObjectIds, String captionColumn, String chartTitle)
+        public NabGraphSelectedBean(ViewContext context, ExpProtocol protocol, int[] cutoffs, long[] dataObjectIds, String captionColumn, String chartTitle)
         {
             super(context, protocol, cutoffs, dataObjectIds, captionColumn, chartTitle);
         }
@@ -376,9 +376,9 @@ public class NabAssayController extends SpringActionController
                     SimpleFilter existingFilter = (SimpleFilter) view.getRenderContext().getBaseFilter();
                     if (existingFilter != null)
                         filter.addAllClauses(existingFilter);
-                    List<Integer> objectIds = new ArrayList<>(_dataObjectIds.length);
-                    for (int dataObjectId : _dataObjectIds)
-                        objectIds.add(Integer.valueOf(dataObjectId));
+                    List<Long> objectIds = new ArrayList<>(_dataObjectIds.length);
+                    for (long dataObjectId : _dataObjectIds)
+                        objectIds.add(Long.valueOf(dataObjectId));
 
                     filter.addInClause(FieldKey.fromString("RowId"), objectIds);
                     view.getDataRegion().setRecordSelectorValueColumns("RowId");
@@ -400,7 +400,7 @@ public class NabAssayController extends SpringActionController
     public static class NabGraphSelectedAction extends GraphSelectedAction<GraphSelectedForm>
     {
         @Override
-        protected GraphSelectedBean createSelectionBean(ViewContext context, ExpProtocol protocol, int[] cutoffs, int[] dataObjectIds, String caption, String title)
+        protected GraphSelectedBean createSelectionBean(ViewContext context, ExpProtocol protocol, int[] cutoffs, long[] dataObjectIds, String caption, String title)
         {
             return new NabGraphSelectedBean(context, protocol, cutoffs, dataObjectIds, caption, title);
         }

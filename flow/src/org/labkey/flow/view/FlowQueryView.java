@@ -249,19 +249,19 @@ public class FlowQueryView extends QueryView
             URLHelper target = urlChangeView();
             MenuButton button = new MenuButton("Analysis Folder");
 
-            Map<Integer, String> availableExperiments = new LinkedHashMap<>();
-            availableExperiments.put(0, "All Analysis Folders");
+            Map<Long, String> availableExperiments = new LinkedHashMap<>();
+            availableExperiments.put(0L, "All Analysis Folders");
 
             for (FlowExperiment experiment : experiments)
                 availableExperiments.put(experiment.getExperimentId(), experiment.getName());
 
             FlowExperiment current = getSchema().getExperiment();
-            int currentId = current == null ? 0 : current.getExperimentId();
+            long currentId = current == null ? 0 : current.getExperimentId();
 
             if (!availableExperiments.containsKey(currentId))
                 availableExperiments.put(current.getExperimentId(), current.getName());
 
-            for (Map.Entry<Integer, String> entry : availableExperiments.entrySet())
+            for (Map.Entry<Long, String> entry : availableExperiments.entrySet())
             {
                 URLHelper url = target.clone();
                 if (entry.getKey().intValue() != 0)

@@ -269,7 +269,7 @@ public class FlowReportJob extends RReportJob
             }
         };
 
-        Integer ownerId = FlowReportManager.ensureReportOntologyObjectId(_report, getContainer());
+        Long ownerId = FlowReportManager.ensureReportOntologyObjectId(_report, getContainer());
 
         try (DataIterator iter = loader.getDataIterator(new DataIteratorContext()))
         {

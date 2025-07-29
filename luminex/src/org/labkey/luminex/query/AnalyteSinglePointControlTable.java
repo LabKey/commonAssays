@@ -122,7 +122,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
                 @Override
                 public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                 {
-                    int protocolId = schema.getProtocol().getRowId();
+                    long protocolId = schema.getProtocol().getRowId();
                     int analyte = (int)ctx.get("analyte");
                     int singlePointControl = (int)ctx.get("singlePointControl");
                     String onClickPattern = "LABKEY.LeveyJenningsPlotHelper.getLeveyJenningsPlotWindow(%d,%d,%d,'%s','SinglePoint');";

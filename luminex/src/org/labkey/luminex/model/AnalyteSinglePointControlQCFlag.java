@@ -29,7 +29,7 @@ public class AnalyteSinglePointControlQCFlag extends AbstractAnalyteQCFlag
         super();
     }
 
-    public AnalyteSinglePointControlQCFlag(int runId, String description, int analyte, int singlePointControl)
+    public AnalyteSinglePointControlQCFlag(long runId, String description, int analyte, int singlePointControl)
     {
         super(runId, LuminexDataHandler.QC_FLAG_SINGLE_POINT_CONTROL_FI_FLAG_TYPE, description, analyte);
         setSinglePointControl(singlePointControl);
@@ -67,7 +67,7 @@ public class AnalyteSinglePointControlQCFlag extends AbstractAnalyteQCFlag
     @Override
     public int hashCode()
     {
-        int result = getRunId();
+        int result = (int)getRunId();
         result = 31 * result + (getFlagType() != null ? getFlagType().hashCode() : 0);
         result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
         result = 31 * result + getAnalyte();

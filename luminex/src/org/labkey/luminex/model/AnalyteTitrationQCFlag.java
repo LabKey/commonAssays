@@ -25,7 +25,7 @@ public class AnalyteTitrationQCFlag extends AbstractAnalyteQCFlag
 
     public AnalyteTitrationQCFlag() {}
 
-    public AnalyteTitrationQCFlag(int runId, String flagType, String description, int analyte, int titration)
+    public AnalyteTitrationQCFlag(long runId, String flagType, String description, int analyte, int titration)
     {
         super(runId, flagType, description, analyte);
         setTitration(titration);
@@ -62,7 +62,7 @@ public class AnalyteTitrationQCFlag extends AbstractAnalyteQCFlag
     @Override
     public int hashCode()
     {
-        int result = getRunId();
+        int result = (int)getRunId();
         result = 31 * result + (getFlagType() != null ? getFlagType().hashCode() : 0);
         result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
         result = 31 * result + getAnalyte();

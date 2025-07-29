@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.labkey.api.audit.AuditLogService;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.Aggregate;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -962,7 +963,7 @@ public class FlowManager
                 .append("WHERE fo.rowid = val.objectid\n")
                 .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").appendValue(rowId).append("\n");
 
-        final Map<Integer, Collection<FlowDataObject>> usages = new HashMap<>();
+        final Map<Integer, Collection<FlowDataObject>> usages = new IntHashMap<>();
         SqlSelector selector = new SqlSelector(getSchema(), sql);
         selector.forEachMap(row -> {
             Integer attributeRowId = (Integer)row.get("OriginalAttrId");

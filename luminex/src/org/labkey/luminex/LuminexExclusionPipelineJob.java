@@ -33,7 +33,7 @@ public class LuminexExclusionPipelineJob extends PipelineJob
 {
     private LuminexSaveExclusionsForm _form;
     private LuminexManager.ExclusionType _exclusionType;
-    private Integer _runId;
+    private Long _runId;
 
     private transient AssayProvider _assayProvider;
     private transient ExpRun _run;

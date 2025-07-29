@@ -217,9 +217,9 @@ public abstract class BaseFlowController extends SpringActionController
         url.replaceParameter(param.toString(), value);
     }
 
-    protected void putParam(ActionURL url, Enum<?> param, int value)
+    protected void putParam(ActionURL url, Enum<?> param, long value)
     {
-        putParam(url, param, Integer.toString(value));
+        putParam(url, param, Long.toString(value));
     }
 
     public HttpServletRequest getRequest()

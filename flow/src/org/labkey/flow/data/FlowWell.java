@@ -57,7 +57,7 @@ public class FlowWell extends FlowDataObject
     // For serialization
     protected FlowWell() {}
 
-    static public FlowWell fromWellId(int id)
+    static public FlowWell fromWellId(long id)
     {
         FlowDataObject flowobj = fromRowId(id);
         if (flowobj instanceof FlowWell)
@@ -65,7 +65,7 @@ public class FlowWell extends FlowDataObject
         return null;
     }
 
-    static public List<? extends FlowWell> fromWellIds(int... ids)
+    static public List<? extends FlowWell> fromWellIds(long... ids)
     {
         List<FlowWell> wells = new ArrayList<>(ids.length);
         List<FlowDataObject> flowobjs = fromRowIds(ids);
@@ -75,7 +75,7 @@ public class FlowWell extends FlowDataObject
         return wells;
     }
 
-    static public List<FlowWell> fromWellIds(Collection<Integer> ids)
+    static public List<FlowWell> fromWellIds(Collection<Long> ids)
     {
         List<FlowWell> wells = new ArrayList<>(ids.size());
         List<FlowDataObject> flowobjs = fromRowIds(ids);
@@ -263,7 +263,7 @@ public class FlowWell extends FlowDataObject
         return prefix + " '" + getName() + "'";
     }
 
-    public int getWellId()
+    public long getWellId()
     {
         return getRowId();
     }

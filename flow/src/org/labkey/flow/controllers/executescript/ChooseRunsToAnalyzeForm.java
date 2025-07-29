@@ -170,7 +170,7 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
             FlowExperiment analysis = FlowExperiment.getMostRecentAnalysis(getContainer());
             if (analysis != null)
             {
-                ff_targetExperimentId = Integer.toString(analysis.getExperimentId());
+                ff_targetExperimentId = Long.toString(analysis.getExperimentId());
             }
         }
         Collection<FlowScript> availableProtocols = Arrays.asList(FlowScript.getScripts(getContainer()));

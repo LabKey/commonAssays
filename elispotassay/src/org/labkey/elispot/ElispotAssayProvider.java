@@ -174,10 +174,10 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
     }
 
     @Override
-    public Set<ExpData> getDatasForResultRows(Collection<Integer> rowIds, ExpProtocol protocol, ResolverCache cache)
+    public Set<ExpData> getDatasForResultRows(Collection<Long> rowIds, ExpProtocol protocol, ResolverCache cache)
     {
         Set<ExpData> result = new HashSet<>();
-        for (Integer rowId : rowIds)
+        for (var rowId : rowIds)
         {
             RunDataRow dataRow = ElispotManager.get().getRunDataRow(rowId);
             if (dataRow == null)

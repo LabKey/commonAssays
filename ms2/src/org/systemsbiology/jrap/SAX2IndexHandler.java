@@ -40,8 +40,8 @@
 package org.systemsbiology.jrap;
 
 import java.util.Map;
-import java.util.HashMap;
 
+import org.labkey.api.collections.IntHashMap;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
@@ -63,7 +63,7 @@ public final class SAX2IndexHandler extends DefaultHandler
     protected boolean foundScanOffset = false;
 
     /** Data structure to hold index table */
-    Map<Integer, Long> offsets = new HashMap<>();
+    Map<Integer, Long> offsets = new IntHashMap<>();
     private int _currentId;
     private int _maxScan = -1;
 

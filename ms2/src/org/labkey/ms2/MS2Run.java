@@ -42,7 +42,7 @@ public abstract class MS2Run implements Serializable
 
     protected final static String[] EMPTY_STRING_ARRAY = new String[0];
 
-    protected int run;
+    protected long run;
     protected GUID containerId;
     protected String description;
     protected String path;
@@ -240,13 +240,13 @@ public abstract class MS2Run implements Serializable
         return _fastaIds;
     }
 
-    public int getRun()
+    public long getRun()
     {
         return run;
     }
 
 
-    public void setRun(int run)
+    public void setRun(long run)
     {
         this.run = run;
     }

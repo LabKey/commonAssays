@@ -5,8 +5,8 @@ import org.labkey.api.data.Entity;
 public class CurveFitDb extends Entity
 {
     private Integer _rowId;
-    private Integer _runId;
-    private Integer _protocolId;
+    private Long _runId;
+    private Long _protocolId;
     private String _plateName;
     private Integer _spot;
     private Double _rSquared;
@@ -27,22 +27,22 @@ public class CurveFitDb extends Entity
         _rowId = rowId;
     }
 
-    public Integer getRunId()
+    public Long getRunId()
     {
         return _runId;
     }
 
-    public void setRunId(Integer runId)
+    public void setRunId(Long runId)
     {
         _runId = runId;
     }
 
-    public Integer getProtocolId()
+    public Long getProtocolId()
     {
         return _protocolId;
     }
 
-    public void setProtocolId(Integer protocolId)
+    public void setProtocolId(Long protocolId)
     {
         _protocolId = protocolId;
     }

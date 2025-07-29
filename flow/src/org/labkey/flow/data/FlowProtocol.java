@@ -16,6 +16,8 @@
 
 package org.labkey.flow.data;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.LongHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -79,7 +82,6 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.KeywordsJob;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -370,7 +372,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 _log.warn("Flow sample join property '" + propertyName + "' not found on SampleType");
         }
 
-        Map<Integer, ExpMaterial> materialMap = new HashMap<>();
+        Map<Long, ExpMaterial> materialMap = new LongHashMap<>();
         List<? extends ExpMaterial> materials = getSamples(st, user);
         for (ExpMaterial material : materials)
         {
@@ -382,7 +384,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         {
             while (rsSamples.next())
             {
-                int rowId = ((Number) colRowId.getValue(rsSamples)).intValue();
+                long rowId = colRowId.getLongValue(rsSamples);
                 ExpMaterial sample = materialMap.get(rowId);
                 if (sample == null)
                     continue;
@@ -449,7 +451,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         int linked = 0;
 
         List<? extends ExpData> fcsFiles = ExperimentService.get().getExpDatas(getContainer(), FlowDataType.FCSFile, null);
-        Map<Integer, ExpData> fcsFileMap = new HashMap<>();
+        Map<Long, ExpData> fcsFileMap = new LongHashMap<>();
         for (ExpData fcsFile : fcsFiles)
         {
             fcsFileMap.put(fcsFile.getRowId(), fcsFile);
@@ -467,7 +469,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             Set<ExpRun> fcsFileRuns = new HashSet<>();
             while (rs.next())
             {
-                Number fcsFileId = ((Number) colRowId.getValue(rs));
+                Long fcsFileId = colRowId.getLongValue(rs);
                 ExpData fcsFile = fcsFileMap.get(fcsFileId);
                 _log.debug("-- fcsFileId=" + fcsFileId + ", fcsFile=" + fcsFile);
                 if (fcsFile == null)
@@ -487,7 +489,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 _log.debug("   sampleKey=" + key);
 
                 ExpMaterial sample = sampleMap.get(key);
-                Integer newSampleId = sample == null ? null : sample.getRowId();
+                Long newSampleId = sample == null ? null : sample.getRowId();
                 Object oldSampleId = colSampleId.getValue(rs);
                 _log.debug("   newSampleId=" + newSampleId + ", oldSampleId=" + oldSampleId);
                 if (Objects.equals(newSampleId, oldSampleId))
@@ -570,15 +572,15 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public static class FCSFilesGroupedBySample
     {
-        public Map<Integer, Map<FieldKey, Object>> samples;
-        public Map<Integer, Map<FieldKey, Object>> fcsFiles;
+        public Map<Long, Map<FieldKey, Object>> samples;
+        public Map<Long, Map<FieldKey, Object>> fcsFiles;
         public List<FieldKey> sampleFields;
         public Collection<FieldKey> fcsFileFields;
-        public Map<Integer, Pair<Integer, String>> fcsFileRuns;
-        public Map<Integer, List<Integer>> linkedSampleIdToFcsFileIds;
+        public Map<Long, Pair<Long, String>> fcsFileRuns;
+        public Map<Long, List<Long>> linkedSampleIdToFcsFileIds;
         public int linkedFcsFileCount;
-        public List<Integer> unlinkedFcsFileIds;
-        public List<Integer> unlinkedSampleIds;
+        public List<Long> unlinkedFcsFileIds;
+        public List<Long> unlinkedSampleIds;
 
     }
 
@@ -610,20 +612,20 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         tableMap.put("__FCSFiles", fcsTable);
         tableMap.put("__Samples", sampleTable);
 
-        List<Integer> sampleIds = new ArrayList<>();
-        List<Integer> fcsFileIds = new ArrayList<>();
-        Map<Integer, List<Integer>> samplesToFcsFiles = new LinkedHashMap<>();
-        List<Integer> unlinkedFcsFileIds = new ArrayList<>();
-        Map<Integer, Pair<Integer, String>> fcsFileRuns = new HashMap<>();
+        List<Long> sampleIds = new ArrayList<>();
+        List<Long> fcsFileIds = new ArrayList<>();
+        Map<Long, List<Long>> samplesToFcsFiles = new LinkedHashMap<>();
+        List<Long> unlinkedFcsFileIds = new ArrayList<>();
+        Map<Long, Pair<Long, String>> fcsFileRuns = new LongHashMap<>();
         int linkedFcsFileCount = 0;
 
         try (TableResultSet rs = QueryService.get().select(schema, sql, tableMap, false, false))
         {
             for (Map<String, Object> row : rs)
             {
-                Integer sampleRowId = (Integer) row.get("SampleRowId");
-                Integer fcsFileRowId = (Integer) row.get("FCSFileRowId");
-                Integer fcsFileRunId = (Integer) row.get("FCSFileRunId");
+                Long sampleRowId = MapUtils.getLong(row,"SampleRowId");
+                Long fcsFileRowId = MapUtils.getLong(row,"FCSFileRowId");
+                Long fcsFileRunId = MapUtils.getLong(row,"FCSFileRunId");
                 String fcsFileRunName = (String) row.get("FCSFileRunName");
 
                 if (sampleRowId != null)
@@ -657,13 +659,13 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             throw new RuntimeSQLException(e);
         }
 
-        List<Integer> unlinkedSampleIds = new ArrayList<>(sampleIds);
+        List<Long> unlinkedSampleIds = new ArrayList<>(sampleIds);
         unlinkedSampleIds.removeAll(samplesToFcsFiles.keySet());
 
         var rowIdFieldKey = FieldKey.fromParts("RowId");
         var nameFieldKey = FieldKey.fromParts("Name");
 
-        Map<Integer, Map<FieldKey, Object>> samples = new HashMap<>();
+        Map<Long, Map<FieldKey, Object>> samples = new LongHashMap<>();
         var sampleColumns = new HashSet<FieldKey>();
         sampleColumns.add(rowIdFieldKey);
         sampleColumns.add(nameFieldKey);
@@ -674,7 +676,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             while (results.next())
             {
                 var row = results.getFieldKeyRowMap();
-                Integer sampleId = (Integer)row.get(rowIdFieldKey);
+                Long sampleId = MapUtils.getLong(row,rowIdFieldKey);
                 samples.put(sampleId, new HashMap<>(row));
             }
         }
@@ -683,7 +685,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             throw new RuntimeSQLException(e);
         }
 
-        Map<Integer, Map<FieldKey, Object>> fcsFiles = new HashMap<>();
+        Map<Long, Map<FieldKey, Object>> fcsFiles = new LongHashMap<>();
         var fcsFileColumns = new HashSet<FieldKey>();
         fcsFileColumns.add(rowIdFieldKey);
         fcsFileColumns.add(nameFieldKey);
@@ -695,7 +697,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             while (results.next())
             {
                 var row = results.getFieldKeyRowMap();
-                Integer fcsFileId = (Integer) row.get(rowIdFieldKey);
+                Long fcsFileId = MapUtils.getLong(row,rowIdFieldKey);
                 fcsFiles.put(fcsFileId, new HashMap<>(row));
             }
         }
@@ -1006,7 +1008,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             assertEquals(1, runs.size());
 
             FlowRun run = runs.get(0);
-            int runId = run.getRunId();
+            long runId = run.getRunId();
             FlowFCSFile[] fcsFiles = run.getFCSFiles();
             assertEquals(2, fcsFiles.length);
             assertEquals(0, fcsFiles[0].getSamples().size());

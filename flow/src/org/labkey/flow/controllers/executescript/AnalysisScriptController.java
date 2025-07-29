@@ -1216,7 +1216,7 @@ public class AnalysisScriptController extends BaseFlowController
                     if (matches != null)
                     {
                         FlowFCSFile perfectMatch = matches.first;
-                        int perfectMatchId = perfectMatch != null ? perfectMatch.getRowId() : 0;
+                        long perfectMatchId = perfectMatch != null ? perfectMatch.getRowId() : 0;
                         List<FlowFCSFile> candidates = matches.second;
 
                         if (perfectMatchId != 0 || (candidates != null && !candidates.isEmpty()))

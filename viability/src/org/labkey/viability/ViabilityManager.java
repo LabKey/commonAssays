@@ -16,6 +16,7 @@
 
 package org.labkey.viability;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -138,7 +139,7 @@ public class ViabilityManager
                 new Sort("SpecimenIndex")).getArray(String.class);
     }
 
-    static Map<PropertyDescriptor, Object> getProperties(int objectID)
+    static Map<PropertyDescriptor, Object> getProperties(long objectID)
     {
         assert objectID > 0;
         OntologyObject obj = OntologyManager.getOntologyObject(objectID);
@@ -169,7 +170,7 @@ public class ViabilityManager
         if (result.getRowID() == 0)
         {
             String lsid = new Lsid(ViabilityAssayProvider.RESULT_LSID_PREFIX, result.getDataID() + "-" + result.getPoolID() + "-" + rowIndex).toString();
-            int id = OntologyManager.ensureObject(c, lsid);
+            long id = OntologyManager.ensureObject(c, lsid);
 
             result.setObjectID(id);
             ViabilityResult inserted = Table.insert(user, ViabilitySchema.getTableInfoResults(), result);
@@ -450,7 +451,7 @@ public class ViabilityManager
     /**
      * Delete a ViabilityResult row by rowid.
      */
-    public static void deleteResult(Container c, int resultRowID, int resultObjectID)
+    public static void deleteResult(Container c, int resultRowID, long resultObjectID)
     {
         deleteSpecimens(resultRowID);
         Table.delete(ViabilitySchema.getTableInfoResults(), resultRowID);
@@ -459,18 +460,18 @@ public class ViabilityManager
         OntologyManager.deleteOntologyObject(obj.getObjectURI(), c, true);
     }
 
-    private static void deleteSpecimens(int resultRowId)
+    private static void deleteSpecimens(long resultRowId)
     {
         Table.delete(ViabilitySchema.getTableInfoResultSpecimens(), new SimpleFilter(FieldKey.fromParts("ResultID"), resultRowId));
     }
 
-    private static void deleteSpecimens(Collection<Integer> resultRowIds)
+    private static void deleteSpecimens(Collection<Long> resultRowIds)
     {
         Table.delete(ViabilitySchema.getTableInfoResultSpecimens(), new SimpleFilter(FieldKey.fromParts("ResultID"), resultRowIds, CompareType.IN));
     }
 
     /** Delete the properties for objectID, but not the object itself. */
-    private static void deleteProperties(Container c, int objectID)
+    private static void deleteProperties(Container c, long objectID)
     {
         OntologyManager.deleteProperties(c, objectID);
     }
@@ -480,7 +481,7 @@ public class ViabilityManager
      * @param resultRowId The row id of the result.
      * @return The ExpData of the viability result row or null.
      */
-    /*package*/ static ExpData getResultExpData(int resultRowId)
+    /*package*/ static ExpData getResultExpData(long resultRowId)
     {
         Integer dataId = new TableSelector(ViabilitySchema.getTableInfoResults(), Collections.singleton("DataID"), new SimpleFilter(FieldKey.fromParts("RowID"), resultRowId), null).getObject(Integer.class);
         if (dataId != null)
@@ -494,7 +495,7 @@ public class ViabilityManager
         DbScope scope = ViabilitySchema.getSchema().getScope();
         try (DbScope.Transaction tx = scope.ensureTransaction())
         {
-            List<Integer> dataIDs = new ArrayList<>(datas.size());
+            List<Long> dataIDs = new ArrayList<>(datas.size());
             for (ExpData data : datas)
                 dataIDs.add(data.getRowId());
 
@@ -504,14 +505,14 @@ public class ViabilityManager
 
             ts.forEachMapBatch(1000, (rows) -> {
 
-                List<Integer> resultIDs = new ArrayList<>(rows.size());
-                int[] objectIDs = new int[rows.size()];
+                List<Long> resultIDs = new ArrayList<>(rows.size());
+                long[] objectIDs = new long[rows.size()];
 
                 int i = 0;
                 for (Map<String, Object> row : rows)
                 {
-                    resultIDs.add(((Integer) row.get("RowID")).intValue());
-                    objectIDs[i] = ((Integer) row.get("ObjectID")).intValue();
+                    resultIDs.add( MapUtils.getLong(row,"RowID") );
+                    objectIDs[i] = MapUtils.getLong(row,"ObjectID");
                     i++;
                 }
 
@@ -603,7 +604,7 @@ public class ViabilityManager
             assertFalse("login before running this test", user.isGuest());
 
             int resultId;
-            int objectId;
+            long objectId;
             String objectURI;
 
             // INSERT

@@ -504,7 +504,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 }
             }
 
-            List<Integer> dataIds = new ArrayList<>();
+            List<Long> dataIds = new ArrayList<>();
             for (ExpData sourceFile : sourceFiles)
             {
                 insertExcelProperties(excelRunDomain, sourceFile, parser, user, protocol);
@@ -534,7 +534,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     /** Saves the data rows, updating if they already exist, inserting if not */
-    private void saveDataRows(ExpRun expRun, User user, ExpProtocol protocol, Map<DataRowKey, Map<String, Object>> rows, List<Integer> dataIds)
+    private void saveDataRows(ExpRun expRun, User user, ExpProtocol protocol, Map<DataRowKey, Map<String, Object>> rows, List<Long> dataIds)
             throws SQLException, BatchValidationException
     {
         // Do a query to find all the rows that have already been inserted
@@ -622,7 +622,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
     private static class DataRowKey
     {
-        private final int _dataId;
+        private final long _dataId;
         private final int _analyteId;
         private final String _well;
         private final String _type;
@@ -657,7 +657,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         @Override
         public int hashCode()
         {
-            int result = _dataId;
+            int result = (int)_dataId;
             result = 31 * result + _analyteId;
             result = 31 * result + (_well != null ? _well.hashCode() : 0);
             result = 31 * result + (_type != null ? _type.hashCode() : 0);
@@ -1626,7 +1626,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         Container container = data.getContainer();
         // Clear out the values - this is necessary if this is a XAR import where the run properties would
         // have been loaded as part of the ExperimentRun itself.
-        Integer objectId = OntologyManager.ensureObject(container, data.getLSID());
+        Long objectId = OntologyManager.ensureObject(container, data.getLSID());
         for (DomainProperty prop : domain.getProperties())
         {
             OntologyManager.deleteProperty(data.getLSID(), prop.getPropertyURI(), container, protocol.getContainer());
@@ -1942,7 +1942,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     @Override
     public void beforeDeleteData(List<ExpData> data, User user)
     {
-        List<Integer> ids = new ArrayList<>();
+        List<Long> ids = new ArrayList<>();
         data.forEach(d -> ids.add(d.getRowId()));
         ListUtils.partition(ids, DELETE_BATCH_SIZE).forEach(this::deleteDatas);
     }
@@ -1951,7 +1951,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
      * Delete all exclusions for a set of Ids
      * @param dataIds Set of Ids to remove exclusions for
      */
-    private void cleanUpExclusions(List<Integer> dataIds, final SqlExecutor executor)
+    private void cleanUpExclusions(List<Long> dataIds, final SqlExecutor executor)
     {
         SQLFragment idSQL = new SQLFragment();
         OntologyManager.getTinfoObject().getSqlDialect().appendInClauseSql(idSQL, dataIds);
@@ -1971,7 +1971,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
                 " WHERE RowId ").append(idSQL).append("))"));
     }
 
-    private void deleteDatas(List<Integer> dataIds)
+    private void deleteDatas(List<Long> dataIds)
     {
         SQLFragment idSQL = new SQLFragment();
         OntologyManager.getTinfoObject().getSqlDialect().appendInClauseSql(idSQL, dataIds);
@@ -2051,7 +2051,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         Set<String> titrations = parser.getTitrations();
 
         // either the run's RowId (for the re-run transform script case) or the replaced run's RowId (in the re-import run case)
-        Integer runId = LuminexManager.get().getRunRowIdForUploadContext(run, ((AssayUploadXarContext)context).getContext());
+        Long runId = LuminexManager.get().getRunRowIdForUploadContext(run, ((AssayUploadXarContext)context).getContext());
 
         Set<String> excludedWells = LuminexManager.get().getWellExclusionKeysForRun(runId, protocol, info.getContainer(), info.getUser());
 

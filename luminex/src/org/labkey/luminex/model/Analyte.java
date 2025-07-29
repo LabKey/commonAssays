@@ -27,7 +27,7 @@ import java.util.Objects;
 */
 public class Analyte
 {
-    private int _dataId;
+    private long _dataId;
     private String _lsid;
     private String _name;
     private String _beadNumber;
@@ -53,7 +53,7 @@ public class Analyte
         _sheetName = name;
     }
 
-    public int getDataId()
+    public long getDataId()
     {
         return _dataId;
     }
@@ -63,7 +63,7 @@ public class Analyte
         return _name;
     }
 
-    public void setDataId(int dataId)
+    public void setDataId(long dataId)
     {
         _dataId = dataId;
     }

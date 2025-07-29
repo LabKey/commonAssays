@@ -15,9 +15,11 @@
  */
 package org.labkey.luminex;
 
+import org.apache.commons.collections.MapUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.collections.LongHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -133,7 +135,7 @@ public class LuminexManager
             }
 
             @Override
-            public Map<String, Object> getRowMap(LuminexSingleExclusionCommand form, Integer runId, boolean keysOnly)
+            public Map<String, Object> getRowMap(LuminexSingleExclusionCommand form, Long runId, boolean keysOnly)
             {
                 Map<String, Object> row = new HashMap<>();
                 if (!keysOnly)
@@ -180,7 +182,7 @@ public class LuminexManager
             }
 
             @Override
-            public Map<String, Object> getRowMap(LuminexSingleExclusionCommand form, Integer runId, boolean keysOnly)
+            public Map<String, Object> getRowMap(LuminexSingleExclusionCommand form, Long runId, boolean keysOnly)
             {
                 Map<String, Object> row = new HashMap<>();
                 if (!keysOnly)
@@ -215,7 +217,7 @@ public class LuminexManager
             }
 
             @Override
-            public Map<String, Object> getRowMap(LuminexSingleExclusionCommand form, Integer runId, boolean keysOnly)
+            public Map<String, Object> getRowMap(LuminexSingleExclusionCommand form, Long runId, boolean keysOnly)
             {
                 Map<String, Object> row = new HashMap<>();
                 if (!keysOnly)
@@ -246,7 +248,7 @@ public class LuminexManager
             }
 
             @Override
-            public Map<String, Object> getRowMap(LuminexSingleExclusionCommand form, Integer runId, boolean keysOnly)
+            public Map<String, Object> getRowMap(LuminexSingleExclusionCommand form, Long runId, boolean keysOnly)
             {
                 Map<String, Object> row = new HashMap<>();
                 if (!keysOnly)
@@ -272,10 +274,10 @@ public class LuminexManager
 
         public abstract String getTableName();
         public abstract String getInfo(List<LuminexSingleExclusionCommand> commands);
-        public abstract Map<String, Object> getRowMap(LuminexSingleExclusionCommand form, Integer runId, boolean keysOnly);
+        public abstract Map<String, Object> getRowMap(LuminexSingleExclusionCommand form, Long runId, boolean keysOnly);
     }
 
-    public Analyte[] getAnalytes(int dataRowId)
+    public Analyte[] getAnalytes(long dataRowId)
     {
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("DataId"), dataRowId);
         Sort sort = new Sort("RowId");
@@ -296,33 +298,33 @@ public class LuminexManager
         return analytes;
     }
 
-    public long getExclusionCount(int rowId)
+    public long getExclusionCount(long rowId)
     {
         long exclusionCount = new TableSelector(LuminexProtocolSchema.getTableInfoRunExclusion(), new SimpleFilter(FieldKey.fromParts("RunId"), rowId), null).getRowCount();
         exclusionCount += new TableSelector(LuminexProtocolSchema.getTableInfoWellExclusion(), new SimpleFilter(FieldKey.fromParts("DataId", "RunId"), rowId), null).getRowCount();
         return exclusionCount;
     }
 
-    private Map<Integer, ExpData> getReplacementInputMap(ExpProtocol protocol, ExpRun replacedRun, ExpRun run)
+    private Map<Long, ExpData> getReplacementInputMap(ExpProtocol protocol, ExpRun replacedRun, ExpRun run)
     {
         //Map old data inputs to new based on dataFileHeaderKey
         //NOTE: exclusions in renamed/new files will be dropped
-        Map<String, Integer> oldInputs = new HashMap<>();
-        Map<Integer, ExpData> inputIdMap = new HashMap<>(); //key: oldId
+        Map<String, Long> oldInputs = new HashMap<>();
+        Map<Long, ExpData> inputIdMap = new LongHashMap<>(); //key: oldId
         replacedRun.getDataOutputs().forEach(o ->  {
             oldInputs.put(getDataFileHeaderKey(protocol, o), o.getRowId());
         });
         run.getDataOutputs().stream()
                 .filter(newFile -> oldInputs.containsKey(getDataFileHeaderKey(protocol, newFile)))
                 .forEach( newFile -> {
-                    Integer oldId = oldInputs.get(getDataFileHeaderKey(protocol, newFile));
+                    Long oldId = MapUtils.getLong(oldInputs, getDataFileHeaderKey(protocol, newFile));
                     inputIdMap.put(oldId, newFile);
                 });
 
         return inputIdMap;
     }
 
-    private LuminexSingleExclusionCommand generateExclusionCommands(Map<String, Object> oldExclusion, Integer dataFileId)
+    private LuminexSingleExclusionCommand generateExclusionCommands(Map<String, Object> oldExclusion, Long dataFileId)
     {
         LuminexSingleExclusionCommand command = new LuminexSingleExclusionCommand();
         command.setCommand("insert");
@@ -338,7 +340,7 @@ public class LuminexManager
         return command;
     }
 
-    private Collection<Map<String, Object>> getWellExclusions(Set<Integer> dataIds)
+    private Collection<Map<String, Object>> getWellExclusions(Set<Long> dataIds)
     {
         if(dataIds == null || dataIds.isEmpty())
             return null;
@@ -361,7 +363,7 @@ public class LuminexManager
         return new SqlSelector(getSchema(), sql).getMapCollection();
     }
 
-    private LuminexSingleExclusionCommand generateRunExclusionCommands(Map<Integer, ExpData> inputIdMap, Map<String, Analyte> analyteMap, int replacedRunId)
+    private LuminexSingleExclusionCommand generateRunExclusionCommands(Map<Long, ExpData> inputIdMap, Map<String, Analyte> analyteMap, long replacedRunId)
     {
         Collection<Map<String, Object>> exclusions = getRunExclusions(inputIdMap.keySet(), replacedRunId);
 
@@ -391,7 +393,7 @@ public class LuminexManager
         return !command.getAnalyteRowIds().isEmpty() ? command : null;
     }
 
-    private Collection<Map<String,Object>> getRunExclusions(Set<Integer> integers, int replacedRunId)
+    private Collection<Map<String,Object>> getRunExclusions(Set<Long> integers, long replacedRunId)
     {
         //Get full list of exclusions by analyte
         SQLFragment sql = new SQLFragment();
@@ -407,7 +409,7 @@ public class LuminexManager
         return new SqlSelector(getSchema(), sql).getMapCollection();
     }
 
-    private Collection<LuminexSingleExclusionCommand> generateWellExclusionCommands(Integer newRunId, LuminexRunContext context, Map<Integer, ExpData> inputIdMap, Map<String, Analyte> analyteMap)
+    private Collection<LuminexSingleExclusionCommand> generateWellExclusionCommands(Long newRunId, LuminexRunContext context, Map<Long, ExpData> inputIdMap, Map<String, Analyte> analyteMap)
     {
         Collection<Map<String, Object>> exclusions = getWellExclusions(inputIdMap.keySet());
         if(exclusions == null)
@@ -465,7 +467,7 @@ public class LuminexManager
         return replacementCommands.values();
     }
 
-    public Long getRetainedRunExclusionCount(Integer replacedRunId, Set<String> analyteNames)
+    public Long getRetainedRunExclusionCount(Long replacedRunId, Set<String> analyteNames)
     {
         SQLFragment sql = new SQLFragment();
         sql.append( "SELECT COUNT(DISTINCT re.RunId) FROM ")
@@ -482,7 +484,7 @@ public class LuminexManager
         return new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getObject(Long.class);
     }
 
-    public Collection<WellExclusion> getRetainedWellExclusions(Integer replacedRunId)
+    public Collection<WellExclusion> getRetainedWellExclusions(Long replacedRunId)
     {
         SQLFragment sql = new SQLFragment();
         sql.append( "SELECT opvRSN.StringValue AS ReaderSerialNumber, opvAD.DateTimeValue AS AcquisitionDate, ")
@@ -519,7 +521,7 @@ public class LuminexManager
     public void retainExclusions(LuminexRunContext uploadContext, ExpRun replacedRun, ExpRun run) throws ValidationException
     {
         //Map existing Files & analytes to new run
-        Map<Integer, ExpData> inputIdMap = getReplacementInputMap(uploadContext.getProtocol(), replacedRun, run);
+        Map<Long, ExpData> inputIdMap = getReplacementInputMap(uploadContext.getProtocol(), replacedRun, run);
         Map<String, Analyte> analyteMap = getAnalyteMap(replacedRun, run);
 
         Collection<LuminexSingleExclusionCommand> wellExclusionCommands = generateWellExclusionCommands(run.getRowId(), uploadContext, inputIdMap, analyteMap);
@@ -565,7 +567,7 @@ public class LuminexManager
         return results;
     }
 
-    public void createExclusions(User user, Container c, Collection<LuminexSingleExclusionCommand> commands, Integer runId,
+    public void createExclusions(User user, Container c, Collection<LuminexSingleExclusionCommand> commands, Long runId,
                                  @Nullable ExclusionType baseExclusionType, ExpProtocol protocol, AssayProvider assayProvider,
                                  boolean rerunTransform, Logger logger)
     throws SQLException, QueryUpdateServiceException, BatchValidationException, DuplicateKeyException, InvalidKeyException
@@ -641,7 +643,7 @@ public class LuminexManager
         }
     }
 
-    public Integer getRunRowIdForUploadContext(ExpRun run, AssayRunUploadContext context)
+    public Long getRunRowIdForUploadContext(ExpRun run, AssayRunUploadContext context)
     {
         //If not a rerun just use current run's id
         if (context.getReRunId() == null)
@@ -652,12 +654,12 @@ public class LuminexManager
             run.getRowId(); //Else use current runId
     }
 
-    public Set<String> getWellExclusionKeysForRun(Integer runId, ExpProtocol protocol, Container container, User user)
+    public Set<String> getWellExclusionKeysForRun(Long runId, ExpProtocol protocol, Container container, User user)
     {
         return getWellKeysForRun(runId, protocol, container, user, true);
     }
 
-    private Set<String> getWellKeysForRun(Integer runId, ExpProtocol protocol, Container container, User user, boolean onlyExcludedWells)
+    private Set<String> getWellKeysForRun(Long runId, ExpProtocol protocol, Container container, User user, boolean onlyExcludedWells)
     {
         Set<String> excludedWellKeys = new HashSet<>();
 

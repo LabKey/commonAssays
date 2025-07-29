@@ -67,7 +67,7 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
             List<ExpData> outputs = run.getDataOutputs();
             for (ExpData output : outputs)
             {
-                int dataId = output.getRowId();
+                var dataId = output.getRowId();
 
                 for (Analyte analyte : LuminexManager.get().getAnalytes(dataId))
                 {

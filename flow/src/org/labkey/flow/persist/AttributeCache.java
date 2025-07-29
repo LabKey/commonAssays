@@ -26,6 +26,7 @@ import org.labkey.api.cache.BlockingCache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbScope;
@@ -89,7 +90,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
             _entries = all;
 
             Map<String, Z> byName = new CaseInsensitiveHashMap<>();
-            Map<Integer, Z> byRowId = new HashMap<>();
+            Map<Integer, Z> byRowId = new IntHashMap<>();
             MultiValuedMap<Integer, Integer> aliases = new ArrayListValuedHashMap<>();
             for (Z entry : all)
             {

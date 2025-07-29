@@ -89,7 +89,7 @@ public class ElispotManager
     }
 
     @Nullable
-    public RunDataRow getRunDataRow(int rowId)
+    public RunDataRow getRunDataRow(long rowId)
     {
         Filter filter = new SimpleFilter(FieldKey.fromString("RowId"), rowId);
         return new TableSelector(getTableInfoElispotRunData()).getObject(filter, RunDataRow.class);
@@ -184,14 +184,14 @@ public class ElispotManager
         try (DbScope.Transaction transaction = scope.ensureTransaction())
         {
             // Delete all rows based on the runId
-            Set<Integer> runIds = new HashSet<>();
+            Set<Long> runIds = new HashSet<>();
             for (ExpData data : datas)
             {
                 runIds.add(data.getRunId());
             }
 
             // Since runIds may be from different folders, delete from each separately
-            for (Integer runId : runIds)
+            for (var runId : runIds)
             {
                 if (null != runId)
                 {

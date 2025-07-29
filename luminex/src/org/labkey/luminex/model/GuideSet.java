@@ -46,7 +46,7 @@ public class GuideSet
     private Integer _modifiedBy;
 
     // uneditable properties
-    private int _protocolId;
+    private long _protocolId;
     private boolean _valueBased;
     private boolean _isTitration;
     private String _controlName;
@@ -82,12 +82,12 @@ public class GuideSet
         _rowId = rowId;
     }
 
-    public int getProtocolId()
+    public long getProtocolId()
     {
         return _protocolId;
     }
 
-    public void setProtocolId(int protocolId)
+    public void setProtocolId(long protocolId)
     {
         _protocolId = protocolId;
     }

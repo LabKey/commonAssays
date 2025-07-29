@@ -23,7 +23,7 @@ public abstract class AbstractAnalyteQCFlag extends ExpQCFlag
 
     public AbstractAnalyteQCFlag() {}
 
-    public AbstractAnalyteQCFlag(int runId, String flagType, String description, int analyte)
+    public AbstractAnalyteQCFlag(long runId, String flagType, String description, int analyte)
     {
         super(runId, flagType, description);
         setAnalyte(analyte);

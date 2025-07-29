@@ -145,7 +145,7 @@ public class FlowScript extends FlowDataObject
         strScript = script;
     }
 
-    public int getScriptId()
+    public long getScriptId()
     {
         return getExpObject().getRowId();
     }

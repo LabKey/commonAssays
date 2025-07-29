@@ -431,7 +431,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
         {
             super.beforeDeleteData(datas, user);
 
-            Set<Integer> runIds = new HashSet<>();
+            Set<Long> runIds = new HashSet<>();
             for (ExpData data : datas)
             {
                 if (null != data.getRunId())

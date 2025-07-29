@@ -64,7 +64,7 @@ public class FlowServiceImpl implements FlowService
 
             sql.append(" ORDER BY 1");
 
-            Integer[] dataids = new SqlSelector(FlowManager.get().getSchema(), sql).getArray(Integer.class);
+            Long[] dataids = new SqlSelector(FlowManager.get().getSchema(), sql).getArray(Long.class);
 
             return ExperimentService.get().getExpDatas(Arrays.asList(dataids));
         }

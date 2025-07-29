@@ -28,7 +28,7 @@ public class SensitivitySummary
     protected float[] _minProb;
     protected float[] _sensitivity;
     protected float[] _error;
-    private int _runId;
+    private long _runId;
 
     public byte[] getMinProbSeries()
     {
@@ -102,12 +102,12 @@ public class SensitivitySummary
         }
     }
 
-    public int getRun()
+    public long getRun()
     {
         return _runId;
     }
 
-    public void setRun(int runId)
+    public void setRun(long runId)
     {
         _runId = runId;
     }

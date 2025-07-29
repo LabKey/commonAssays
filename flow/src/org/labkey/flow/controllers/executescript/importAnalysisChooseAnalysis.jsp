@@ -36,6 +36,7 @@
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
+<%@ page import="org.labkey.api.collections.LongHashMap" %>
 <%@ page import="org.labkey.api.assay.AbstractAssayProvider" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
@@ -60,7 +61,7 @@
 <%
     FlowExperiment[] analyses = FlowExperiment.getAnalyses(container);
     FlowExperiment firstNonDisabledAnalysis = null;
-    Map<Integer, String> disabledAnalyses = new HashMap<>();
+    Map<Long, String> disabledAnalyses = new LongHashMap<>();
     if (pipeRoot != null)
     {
         List<File> keywordDirs = new ArrayList<>();
@@ -154,7 +155,7 @@ those results must be put into different analysis folders.
                 <select id="existingAnalysisId" name="existingAnalysisId">
                     <%
                         FlowExperiment recentAnalysis = FlowExperiment.getMostRecentAnalysis(container);
-                        int selectedId = 0;
+                        long selectedId = 0;
                         if (firstNonDisabledAnalysis != null)
                             selectedId = firstNonDisabledAnalysis.getExperimentId();
                         if (recentAnalysis != null && !disabledAnalyses.containsKey(recentAnalysis.getExperimentId()))

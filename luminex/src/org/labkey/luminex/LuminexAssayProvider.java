@@ -266,7 +266,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public Set<ExpData> getDatasForResultRows(Collection<Integer> rowIds, ExpProtocol protocol, ResolverCache cache)
+    public Set<ExpData> getDatasForResultRows(Collection<Long> rowIds, ExpProtocol protocol, ResolverCache cache)
     {
         Set<ExpData> result = new HashSet<>();
         List<Integer> dataRowIds = new TableSelector(LuminexProtocolSchema.getTableInfoDataRow(), Collections.singleton("DataId"),
@@ -283,9 +283,9 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    protected String getSourceLSID(String runLSID, int dataId, int resultRowId)
+    protected String getSourceLSID(String runLSID, long dataId, int resultRowId)
     {
-        return new Lsid(LUMINEX_DATA_ROW_LSID_PREFIX, Integer.toString(dataId)).toString();
+        return new Lsid(LUMINEX_DATA_ROW_LSID_PREFIX, Long.toString(dataId)).toString();
     }
 
     @Override
@@ -497,7 +497,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
                 .append(" WHERE dataid IN ( SELECT rowId FROM ")
                 .append(ExperimentService.get().getTinfoData())
                 .append(" WHERE runid ");
-        List<Integer> runRowIds = runs.stream().map(ExpRun::getRowId).toList();
+        List<Long> runRowIds = runs.stream().map(ExpRun::getRowId).toList();
         dataRowTable.getSchema().getSqlDialect().appendInClauseSql(updateSql, runRowIds);
         updateSql.append(")");
 

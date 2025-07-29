@@ -138,7 +138,7 @@ public class PeptideProphetGraphs
         outputChart(response, chart);
     }
 
-    public static void renderObservedVsPPScore(HttpServletResponse response, Container c, int runId, int charge, boolean cumulative) throws IOException, SQLException
+    public static void renderObservedVsPPScore(HttpServletResponse response, Container c, long runId, int charge, boolean cumulative) throws IOException, SQLException
     {
         String chargeSQL = "SELECT count(*) " +
                         "FROM " + MS2Manager.getTableInfoPeptides().getSelectName() + " " +

@@ -30,7 +30,7 @@ public class LuminexSingleExclusionCommand
 {
     private String _command;
     private Integer _key;
-    private Integer _dataId;
+    private Long _dataId;
     private String _description;
     private Double _dilution;
     private String _type;
@@ -72,12 +72,12 @@ public class LuminexSingleExclusionCommand
         _key = key;
     }
 
-    public Integer getDataId()
+    public Long getDataId()
     {
         return _dataId;
     }
 
-    public void setDataId(Integer dataId)
+    public void setDataId(Long dataId)
     {
         _dataId = dataId;
     }

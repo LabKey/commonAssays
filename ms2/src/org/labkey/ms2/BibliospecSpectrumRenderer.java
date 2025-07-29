@@ -19,6 +19,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.junit.Assert;
 import org.junit.Test;
+import org.labkey.api.collections.IntHashMap;
+import org.labkey.api.collections.LongHashMap;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.util.FileUtil;
@@ -126,9 +128,9 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                      PreparedStatement modificationPS = connection.prepareStatement("INSERT INTO Modifications (RefSpectraId, Position, Mass) VALUES (?, ?, ?)"))
                 {
                     // Run ID->Modification list
-                    Map<Integer, List<MS2Modification>> modificationsCache = new HashMap<>();
+                    Map<Long, List<MS2Modification>> modificationsCache = new LongHashMap<>();
 
-                    Map<Integer, Integer> fractionIdsIncluded = new HashMap<>();
+                    Map<Integer, Integer> fractionIdsIncluded = new IntHashMap<>();
 
                     // Iterate over all of the spectra
                     while (iter.hasNext())
@@ -183,7 +185,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                         }
 
                         // Hold on to the index->mass difference info so we can insert into the Modifications table as well
-                        Map<Integer, Float> peptideModifications = new HashMap<>();
+                        Map<Integer, Float> peptideModifications = new IntHashMap<>();
 
                         peptidePS.setString(1, spectrum.getTrimmedSequence());
                         peptidePS.setString(2, getExportModifiedSequence(spectrum.getSequence(), modifications, peptideModifications));
@@ -380,7 +382,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
             mod3.setMassDiff(17);
             mod3.setSymbol("'");
 
-            HashMap<Integer, Float> peptideMods = new HashMap<>();
+            HashMap<Integer, Float> peptideMods = new IntHashMap<>();
             assertEquals("ABFDSC[+57.0]CC", renderer.getExportModifiedSequence("X.ABFDSC*CC.X", Arrays.asList(mod1), peptideMods));
             assertEquals(Collections.singletonMap(6, 57.0f), peptideMods);
 

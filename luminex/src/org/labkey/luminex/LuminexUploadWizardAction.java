@@ -490,7 +490,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
 
     private int getRetainedWellExclusions(LuminexRunUploadForm form) throws ExperimentException
     {
-        Collection<WellExclusion> notRetained = LuminexManager.get().getRetainedWellExclusions(form.getReRun().getRowId()         );
+        Collection<WellExclusion> notRetained = LuminexManager.get().getRetainedWellExclusions(form.getReRun().getRowId());
 
         //Get dataFileHeaderKey from the Run excel header property
         LuminexExcelParser parser = form.getParser();

@@ -511,7 +511,7 @@ if (!relatedFiles.isEmpty())
     %></table><%
 }
 
-LinkedHashMap<Integer, FlowFCSAnalysis> allAnalyses = new LinkedHashMap<>(10);
+LinkedHashMap<Long, FlowFCSAnalysis> allAnalyses = new LinkedHashMap<>(10);
 for (FlowFCSAnalysis analysis : well.getFCSAnalysisOutputs())
     allAnalyses.put(analysis.getRowId(), analysis);
 if (originalFile != null)

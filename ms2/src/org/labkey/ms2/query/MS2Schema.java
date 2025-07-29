@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.BaseViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.AggregateColumnInfo;
 import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
@@ -1176,7 +1177,7 @@ public class MS2Schema extends UserSchema
         }
     }
 
-    private final static Map<Integer, NormalizedProteinGroupsTracker> NORMALIZED_PROTEIN_GROUP_CACHE = new HashMap<>();
+    private final static Map<Integer, NormalizedProteinGroupsTracker> NORMALIZED_PROTEIN_GROUP_CACHE = new IntHashMap<>();
 
     private String ensureNormalizedProteinGroups(int runListId) throws SQLException
     {
@@ -1261,7 +1262,7 @@ public class MS2Schema extends UserSchema
 
         //todo: can we support column ordering that matches the MS2 Runs grid on the dashboard?
         
-        List<Integer> runIds = new ArrayList<>();
+        List<Long> runIds = new ArrayList<>();
         if (_runs != null)
         {
             for (MS2Run run : _runs)
@@ -1390,7 +1391,7 @@ public class MS2Schema extends UserSchema
 
         CrosstabSettings settings = new CrosstabSettings(baseTable);
         SimpleFilter filter = new SimpleFilter();
-        List<Integer> runIds = new ArrayList<>();
+        List<Long> runIds = new ArrayList<>();
         if (_runs != null)
         {
             for (MS2Run run : _runs)

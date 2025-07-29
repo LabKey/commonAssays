@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.collections.LongHashMap;
 import org.labkey.api.collections.NamedObject;
 import org.labkey.api.collections.NamedObjectList;
 import org.labkey.api.collections.RowMapFactory;
@@ -87,7 +88,7 @@ public class SamplesConfirmGridView extends GridView
     static FieldKey SAMPLE_NAME_FIELD_KEY = new FieldKey(null, "SampleName");
     static FieldKey GROUP_NAMES_FIELD_KEY = new FieldKey(null, "GroupNames");
 
-    Map<Integer, FlowRun> _runs = new HashMap<>();
+    Map<Long, FlowRun> _runs = new LongHashMap<>();
 
     public SamplesConfirmGridView(User user, Container container, SelectedSamples data, boolean resolving, Errors errors)
     {
@@ -436,7 +437,7 @@ public class SamplesConfirmGridView extends GridView
                 return _list;
 
             // Put most likely candidates on the top of the list
-            Set<Integer> candidateRowIds = new HashSet<>(candidates.size());
+            Set<Long> candidateRowIds = new HashSet<>(candidates.size());
             NamedObjectList list = new NamedObjectList();
             for (FlowFCSFile candidate : candidates)
             {

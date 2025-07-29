@@ -26,6 +26,7 @@ import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.assay.nab.query.NAbSpecimenTable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
@@ -68,15 +69,15 @@ public abstract class NabDataHandler extends DilutionDataHandler
     }
 
     @Override
-    public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, StatsService.CurveFitType fit, int... dataObjectIds) throws ExperimentException
+    public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, StatsService.CurveFitType fit, long... dataObjectIds) throws ExperimentException
     {
         Map<DilutionSummary, DilutionAssayRun> summaries = new LinkedHashMap<>();
         if (dataObjectIds == null || dataObjectIds.length == 0)
             return summaries;
 
-        Map<Integer, DilutionAssayRun> dataToAssay = new HashMap<>();
-        List<Integer> nabSpecimenIds = new ArrayList<>(dataObjectIds.length);
-        for (int nabSpecimenId : dataObjectIds)
+        Map<Integer, DilutionAssayRun> dataToAssay = new IntHashMap<>();
+        List<Long> nabSpecimenIds = new ArrayList<>(dataObjectIds.length);
+        for (long nabSpecimenId : dataObjectIds)
             nabSpecimenIds.add(nabSpecimenId);
         List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);
         for (NabSpecimen nabSpecimen : nabSpecimens)
