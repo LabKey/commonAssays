@@ -707,7 +707,7 @@ public class AnalysisScriptController extends BaseFlowController
                     // save the uploaded workspace
                     FileLike path = AssayFileWriter.getUploadDirectoryPath(getContainer(), DIR_NAME);
                     FileLike dir = AssayFileWriter.ensureUploadDirectoryPath(path);
-                    FileLike uploadedFile = AssayFileWriter.findUniqueFileName(file.getOriginalFilename(), dir);
+                    FileLike uploadedFile = FileUtil.findUniqueFileName(file.getOriginalFilename(), dir);
                     file.transferTo(uploadedFile.toNioPathForWrite().toFile());
 
                     String uploadedPath = root.relativePath(uploadedFile.toNioPathForRead().toFile());
