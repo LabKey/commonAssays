@@ -46,6 +46,7 @@ import org.labkey.api.settings.AdminConsole.SettingsLinkType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.JobRunner;
 import org.labkey.api.util.TestContext;
+import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
@@ -71,8 +72,6 @@ import org.labkey.vfs.FileLike;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
-
-import java.net.URI;
 
 @Marshal(Marshaller.Jackson)
 public class FlowController extends BaseFlowController
@@ -367,8 +366,8 @@ public class FlowController extends BaseFlowController
         public ModelAndView getView(Object o, BindException errors) throws Exception
         {
             FlowPreference.update(getRequest());
-            URI uri = new URI(getRequest().getContextPath() + "/_.gif");
-            return HttpView.redirect(uri.toString());
+            URLHelper url = new URLHelper(getRequest().getContextPath() + "/_.gif");
+            return HttpView.redirect(url, false);
         }
 
         @Override
