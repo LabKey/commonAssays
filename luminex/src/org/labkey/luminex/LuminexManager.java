@@ -420,7 +420,7 @@ public class LuminexManager
         //Map existing exclusions to new input files
         exclusions.forEach(exclusion ->
         {
-            Integer dataId = (Integer)exclusion.get("DataId");
+            Long dataId = MapUtils.getLong(exclusion,"DataId");
             String analyteName = (String)exclusion.get("AnalyteName");
             ExpData file = inputIdMap.get(dataId);
             Analyte newAnalyte = analyteMap.get(analyteName);
