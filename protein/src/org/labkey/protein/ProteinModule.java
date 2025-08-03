@@ -20,9 +20,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
+import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
+import org.labkey.api.module.DatabaseMigration;
+import org.labkey.api.module.DatabaseMigration.DefaultMigrationHandler;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.pipeline.PipelineService;
@@ -62,7 +66,7 @@ public class ProteinModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 25.000;
+        return 25.001;
     }
 
     @Override
@@ -125,6 +129,20 @@ public class ProteinModule extends DefaultModule
         }
 
         ProteinService.get().registerProteinSearchView(new ProteinSearchViewProvider());
+        DatabaseMigration.registerHandler(ProteinSchema.getSchema(), new DefaultMigrationHandler()
+        {
+            @Override
+            public void beforeSchema(DbSchema targetSchema)
+            {
+                new SqlExecutor(targetSchema).execute("ALTER TABLE prot.Organisms DROP CONSTRAINT FK_ProtOrganisms_ProtIdentifiers");
+            }
+
+            @Override
+            public void afterSchema(DbSchema targetSchema)
+            {
+                new SqlExecutor(targetSchema).execute("ALTER TABLE prot.Organisms ADD CONSTRAINT FK_ProtOrganisms_ProtIdentifiers FOREIGN KEY (IdentId) REFERENCES prot.Identifiers (IdentId)");
+            }
+        });
     }
 
     @Override
