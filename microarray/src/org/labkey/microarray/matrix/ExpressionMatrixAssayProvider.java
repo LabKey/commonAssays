@@ -209,8 +209,8 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     {
         return new XarCallbacks()
         {
-            Map<Integer,String> mapRowIdName = null;
-            Map<String,Integer> mapNameRowId = null;
+            Map<Long,String> mapRowIdName = null;
+            Map<String,Long> mapNameRowId = null;
 
             @Override
             public void beforeXarExportRun(ExpRun run, ExperimentRunType xrun)
@@ -221,14 +221,14 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
                     QuerySchema microarray = DefaultSchema.get(user, container).getSchema("Microarray");
                     if (null == microarray)
                         return;
-                    Map map = QueryService.get().selector(microarray, "SELECT RowId, Name FROM FeatureAnnotationSet")
-                            .getValueMap();
-                    mapRowIdName = (Map<Integer,String>)map;
+                    Map<Long,String> map = QueryService.get().selector(microarray, "SELECT RowId, Name FROM FeatureAnnotationSet")
+                            .getValueMap(Long.class);
+                    mapRowIdName = (Map<Long,String>)map;
                     // Make sure this is really <Integer,String>?
                     if (!mapRowIdName.isEmpty())
                     {
-                        Map.Entry<Integer,String> e = mapRowIdName.entrySet().iterator().next();
-                        assert e.getKey() instanceof Integer;
+                        Map.Entry<Long,String> e = mapRowIdName.entrySet().iterator().next();
+                        assert e.getKey() instanceof Long;
                         assert e.getValue() instanceof String;
                     }
                 }
@@ -253,15 +253,16 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
                     QuerySchema microarray = DefaultSchema.get(user, container).getSchema("Microarray");
                     if (null == microarray)
                         return;
-                    Map map = QueryService.get().selector(microarray, "SELECT Name, RowId FROM FeatureAnnotationSet")
-                            .getValueMap();
-                    mapNameRowId = (Map<String,Integer>)map;
+                    Map<String,Long> map = new HashMap<>();
+                    QueryService.get().selector(microarray, "SELECT Name, RowId FROM FeatureAnnotationSet")
+                            .forEach(rs -> map.put(rs.getString(1),rs.getLong(2)));
+                    mapNameRowId = map;
                     // Make sure this is really <Integer,String>?
                     if (!mapNameRowId.isEmpty())
                     {
-                        Map.Entry<String,Integer> e = mapNameRowId.entrySet().iterator().next();
+                        Map.Entry<String,Long> e = mapNameRowId.entrySet().iterator().next();
                         assert e.getKey() instanceof String;
-                        assert e.getValue() instanceof Integer;
+                        assert e.getValue() instanceof Long;
                     }
                 }
                 for (SimpleValueType sv : xrun.getProperties().getSimpleValArray())
@@ -269,7 +270,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
                     if (StringUtils.equals(FEATURE_SET_PROPERTY_NAME,sv.getName()))
                     {
                         String featureAnnotationSetName = sv.getStringValue();
-                        Integer featureAnnotationRowId = mapNameRowId.get(featureAnnotationSetName);
+                        Long featureAnnotationRowId = mapNameRowId.get(featureAnnotationSetName);
                         sv.setValueType(SimpleTypeNames.INTEGER);
                         sv.setStringValue(featureAnnotationRowId==null ? null : String.valueOf(featureAnnotationRowId));
                     }
