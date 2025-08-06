@@ -65,6 +65,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.labkey.api.exp.api.ExperimentService.asInteger;
+
 public class MicroarrayManager
 {
     private static final MicroarrayManager _instance = new MicroarrayManager();
@@ -146,7 +148,7 @@ public class MicroarrayManager
             row.put("Container", container);
 
             List<Map<String, Object>> results = featureSetUpdateService.insertRows(user, container, Collections.singletonList(row), errors, null, null);
-            return (Integer) results.get(0).get("RowId");
+            return asInteger(results.get(0).get("RowId"));
         }
 
         return null;
