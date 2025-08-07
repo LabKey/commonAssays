@@ -1,1 +1,1 @@
-MiALTER TABLE viability.Results ALTER COLUMN ObjectId TYPE BIGINT;
+ALTER TABLE viability.Results ALTER COLUMN ObjectId TYPE BIGINT;
