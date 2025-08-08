@@ -36,6 +36,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static org.labkey.api.exp.api.ExperimentService.asInteger;
+
 public class ProteinManager
 {
     public static FastaFile getFastaFile(int fastaId)
@@ -193,7 +195,7 @@ public class ProteinManager
             map.put("name", identifierType);
             map.put("entryDate", new Date());
             map = Table.insert(null, ProteinSchema.getTableInfoIdentTypes(), map);
-            identTypeId = (Integer)map.get("identTypeId");
+            identTypeId = asInteger(map.get("identTypeId"));
         }
         return identTypeId;
     }
