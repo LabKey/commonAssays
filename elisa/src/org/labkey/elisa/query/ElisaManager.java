@@ -36,7 +36,6 @@ public class ElisaManager
         filter.addCondition(FieldKey.fromParts("PlateName"), plateName);
         filter.addCondition(FieldKey.fromParts("Spot"), spot);
         return new TableSelector(ElisaProtocolSchema.getTableInfoCurveFit(), filter, null).getObject(CurveFitDb.class);
-
     }
 
     public static void deleteContainerData(Container container)
