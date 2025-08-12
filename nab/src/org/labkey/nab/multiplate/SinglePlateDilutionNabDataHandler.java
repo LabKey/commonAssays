@@ -24,6 +24,7 @@ import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateService;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.collections.IntHashMap;
+import org.labkey.api.collections.LongArrayList;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -212,7 +213,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
             return summaries;
 
         Map<Integer, DilutionAssayRun> dataToAssay = new IntHashMap<>();
-        List<Long> nabSpecimenIds = new ArrayList<>(dataObjectIds.length);
+        List<Long> nabSpecimenIds = new LongArrayList(dataObjectIds.length);
         for (long nabSpecimenId : dataObjectIds)
             nabSpecimenIds.add(nabSpecimenId);
         List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);

@@ -73,6 +73,7 @@ import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.LongArrayList;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
@@ -376,7 +377,7 @@ public class NabAssayController extends SpringActionController
                     SimpleFilter existingFilter = (SimpleFilter) view.getRenderContext().getBaseFilter();
                     if (existingFilter != null)
                         filter.addAllClauses(existingFilter);
-                    List<Long> objectIds = new ArrayList<>(_dataObjectIds.length);
+                    List<Long> objectIds = new LongArrayList(_dataObjectIds.length);
                     for (long dataObjectId : _dataObjectIds)
                         objectIds.add(Long.valueOf(dataObjectId));
 

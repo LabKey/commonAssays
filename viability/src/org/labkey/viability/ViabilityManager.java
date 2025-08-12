@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
+import org.labkey.api.collections.LongArrayList;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -495,7 +496,7 @@ public class ViabilityManager
         DbScope scope = ViabilitySchema.getSchema().getScope();
         try (DbScope.Transaction tx = scope.ensureTransaction())
         {
-            List<Long> dataIDs = new ArrayList<>(datas.size());
+            List<Long> dataIDs = new LongArrayList(datas.size());
             for (ExpData data : datas)
                 dataIDs.add(data.getRowId());
 
@@ -505,7 +506,7 @@ public class ViabilityManager
 
             ts.forEachMapBatch(1000, (rows) -> {
 
-                List<Long> resultIDs = new ArrayList<>(rows.size());
+                List<Long> resultIDs = new LongArrayList(rows.size());
                 long[] objectIDs = new long[rows.size()];
 
                 int i = 0;

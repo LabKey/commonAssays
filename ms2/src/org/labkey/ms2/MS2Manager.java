@@ -26,6 +26,7 @@ import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.LongArrayList;
 import org.labkey.api.data.BeanObjectFactory;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -465,7 +466,7 @@ public class MS2Manager
 
     public static List<Long> getRunIds(List<MS2Run> runs)
     {
-        List<Long> runIds = new ArrayList<>(runs.size());
+        List<Long> runIds = new LongArrayList(runs.size());
 
         for (MS2Run run : runs)
             runIds.add(run.getRun());
@@ -683,7 +684,7 @@ public class MS2Manager
     // Now, verify DELETE permission on old container(s) and move runs to the new container
     public static void moveRuns(final User user, List<MS2Run> runList, Container newContainer) throws UnauthorizedException
     {
-        List<Long> runIds = new ArrayList<>(runList.size());
+        List<Long> runIds = new LongArrayList(runList.size());
 
         for (MS2Run run : runList)
             runIds.add(run.getRun());

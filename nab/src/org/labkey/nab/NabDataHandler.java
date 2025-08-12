@@ -27,6 +27,7 @@ import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.assay.nab.query.NAbSpecimenTable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.collections.IntHashMap;
+import org.labkey.api.collections.LongArrayList;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
@@ -76,7 +77,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
             return summaries;
 
         Map<Integer, DilutionAssayRun> dataToAssay = new IntHashMap<>();
-        List<Long> nabSpecimenIds = new ArrayList<>(dataObjectIds.length);
+        List<Long> nabSpecimenIds = new LongArrayList(dataObjectIds.length);
         for (long nabSpecimenId : dataObjectIds)
             nabSpecimenIds.add(nabSpecimenId);
         List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);

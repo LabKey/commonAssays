@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.LongArrayList;
 import org.labkey.api.collections.LongHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -659,7 +660,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             throw new RuntimeSQLException(e);
         }
 
-        List<Long> unlinkedSampleIds = new ArrayList<>(sampleIds);
+        List<Long> unlinkedSampleIds = new LongArrayList(sampleIds);
         unlinkedSampleIds.removeAll(samplesToFcsFiles.keySet());
 
         var rowIdFieldKey = FieldKey.fromParts("RowId");

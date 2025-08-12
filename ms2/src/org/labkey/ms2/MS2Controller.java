@@ -44,6 +44,7 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
+import org.labkey.api.collections.LongArrayList;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerDisplayColumn;
@@ -2572,7 +2573,7 @@ public class MS2Controller extends SpringActionController
                 exportRows = new ArrayList<>();
             }
 
-            List<Long> peptideIds = new ArrayList<>(exportRows.size());
+            List<Long> peptideIds = new LongArrayList(exportRows.size());
 
             // Technically, should only limit this in Excel export case... but there's no way to individually select 65K peptides
             for (int i = 0; i < Math.min(exportRows.size(), ExcelWriter.ExcelDocumentType.xlsx.getMaxRows()); i++)
