@@ -182,16 +182,14 @@ public class CompensationMatrix implements Serializable
         NodeList nlChannels = elMatrix.getChildNodes();
         for (int iChannel = 0; iChannel < nlChannels.getLength(); iChannel ++)
         {
-            if (!(nlChannels.item(iChannel) instanceof Element))
+            if (!(nlChannels.item(iChannel) instanceof Element elChannel))
                 continue;
-            Element elChannel = (Element) nlChannels.item(iChannel);
             HashMap<String, Double> mapValues = new HashMap<>();
             NodeList nlChannelValues = elChannel.getChildNodes();
             for (int iValue = 0; iValue < nlChannelValues.getLength(); iValue ++)
             {
-                if (!(nlChannelValues.item(iValue) instanceof Element))
+                if (!(nlChannelValues.item(iValue) instanceof Element elChannelValue))
                     continue;
-                Element elChannelValue = (Element) nlChannelValues.item(iValue);
 
                 // FlowJo v9.7 uses 'fluorName' attribute name
                 String fluorName = FlowJoWorkspace.getAttribute(elChannelValue, "name", "fluorName");
@@ -228,9 +226,8 @@ public class CompensationMatrix implements Serializable
             NodeList nlParameter = elParameters.getElementsByTagNameNS(DATATYPES_2_0_NS, "parameter");
             for (int i = 0; i < nlParameter.getLength(); i++)
             {
-                if (!(nlParameter.item(i) instanceof Element))
+                if (!(nlParameter.item(i) instanceof Element elParameter))
                     continue;
-                Element elParameter = (Element)nlParameter.item(i);
                 String name = elParameter.getAttributeNS(DATATYPES_2_0_NS, "name");
                 if (!parameterNames.add(name))
                     throw new FlowException("Duplicate parameter '" + name + "' in comp. matrix '" + _name + "'");
@@ -243,14 +240,13 @@ public class CompensationMatrix implements Serializable
 
         for (int i = 0; i < nlSpillover.getLength(); i++)
         {
-            if (!(nlSpillover.item(i) instanceof Element))
+            if (!(nlSpillover.item(i) instanceof Element elSpillover))
                 continue;
-            Element elSpillover = (Element)nlSpillover.item(i);
 
             String channelName = elSpillover.getAttributeNS(DATATYPES_1_5_NS, "parameter");
-            if (channelName == null || channelName.length() == 0)
+            if (channelName == null || channelName.isEmpty())
                 channelName = elSpillover.getAttributeNS(DATATYPES_2_0_NS, "parameter");
-            if (channelName == null || channelName.length() == 0)
+            if (channelName == null || channelName.isEmpty())
                 throw new FlowException("Compensation matrix spillover name required in comp. matrix '" + _name + "'");
 
             if (parameterNames != null && !parameterNames.contains(channelName))
@@ -265,14 +261,13 @@ public class CompensationMatrix implements Serializable
                 nlCoefficient = elSpillover.getElementsByTagNameNS(TRANSFORMATIONS_2_0_NS, "coefficient");
             for (int j = 0; j < nlCoefficient.getLength(); j++)
             {
-                if (!(nlCoefficient.item(j) instanceof Element))
+                if (!(nlCoefficient.item(j) instanceof Element elCoefficient))
                     continue;
-                Element elCoefficient = (Element)nlCoefficient.item(j);
 
                 String parameterName = elCoefficient.getAttributeNS(DATATYPES_1_5_NS, "parameter");
-                if (parameterName == null || parameterName.length() == 0)
+                if (parameterName == null || parameterName.isEmpty())
                     parameterName = elCoefficient.getAttributeNS(DATATYPES_2_0_NS, "parameter");
-                if (parameterName == null || parameterName.length() == 0)
+                if (parameterName == null || parameterName.isEmpty())
                     throw new FlowException("Compensation matrix coefficient name required in comp. matrix '" + _name + "'");
 
                 if (parameterNames != null && !parameterNames.contains(parameterName))
@@ -282,9 +277,9 @@ public class CompensationMatrix implements Serializable
                 }
 
                 String value = elCoefficient.getAttributeNS(TRANSFORMATIONS_1_5_NS, "value");
-                if (value == null || value.length() == 0)
+                if (value == null || value.isEmpty())
                     value = elCoefficient.getAttributeNS(TRANSFORMATIONS_2_0_NS, "value");
-                if (value == null || value.length() == 0)
+                if (value == null || value.isEmpty())
                     throw new FlowException("Compensation matrix coefficient value required in comp. matrix '" + _name + "'");
 
                 Double d = Double.valueOf(value);
@@ -615,9 +610,8 @@ public class CompensationMatrix implements Serializable
 
     public boolean equals(Object other)
     {
-        if (!(other instanceof CompensationMatrix))
+        if (!(other instanceof CompensationMatrix comp))
             return false;
-        CompensationMatrix comp = (CompensationMatrix) other;
         if (!Arrays.equals(_channelNames, comp._channelNames))
             return false;
         for (int i = 0; i < _rows.length; i ++)

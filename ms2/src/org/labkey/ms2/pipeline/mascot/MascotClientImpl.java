@@ -138,7 +138,7 @@ public class MascotClientImpl implements SearchClient
     {
         // let' works on the proxy server setup
         boolean succeeded = false;
-        if (null == proxyURL || "".equals(proxyURL))
+        if (null == proxyURL || proxyURL.isEmpty())
         {
             proxyURL = "";
             Properties systemProperties = System.getProperties();
@@ -376,7 +376,7 @@ public class MascotClientImpl implements SearchClient
                         }
                     }
 
-                    if ("".equals(chunkSize))
+                    if (chunkSize.isEmpty())
                     {
                         throw new IOException("Fail to parse chunk size when attempting to download DB " + db);
                     }
@@ -717,7 +717,7 @@ public class MascotClientImpl implements SearchClient
             else
             {
                 if (sectionTAXONOMY)
-                    if (!"".equals(contentLine))
+                    if (!contentLine.isEmpty())
                         taxonomies.add(contentLine);
             }
         }
@@ -748,7 +748,7 @@ public class MascotClientImpl implements SearchClient
             else
             {
                 if (sectionDB)
-                    if (!"".equals(contentLine))
+                    if (!contentLine.isEmpty())
                         dbNames.add(contentLine);
             }
         }
@@ -779,7 +779,7 @@ public class MascotClientImpl implements SearchClient
             else
             {
                 if (sectionMODS)
-                    if (!"".equals(contentLine))
+                    if (!contentLine.isEmpty())
                         mods.put(contentLine, contentLine);
             }
         }
@@ -1379,7 +1379,7 @@ public class MascotClientImpl implements SearchClient
                 mascotRequestURL = mascotRequestURL.replace(password, "***");
             // If using the class logger, then assume user interface will deliver the error message.
             String msg = "Connect("+_url+","+parameters.getProperty("username","<null>")+","
-                    +(parameters.getProperty("password","").length()>0 ? "***" : "")
+                    +(!parameters.getProperty("password", "").isEmpty() ? "***" : "")
                     +","+_proxyURL+")="+mascotRequestURL;
             if (getLogger() == _log)
                 getLogger().info(msg, x);

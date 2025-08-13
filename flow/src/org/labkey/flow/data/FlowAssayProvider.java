@@ -199,11 +199,17 @@ public class FlowAssayProvider extends AbstractAssayProvider
     @Override
     public Domain getBatchDomain(ExpProtocol protocol)
     {
+        return getBatchDomain(protocol, false);
+    }
+
+    @Override
+    public Domain getBatchDomain(ExpProtocol protocol, boolean forUpdate)
+    {
         return null;
     }
 
     @Override
-    public Domain getResultsDomain(ExpProtocol protocol)
+    public Domain getResultsDomain(ExpProtocol protocol, boolean forUpdate)
     {
         return null;
     }
@@ -234,7 +240,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public HttpView getDataDescriptionView(AssayRunUploadForm form)
+    public HttpView<?> getDataDescriptionView(AssayRunUploadForm form)
     {
         return new HtmlView(HtmlString.of("Data files must be FCS file format."));
     }
@@ -475,7 +481,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ValidationException setValidationAndAnalysisScripts(ExpProtocol protocol, @NotNull List<AnalysisScript> scripts)
+    public Pair<ValidationException, Pair<String, String>> setValidationAndAnalysisScripts(ExpProtocol protocol, @NotNull List<AnalysisScript> scripts)
     {
         throw new UnsupportedOperationException();
     }

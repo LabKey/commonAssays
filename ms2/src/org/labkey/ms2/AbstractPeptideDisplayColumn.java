@@ -31,7 +31,7 @@ public class AbstractPeptideDisplayColumn extends SimpleDisplayColumn
         Object result = null;
         if (colInfo != null)
         {
-            result = ctx.get(colInfo.getAlias());
+            result = colInfo.getValue(ctx);
         }
         if (result == null)
         {

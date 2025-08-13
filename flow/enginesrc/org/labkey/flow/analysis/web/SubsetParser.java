@@ -78,7 +78,7 @@ public class SubsetParser
 
     private static final Token EOF = new Token(Tok.eof, "");
 
-    private Lexer _lexer;
+    private final Lexer _lexer;
     private Token _lookahead;
 
     public SubsetParser(String str)
@@ -224,11 +224,11 @@ public class SubsetParser
         /** The last recognized token. */
         Token _token = null;
         /** Lookahead, if any. */
-        int _lookahead = -1;
+        int _lookahead;
         /** Current index. */
         int _index = -1;
         /** The source string. */
-        String _str = null;
+        String _str;
         /** are we in a spot where we might have an unescaped name? */
         boolean _allowUnescapedName = false;
 

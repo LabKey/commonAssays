@@ -18,8 +18,8 @@ package org.labkey.flow.analysis.model;
 
 public class ValueConstraint
 {
-    private double _minValue;
-    private double _maxValue;
+    private final double _minValue;
+    private final double _maxValue;
 
     public ValueConstraint(double minValue, double maxValue)
     {

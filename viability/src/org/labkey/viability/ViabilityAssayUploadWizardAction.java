@@ -129,18 +129,17 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         InsertView view = _getResultsView(form, errorReshow, errors);
         String formRef = view.getDataRegion().getJavascriptFormReference();
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("\n");
-        sb.append("<script type=\"text/javascript\" nonce=\"").append(HttpView.currentPageConfig().getScriptNonce()).append("\">");
-        sb.append("LABKEY.requiresScript(['internal/jQuery', 'viability/CheckRunUploadForm.js'],function(){\n");
-        sb.append(formRef).append(".onsubmit = function(){return checkRunUploadForm(").append(formRef).append(", jQuery);};\n");
-        sb.append("});\n");
-        sb.append("</script>\n");
+        String sb = "\n" +
+                "<script type=\"text/javascript\" nonce=\"" + HttpView.currentPageConfig().getScriptNonce() + "\">" +
+                "LABKEY.requiresScript(['internal/jQuery', 'viability/CheckRunUploadForm.js'],function(){\n" +
+                formRef + ".onsubmit = function(){return checkRunUploadForm(" + formRef + ", jQuery);};\n" +
+                "});\n" +
+                "</script>\n";
 
         VBox vbox = new VBox();
         vbox.addView(HtmlView.unsafe("<style type='text/css'>input { font-family: monospace; }</style>"));
         vbox.addView(view);
-        vbox.addView(HtmlView.unsafe(sb.toString()));
+        vbox.addView(HtmlView.unsafe(sb));
         return vbox;
     }
 
@@ -173,7 +172,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         List<Map<String, Object>> rows = errorReshow ? form.getResultProperties(errors) : form.getParsedResultData();
         Map<String, Map<String, Object>> reRunResults = form.getReRunResults();
 
-        Domain resultDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ExpProtocol.ASSAY_DOMAIN_DATA);
+        Domain resultDomain = AbstractAssayProvider.getDomainByPrefix(_protocol, ExpProtocol.ASSAY_DOMAIN_DATA, false);
         List<? extends DomainProperty> resultDomainProperties = resultDomain.getProperties();
         String lsidCol = "RowID";
         InsertView view = createInsertView(ViabilitySchema.getTableInfoResults(), lsidCol, resultDomainProperties, errorReshow, ResultsStepHandler.NAME, form, errors);

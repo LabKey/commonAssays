@@ -83,7 +83,7 @@ public class EditICSMetadataForm extends ProtocolForm
                     matchColumn[i] = icsmetadata.getMatchColumns().get(i);
             }
 
-            if (icsmetadata.getBackgroundFilter() != null && icsmetadata.getBackgroundFilter().size() > 0)
+            if (icsmetadata.getBackgroundFilter() != null && !icsmetadata.getBackgroundFilter().isEmpty())
             {
                 for (int i = 0; i < icsmetadata.getBackgroundFilter().size(); i++)
                 {
@@ -251,7 +251,7 @@ public class EditICSMetadataForm extends ProtocolForm
                 StatisticSpec spec = stat.getAttribute();
                 if (spec.getStatistic() != StatisticSpec.STAT.Count)
                     continue;
-                ret.put(new FieldKey(statisticProperty, spec.toString()), "Statistic " + spec.toString());
+                ret.put(new FieldKey(statisticProperty, spec.toString()), "Statistic " + spec);
             }
         }
 

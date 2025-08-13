@@ -62,7 +62,7 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.study.Dataset;
 import org.labkey.api.study.publish.StudyPublishService;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.Link.LinkBuilder;
+import org.labkey.api.util.LinkBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
@@ -75,8 +75,6 @@ import org.labkey.luminex.LuminexDataHandler;
 import org.labkey.luminex.LuminexResultsDataRegion;
 import org.springframework.validation.BindException;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -84,6 +82,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.labkey.api.util.DOM.Attribute.src;
+import static org.labkey.api.util.DOM.IMG;
+import static org.labkey.api.util.DOM.at;
 
 /**
  * Maps to a single assay design for schema tables/queries (batch, run, data, analyte, titration, curve fit, etc.)
@@ -155,7 +157,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
         {
             QueryDefinition queryDef = QueryService.get().createQueryDef(getUser(), _container, this, "query");
             queryDef.setSql("SELECT DISTINCT CurveType FROM \"" + CURVE_FIT_TABLE_NAME+ "\"");
-            queryDef.setContainerFilter(ContainerFilter.EVERYTHING_UNSAFE);
+            queryDef.setContainerFilter(ContainerFilter.getUnsafeEverythingFilter());
 
             ArrayList<QueryException> errors = new ArrayList<>();
             TableInfo table = queryDef.getTable(this, errors, false);
@@ -624,7 +626,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             }
 
             @Override
-            public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+            public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
             {
                 Map<Integer, String> pdfs = new HashMap<>();
                 for (Map.Entry<FieldKey, FieldKey> entry : _pdfColumns.entrySet())
@@ -642,9 +644,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     {
                         ActionURL url = PageFlowUtil.urlProvider(ExperimentUrls.class).getShowFileURL(getContainer());
                         url.addParameter("rowId", entry.getKey().toString());
-                        oldWriter.write("<a href=\"" + url + "\">");
-                        oldWriter.write("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
-                        oldWriter.write("</a>");
+                        LinkBuilder.simpleLink(IMG(at(src, AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png")), url).appendTo(out);
                     }
                 }
                 else if (pdfs.size() > 1)
@@ -662,10 +662,9 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     }
 
                     HtmlString image = HtmlString.unsafe("<img src=\"" + AppProps.getInstance().getContextPath() + "/_images/sigmoidal_curve.png\" />");
-                    new LinkBuilder(image)
+                    LinkBuilder.simpleLink(image)
                         .onMouseOver("return showHelpDiv(this, 'Titration Curves', " + PageFlowUtil.jsString(PageFlowUtil.filter(sb.toString())) + ");")
-                        .clearClasses()
-                        .appendTo(oldWriter);
+                        .appendTo(out);
                 }
             }
         };

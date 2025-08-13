@@ -38,15 +38,16 @@ import org.labkey.api.data.Results;
 import org.labkey.api.data.ResultsImpl;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.InputBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.SimpleNamedObject;
 import org.labkey.api.util.StringExpression;
-import org.labkey.api.util.element.Input.InputBuilder;
 import org.labkey.api.view.GridView;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.flow.analysis.model.ISampleInfo;
@@ -57,8 +58,6 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.util.KeywordUtil;
 import org.springframework.validation.Errors;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -70,6 +69,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static org.labkey.api.util.DOM.Attribute.src;
+import static org.labkey.api.util.DOM.IMG;
+import static org.labkey.api.util.DOM.at;
 
 public class SamplesConfirmGridView extends GridView
 {
@@ -94,12 +97,11 @@ public class SamplesConfirmGridView extends GridView
     public SamplesConfirmGridView(User user, Container container, Collection<String> keywords, List<? extends ISampleInfo> samples, boolean resolving, Map<String, SelectedSamples.ResolvedSample> rows, Errors errors)
     {
         super(new SamplesConfirmDataRegion(), errors);
-
         boolean hasGroupInfo = samples.get(0) instanceof Workspace.SampleInfo;
 
         // Create the list of columns
         keywords = KeywordUtil.filterHidden(keywords);
-        Map<FieldKey, ColumnInfo> columns = new LinkedHashMap<>();
+        Map<FieldKey, BaseColumnInfo> columns = new LinkedHashMap<>();
         if (resolving)
         {
             columns.put(MATCHED_FLAG_FIELD_KEY, new BaseColumnInfo(MATCHED_FLAG_FIELD_KEY, JdbcType.BOOLEAN));
@@ -116,7 +118,6 @@ public class SamplesConfirmGridView extends GridView
         {
             FieldKey fieldKey = new FieldKey(null, keyword);
             var col = new BaseColumnInfo(fieldKey, JdbcType.VARCHAR);
-            col.setAlias(fieldKey.getName());
             if (!columns.containsKey(fieldKey))
             {
                 uniqueKeywords.add(keyword);
@@ -127,8 +128,9 @@ public class SamplesConfirmGridView extends GridView
                 LOG.warn("Ignoring duplicate columns for FieldKey '" + fieldKey + "', got: '" + col.getName() + "' and '" + columns.get(fieldKey).getName() + "'");
             }
         }
-
+        // these are "fake" columns (set fake aliases)
         int columnCount = columns.size();
+        columns.values().forEach(c -> c.setAlias(SqlDialect.makeDatabaseIdentifier(c.getName(), null)));
 
         List<String> columnNames = columns.keySet().stream().map(FieldKey::getName).collect(Collectors.toList());
         RowMapFactory<Object> factory = new RowMapFactory<>(columnNames);
@@ -189,7 +191,7 @@ public class SamplesConfirmGridView extends GridView
 
         // Initialize the ResultSet and DataRegion
         ResultSet rs = CachedResultSets.create(maps);
-        Results results = new ResultsImpl(rs, columns);
+        Results results = new ResultsImpl(rs, (Map<FieldKey,ColumnInfo>)(Map)columns);
         setResults(results);
 
         SamplesConfirmDataRegion dr = (SamplesConfirmDataRegion)getDataRegion();
@@ -335,8 +337,7 @@ public class SamplesConfirmGridView extends GridView
         {
             // Add a hidden input for spring form binding -- if this value is posted, the row was unchecked.
             out.write(
-                new InputBuilder<>()
-                    .type("hidden")
+                InputBuilder.hidden()
                     .name(SpringActionController.FIELD_MARKER + getRecordSelectorName(ctx))
                     .value(0)
             );
@@ -369,23 +370,23 @@ public class SamplesConfirmGridView extends GridView
         }
 
         @Override
-        public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+        public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
         {
             Boolean match = ctx.get(MATCHED_FLAG_FIELD_KEY, Boolean.class);
             if (match != null)
             {
-                oldWriter.write("<img src=\"");
-                oldWriter.write(AppProps.getInstance().getContextPath());
+                IMG(
+                    at(src, AppProps.getInstance().getContextPath() + (match ? "/_images/check.png" : "/_images/cancel.png"))
+                ).appendTo(out);
+
                 if (match)
                 {
-                    oldWriter.write("/_images/check.png\" />");
                     String fileName = ctx.get(SAMPLE_NAME_FIELD_KEY, String.class);
-                    PageFlowUtil.popupHelp(HtmlString.of("Matched the previously imported FCS file '" + fileName + "'"), "Matched").appendTo(oldWriter);
+                    out.write(PageFlowUtil.popupHelp(HtmlString.of("Matched the previously imported FCS file '" + fileName + "'"), "Matched"));
                 }
                 else
                 {
-                    oldWriter.write("/_images/cancel.png\" />");
-                    PageFlowUtil.popupHelp(HtmlString.of("Failed to match a previously imported FCS file. Please manually select a matching FCS file or skip importing this row."), "Not matched").appendTo(oldWriter);
+                    out.write(PageFlowUtil.popupHelp(HtmlString.of("Failed to match a previously imported FCS file. Please manually select a matching FCS file or skip importing this row."), "Not matched"));
                 }
             }
         }
@@ -515,7 +516,7 @@ public class SamplesConfirmGridView extends GridView
                 String sampleId = ctx.get(SAMPLE_ID_FIELD_KEY, String.class);
                 for (FlowFCSFile candidate : candidates)
                 {
-                    out.write(new InputBuilder<>().type("hidden").name("selectedSamples.rows[" + sampleId + "].candidateFile").value(candidate.getRowId()));
+                    out.write(InputBuilder.hidden().name("selectedSamples.rows[" + sampleId + "].candidateFile").value(candidate.getRowId()));
                     out.write("\n");
                 }
             }

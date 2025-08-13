@@ -157,15 +157,13 @@ public class Analysis extends ScriptComponent
         if (population.getGates().size() == 1)
         {
             Gate gate = population.getGates().get(0);
-            if (gate instanceof PolygonGate)
+            if (gate instanceof PolygonGate poly)
             {
-                PolygonGate poly = (PolygonGate) gate;
                 GraphSpec graph = new GraphSpec(parent, poly.getXAxis(), poly.getYAxis());
                 graphs.add(graph);
             }
-            else if (gate instanceof IntervalGate)
+            else if (gate instanceof IntervalGate interval)
             {
-                IntervalGate interval = (IntervalGate) gate;
                 GraphSpec graph = new GraphSpec(parent, interval.getXAxis());
                 graphs.add(graph);
             }

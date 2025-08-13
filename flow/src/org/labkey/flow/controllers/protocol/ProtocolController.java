@@ -47,7 +47,7 @@ public class ProtocolController extends BaseFlowController
         setActionResolver(_actionResolver);
     }
 
-    public abstract class ProtocolViewAction<FORM extends ProtocolForm> extends FormViewAction<FORM>
+    public abstract static class ProtocolViewAction<FORM extends ProtocolForm> extends FormViewAction<FORM>
     {
         private FlowProtocol protocol;
 

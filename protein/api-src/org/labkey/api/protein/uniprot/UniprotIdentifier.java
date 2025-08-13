@@ -22,9 +22,9 @@ package org.labkey.api.protein.uniprot;
  */
 public class UniprotIdentifier
 {
-    private String _identType;
-    private String _identifier;
-    private UniprotSequence _sequence;
+    private final String _identType;
+    private final String _identifier;
+    private final UniprotSequence _sequence;
 
     public UniprotIdentifier(String identType, String identifier, UniprotSequence sequence)
     {

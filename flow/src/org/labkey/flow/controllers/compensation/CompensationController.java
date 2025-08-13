@@ -259,7 +259,7 @@ public class CompensationController extends BaseFlowController
                 hasErrors = addError(errors, "This matrix cannot be deleted because belongs to a run.");
             }
             List<? extends ExpRun> runs = comp.getExpObject().getTargetRuns();
-            if (runs.size() != 0)
+            if (!runs.isEmpty())
             {
                 hasErrors = addError(errors, "This matrix cannot be deleted because it has been used in " + runs.size() + " analysis runs.  Those runs must be deleted first.");
             }

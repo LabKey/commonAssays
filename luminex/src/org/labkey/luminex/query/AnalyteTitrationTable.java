@@ -54,17 +54,11 @@ import org.labkey.luminex.model.AnalyteTitration;
 import org.labkey.luminex.model.GuideSet;
 import org.labkey.luminex.model.Titration;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/**
- * User: jeckels
- * Date: 7/8/11
- */
 public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
 {
     public AnalyteTitrationTable(final LuminexProtocolSchema schema, ContainerFilter cf, boolean filter)
@@ -126,7 +120,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
             return new JavaScriptDisplayColumn(colInfo, List.of("clientapi/ext3", "vis/vis", "luminex/LeveyJenningsPlotHelpers.js", "luminex/LeveyJenningsReport.css"))
             {
                 @Override
-                public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+                public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                 {
                     int protocolId = schema.getProtocol().getRowId();
                     int analyte = (int)ctx.get("analyte");
@@ -144,7 +138,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                     ljPlotsNav.addChild(new NavTree("High MFI").setScript(String.format(jsFuncCall, protocolId, analyte, titration, "HighMFI")));
 
                     PopupMenu ljPlotsMenu = new PopupMenu(ljPlotsNav, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.IMAGE);
-                    ljPlotsMenu.renderMenuButton(ctx, oldWriter, false, null);
+                    ljPlotsMenu.renderMenuButton(ctx, out, false, null);
                 }
 
                 @Override

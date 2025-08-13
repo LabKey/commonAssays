@@ -121,13 +121,13 @@ public final class MSXMLParser
     protected XMLReader parser = null;
 
     /** The file we are in charge of reading */
-    protected File file = null;
+    protected File file;
 
     /** The MD5 signature found the last time we read the index */
     protected String fileMD5 = null;
 
     /** The indexHandler */
-    protected SAX2IndexHandler indexHandler = null;
+    protected SAX2IndexHandler indexHandler;
 
     /** The information contained in the header of the mzXML file. */
     protected MZXMLFileInfo info;
@@ -184,55 +184,39 @@ public final class MSXMLParser
         try
         {
             parser.setFeature(SCHEMA_VALIDATION_FEATURE_ID, schemaValidation);
-        } catch (SAXNotRecognizedException e)
+        } catch (SAXNotRecognizedException | SAXNotSupportedException e)
         {
             System.err.println("warning: Parser does not support feature ("
                     + SCHEMA_VALIDATION_FEATURE_ID + ")");
 
-        } catch (SAXNotSupportedException e)
-        {
-            System.err.println("warning: Parser does not support feature ("
-                    + SCHEMA_VALIDATION_FEATURE_ID + ")");
         }
         try
         {
             parser.setFeature(SCHEMA_FULL_CHECKING_FEATURE_ID,
                     schemaFullChecking);
-        } catch (SAXNotRecognizedException e)
+        } catch (SAXNotRecognizedException | SAXNotSupportedException e)
         {
             System.err.println("warning: Parser does not support feature ("
                     + SCHEMA_FULL_CHECKING_FEATURE_ID + ")");
 
-        } catch (SAXNotSupportedException e)
-        {
-            System.err.println("warning: Parser does not support feature ("
-                    + SCHEMA_FULL_CHECKING_FEATURE_ID + ")");
         }
         try
         {
             parser.setFeature(DYNAMIC_VALIDATION_FEATURE_ID, dynamicValidation);
-        } catch (SAXNotRecognizedException e)
+        } catch (SAXNotRecognizedException | SAXNotSupportedException e)
         {
             System.err.println("warning: Parser does not support feature ("
                     + DYNAMIC_VALIDATION_FEATURE_ID + ")");
 
-        } catch (SAXNotSupportedException e)
-        {
-            System.err.println("warning: Parser does not support feature ("
-                    + DYNAMIC_VALIDATION_FEATURE_ID + ")");
         }
         try
         {
             parser.setFeature(CONT_AFTER_FATAL_ERROR_ID, false);
-        } catch (SAXNotRecognizedException e)
+        } catch (SAXNotRecognizedException | SAXNotSupportedException e)
         {
             System.err.println("warning: Parser does not support feature ("
                     + CONT_AFTER_FATAL_ERROR_ID + ")");
 
-        } catch (SAXNotSupportedException e)
-        {
-            System.err.println("warning: Parser does not support feature ("
-                    + CONT_AFTER_FATAL_ERROR_ID + ")");
         }
 
         // Seek to the index;

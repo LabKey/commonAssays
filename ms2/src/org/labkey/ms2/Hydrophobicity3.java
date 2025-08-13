@@ -989,7 +989,7 @@ public class Hydrophobicity3 {
        char f01 = pattern.charAt(0);
        double prod1 = AAPARAMS.get(f01).H2BASCORE;
        int i;
-       double mult = 1.0;
+       double mult;
        String fpart;
        char gpart;
        double s3;
@@ -1106,7 +1106,7 @@ public class Hydrophobicity3 {
        double skore;
        double gscore;   //not my()'ed in perl source
        int best_pos = 0;
-       String tmp = "x";
+       String tmp;
 
        if (sq.length() < 11) {
           ret[HISC] = 0.0;
@@ -1120,9 +1120,7 @@ public class Hydrophobicity3 {
        pass1 = sqCopy.replaceAll("[WFILYMVA]","1");
        pass1 = pass1.replaceAll("[GSPCNKQHRTDE]","0");
 
-       gscore = 0.0;
-
-       for (i=0; i<pass1.length(); i++) {
+        for (i=0; i<pass1.length(); i++) {
           m = pass1.charAt(i);
           if(m == '1') {
              lc = pass1.substring(i);
@@ -1193,7 +1191,7 @@ public class Hydrophobicity3 {
        if(NOHELIX2==1)  return 0.0;
        double h2FwBk,FwHiscor,FwGscor,BkHiscor,BkGscor;
        double h2mult,lenMult,NoPMult;
-       String Bksq = "";
+       String Bksq;
        int i;
        Bksq = new String(new StringBuffer(sq).reverse());
        double fhg[] = heli2Calc(sq);

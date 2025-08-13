@@ -23,6 +23,7 @@ import org.labkey.test.Locator;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
+import org.labkey.test.components.assay.AssayConstants;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.LabKeyExpectedConditions;
@@ -47,7 +48,7 @@ public final class LuminexRTransformTest extends LuminexTest
     @BeforeClass
     public static void updateAssayDefinition()
     {
-        LuminexRTransformTest init = (LuminexRTransformTest)getCurrentTest();
+        LuminexRTransformTest init = getCurrentTest();
 
         // add the R transform script to the assay
         init.goToTestAssayHome();
@@ -121,10 +122,10 @@ public final class LuminexRTransformTest extends LuminexTest
         clickButton("Import Data");
         clickButton("Next");
 
-        setFormElement(Locator.name("name"), "r script transformed assayId");
-        checkCheckbox(Locator.name("subtNegativeFromAll"));
-        setFormElement(Locator.name("stndCurveFitInput"), "FI");
-        setFormElement(Locator.name("unkCurveFitInput"), "FI-Bkgd-Neg");
+        setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, "r script transformed assayId");
+        checkCheckbox(Locator.name("SubtNegativeFromAll"));
+        setFormElement(Locator.name("StndCurveFitInput"), "FI");
+        setFormElement(Locator.name("UnkCurveFitInput"), "FI-Bkgd-Neg");
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE4);
         clickButton("Next", defaultWaitForPage * 2);
 
@@ -158,13 +159,13 @@ public final class LuminexRTransformTest extends LuminexTest
         clickButton("Import Data");
         clickButton("Next");
         String assayRunId = "negative bead assayId";
-        setFormElement(Locator.name("name"), assayRunId);
-        uncheckCheckbox(Locator.name("subtNegativeFromAll"));
+        setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, assayRunId);
+        uncheckCheckbox(Locator.name("SubtNegativeFromAll"));
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE4);
         waitForElement(Locator.id("file-upload-tbl").containing(TEST_ASSAY_LUM_FILE4.getName()));
         clickButton("Next", defaultWaitForPage * 2);
 
-        // uncheck all of the titration well role types
+        // uncheck all the titration well role types
         uncheckCheckbox(Locator.name("_titrationRole_standard_Standard1"));
         uncheckCheckbox(Locator.name("_titrationRole_qccontrol_Standard1"));
 

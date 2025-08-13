@@ -69,28 +69,14 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         var col = getMutableColumn(FieldKey.fromParts(ElispotDataHandler.SFU_PROPERTY_NAME));
         if (col != null)
         {
-            col.setDisplayColumnFactory(new DisplayColumnFactory()
-            {
-                @Override
-                public DisplayColumn createRenderer(ColumnInfo colInfo)
-                {
-                    return new SpotCountDisplayColumn(colInfo, schema);
-                }
-            });
+            col.setDisplayColumnFactory(colInfo -> new SpotCountDisplayColumn(colInfo, schema));
         }
 
         // display column for spot size
         var spotSizeCol = getMutableColumn(FieldKey.fromParts(ElispotDataHandler.SPOT_SIZE_PROPERTY_NAME));
         if (spotSizeCol != null)
         {
-            spotSizeCol.setDisplayColumnFactory(new DisplayColumnFactory()
-            {
-                @Override
-                public DisplayColumn createRenderer(ColumnInfo colInfo)
-                {
-                    return new SpotCountDisplayColumn(colInfo, schema);
-                }
-            });
+            spotSizeCol.setDisplayColumnFactory(colInfo -> new SpotCountDisplayColumn(colInfo, schema));
         }
     }
 
@@ -184,14 +170,14 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         FieldKey runPropFieldKey = FieldKey.fromParts("Run");
         fieldKeys.add(FieldKey.fromParts(runPropFieldKey, FieldKey.fromString("ProtocolName")));
         fieldKeys.add(FieldKey.fromParts(runPropFieldKey, FieldKey.fromString("PlateReader")));
-        fieldKeys.add(FieldKey.fromParts(runPropFieldKey,  FieldKey.fromString("Batch"), FieldKey.fromString("TargetStudy")));
+        fieldKeys.add(FieldKey.fromParts(runPropFieldKey,  FieldKey.fromString("Batch"), FieldKey.fromString(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)));
         return fieldKeys;
     }
 
     public static class SpotCountDisplayColumn extends DataColumn
     {
         private PlateReader _reader;
-        private AssaySchema _schema;
+        private final AssaySchema _schema;
 
         public SpotCountDisplayColumn(ColumnInfo col, AssaySchema schema)
         {
@@ -219,8 +205,7 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
                 ColumnInfo plateReaderColumn = ctx.getFieldMap().get(FieldKey.fromParts("Run", "PlateReader"));
                 if (null != plateReaderColumn)
                 {
-                    String readerAlias = plateReaderColumn.getAlias();
-                    Object readerName = ctx.getRow().get(readerAlias);
+                    Object readerName = plateReaderColumn.getValue(ctx);
 
                     if (readerName != null)
                     {

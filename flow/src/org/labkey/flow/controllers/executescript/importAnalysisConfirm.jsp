@@ -42,6 +42,7 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
 <%@ page import="static org.labkey.flow.controllers.executescript.AnalysisScriptController.BACK_BUTTON_ACTION" %>
+<%@ page import="org.labkey.api.assay.AbstractAssayProvider" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     ImportAnalysisForm form = (ImportAnalysisForm)getModelBean();
@@ -61,7 +62,7 @@
     }
 
     String targetStudyLabel = null;
-    if (form.getTargetStudy() != null && form.getTargetStudy().length() > 0)
+    if (form.getTargetStudy() != null && !form.getTargetStudy().isEmpty())
     {
         Set<Study> studies = StudyService.get().findStudy(form.getTargetStudy(), getUser());
         Study study = studies.iterator().next();
@@ -93,7 +94,7 @@
 <input type="hidden" name="existingAnalysisId" id="existingAnalysisId" value="<%=form.getExistingAnalysisId()%>">
 <% } %>
 
-<input type="hidden" name="targetStudy" id="targetStudy" value="<%=h(form.getTargetStudy())%>">
+<input type="hidden" name="<%= h(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)%>" id="<%= h(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)%>" value="<%=h(form.getTargetStudy())%>">
 
 <p>You are about to import the analysis from the workspace with the following settings:</p>
 <%

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.element.Input.InputBuilder" %>
+<%@ page import="org.labkey.api.util.InputBuilder" %>
 <%@ page import="org.labkey.flow.analysis.model.PopulationName" %>
 <%@ page import="org.labkey.flow.analysis.model.StatisticSet" %>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController.UploadAnalysisAction" %>
@@ -55,7 +55,7 @@
     else
     {
         Map<String, String> sampleAnalyses = this.getSampleAnalysisNames();
-        if (sampleAnalyses.size() > 0)
+        if (!sampleAnalyses.isEmpty())
         {
     %>
     <p>Which sample do you want to use?<br>

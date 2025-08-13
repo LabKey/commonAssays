@@ -35,9 +35,9 @@ import java.util.NoSuchElementException;
  */
 public class SequentialMzxmlIterator extends AbstractMzxmlIterator
 {
-    private static Logger _log = LogManager.getLogger(SequentialMzxmlIterator.class);
+    private static final Logger _log = LogManager.getLogger(SequentialMzxmlIterator.class);
 
-    private File _file;
+    private final File _file;
     private InputStream _in;
     private SimpleXMLStreamReader _parser;
     private SimpleScan _currentScan;
@@ -193,7 +193,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
         return result;
     }
 
-    private class SequentialSimpleScan implements SimpleScan
+    private static class SequentialSimpleScan implements SimpleScan
     {
         private final int _scan;
         private final int _msLevel;

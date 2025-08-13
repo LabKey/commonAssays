@@ -43,7 +43,7 @@ public class CometTest extends AbstractMS2SearchEngineTest
         log("Verifying that pipeline files were cleaned up properly");
         File test2 = new File(PIPELINE_PATH + "/bov_sample/" + SEARCH_TYPE + "/test2");
         if (test2.exists())
-            fail("Pipeline files were not cleaned up; test2(" + test2.toString() + ") directory still exists");
+            fail("Pipeline files were not cleaned up; test2(" + test2 + ") directory still exists");
 
         _useOnlyOneFasta = true;
 

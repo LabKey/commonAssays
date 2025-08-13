@@ -217,7 +217,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
         sampleProperties.add(DATE_PROPERTY_NAME);
 
         if (!domainMap.containsKey(ASSAY_DOMAIN_VIRUS_WELLGROUP))
-            domainMap.put(ASSAY_DOMAIN_VIRUS_WELLGROUP, new HashSet<String>());
+            domainMap.put(ASSAY_DOMAIN_VIRUS_WELLGROUP, new HashSet<>());
 
         domainMap.get(ASSAY_DOMAIN_VIRUS_WELLGROUP).add(VIRUS_NAME_PROPERTY_NAME);
 
@@ -237,7 +237,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     }
 
     @Override
-    public HttpView getDataDescriptionView(AssayRunUploadForm form)
+    public HttpView<?> getDataDescriptionView(AssayRunUploadForm form)
     {
         return HtmlView.of("The NAb data file is a specially formatted TSV, CSV or Excel file.");
     }
@@ -337,7 +337,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     public Domain getVirusWellGroupDomain(ExpProtocol protocol)
     {
         if (supportsMultiVirusPlate())
-            return getDomainByPrefixIfExists(protocol, ASSAY_DOMAIN_VIRUS_WELLGROUP);
+            return getDomainByPrefixIfExists(protocol, ASSAY_DOMAIN_VIRUS_WELLGROUP, false);
         else
             return null;
     }

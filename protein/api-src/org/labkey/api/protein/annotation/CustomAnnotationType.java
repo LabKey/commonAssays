@@ -17,6 +17,7 @@
 package org.labkey.api.protein.annotation;
 
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.util.SafeToRenderEnum;
@@ -60,19 +61,19 @@ public enum CustomAnnotationType implements SafeToRenderEnum
         return null;
     }
 
-    public String getFirstSelectForSeqId()
+    public SQLFragment getFirstSelectForSeqId()
     {
-        StringBuilder sql = new StringBuilder();
+        SQLFragment sql = new SQLFragment();
         sql.append("(SELECT MIN(Identifier) FROM ");
         sql.append(ProteinSchema.getTableInfoIdentifiers());
         sql.append(" i, ");
         sql.append(ProteinSchema.getTableInfoIdentTypes());
-        sql.append(" it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = '");
-        sql.append(_type.toString());
-        sql.append("' AND i.SeqId = ");
+        sql.append(" it WHERE i.IdentTypeId = it.IdentTypeId AND it.Name = ");
+        sql.appendValue(_type);
+        sql.append(" AND i.SeqId = ");
         sql.append(ExprColumn.STR_TABLE_ALIAS);
         sql.append(".SeqId)");
-        return sql.toString();
+        return sql;
     }
 
     private final String _description;
@@ -84,34 +85,34 @@ public enum CustomAnnotationType implements SafeToRenderEnum
         _type = type;
     }
 
-    public String getLookupStringSelect(ColumnInfo colSeqId)
+    public SQLFragment getLookupStringSelect(ColumnInfo colSeqId)
     {
-        StringBuilder sb = new StringBuilder("SELECT ");
-        sb.append(getIdentifierSelectSQL());
-        sb.append(" FROM ");
-        sb.append(ProteinSchema.getTableInfoIdentifiers());
-        sb.append(" WHERE SeqId = ");
-        sb.append(colSeqId.getValueSql(ExprColumn.STR_TABLE_ALIAS));
-        sb.append(" AND IdentTypeId IN ");
-        sb.append(getIdentTypeIdSelect());
-        return sb.toString();
+        SQLFragment sql = new SQLFragment("SELECT ");
+        sql.append(getIdentifierSelectSQL());
+        sql.append(" FROM ");
+        sql.append(ProteinSchema.getTableInfoIdentifiers());
+        sql.append(" WHERE SeqId = ");
+        sql.append(colSeqId.getValueSql(ExprColumn.STR_TABLE_ALIAS));
+        sql.append(" AND IdentTypeId IN ");
+        sql.append(getIdentTypeIdSelect());
+        return sql;
     }
 
-    public String getSeqIdSelect()
+    public SQLFragment getSeqIdSelect()
     {
-        StringBuilder sb = new StringBuilder();
-        sb.append("SELECT SeqId, ");
-        sb.append(getIdentifierSelectSQL());
-        sb.append(" AS Ident FROM ");
-        sb.append(ProteinSchema.getTableInfoIdentifiers());
-        sb.append(" WHERE IdentTypeId IN ");
-        sb.append(getIdentTypeIdSelect());
-        return sb.toString();
+        SQLFragment sql = new SQLFragment();
+        sql.append("SELECT SeqId, ");
+        sql.append(getIdentifierSelectSQL());
+        sql.append(" AS Ident FROM ");
+        sql.append(ProteinSchema.getTableInfoIdentifiers());
+        sql.append(" WHERE IdentTypeId IN ");
+        sql.append(getIdentTypeIdSelect());
+        return sql;
     }
 
-    protected String getIdentTypeIdSelect()
+    protected SQLFragment getIdentTypeIdSelect()
     {
-        return "(SELECT IdentTypeId FROM " + ProteinSchema.getTableInfoIdentTypes() + " WHERE Name = '" + _type.toString() + "')";
+        return new SQLFragment("(SELECT IdentTypeId FROM ").append(ProteinSchema.getTableInfoIdentTypes()).append(" WHERE Name = ").appendValue(_type).append(")");
     }
 
     public String getDescription()

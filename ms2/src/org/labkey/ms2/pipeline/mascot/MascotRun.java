@@ -35,8 +35,9 @@ import org.labkey.ms2.peptideview.MS2RunViewType;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.PrintWriter;
 import java.util.Map;
+
+import static org.labkey.api.util.DOM.DIV;
 
 public class MascotRun extends MS2Run
 {
@@ -47,8 +48,7 @@ public class MascotRun extends MS2Run
     public void adjustScores(Map<String, String> map)
     {
         // Mascot exported pepXML can exclude "homologyscore"
-        if (null == map.get("homologyscore"))
-            map.put("homologyscore", "-1");
+        map.putIfAbsent("homologyscore", "-1");
         // Issue 30322 - ProteomeDiscoverer pep.xml files use a different name for the score value
         if (null == map.get("ionscore") && map.containsKey("Ions Score"))
             map.put("ionscore", map.get("Ions Score"));
@@ -147,11 +147,13 @@ public class MascotRun extends MS2Run
         }
         else
         {
-            return new WebPartView(title) {
+            return new WebPartView<>(title) {
                 @Override
-                protected void renderView(Object model, PrintWriter out)
+                protected void renderView(Object model, HtmlWriter out)
                 {
-                    out.write("<div>Use the 'Standard' grouping to view this information.</div>");
+                    DIV(
+                        "Use the 'Standard' grouping to view this information."
+                    ).appendTo(out);
                 }
             };
         }

@@ -16,24 +16,23 @@
 
 package org.labkey.ms2;
 
-import org.labkey.api.data.SimpleDisplayColumn;
-import org.labkey.api.data.RenderContext;
-import org.labkey.api.data.ColumnInfo;
-import org.labkey.api.view.ActionURL;
-import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.RenderContext;
+import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.LinkBuilder;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.writer.HtmlWriter;
 
-import java.io.Writer;
-import java.io.IOException;
-import java.util.*;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * User: jeckels
- * Date: Feb 15, 2006
- */
 public class ProteinListDisplayColumn extends SimpleDisplayColumn
 {
     private final SequenceColumnType _sequenceColumn;
@@ -70,15 +69,11 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
             }
 
             @Override
-            public void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
+            public void writeInfo(ProteinSummary summary, HtmlWriter out, ActionURL url, int groupId)
             {
                 url.replaceParameter("proteinGroupId", groupId);
                 url.replaceParameter("seqId", summary.getSeqId());
-                out.write("<a href=\"");
-                out.write(url.toString());
-                out.write("\" target=\"prot\">");
-                out.write(PageFlowUtil.filter(summary.getName()));
-                out.write("</a>");
+                out.write(LinkBuilder.simpleLink(summary.getName(), url).target("prot"));
             }
         },
         Description
@@ -90,9 +85,9 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
             }
 
             @Override
-            public void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
+            public void writeInfo(ProteinSummary summary, HtmlWriter out, ActionURL url, int groupId)
             {
-                out.write(PageFlowUtil.filter(summary.getDescription()));
+                out.write(summary.getDescription());
             }
         },
         BestName
@@ -104,9 +99,9 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
             }
 
             @Override
-            public void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
+            public void writeInfo(ProteinSummary summary, HtmlWriter out, ActionURL url, int groupId)
             {
-                out.write(PageFlowUtil.filter(summary.getBestName()));
+                out.write(summary.getBestName());
             }
         },
         BestGeneName
@@ -118,12 +113,12 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
             }
 
             @Override
-            public void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
+            public void writeInfo(ProteinSummary summary, HtmlWriter out, ActionURL url, int groupId)
             {
                 String geneName = summary.getBestGeneName();
                 if (geneName != null)
                 {
-                    out.write(PageFlowUtil.filter(geneName));
+                    out.write(geneName);
                 }
             }
         },
@@ -136,9 +131,9 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
             }
 
             @Override
-            public void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
+            public void writeInfo(ProteinSummary summary, HtmlWriter out, ActionURL url, int groupId)
             {
-                out.write(PageFlowUtil.filter(MASS_FORMAT.format(summary.getSequenceMass())));
+                out.write(MASS_FORMAT.format(summary.getSequenceMass()));
             }
 
             @Override
@@ -150,7 +145,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
 
         public abstract Object getValue(ProteinSummary summary);
 
-        public abstract void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException;
+        public abstract void writeInfo(ProteinSummary summary, HtmlWriter out, ActionURL url, int groupId);
 
         public String getTextAlign()
         {
@@ -222,13 +217,13 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
     }
 
     @Override
-    public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+    public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
     {
-        Map row = ctx.getRow();
+        Map<String, Object> row = ctx.getRow();
 
         if (!row.containsKey(_columnName))
         {
-            oldWriter.write("ProteinGroupId not present in ResultSet");
+            out.write("ProteinGroupId not present in ResultSet");
             return;
         }
         Object groupIdObject = row.get(_columnName);
@@ -238,7 +233,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         }
         if (!(groupIdObject instanceof Number))
         {
-            oldWriter.write("ProteinGroupId is of unexpected type: " + groupIdObject.getClass());
+            out.write("ProteinGroupId is of unexpected type: " + groupIdObject.getClass());
             return;
         }
         int groupId = ((Number) groupIdObject).intValue();
@@ -251,7 +246,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         {
             for (ProteinSummary summary : summaryList)
             {
-                writeInfo(summary, oldWriter, url, groupId);
+                writeInfo(summary, out, url, groupId);
             }
         }
     }
@@ -263,15 +258,15 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
         set.add(_columnInfo);
     }
 
-    private void writeInfo(ProteinSummary summary, Writer out, ActionURL url, int groupId) throws IOException
+    private void writeInfo(ProteinSummary summary, HtmlWriter out, ActionURL url, int groupId)
     {
         _sequenceColumn.writeInfo(summary, out, url, groupId);
-        out.write("<br/>");
+        out.write(HtmlString.BR);
     }
 
     public void setColumnInfo(ColumnInfo colInfo)
     {
         _columnInfo = colInfo;
-        _columnName = colInfo.getAlias();
+        _columnName = colInfo.getAlias().getId();
     }
 }

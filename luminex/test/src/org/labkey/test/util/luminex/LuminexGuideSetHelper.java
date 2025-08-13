@@ -42,7 +42,7 @@ public class LuminexGuideSetHelper
     private static final Locator GS_WINDOW_LOC =
             Locator.tag("div").withClasses("x-window", "leveljenningsreport");
     public static final String[] GUIDE_SET_ANALYTE_NAMES = {"GS Analyte A", "GS Analyte B"};
-    private static Map<Integer, String> timestamps = new HashMap<>();
+    private static final Map<Integer, String> timestamps = new HashMap<>();
     final LuminexTest _test;
     
     public Calendar TESTDATE = Calendar.getInstance();
@@ -59,9 +59,9 @@ public class LuminexGuideSetHelper
     {
         _test.goToTestAssayHome(assayName);
         _test.clickButton("Import Data");
-        _test.setFormElement(Locator.name("network"), "NETWORK" + (_runNumber));
-        if (_test.isElementPresent(Locator.name("customProtocol")))
-            _test.setFormElement(Locator.name("customProtocol"), "PROTOCOL" + (_runNumber));
+        _test.setFormElement(Locator.name("Network"), "NETWORK" + (_runNumber));
+        if (_test.isElementPresent(Locator.name("CustomProtocol")))
+            _test.setFormElement(Locator.name("CustomProtocol"), "PROTOCOL" + (_runNumber));
         _test.clickButton("Next");
 
         TESTDATE.add(Calendar.DATE, 1);

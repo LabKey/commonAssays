@@ -39,7 +39,8 @@ public class SampleIdMap<V>
 {
     public static <V1> SampleIdMap<V1> emptyMap()
     {
-        return new SampleIdMap<V1>() {
+        return new SampleIdMap<>()
+        {
             @Override
             public void put(String id, String name, Object value)
             {

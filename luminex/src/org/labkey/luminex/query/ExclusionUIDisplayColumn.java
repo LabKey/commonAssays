@@ -26,12 +26,10 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.DOM;
 import org.labkey.api.util.DOM.Attribute;
 import org.labkey.api.util.HtmlString;
-import org.labkey.api.util.Link.LinkBuilder;
+import org.labkey.api.util.LinkBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.writer.HtmlWriter;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Set;
 
 import static org.labkey.api.util.DOM.Attribute.alt;
@@ -89,7 +87,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
     }
 
     @Override
-    public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out) throws IOException
+    public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
     {
         String type = (String)ctx.get(_typeFieldKey);
         String description = (String)ctx.get(_descriptionFieldKey);
@@ -103,7 +101,7 @@ public class ExclusionUIDisplayColumn extends DataColumn
         boolean canEdit = _container.hasPermission(_user, UpdatePermission.class);
         Boolean excluded = (Boolean)ctx.get(getColumnInfo().getFieldKey());
 
-        HtmlString img = excluded.booleanValue() ?
+        DOM.Renderable img = excluded.booleanValue() ?
             getImgTag("excluded.png", exclusionComment, id, canEdit) :
             getImgTag("included.png", "Click to add a well or replicate group exclusion", id, canEdit);
 
@@ -112,15 +110,15 @@ public class ExclusionUIDisplayColumn extends DataColumn
             // add onclick handler to call the well exclusion window creation function
             String onClick = "openExclusionsWellWindow(" + _protocolId + ", " + runId + ", " + dataId + ", " +
                 jsString(wellID) + ", " + (description == null ? null : jsString(description)) + ", " + jsString(type) + ");";
-            new LinkBuilder(img).href("#").onClick(onClick).clearClasses().appendTo(oldWriter);
+            LinkBuilder.simpleLink(img).href("#").onClick(onClick).appendTo(out);
         }
         else
         {
-            oldWriter.write(img.toString());
+            out.write(img);
         }
     }
 
-    private HtmlString getImgTag(String png, String titleAlt, String id, boolean canEdit)
+    private DOM.Renderable getImgTag(String png, String titleAlt, String id, boolean canEdit)
     {
         DOM._Attributes att = at(src, AppProps.getInstance().getContextPath() + "/luminex/exclusion/" + png)
             .at(height, 16)
@@ -130,6 +128,6 @@ public class ExclusionUIDisplayColumn extends DataColumn
         if (canEdit)
             att.at(title, titleAlt).at(alt, titleAlt);
 
-        return DOM.createHtmlFragment(IMG(att));
+        return IMG(att);
     }
 }

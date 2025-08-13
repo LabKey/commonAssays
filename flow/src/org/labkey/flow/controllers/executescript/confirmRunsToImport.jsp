@@ -30,9 +30,10 @@
 <%@ page import="java.util.LinkedHashMap" %>
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.Set" %>
+<%@ page import="org.labkey.api.assay.AbstractAssayProvider" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<ImportRunsForm> me = (JspView<ImportRunsForm>) HttpView.currentView();
+    JspView<ImportRunsForm> me = HttpView.currentView();
     ImportRunsForm form = me.getModelBean();
     Container c = getContainer();
 
@@ -59,7 +60,7 @@
 
     %><labkey:errors/><%
 
-    if (paths != null && paths.size() != 0)
+    if (paths != null && !paths.isEmpty())
     {
         %><labkey:form method="POST" action="<%=new ActionURL(ImportRunsAction.class, c)%>">
         <input type="hidden" name="path" value="<%=h(form.getPath())%>">
@@ -86,8 +87,8 @@
                 to look up specimen information from the target study's specimen repository.
             </p>
             <p class="labkey-indented">
-                <label for="targetStudy">Optionally, choose a target study folder:</label><br>
-                <select id="targetStudy" name="targetStudy">
+                <label for="<%= h(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)%>">Optionally, choose a target study folder:</label><br>
+                <select id="<%= h(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)%>" name="<%= h(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)%>">
                     <labkey:options value="<%=unsafe(form.getTargetStudy())%>" map="<%=targetStudies%>"/>
                 </select>
             </p>

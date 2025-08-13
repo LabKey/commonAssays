@@ -28,7 +28,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-    JspView<ExportAnalysisForm> me = (JspView<ExportAnalysisForm>) HttpView.currentView();
+    JspView<ExportAnalysisForm> me = HttpView.currentView();
     ExportAnalysisForm bean = me.getModelBean();
 
     Map<AnalysisSerializer.Options, String> exportFormats = new EnumMap<>(AnalysisSerializer.Options.class);

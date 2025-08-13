@@ -414,7 +414,7 @@ public class AttributeController extends BaseFlowController
     }
 
     @RequiresPermission(AdminPermission.class)
-    public class DeleteUnusedAction extends ConfirmAction<ReturnUrlForm>
+    public static class DeleteUnusedAction extends ConfirmAction<ReturnUrlForm>
     {
         @Override
         public ModelAndView getConfirmView(ReturnUrlForm form, BindException errors)
@@ -481,7 +481,7 @@ public class AttributeController extends BaseFlowController
     }
 
     @RequiresPermission(AdminPermission.class)
-    public class CaseSensitivityAction extends FormViewAction<CaseSensitivityForm>
+    public static class CaseSensitivityAction extends FormViewAction<CaseSensitivityForm>
     {
         @Override
         public void validateCommand(CaseSensitivityForm form, Errors errors)

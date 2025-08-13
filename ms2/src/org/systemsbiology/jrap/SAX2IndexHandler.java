@@ -172,7 +172,7 @@ public final class SAX2IndexHandler extends DefaultHandler
             {
                 System.err
                         .println("Error: File contains an invalid index offset!: "
-                                + buffer.toString());
+                                + buffer);
                 idxOffset = -1;
             }
             throw new SAXException("IdxReadException");

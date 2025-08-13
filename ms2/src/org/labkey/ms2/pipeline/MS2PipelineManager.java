@@ -45,7 +45,7 @@ import java.util.*;
  */
 public class MS2PipelineManager
 {
-    private static Logger _log = LogManager.getLogger(MS2PipelineProvider.class);
+    private static final Logger _log = LogManager.getLogger(MS2PipelineProvider.class);
     private static final String DEFAULT_FASTA_DIR = "databases";
 
     public static final String SEQUENCE_DB_ROOT_TYPE = "SEQUENCE_DATABASE";

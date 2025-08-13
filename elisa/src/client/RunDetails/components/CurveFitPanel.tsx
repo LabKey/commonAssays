@@ -22,7 +22,7 @@ export class CurveFitPanel extends PureComponent<Props> {
         const { plotOptions, runPropertiesRow, curveFitData } = this.props;
 
         return (
-            <div className="panel panel-default">
+            <div className="panel panel-default curve-fit-panel">
                 <div className="panel-heading">
                     Curve Fit: {runPropertiesRow?.CurveFitMethod ?? 'Linear'}
                 </div>

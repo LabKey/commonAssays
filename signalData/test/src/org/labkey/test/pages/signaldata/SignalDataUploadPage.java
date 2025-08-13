@@ -35,7 +35,7 @@ public class SignalDataUploadPage
 {
     private static final String CLEAR_BUTTON = "Clear Run";
 
-    private BaseWebDriverTest _test;
+    private final BaseWebDriverTest _test;
 
     public SignalDataUploadPage(BaseWebDriverTest test)
     {

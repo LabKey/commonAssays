@@ -96,7 +96,7 @@ public class KeywordsHandler extends BaseHandler
 
     private boolean isEmpty(String str)
     {
-        return str == null || str.length() == 0;
+        return str == null || str.isEmpty();
     }
 
     protected void addStatus(String status)
@@ -123,7 +123,7 @@ public class KeywordsHandler extends BaseHandler
     {
         ExperimentArchiveDocument xarDoc = _job.createExperimentArchive();
         ExperimentArchiveType xar = xarDoc.getExperimentArchive();
-        String runName = null;
+        String runName;
         File runDirectory = _job.createAnalysisDirectory(directory, FlowProtocolStep.keywords);
 
         runName = directory.getName();
@@ -212,7 +212,7 @@ public class KeywordsHandler extends BaseHandler
             addStatus("Reading keywords from file " + file.getName());
             lstFileData.add( getAnalyzer().readAllKeywords(file.toURI()));
         }
-        if (lstFileData.size() == 0)
+        if (lstFileData.isEmpty())
         {
             warn("No FCS files found");
             return null;

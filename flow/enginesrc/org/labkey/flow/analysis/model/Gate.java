@@ -71,9 +71,8 @@ public abstract class Gate implements Serializable
         for (int i = 0; i < nlChildren.getLength(); i ++)
         {
             Node nodeChild = nlChildren.item(i);
-            if (!(nodeChild instanceof Element))
+            if (!(nodeChild instanceof Element elChild))
                 continue;
-            Element elChild = (Element) nodeChild;
             if ("interval".equals(elChild.getTagName()))
             {
                 ret.add(IntervalGate.readInterval(elChild));

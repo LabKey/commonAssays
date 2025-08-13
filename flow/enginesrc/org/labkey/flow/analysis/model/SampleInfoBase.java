@@ -74,9 +74,9 @@ public abstract class SampleInfoBase implements ISampleInfo, Serializable
     public @NotNull String getLabel()
     {
         String ret = _sampleName;
-        if (ret == null || ret.length() == 0)
+        if (ret == null || ret.isEmpty())
             ret = getFilename();
-        if (ret == null || ret.length() == 0)
+        if (ret == null || ret.isEmpty())
             return _sampleId;
         return ret;
     }

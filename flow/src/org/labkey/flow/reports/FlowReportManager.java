@@ -131,10 +131,10 @@ public class FlowReportManager
         return domains;
     }
 
-    private static String FLOW_REPORT_DOMAIN_PREFIX = "FlowReportDomain-";
-    private static String FLOW_REPORT_TABLE_TYPE_SUBST = "FlowTableType";
-    private static String FLOW_REPORT_TYPE_SUBST = "ReportType";
-    private static String FLOW_REPORT_DOMAIN_URI_TEMPLATE =
+    private static final String FLOW_REPORT_DOMAIN_PREFIX = "FlowReportDomain-";
+    private static final String FLOW_REPORT_TABLE_TYPE_SUBST = "FlowTableType";
+    private static final String FLOW_REPORT_TYPE_SUBST = "ReportType";
+    private static final String FLOW_REPORT_DOMAIN_URI_TEMPLATE =
             "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION +
                     ":" + FLOW_REPORT_DOMAIN_PREFIX + XarContext.createSubstitution(FLOW_REPORT_TYPE_SUBST) + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION +
                     ":" + XarContext.createSubstitution(FLOW_REPORT_TABLE_TYPE_SUBST);
@@ -192,7 +192,7 @@ public class FlowReportManager
             return domain;
 
         Collection<PropertyDescriptor> properties = report.getDomainPrototypeProperties();
-        assert properties != null && properties.size() > 0;
+        assert properties != null && !properties.isEmpty();
 
         DbSchema schema = ExperimentService.get().getSchema();
         try (DbScope.Transaction transaction = schema.getScope().ensureTransaction())
@@ -202,7 +202,7 @@ public class FlowReportManager
             domain.setDescription("Domain for " + report.getDescriptor().getDescriptorType() + " reports on flow table " + tableType);
             domain.save(user);
 
-            domain = PropertyService.get().getDomain(domain.getTypeId());
+            domain = PropertyService.get().getDomain(domain.getTypeId(), true);
 
             for (PropertyDescriptor prop : properties)
             {
@@ -225,9 +225,9 @@ public class FlowReportManager
         }
     }
 
-    private static String FLOW_REPORT_EXPOBJECT_PREFIX = "FlowReportObject-";
-    private static String FLOW_REPORT_ID_SUBST = "ReportId";
-    private static String FLOW_REPORT_EXPOBJECT_URI_TEMPLATE =
+    private static final String FLOW_REPORT_EXPOBJECT_PREFIX = "FlowReportObject-";
+    private static final String FLOW_REPORT_ID_SUBST = "ReportId";
+    private static final String FLOW_REPORT_EXPOBJECT_URI_TEMPLATE =
             "urn:lsid:" + XarContext.LSID_AUTHORITY_SUBSTITUTION +
                     ":" + FLOW_REPORT_EXPOBJECT_PREFIX + XarContext.createSubstitution(FLOW_REPORT_TYPE_SUBST) + ".Folder-" + XarContext.CONTAINER_ID_SUBSTITUTION +
                     ":" + XarContext.createSubstitution(FLOW_REPORT_ID_SUBST);

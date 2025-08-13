@@ -209,7 +209,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
         }
 
         String errors = StringUtils.join(validator.validate(fastaFile), "\n");
-        if (errors.length() > 0)
+        if (!errors.isEmpty())
         {
             getJob().error(errors);
             return false;

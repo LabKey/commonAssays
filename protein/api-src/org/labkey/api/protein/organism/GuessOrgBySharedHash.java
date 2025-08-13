@@ -28,7 +28,7 @@ import java.util.Map;
 public class GuessOrgBySharedHash extends Timer implements OrganismGuessStrategy
 {
     private static final String CACHED_MISS_VALUE = "GuessOrgBySharedHash.CACHED_MISS_VALUE";
-    private Map<String, String> _cache = new HashMap<>();  // TODO: This could easily blow out all available memory for large FASTA; once we enable this guessing strategy, switch to Map with limit
+    private final Map<String, String> _cache = new HashMap<>();  // TODO: This could easily blow out all available memory for large FASTA; once we enable this guessing strategy, switch to Map with limit
     private static final DbSchema _schema = ProteinSchema.getSchema();
     private static final SQLFragment HASHCMD;
 

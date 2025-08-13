@@ -24,7 +24,7 @@ import org.labkey.flow.analysis.web.SubsetSpec;
  */
 public class CleanNameExpressionTransform implements SubsetExpression.Transform<SubsetExpression>
 {
-    private boolean _tailOnly = false;
+    private boolean _tailOnly;
 
     public CleanNameExpressionTransform(boolean tailOnly)
     {

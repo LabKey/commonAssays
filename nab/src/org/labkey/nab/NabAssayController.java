@@ -191,7 +191,7 @@ public class NabAssayController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class BeginAction extends SimpleViewAction
+    public static class BeginAction extends SimpleViewAction<Object>
     {
         @Override
         public ModelAndView getView(Object o, BindException errors)
@@ -331,8 +331,6 @@ public class NabAssayController extends SpringActionController
         return assay;
     }
 
-    private static final String LAST_NAB_RUN_KEY = NabAssayController.class.getName() + "/LastNAbRun";
-
     @RequiresPermission(ReadPermission.class)
     @ContextualRoles(RunDatasetContextualRoles.class)
     public class DetailsAction extends RunDetailsAction<RenderAssayBean>
@@ -399,7 +397,7 @@ public class NabAssayController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class NabGraphSelectedAction extends GraphSelectedAction<GraphSelectedForm>
+    public static class NabGraphSelectedAction extends GraphSelectedAction<GraphSelectedForm>
     {
         @Override
         protected GraphSelectedBean createSelectionBean(ViewContext context, ExpProtocol protocol, int[] cutoffs, int[] dataObjectIds, String caption, String title)
@@ -484,7 +482,7 @@ public class NabAssayController extends SpringActionController
 
     @RequiresPermission(ReadPermission.class)
     @ContextualRoles(RunDatasetContextualRoles.class)
-    public class NabMultiGraphAction extends MultiGraphAction<GraphSelectedForm>
+    public static class NabMultiGraphAction extends MultiGraphAction<GraphSelectedForm>
     {
     }
 
@@ -503,12 +501,6 @@ public class NabAssayController extends SpringActionController
         protected DilutionAssayRun getAssayRun(ExpRun run, StatsService.CurveFitType fit, User user) throws ExperimentException
         {
             return _getNabAssayRun(run, fit, user);
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            throw new UnsupportedOperationException();
         }
     }
 
@@ -563,7 +555,7 @@ public class NabAssayController extends SpringActionController
                 headers.add(property.getName());
             }
 
-            if (_virusGroups.size() > 0)
+            if (!_virusGroups.isEmpty())
             {
                 headers.add(NabVirusFilePropertyHelper.VIRUS_WELLGROUP_COLUMN);
                 if (_virusDomain != null)
@@ -590,7 +582,7 @@ public class NabAssayController extends SpringActionController
             int rowNum = 1;
             for (WellGroup sampleGroup : _sampleGroups)
             {
-                if (_virusGroups.size() > 0)
+                if (!_virusGroups.isEmpty())
                 {
                     for (WellGroup virusGroup : _virusGroups)
                         renderRow(sheet, headers, columnToDefaultValue, rowNum++, sampleGroup, virusGroup);
@@ -635,7 +627,7 @@ public class NabAssayController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class SampleSpreadsheetTemplateAction extends ExportAction<SampleSpreadsheetForm>
+    public static class SampleSpreadsheetTemplateAction extends ExportAction<SampleSpreadsheetForm>
     {
         @Override
         public void export(SampleSpreadsheetForm sampleSpreadsheetForm, HttpServletResponse response, BindException errors)
@@ -648,12 +640,11 @@ public class NabAssayController extends SpringActionController
             }
 
             AssayProvider provider = AssayService.get().getProvider(protocol);
-            if (provider == null || !(provider instanceof NabAssayProvider))
+            if (provider == null || !(provider instanceof NabAssayProvider nabProvider))
             {
                 String message = "Protocol " + sampleSpreadsheetForm.getProtocol() + " is not a NAb protocol: " + protocol.getName();
                 throw new NotFoundException(message);
             }
-            NabAssayProvider nabProvider = ((NabAssayProvider) provider);
             Domain sampleDomain = nabProvider.getSampleWellGroupDomain(protocol);
             Domain virusDomain = nabProvider.getVirusWellGroupDomain(protocol);
             Plate template = nabProvider.getPlate(context.getContainer(), protocol);
@@ -894,8 +885,6 @@ public class NabAssayController extends SpringActionController
     /**
      * Serializes plate information for both control wells and the raw plate data
      *
-     * @param plate
-     * @return
      */
     private Map<String, Object> serializePlate(Plate plate, DilutionAssayRun assay)
     {
@@ -1070,9 +1059,8 @@ public class NabAssayController extends SpringActionController
                 if (provider instanceof DilutionAssayProvider)
                 {
                     DilutionDataHandler handler = ((DilutionAssayProvider)provider).getDataHandler();
-                    if (handler instanceof NabDataHandler)
+                    if (handler instanceof NabDataHandler dataHandler)
                     {
-                        NabDataHandler dataHandler = (NabDataHandler)handler;
                         try (DbScope.Transaction transaction = scope.ensureTransaction())
                         {
                             // clear all well exclusions for this run
@@ -1270,7 +1258,7 @@ public class NabAssayController extends SpringActionController
 
     @RequiresPermission(ReadPermission.class)
     @Marshal(Marshaller.Jackson)
-    public class GetExcludedWellsAction extends ReadOnlyApiAction<RenderAssayBean>
+    public static class GetExcludedWellsAction extends ReadOnlyApiAction<RenderAssayBean>
     {
         @Override
         public ApiResponse execute(RenderAssayBean form, BindException errors)

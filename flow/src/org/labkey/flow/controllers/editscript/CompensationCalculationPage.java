@@ -24,7 +24,7 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.json.JSONArray;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.util.element.Select.SelectBuilder;
+import org.labkey.api.util.SelectBuilder;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.AutoCompensationScript;
 import org.labkey.flow.analysis.model.Population;
@@ -132,7 +132,6 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
     /**
      * Walks all of the samples in the workspace, looking for keyword/value pairs that uniquely identify a sample.
      * For each pair that is found, returns the list of subset names.
-     * @param workspace
      * @return Keyword -> Value -> Subsets
      */
     public Map<String, Map<String, List<String>>> getKeywordValueSampleMap(Workspace workspace)

@@ -28,7 +28,7 @@
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    JspView<MS2Controller.RunSummaryBean> me = ((JspView<MS2Controller.RunSummaryBean>)HttpView.currentView());
+    JspView<MS2Controller.RunSummaryBean> me = HttpView.currentView();
     Container c = getContainer();
     MS2Controller.RunSummaryBean bean = me.getModelBean();
     MS2Run run = bean.run;
@@ -76,17 +76,17 @@ if (null != bean.quantAlgorithm)
 
         if (null != run.getParamsFileName() && null != run.getPath())
         { %>
-            <%=link("Show " + run.getParamsFileName()).href(urlFor(MS2Controller.ShowParamsFileAction.class).addParameter("run", run.getRun())).id("paramFileLink").target("paramFile")%><%
+            <%=link("Show " + run.getParamsFileName(), urlFor(MS2Controller.ShowParamsFileAction.class).addParameter("run", run.getRun())).id("paramFileLink").target("paramFile")%><%
         }
 
         if (run.getHasPeptideProphet())
         { %>
-            <%=link("Show Peptide Prophet Details").href(urlFor(MS2Controller.ShowPeptideProphetDetailsAction.class).addParameter("run", run.getRun())).id("peptideProphetDetailsLink").target("peptideProphetSummary")%><%
+            <%=link("Show Peptide Prophet Details", urlFor(MS2Controller.ShowPeptideProphetDetailsAction.class).addParameter("run", run.getRun())).id("peptideProphetDetailsLink").target("peptideProphetSummary")%><%
         }
 
         if (run.hasProteinProphet())
         { %>
-            <%=link("Show Protein Prophet Details").href(urlFor(MS2Controller.ShowProteinProphetDetailsAction.class).addParameter("run", run.getRun())).id("proteinProphetDetailsLink").target("proteinProphetSummary")%><%
+            <%=link("Show Protein Prophet Details", urlFor(MS2Controller.ShowProteinProphetDetailsAction.class).addParameter("run", run.getRun())).id("proteinProphetDetailsLink").target("proteinProphetSummary")%><%
         } %>
         </div>
     </td></tr>

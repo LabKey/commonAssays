@@ -5,10 +5,8 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.ContainerForeignKey;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.query.FilteredTable;
-import org.labkey.api.query.UserIdForeignKey;
 import org.labkey.elisa.ElisaProtocolSchema;
 
 public class CurveFitTable extends FilteredTable<AssayProtocolSchema>

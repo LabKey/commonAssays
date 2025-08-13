@@ -363,7 +363,7 @@ public class FlowManager
         }
 
         // Validate the name
-        if (attr == null || attr.length() == 0)
+        if (attr == null || attr.isEmpty())
             throw new IllegalArgumentException("Name must not be null");
 
         // Validate that name can be parsed as the given attribute type
@@ -600,7 +600,7 @@ public class FlowManager
         final int rowId = entry._rowId;
 
         // Validate the name
-        if (name == null || name.length() == 0)
+        if (name == null || name.isEmpty())
             throw new IllegalArgumentException("Name must not be null");
 
         // Parse the name before storing
@@ -1029,9 +1029,9 @@ public class FlowManager
     }
 
     
-    public AttrObject createAttrObject(ExpData data, ObjectType type, URI uri)
+    public AttrObject createAttrObject(@NotNull ExpData data, ObjectType type, URI uri)
     {
-        if (FlowDataHandler.instance.getPriority(ExperimentService.get().getExpData(data.getRowId())) != Handler.Priority.HIGH)
+        if (FlowDataHandler.instance.getPriority(data) != Handler.Priority.HIGH)
         {
             // Need to make sure the right ExperimentDataHandler is associated with this data file, otherwise, you
             // won't be able to delete it because of the foreign key constraint from the flow.object table.
@@ -1145,7 +1145,7 @@ public class FlowManager
 
     public void deleteData(List<ExpData> datas)
     {
-        if (datas.size() == 0)
+        if (datas.isEmpty())
             return;
         StringBuilder sqlGetOIDs = new StringBuilder("SELECT flow.Object.RowId FROM flow.Object WHERE flow.Object.DataId IN (");
         String comma = "";
@@ -1187,7 +1187,7 @@ public class FlowManager
         getSchema().getSqlDialect().appendInClauseSql(sql, Arrays.asList(keywords));
         SqlSelector selector = new SqlSelector(getSchema(), sql);
 
-        return selector.fillValueMap(new TreeMap<String, String>());
+        return selector.fillValueMap(new TreeMap<>());
     }
 
     static private final String sqlDeleteKeyword = "DELETE FROM flow.keyword WHERE ObjectId = ? AND KeywordId = ?";

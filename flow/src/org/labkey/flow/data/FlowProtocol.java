@@ -352,7 +352,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         if (st == null)
             return Collections.emptyMap();
         Set<String> propertyNames = getSampleTypeJoinFields().keySet();
-        if (propertyNames.size() == 0)
+        if (propertyNames.isEmpty())
             return Collections.emptyMap();
         SamplesSchema schema = new SamplesSchema(user, getContainer());
 
@@ -617,7 +617,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         Map<Integer, Pair<Integer, String>> fcsFileRuns = new HashMap<>();
         int linkedFcsFileCount = 0;
 
-        try (TableResultSet rs = (TableResultSet)QueryService.get().select(schema, sql, tableMap, false, false))
+        try (TableResultSet rs = QueryService.get().select(schema, sql, tableMap, false, false))
         {
             for (Map<String, Object> row : rs)
             {
@@ -703,7 +703,6 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         {
             throw new RuntimeSQLException(e);
         }
-        ;
 
         var ret = new FCSFilesGroupedBySample();
         ret.fcsFileRuns = fcsFileRuns;
@@ -722,7 +721,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     public SampleKey makeSampleKey(String runName, String fileName, AttributeSet attrs)
     {
         Collection<FieldKey> fields = getSampleTypeJoinFields().values();
-        if (fields.size() == 0)
+        if (fields.isEmpty())
             return null;
         FieldKey tableRun = FieldKey.fromParts("Run");
         FieldKey tableKeyword = FieldKey.fromParts("Keyword");
@@ -913,14 +912,14 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     public boolean hasICSMetadata()
     {
         String metadata = getICSMetadataString();
-        return metadata != null && metadata.length() > 0;
+        return metadata != null && !metadata.isEmpty();
     }
 
     @Nullable
     public ICSMetadata getICSMetadata()
     {
         String metadata = getICSMetadataString();
-        if (metadata == null || metadata.length() == 0)
+        if (metadata == null || metadata.isEmpty())
             return null;
         return ICSMetadata.fromXmlString(metadata);
     }
@@ -928,7 +927,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     public String getProtocolSettingsDescription()
     {
         List<String> parts = new ArrayList<>();
-        if (getSampleTypeJoinFields().size() != 0)
+        if (!getSampleTypeJoinFields().isEmpty())
         {
             parts.add("Sample type join fields");
         }
@@ -944,7 +943,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         {
             parts.add("Metadata");
         }
-        if (parts.size() == 0)
+        if (parts.isEmpty())
             return null;
         StringBuilder ret = new StringBuilder("Protocol Settings (");
         if (parts.size() ==1)

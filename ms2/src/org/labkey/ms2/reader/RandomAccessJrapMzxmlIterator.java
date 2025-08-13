@@ -42,8 +42,8 @@ import java.io.IOException;
 // admit optional use of pwiz for mzml and mzxml.gz
 public class RandomAccessJrapMzxmlIterator extends RandomAccessMzxmlIterator
 {
-    MSXMLParser _parser = null;
-    int _maxScan = 0;
+    MSXMLParser _parser;
+    int _maxScan;
     int _currScan = 0;
     MzxmlSimpleScan _nextSimpleScan = null;
 

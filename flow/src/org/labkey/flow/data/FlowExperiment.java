@@ -105,8 +105,6 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
 
     /**
      * Generate an unused FlowExperiment name using "Analysis" as the starting name.
-     * @param container
-     * @return
      */
     static public String generateUnusedName(Container container)
     {

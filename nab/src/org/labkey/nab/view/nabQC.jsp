@@ -15,10 +15,11 @@
  * limitations under the License.
  */
 %>
-<%@ page import="com.fasterxml.jackson.databind.ObjectMapper" %>
 <%@ page import="org.labkey.api.assay.dilution.DilutionAssayRun" %>
 <%@ page import="org.labkey.api.assay.nab.Luc5Assay" %>
 <%@ page import="org.labkey.api.assay.plate.Plate" %>
+<%@ page import="org.labkey.api.util.HtmlString" %>
+<%@ page import="org.labkey.api.util.JavaScriptFragment" %>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
@@ -27,12 +28,9 @@
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="static org.labkey.api.util.DOM.cl" %>
 <%@ page import="static org.labkey.api.util.DOM.DIV" %>
 <%@ page import="static org.labkey.api.util.DOM.createHtml" %>
-<%@ page import="org.labkey.api.util.JsonUtil" %>
-<%@ page import="org.labkey.api.util.JavaScriptFragment" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -42,7 +40,7 @@
     }
 %>
 <%
-    JspView<NabAssayController.NabQCForm> me = (JspView<NabAssayController.NabQCForm>) HttpView.currentView();
+    JspView<NabAssayController.NabQCForm> me = HttpView.currentView();
     NabAssayController.NabQCForm bean = me.getModelBean();
     DilutionAssayRun assay = bean.getAssay();
     HtmlString errorMsg = HtmlString.EMPTY_STRING;

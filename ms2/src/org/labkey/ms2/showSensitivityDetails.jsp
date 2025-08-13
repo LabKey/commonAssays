@@ -18,11 +18,12 @@
 <%@ page import="org.labkey.api.view.ActionURL"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
-<%@ page import="org.labkey.ms2.MS2Controller"%>
-<%@ page import="java.text.DecimalFormat"%>
+<%@ page import="org.labkey.ms2.MS2Controller.PeptideProphetDetailsBean"%>
+<%@ page import="java.text.DecimalFormat" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.PeptideProphetDetailsBean bean = ((JspView<MS2Controller.PeptideProphetDetailsBean>)HttpView.currentView()).getModelBean();
+    JspView<PeptideProphetDetailsBean> view = HttpView.currentView();
+    PeptideProphetDetailsBean bean = view.getModelBean();
     DecimalFormat df4 = new DecimalFormat("0.0000");
     DecimalFormat df2 = new DecimalFormat("0.00");
     ActionURL sensitivityURL = getViewContext().cloneActionURL().setAction(bean.action);

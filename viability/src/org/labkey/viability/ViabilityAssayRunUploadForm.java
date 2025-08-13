@@ -31,11 +31,9 @@ import org.labkey.api.assay.actions.AssayRunUploadForm;
 import org.labkey.api.assay.actions.UploadWizardAction;
 import org.labkey.api.assay.AssayDataCollector;
 import org.labkey.api.assay.AssayFileWriter;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.vfs.FileLike;
 import org.springframework.validation.Errors;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -144,10 +142,10 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                 Class type = pd.getPropertyType().getJavaType();
 
                 if (dp.isRequired() && dp.getPropertyDescriptor().getPropertyType() == PropertyType.BOOLEAN &&
-                        (parameter == null || parameter.length() == 0))
+                        (parameter == null || parameter.isEmpty()))
                     parameter = Boolean.FALSE.toString();
 
-                if (dp.isRequired() && (parameter == null || parameter.length() == 0))
+                if (dp.isRequired() && (parameter == null || parameter.isEmpty()))
                 {
                     String msg = label + " is required and must be of type " + ColumnInfo.getFriendlyTypeName(type) + ".";
                     if (errors == null)
@@ -167,7 +165,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                             specimenID = specimenID.trim();
                             if (specimenID.startsWith(FRONTIER_SCIENCE_BARCODE_PREFIX))
                                 specimenID = specimenID.substring(FRONTIER_SCIENCE_BARCODE_PREFIX.length());
-                            if (specimenID.length() > 0)
+                            if (!specimenID.isEmpty())
                                 specimenIDs.add(specimenID);
                         }
                     }

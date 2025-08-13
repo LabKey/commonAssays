@@ -53,7 +53,7 @@ public class GraphSpec implements SpecBase<GraphSpec>
     public GraphSpec(SubsetSpec subset, Collection<String> parameters)
     {
         _subset = subset;
-        _parameters = parameters.toArray(new String[parameters.size()]);
+        _parameters = parameters.toArray(new String[0]);
     }
 
     public GraphSpec(@NotNull String str)
@@ -90,7 +90,7 @@ public class GraphSpec implements SpecBase<GraphSpec>
         StringBuilder ret = new StringBuilder();
 
         if (_subset != null)
-            ret.append(_subset.toString());
+            ret.append(_subset);
         ret.append("(");
         for (int i = 0; i < _parameters.length; i ++)
         {

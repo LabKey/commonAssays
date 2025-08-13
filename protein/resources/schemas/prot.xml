@@ -38,9 +38,6 @@
 			</column>
 			<column columnName="StartPos"/>
 			<column columnName="EndPos"/>
-			<column columnName="Deleted">
-				<isHidden>true</isHidden>
-			</column>
 		</columns>
 	</table>
 	<table tableName="AnnotationTypes" tableDbType="TABLE">
@@ -53,7 +50,6 @@
 			<column columnName="Description"/>
 			<column columnName="EntryDate"/>
 			<column columnName="ModDate"/>
-			<column columnName="Deleted"/>
 		</columns>
 	</table>
 	<table tableName="AnnotInsertions" tableDbType="TABLE">
@@ -135,9 +131,6 @@
 			<column columnName="SourceVersion">
 				<isHidden>true</isHidden>
 			</column>
-			<column columnName="Deleted">
-				<isHidden>true</isHidden>
-			</column>
 		</columns>
 	</table>
 	<table tableName="IdentTypes" tableDbType="TABLE">
@@ -151,9 +144,6 @@
 			</column>
 			<column columnName="EntryDate"/>
 			<column columnName="Description"/>
-			<column columnName="Deleted">
-				<isHidden>true</isHidden>
-			</column>
 		</columns>
 	</table>
 	<table tableName="InfoSources" tableDbType="TABLE">
@@ -169,7 +159,6 @@
 			<column columnName="LastUpdate"/>
 			<column columnName="InsertDate"/>
 			<column columnName="ModDate"/>
-			<column columnName="Deleted"/>
 		</columns>
 	</table>
 	<table tableName="Organisms" tableDbType="TABLE">
@@ -183,9 +172,6 @@
 			<column columnName="Species"/>
 			<column columnName="Comments"/>
 			<column columnName="IdentId">
-				<isHidden>true</isHidden>
-			</column>
-			<column columnName="Deleted">
 				<isHidden>true</isHidden>
 			</column>
 		</columns>
@@ -229,9 +215,6 @@
             <column columnName="BestName"/>
 			<column columnName="BestGeneName"/>
 			<column columnName="Length"/>
-			<column columnName="Deleted">
-                <isHidden>true</isHidden>
-            </column>
         </columns>
         <description>Contains a row per protein known to this server installation.</description>
 	</table>

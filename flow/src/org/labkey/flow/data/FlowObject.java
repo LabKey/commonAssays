@@ -173,7 +173,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     static public int getIntParam(ActionURL url, HttpServletRequest request, FlowParam param)
     {
         String str = getParam(url, request, param);
-        if (str == null || str.length() == 0)
+        if (str == null || str.isEmpty())
             return 0;
         try
         {

@@ -92,7 +92,7 @@ public class QueryProteinGroupMS2RunView extends AbstractMS2RunView
         ColumnInfo desiredCol = pair.first;
         SQLFragment sql = pair.second;
 
-        SQLFragment result = new SQLFragment("SELECT " + desiredCol.getAlias() + " FROM (");
+        SQLFragment result = new SQLFragment("SELECT ").appendIdentifier(desiredCol.getAlias()).append(" FROM (");
         result.append(sql);
         result.append(") x");
         return result;

@@ -258,7 +258,7 @@ public class LuminexManager
             }
         };
 
-        private String _description;
+        private final String _description;
 
         ExclusionType(String description)
         {
@@ -340,7 +340,7 @@ public class LuminexManager
 
     private Collection<Map<String, Object>> getWellExclusions(Set<Integer> dataIds)
     {
-        if(dataIds == null || dataIds.size() == 0)
+        if(dataIds == null || dataIds.isEmpty())
             return null;
 
         //Get full list of exclusions expanded per analyte
@@ -506,7 +506,7 @@ public class LuminexManager
     private SQLFragment appendInClause(SQLFragment sql, String columnExpression, Set set, String closeOutString)
     {
         //Add dataFileHeaderKey filter
-        if (set != null && set.size() > 0)
+        if (set != null && !set.isEmpty())
         {
             sql.append(" AND ").append(columnExpression);
             OntologyManager.getTinfoObject().getSqlDialect().appendInClauseSql(sql, set);
@@ -687,16 +687,16 @@ public class LuminexManager
 
         new TableSelector(table, cols.values(), filter, null).forEachMap(row ->
         {
-            String readerSerialNumber = (String)row.get(cols.get(readerSerialNumberFK).getAlias());
-            Date acquisitionDate = (Date)row.get(cols.get(acquisitionDateFK).getAlias());
+            String readerSerialNumber = (String)cols.get(readerSerialNumberFK).getValue(row);
+            Date acquisitionDate = (Date)cols.get(acquisitionDateFK).getValue(row);
             String dataFileHeaderKey = getDataFileHeaderKey(readerSerialNumber, acquisitionDate);
 
-            String analyteName = (String)row.get(cols.get(analyteFK).getAlias());
-            String description = (String)row.get(cols.get(descriptionFK).getAlias());
-            String type = (String)row.get(cols.get(typeFK).getAlias());
-            Object dilutionObj = row.get(cols.get(dilutionFK).getAlias());
+            String analyteName = (String)cols.get(analyteFK).getValue(row);
+            String description = (String)cols.get(descriptionFK).getValue(row);
+            String type = (String)cols.get(typeFK).getValue(row);
+            Object dilutionObj = cols.get(dilutionFK).getValue(row);
             Double dilution = dilutionObj != null ? Double.parseDouble(dilutionObj.toString()) : null;
-            String well = onlyExcludedWells ? (String)row.get(cols.get(wellFK).getAlias()) : null;
+            String well = onlyExcludedWells ? (String)cols.get(wellFK).getValue(row) : null;
 
             excludedWellKeys.add(createWellKey(dataFileHeaderKey, analyteName, description, type, dilution, well));
         });

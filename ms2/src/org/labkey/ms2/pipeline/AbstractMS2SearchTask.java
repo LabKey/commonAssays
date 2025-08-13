@@ -17,7 +17,6 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.WorkDirectoryTask;
-import org.labkey.api.util.FileType;
 
 /**
  * User: jeckels

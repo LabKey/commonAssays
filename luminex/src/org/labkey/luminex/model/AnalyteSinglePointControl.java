@@ -77,7 +77,7 @@ public class AnalyteSinglePointControl extends AbstractLuminexControlAnalyte
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Analyte"), analyte.getRowId());
         filter.addCondition(FieldKey.fromParts("SinglePointControl"), control.getRowId());
         AnalyteSinglePointControlTable analyteSinglePointControlTable = schema.createAnalyteSinglePointControlTable(null, true);
-        analyteSinglePointControlTable.setContainerFilter(ContainerFilter.EVERYTHING_UNSAFE);
+        analyteSinglePointControlTable.setContainerFilter(ContainerFilter.getUnsafeEverythingFilter());
         Double average = new TableSelector(analyteSinglePointControlTable, Collections.singleton("AverageFiBkgd"), filter, null).getObject(Double.class);
 
         LuminexDataHandler.insertOrUpdateAnalyteSinglePointControlQCFlags(schema.getUser(), run, schema.getProtocol(), this, analyte, control, runIsotypeConjugate.get("Isotype"), runIsotypeConjugate.get("Conjugate"), average);

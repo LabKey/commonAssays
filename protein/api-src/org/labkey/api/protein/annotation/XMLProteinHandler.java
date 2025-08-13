@@ -204,7 +204,7 @@ public class XMLProteinHandler extends DefaultHandler
     }
 
     /* info about parse state, passed to content handlers */
-    private ParseContext _parseContext;
+    private final ParseContext _parseContext;
 
     @Override
     public void endDocument()

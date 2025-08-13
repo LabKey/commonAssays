@@ -581,7 +581,7 @@ public class PersistTests
 
             // Set the Id column to indicate that it is not an alias
             map.put("Id", upperId);
-            map = Table.update(user, FlowManager.get().getTinfoKeywordAttr(), map, upperId);
+            Table.update(user, FlowManager.get().getTinfoKeywordAttr(), map, upperId);
 
             // Insert a duplicate name that only differs by case (NOTE: SQLServer default collation won't allow this)
             if (!sqlserver)
@@ -595,7 +595,7 @@ public class PersistTests
 
                 // Set the Id column to indicate that it is not an alias
                 map.put("Id", lowerId);
-                map = Table.update(user, FlowManager.get().getTinfoKeywordAttr(), map, lowerId);
+                Table.update(user, FlowManager.get().getTinfoKeywordAttr(), map, lowerId);
             }
         }
 

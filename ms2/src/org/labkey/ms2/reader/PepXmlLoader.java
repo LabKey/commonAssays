@@ -39,7 +39,7 @@ public class PepXmlLoader extends MS2XmlLoader
 {
     private PeptideProphetSummary _ppSummary;
 
-    private ArrayList<RelativeQuantAnalysisSummary> _quantSummaries = new ArrayList<>();
+    private final ArrayList<RelativeQuantAnalysisSummary> _quantSummaries = new ArrayList<>();
 
     public PepXmlLoader(File f, Logger log) throws FileNotFoundException, XMLStreamException
     {
@@ -135,7 +135,7 @@ public class PepXmlLoader extends MS2XmlLoader
 
     public static class PepXmlFraction extends PeptideFraction
     {
-        private SimpleXMLStreamReader _parser;
+        private final SimpleXMLStreamReader _parser;
 
         private int _searchConstraintMaxInternalCleavages;
         private int _searchConstraintMinTermini;
@@ -163,6 +163,7 @@ public class PepXmlLoader extends MS2XmlLoader
             _searchEngine = null;
             _searchEnzyme = null;
             _databaseLocalPaths = new LinkedHashSet<>();
+            _databaseParameterValues = new LinkedHashSet<>();
 
             handleMsMsRunSummary();
 
@@ -239,6 +240,9 @@ public class PepXmlLoader extends MS2XmlLoader
 
                         if ("pipeline, load spectra".equals(name) || "pipeline, import spectra".equals(name))
                             _loadSpectra = !"no".equalsIgnoreCase(_parser.getAttributeValue(null, "value"));
+
+                        if ("database".equalsIgnoreCase(name))
+                            _databaseParameterValues.add(_parser.getAttributeValue(null, "value"));
                     }
                 }
                 else
@@ -311,15 +315,15 @@ public class PepXmlLoader extends MS2XmlLoader
 
     public static class PeptideIterator implements Iterator<PepXmlPeptide>
     {
-        private static Logger _log = LogManager.getLogger(PepXmlLoader.class);
+        private static final Logger _log = LogManager.getLogger(PepXmlLoader.class);
 
-        private SimpleXMLStreamReader _parser;
+        private final SimpleXMLStreamReader _parser;
         private PepXmlPeptide _peptide = null;
-        private MS2ModificationList _modifications;
+        private final MS2ModificationList _modifications;
         private final PepXmlFraction _fraction;
 
-        private Map<Character, Integer> _unknownNTerminalModifications = new HashMap<>();
-        private Map<Character, Integer> _unknownNonNTerminalModifications = new HashMap<>();
+        private final Map<Character, Integer> _unknownNTerminalModifications = new HashMap<>();
+        private final Map<Character, Integer> _unknownNonNTerminalModifications = new HashMap<>();
 
         protected PeptideIterator(SimpleXMLStreamReader parser, MS2ModificationList modifications, PepXmlFraction fraction)
         {
@@ -418,7 +422,7 @@ public class PepXmlLoader extends MS2XmlLoader
 
     public static class PepXmlPeptide extends MS2Loader.Peptide
     {
-        private SimpleXMLStreamReader _parser;
+        private final SimpleXMLStreamReader _parser;
         private String  _dtaFileName;
         private final PepXmlFraction _fraction;
 
@@ -426,7 +430,7 @@ public class PepXmlLoader extends MS2XmlLoader
         //then all elements are null except the actual modifications.  Index+1 = position of mod
         private ModifiedAminoAcid[] _modifiedAminoAcids = null; // TODO Delete this? This doesn't seem to be used ???
 
-        private static Logger _log = LogManager.getLogger(PepXmlPeptide.class);
+        private static final Logger _log = LogManager.getLogger(PepXmlPeptide.class);
 
         protected static PepXmlPeptide getNextPeptide(SimpleXMLStreamReader parser, MS2ModificationList modifications, PepXmlFraction fraction)
                 throws XMLStreamException
@@ -458,7 +462,7 @@ public class PepXmlLoader extends MS2XmlLoader
         private static final int MODIFICATION_INFO = 7;
         private static final int SPECTRUM_QUERY = 8;
         private boolean endOfSpectrumQuery, endOfRun;
-        private static HashMap<String, Integer> elements;
+        private static final HashMap<String, Integer> elements;
 
         static
         {
@@ -589,6 +593,10 @@ public class PepXmlLoader extends MS2XmlLoader
                             _deltaMass = 0.0f;
                         else
                             _deltaMass = Float.parseFloat(massDiff);
+                        if (Float.isInfinite(_deltaMass))
+                        {
+                            _deltaMass = 1000000f;
+                        }
 
                         // Create protein lookup string that matches the way we import FASTA files (which matches what Comet does)
                         String proteinName = _parser.getAttributeValue(null, "protein");

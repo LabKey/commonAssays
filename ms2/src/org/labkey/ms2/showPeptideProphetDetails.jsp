@@ -16,6 +16,7 @@
  */
 %>
 <%@ page import="org.labkey.api.view.ViewContext" %>
+<%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ include file="showSensitivityDetails.jsp" %>
 <table>
 <%
@@ -40,10 +41,15 @@
     <td><img src="<%=h(versus.replaceParameter("charge", charge))%>" alt="Charge <%=i%>+ Observed vs. Model"></td>
     <td><img src="<%=h(versusCumulative.replaceParameter("charge", charge))%>" alt="Charge <%=i%>+ Cumulative Observed vs. Model"></td>
 </tr>
-<% if (bean.run.getNegativeHitCount() > bean.run.getPeptideCount() / 3) { %>
+<%
+        if (bean.run.getNegativeHitCount() > bean.run.getPeptideCount() / 3)
+        {
+%>
 <tr>
     <td><img src="<%=h(versusPP.replaceParameter("charge", charge))%>" alt="Charge <%=i%>+ Observed vs. Prophet"></td>
 </tr>
-<% } %>
-<%   }  %>
+<%
+        }
+    }
+%>
 </table>

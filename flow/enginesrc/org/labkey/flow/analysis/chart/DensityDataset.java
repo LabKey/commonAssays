@@ -123,13 +123,13 @@ public class DensityDataset extends AbstractXYDataset implements ContourDataset
     @Override
     public double getMinZValue()
     {
-        return (double) 0;
+        return 0;
     }
 
     @Override
     public double getMaxZValue()
     {
-        return (double) _zMax;
+        return _zMax;
     }
 
     @Override

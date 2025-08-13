@@ -45,7 +45,7 @@ public class ListParamsValidator implements IParamsValidator
             return parserError;
         }
         String value = spp.getValue();
-        if (value == null ||value.length()< 1)
+        if (value == null || value.isEmpty())
         {
             parserError = spp.getInputXmlLabels().get(0) + ", " + "this value is not set.\n";
             return parserError;

@@ -24,7 +24,7 @@ import java.util.List;
 
 public class SignalDataAssayBeginPage
 {
-    private BaseWebDriverTest _test;
+    private final BaseWebDriverTest _test;
 
     public SignalDataAssayBeginPage(BaseWebDriverTest test)
     {

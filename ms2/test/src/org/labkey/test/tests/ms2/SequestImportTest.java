@@ -24,6 +24,7 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.components.CustomizeView;
+import org.labkey.test.params.FieldKey;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.FileBrowserHelper;
 import org.labkey.test.util.LogMethod;
@@ -38,8 +39,8 @@ public class SequestImportTest extends BaseWebDriverTest
 {
     private static final String PROJECT_NAME = "SequestImport" + TRICKY_CHARACTERS_FOR_PROJECT_NAMES;
 
-    private static final String[] TOTAL_PEPTIDES_FIELD_KEY = {"PeptideCounts", "TotalPeptides"};
-    private static final String[] UNIQUE_PEPTIDES_FIELD_KEY = {"PeptideCounts", "DistinctPeptides"};
+    private static final FieldKey TOTAL_PEPTIDES_FIELD_KEY = FieldKey.fromParts("PeptideCounts", "TotalPeptides");
+    private static final FieldKey UNIQUE_PEPTIDES_FIELD_KEY = FieldKey.fromParts("PeptideCounts", "DistinctPeptides");
 
     @Override
     protected String getProjectName()
@@ -69,8 +70,8 @@ public class SequestImportTest extends BaseWebDriverTest
         viewsHelper.addColumn(UNIQUE_PEPTIDES_FIELD_KEY);
 
         // Add a filter so that we can check the values were calculated and shown correctly
-        viewsHelper.addFilter(TOTAL_PEPTIDES_FIELD_KEY, "Total Peptides", "Equals", "2");
-        viewsHelper.addFilter(UNIQUE_PEPTIDES_FIELD_KEY, "Distinct Peptides", "Equals", "1");
+        viewsHelper.addFilter(TOTAL_PEPTIDES_FIELD_KEY, "Equals", "2");
+        viewsHelper.addFilter(UNIQUE_PEPTIDES_FIELD_KEY, "Equals", "1");
         viewsHelper.saveDefaultView();
 
         // Make sure that our run is still showing

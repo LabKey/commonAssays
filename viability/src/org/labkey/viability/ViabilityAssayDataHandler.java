@@ -269,7 +269,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     // check file data: all rows must have PoolID
     public static void validateData(List<Map<String, Object>> rows, boolean requireSpecimens) throws ExperimentException
     {
-        if (rows == null || rows.size() == 0)
+        if (rows == null || rows.isEmpty())
             throw new ExperimentException("No rows found.");
 
         for (ListIterator<Map<String, Object>> it = rows.listIterator(); it.hasNext();)
@@ -366,7 +366,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             // If the property is on the result domain, it's already in the base map.
             if (batchOrRunTargetStudy != null)
             {
-                base.put("targetStudy", batchOrRunTargetStudy);
+                base.put(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME, batchOrRunTargetStudy);
             }
 
             ViabilityResult result = ViabilityResult.fromMap(base, extra);

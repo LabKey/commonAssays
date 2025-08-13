@@ -81,7 +81,7 @@ public abstract class MS2Importer
 
     // Use passed in logger for import status, information, and file format problems.  This should
     // end up in the pipeline log.
-    protected Logger _log = null;
+    protected Logger _log;
 
     // Use system logger for bugs & system problems, and in cases where we don't have a pipeline logger
     protected static Logger _systemLog = LogManager.getLogger(MS2Importer.class);
@@ -296,7 +296,7 @@ public abstract class MS2Importer
         runMap.put("Status", IMPORT_STARTED);
         runMap.put("Type", getType());    // TODO: Change how we handle type: For pepXML, this is null at this point... okay for Comet
 
-        Map returnMap = Table.insert(_user, MS2Manager.getTableInfoRuns(), runMap);
+        Map<String,Object> returnMap = Table.insert(_user, MS2Manager.getTableInfoRuns(), runMap);
         return (Integer)returnMap.get("Run");
     }
 
@@ -441,11 +441,11 @@ public abstract class MS2Importer
     }
 
 
-    private static String _updateSwissProtSeqIdSql;
+    private static final String _updateSwissProtSeqIdSql;
 
     static
     {
-        StringBuilder sql = new StringBuilder();
+        SQLFragment sql = new SQLFragment();
         /*
         UPDATE ms2.PeptidesData SET SeqId = (SELECT
             CASE (SELECT Count(*) FROM
@@ -483,7 +483,7 @@ public abstract class MS2Importer
         sql.append(")");
         sql.append(" WHERE SeqId IS NULL AND Fraction = ?");
 
-        _updateSwissProtSeqIdSql = sql.toString();
+        _updateSwissProtSeqIdSql = sql.getSQL();
     }
 
     private static final String _updateSeqIdEndOfLookupStringSql;
@@ -547,7 +547,7 @@ public abstract class MS2Importer
 
     static
     {
-        StringBuilder sql = new StringBuilder();
+        SQLFragment sql = new SQLFragment();
 
         /*
             UPDATE ms2.peptidesdata p SET SeqId = (
@@ -577,10 +577,10 @@ public abstract class MS2Importer
         sql.append("        END)");
         sql.append(" WHERE SeqId IS NULL AND Fraction = ?");
 
-        _updateSeqIdInexactMatchSql = sql.toString();
+        _updateSeqIdInexactMatchSql = sql.getSQL();
     }
 
-    private static SQLFragment _updateSequencePositionSql;
+    private static final SQLFragment _updateSequencePositionSql;
 
     static
     {
@@ -636,18 +636,21 @@ public abstract class MS2Importer
 
             for (int fastaId : run.getFastaIds())
             {
+                assert 3 == StringUtils.countMatches(_updateSwissProtSeqIdSql,"?");
                 int rowCount = executor.execute(_updateSwissProtSeqIdSql, fastaId, fastaId, fraction.getFraction());
                 _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on protein identifier match from SwissProt database for FASTA id " + fastaId);
             }
 
             for (int fastaId : run.getFastaIds())
             {
+                assert 3 == StringUtils.countMatches(_updateSeqIdEndOfLookupStringSql, "?");
                 int rowCount = executor.execute(_updateSeqIdEndOfLookupStringSql, fraction.getFraction(), fastaId, fraction.getFraction());
                 _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on trailing FASTA header line for FASTA id " + fastaId);
             }
 
             for (int fastaId : run.getFastaIds())
             {
+                assert 2 == StringUtils.countMatches(_updateSpPrefixSeqIdSql, "?");
                 int rowCount = executor.execute(_updateSpPrefixSeqIdSql, fraction.getFraction(), fastaId);
                 _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on 'sp|' prefix name match for FASTA id " + fastaId);
             }
@@ -677,7 +680,7 @@ public abstract class MS2Importer
     }
 
 
-    private static String _updateCountsSql = "UPDATE " + MS2Manager.getTableInfoRuns() +
+    private static final String _updateCountsSql = "UPDATE " + MS2Manager.getTableInfoRuns() +
             " SET PeptideCount = (SELECT COUNT(*) AS PepCount FROM " + MS2Manager.getTableInfoPeptides() + " pep WHERE pep.run = " + MS2Manager.getTableInfoRuns() + ".run), " +
                 " NegativeHitCount = (SELECT COUNT(*) AS NegHitCount FROM " + MS2Manager.getTableInfoPeptides() + " pep WHERE pep.run = " + MS2Manager.getTableInfoRuns() + ".run AND pep.Protein LIKE ?) " +
             " WHERE Run = ?";
@@ -774,7 +777,7 @@ public abstract class MS2Importer
         UpdateCounts("update peptide and spectrum counts"),
         ClearRun("clear out any previously imported data");
 
-        private String _action;
+        private final String _action;
 
         Tasks(String action)
         {
@@ -813,7 +816,7 @@ public abstract class MS2Importer
 
         private Integer _previous = null;
 
-        private CumulativeTimer _timer = new CumulativeTimer(_log);
+        private final CumulativeTimer _timer = new CumulativeTimer(_log);
 
         public CumulativeTimer getCumulativeTimer()
         {

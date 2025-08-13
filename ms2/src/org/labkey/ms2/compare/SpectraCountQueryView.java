@@ -36,6 +36,7 @@ import org.labkey.ms2.query.SpectraCountConfiguration;
 import org.springframework.validation.BindException;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * User: jeckels
@@ -45,7 +46,7 @@ public class SpectraCountQueryView extends QueryView
 {
     private final MS2Schema _schema;
     private final SpectraCountConfiguration _config;
-    private MS2Controller.SpectraCountForm _form;
+    private final MS2Controller.SpectraCountForm _form;
 
     public SpectraCountQueryView(MS2Schema schema, QuerySettings settings, @Nullable BindException errors, SpectraCountConfiguration config, MS2Controller.SpectraCountForm form)
     {
@@ -70,9 +71,9 @@ public class SpectraCountQueryView extends QueryView
     }
 
     @Override
-    public ExcelWriter getExcelWriter(ExcelWriter.ExcelDocumentType docType) throws IOException
+    public ExcelWriter getExcelWriter(ExcelWriter.ExcelDocumentType docType, @Nullable Map<String, String> renameColumnMap) throws IOException
     {
-        ExcelWriter result = super.getExcelWriter(docType);
+        ExcelWriter result = super.getExcelWriter(docType, renameColumnMap);
         String header = getExportHeader();
         if (header != null)
         {
@@ -131,6 +132,6 @@ public class SpectraCountQueryView extends QueryView
             sb.append("Peptide filter: ");
             sb.append(filter.getFilterText());
         }
-        return sb.length() == 0 ? null : sb.toString();
+        return sb.isEmpty() ? null : sb.toString();
     }
 }

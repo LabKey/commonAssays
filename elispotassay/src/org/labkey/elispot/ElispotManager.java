@@ -76,7 +76,7 @@ public class ElispotManager
     @NotNull
     public static TableInfo getTableInfoElispotAntigen(ExpProtocol protocol)
     {
-        Domain domain = AbstractAssayProvider.getDomainByPrefix(protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP);
+        Domain domain = AbstractAssayProvider.getDomainByPrefix(protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP, false);
         if (null != domain)
             return StorageProvisioner.createTableInfo(domain);
         throw new IllegalStateException("Domain not found for protocol: " + protocol.getName());
@@ -160,7 +160,7 @@ public class ElispotManager
                 if (null != antigenHeading)
                 {
                     if (!antigenHeadingMap.containsKey(antigenHeading))
-                        antigenHeadingMap.put(antigenHeading, new HashSet<Integer>());
+                        antigenHeadingMap.put(antigenHeading, new HashSet<>());
                     antigenHeadingMap.get(antigenHeading).add((Integer)object.get("RunId"));
                 }
             });

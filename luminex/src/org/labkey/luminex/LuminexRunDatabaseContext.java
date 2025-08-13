@@ -72,14 +72,14 @@ public class LuminexRunDatabaseContext extends AssayRunDatabaseContext<LuminexAs
     @Override
     public String[] getAnalyteNames()
     {
-        return _analytes.keySet().toArray(new String[_analytes.size()]);
+        return _analytes.keySet().toArray(new String[0]);
     }
 
     @Override
     public Map<DomainProperty, String> getAnalyteProperties(String analyteName)
     {
         Analyte analyte = getAnalyte(analyteName);
-        Domain domain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Domain domain = AbstractAssayProvider.getDomainByPrefix(_protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE, false);
         return getProperties(domain, OntologyManager.getPropertyObjects(_run.getContainer(), analyte.getLsid()));
     }
 

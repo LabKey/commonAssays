@@ -30,7 +30,7 @@ import javax.xml.stream.XMLStreamException;
  */
 public class XPressAnalysisSummary extends RelativeQuantAnalysisSummary
 {
-    private static Logger _log = LogManager.getLogger(XPressAnalysisSummary.class);
+    private static final Logger _log = LogManager.getLogger(XPressAnalysisSummary.class);
 
     public static final String analysisType = "xpress";
 

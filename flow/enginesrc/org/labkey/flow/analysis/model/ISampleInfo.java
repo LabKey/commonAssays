@@ -36,46 +36,41 @@ public interface ISampleInfo
      * Internal sample id used by the workspace or analysis archive.
      * Not a stable identifier across imports.
      */
-    @NotNull
-    public String getSampleId();
+    @NotNull String getSampleId();
 
     /**
      * The sample name (usually the same as the $FIL keyword, but may be renamed in the workspace.)
      * The sample name may be null.
      */
-    @Nullable
-    public String getSampleName();
+    @Nullable String getSampleName();
 
     /**
      * The $FIL keyword value.
      */
-    @Nullable
-    public String getFilename();
+    @Nullable String getFilename();
 
     /**
      * Get human readable display name (may be sample name, $FIL, or sample id).
      */
-    @NotNull
-    public String getLabel();
+    @NotNull String getLabel();
 
     /**
      * A case-insensitive map of keyword names to values.
      */
-    public Map<String, String> getKeywords();
+    Map<String, String> getKeywords();
 
     /**
      * The analysis definition which may be null for an analysis archive.
      */
-    @Nullable
-    public Analysis getAnalysis();
+    @Nullable Analysis getAnalysis();
 
     /**
      * The calculated statistics and graphs.
      */
-    public AttributeSet getAnalysisResults();
+    AttributeSet getAnalysisResults();
 
     /**
      * The compensation matrix used for analysis.
      */
-    public CompensationMatrix getCompensationMatrix();
+    CompensationMatrix getCompensationMatrix();
 }

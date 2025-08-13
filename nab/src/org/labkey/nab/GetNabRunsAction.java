@@ -41,7 +41,6 @@ import org.labkey.api.view.DataView;
 import org.labkey.api.view.NotFoundException;
 import org.springframework.validation.BindException;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;

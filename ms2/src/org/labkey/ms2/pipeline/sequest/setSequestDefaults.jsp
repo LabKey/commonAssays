@@ -31,7 +31,7 @@
     }
 %>
 <%
-    JspView<PipelineController.SetDefaultsForm> view = (JspView<PipelineController.SetDefaultsForm>) HttpView.currentView();
+    JspView<PipelineController.SetDefaultsForm> view = HttpView.currentView();
     PipelineController.SetDefaultsForm form = view.getModelBean();
     Container c = getContainer();
 %>

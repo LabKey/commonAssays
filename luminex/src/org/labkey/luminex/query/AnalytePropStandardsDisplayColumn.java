@@ -23,15 +23,13 @@ import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.util.DOM;
 import org.labkey.api.util.PageFlowUtil;
-import org.labkey.api.util.element.Input.InputBuilder;
+import org.labkey.api.util.InputBuilder;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexRunUploadForm;
 import org.labkey.luminex.LuminexUploadWizardAction;
 import org.labkey.luminex.model.Analyte;
 import org.labkey.luminex.model.Titration;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Map;
 import java.util.Set;
 
@@ -117,13 +115,13 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
             }
         }
 
-        out.write(new InputBuilder<>().type("checkbox").value(1).name(propertyName).checked(checked));
+        out.write(InputBuilder.checkbox().value(1).name(propertyName).checked(checked));
     }
 
     @Override
     public DOM._Attributes getInputAttributes()
     {
-        String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName());
+        String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellNameAndId(_titration.getName());
 
         return at(style, "display:" + (_hideCell ? "none" : "table-cell"), name, titrationCellName);
     }
@@ -131,7 +129,7 @@ public class AnalytePropStandardsDisplayColumn extends SimpleDisplayColumn
     @Override
     public void renderDetailsCaptionCell(RenderContext ctx, HtmlWriter out, @Nullable String cls)
     {
-        String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellName(_titration.getName());
+        String titrationCellName = LuminexUploadWizardAction.getTitrationColumnCellNameAndId(_titration.getName());
 
         TD(
             cl(cls).at(style, "display:" + (_hideCell ? "none" : "table-cell") + ";").name(titrationCellName),

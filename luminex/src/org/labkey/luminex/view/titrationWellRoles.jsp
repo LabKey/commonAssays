@@ -42,7 +42,7 @@
 </style>
 
 <%
-    JspView<LuminexRunUploadForm> me = (JspView<LuminexRunUploadForm>) HttpView.currentView();
+    JspView<LuminexRunUploadForm> me = HttpView.currentView();
     LuminexRunUploadForm bean = me.getModelBean();
     Map<String, Titration> titrationsWithTypes = bean.getParser().getTitrationsWithTypes();
 
@@ -84,11 +84,11 @@
 <%
         for (Map.Entry<String, Titration> titrationEntry : nonUnknownTitrations.entrySet())
         {
-            String standardId = LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue());
+            String standardId = LuminexUploadWizardAction.getTitrationTypeCheckboxNameAndId(Titration.Type.standard, titrationEntry.getValue());
             addHandler(standardId, "click", "titrationRoleChecked(this);showHideAnalytePropertyColumn();");
-            String qcId = LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.qccontrol, titrationEntry.getValue());
+            String qcId = LuminexUploadWizardAction.getTitrationTypeCheckboxNameAndId(Titration.Type.qccontrol, titrationEntry.getValue());
             addHandler(qcId, "click", "titrationRoleChecked(this);");
-            String otherId = LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.othercontrol, titrationEntry.getValue());
+            String otherId = LuminexUploadWizardAction.getTitrationTypeCheckboxNameAndId(Titration.Type.othercontrol, titrationEntry.getValue());
             addHandler(otherId, "click", "titrationRoleChecked(this);");
 %>
                     <tr>
@@ -122,7 +122,7 @@
 <%
         for (Map.Entry<String, Titration> titrationEntry : unknownTitrations.entrySet())
         {
-            String id = LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.unknown, titrationEntry.getValue());
+            String id = LuminexUploadWizardAction.getTitrationTypeCheckboxNameAndId(Titration.Type.unknown, titrationEntry.getValue());
             addHandler(id, "click", "titrationRoleChecked(this);");
 %>
                     <tr>
@@ -150,7 +150,7 @@
 <%
                     for (String trackedSinglePointControl : trackedSinglePointControls)
                     {
-                        String id = LuminexUploadWizardAction.getSinglePointControlCheckboxName(trackedSinglePointControl);
+                        String id = LuminexUploadWizardAction.getSinglePointControlCheckboxNameAndId(trackedSinglePointControl);
                         addHandler(id, "click", "titrationRoleChecked(this);");
 %>
                     <tr>
@@ -187,8 +187,8 @@
         for (Map.Entry<String, Titration> titrationEntry : nonUnknownTitrations.entrySet())
         {
 %>
-            var titrationRoleName = '<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxName(Titration.Type.standard, titrationEntry.getValue())) %>';
-            var titrationCellName = '<%= h(LuminexUploadWizardAction.getTitrationColumnCellName(titrationEntry.getValue().getName())) %>';
+            var titrationRoleName = '<%= h(LuminexUploadWizardAction.getTitrationTypeCheckboxNameAndId(Titration.Type.standard, titrationEntry.getValue())) %>';
+            var titrationCellName = '<%= h(LuminexUploadWizardAction.getTitrationColumnCellNameAndId(titrationEntry.getValue().getName())) %>';
             var isChecked = document.getElementsByName(titrationRoleName)[0].checked;
 
             // set the hidden helper showcol field value
@@ -257,7 +257,7 @@
             for (Titration.Type t : Titration.Type.values())
             {
 %>
-                var propertyName = <%=q(LuminexUploadWizardAction.getTitrationTypeCheckboxName(t, titrationEntry.getValue())) %>;
+                var propertyName = <%=q(LuminexUploadWizardAction.getTitrationTypeCheckboxNameAndId(t, titrationEntry.getValue())) %>;
                 var hiddenEl = getHiddenFormElement(propertyName);
                 var inputEl = getInputFormElement(propertyName);
                 if (hiddenEl && inputEl)
@@ -270,7 +270,7 @@
         for (String singlePointControl : trackedSinglePointControls)
         {
 %>
-            var propertyName = <%=q(LuminexUploadWizardAction.getSinglePointControlCheckboxName(singlePointControl)) %>;
+            var propertyName = <%=q(LuminexUploadWizardAction.getSinglePointControlCheckboxNameAndId(singlePointControl)) %>;
             var hiddenEl = getHiddenFormElement(propertyName);
             var inputEl = getInputFormElement(propertyName);
             if (hiddenEl && inputEl)

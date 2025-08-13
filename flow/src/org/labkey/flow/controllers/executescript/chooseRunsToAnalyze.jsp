@@ -44,7 +44,7 @@
     }
 %>
 <%
-    JspView<ChooseRunsToAnalyzeForm> me = (JspView<ChooseRunsToAnalyzeForm>) HttpView.currentView();
+    JspView<ChooseRunsToAnalyzeForm> me = HttpView.currentView();
     ChooseRunsToAnalyzeForm form = me.getModelBean();
     ChooseRunsView view = new ChooseRunsView(form);
     Collection<FlowExperiment> targetExperiments = new ArrayList(form.getAvailableAnalyses());

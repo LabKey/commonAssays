@@ -52,7 +52,6 @@ import org.labkey.luminex.model.AnalyteSinglePointControl;
 import org.labkey.luminex.model.GuideSet;
 import org.labkey.luminex.model.SinglePointControl;
 
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -81,7 +80,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         // Get the average of the non-excluded FI-Background values for this control
         SQLFragment avgFiSQL = new SQLFragment("(SELECT AVG(dr.FIBackground) FROM (");
         // TODO ContainerFilter -- Do we really want a non-permission checking container filter here?
-        LuminexDataTable dataTable = schema.createDataTable(ContainerFilter.EVERYTHING_UNSAFE, false);
+        LuminexDataTable dataTable = schema.createDataTable(ContainerFilter.getUnsafeEverythingFilter(), false);
         List<ColumnInfo> dataColumns = Arrays.asList(dataTable.getColumn("FlaggedAsExcluded"), dataTable.getColumn("FIBackground"), dataTable.getColumn("Description"), dataTable.getColumn("Data"), dataTable.getColumn("Analyte"));
         avgFiSQL.append(QueryService.get().getSelectSQL(dataTable, dataColumns, null, null, Table.ALL_ROWS, 0, false));
         avgFiSQL.append(") dr, ");
@@ -121,7 +120,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
             return new JavaScriptDisplayColumn(colInfo, List.of("clientapi/ext3", "vis/vis", "luminex/LeveyJenningsPlotHelpers.js", "luminex/LeveyJenningsReport.css"))
             {
                 @Override
-                public void renderGridCellContents(RenderContext ctx, Writer oldWriter, HtmlWriter out)
+                public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                 {
                     int protocolId = schema.getProtocol().getRowId();
                     int analyte = (int)ctx.get("analyte");
@@ -131,7 +130,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
 
                     HtmlString html = HtmlString.unsafe(String.format("<img src='%s' width='27' height='20'>", AppProps.getInstance().getContextPath() + "/luminex/ljPlotIcon.png"));
 
-                    renderLink(oldWriter, html, onClick, null);
+                    renderLink(out, html, onClick, null);
                 }
 
                 @Override
@@ -193,7 +192,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
     public QueryUpdateService getUpdateService()
     {
         // Pair<Integer, Integer> is analyteid/singlePointControlId combo
-        return new AbstractLuminexControlUpdateService<AnalyteSinglePointControl>(this, AnalyteSinglePointControl.class)
+        return new AbstractLuminexControlUpdateService<>(this, AnalyteSinglePointControl.class)
         {
             @Override
             protected AnalyteSinglePointControl createNewBean()

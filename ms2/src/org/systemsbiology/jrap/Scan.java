@@ -177,8 +177,8 @@ public final class Scan implements Serializable
             double[][] tmpMassIntensityList = new double[2][tmp[0].length];
             for (int i=0;i<tmp[0].length;i++)
             {
-                tmpMassIntensityList[0][i] = (double) tmp[0][i];
-                tmpMassIntensityList[1][i] = (double) tmp[1][i];
+                tmpMassIntensityList[0][i] = tmp[0][i];
+                tmpMassIntensityList[1][i] = tmp[1][i];
             }
             return tmpMassIntensityList;
         }
@@ -720,8 +720,8 @@ public final class Scan implements Serializable
             double[][] tmpMassIntensityList = new double[2][floatMassIntensityList[0].length];
    			for (int i = 0; i < floatMassIntensityList[0].length; i++)
             {
-               tmpMassIntensityList[0][i] = (double) floatMassIntensityList[0][i];
-               tmpMassIntensityList[1][i] = (double) floatMassIntensityList[1][i];
+               tmpMassIntensityList[0][i] = floatMassIntensityList[0][i];
+               tmpMassIntensityList[1][i] = floatMassIntensityList[1][i];
             }
             return tmpMassIntensityList;
         }

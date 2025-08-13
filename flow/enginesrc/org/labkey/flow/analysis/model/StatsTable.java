@@ -77,7 +77,7 @@ public class StatsTable
         public String getHeader()
             {
             String ret = getSubset() + ":" + getStatistic();
-            if (_parameter != null && _parameter.length() != 0)
+            if (_parameter != null && !_parameter.isEmpty())
                 {
                 ret += "(" + _parameter + ")";
                 }

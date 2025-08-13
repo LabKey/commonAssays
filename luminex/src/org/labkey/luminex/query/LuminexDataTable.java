@@ -282,7 +282,7 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
         defaultCols.add(FieldKey.fromParts("Titration"));
 
         // issue 21253: Conditional show/hide of the Negative Bead column in the Luminex assay results grid
-        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(protocol, LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE, false);
         if (analyteDomain != null && analyteDomain.getPropertyByName(LuminexDataHandler.NEGATIVE_CONTROL_COLUMN_NAME) != null)
         {
             defaultCols.add(FieldKey.fromParts("Analyte", "NegativeBead"));
@@ -395,7 +395,14 @@ public class LuminexDataTable extends FilteredTable<LuminexProtocolSchema> imple
     @NotNull
     public Domain getDomain()
     {
-        return _provider.getResultsDomain(_userSchema.getProtocol());
+        return getDomain(false);
+    }
+
+    @Override
+    @NotNull
+    public Domain getDomain(boolean forUpdate)
+    {
+        return _provider.getResultsDomain(_userSchema.getProtocol(), forUpdate);
     }
 
     @Override

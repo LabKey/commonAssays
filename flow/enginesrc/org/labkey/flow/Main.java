@@ -78,7 +78,7 @@ public class Main
         try
         {
             Workspace workspace = Workspace.readWorkspace(file);
-            if (printWarnings && workspace.getWarnings().size() > 0)
+            if (printWarnings && !workspace.getWarnings().isEmpty())
             {
                 for (String warning : workspace.getWarnings())
                     System.out.println("warning: " + warning);
@@ -112,10 +112,10 @@ public class Main
         return file;
     }
 
-    private static int MAX_LINE_LEN = 80;
+    private static final int MAX_LINE_LEN = 80;
     private static void printWrapped(PrintStream out, String indent, Collection<? extends Object> os)
     {
-        if (os.size() == 0)
+        if (os.isEmpty())
             return;
 
         int lineLen = indent.length();
@@ -189,7 +189,7 @@ public class Main
             {
                 System.out.printf("Group %s: %s\n", group.getGroupId(), group.getGroupName());
 
-                if (group.getSampleIds().size() == 0)
+                if (group.getSampleIds().isEmpty())
                 {
                     System.out.println("  no samples in group");
                 }
@@ -383,7 +383,7 @@ public class Main
         if (analysisResultsFile.getName().endsWith(".zip"))
         {
             // NOTE: Duplicated code in AnalysisScriptController
-            File statisticsFile = null;
+            File statisticsFile;
             java.util.zip.ZipFile zipFile;
             try
             {
@@ -526,7 +526,7 @@ public class Main
         usage.append("  Execute LabKey analysis and save as XAR:\n");
         usage.append("    ").append(progName).append(" -w labkey.xml -f fcsfiles -F xar run-analysis\n");
 
-        System.err.println(usage.toString());
+        System.err.println(usage);
     }
 
     public static void main(String[] args)

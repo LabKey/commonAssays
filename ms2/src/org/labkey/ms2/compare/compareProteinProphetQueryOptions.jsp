@@ -38,7 +38,7 @@
 <%@ page extends="org.labkey.api.jsp.JspBase"%>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%
-JspView<MS2Controller.CompareOptionsBean> view = (JspView<MS2Controller.CompareOptionsBean>) HttpView.currentView();
+JspView<MS2Controller.CompareOptionsBean> view = HttpView.currentView();
 MS2Controller.CompareOptionsBean bean = view.getModelBean();
 MS2Controller.PeptideFilteringComparisonForm form = bean.getForm();
 String peptideViewName = form.getPeptideCustomViewName(getViewContext());

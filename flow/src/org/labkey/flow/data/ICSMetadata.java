@@ -53,8 +53,8 @@ public class ICSMetadata
                 participantColumn == null &&
                 visitColumn == null &&
                 dateColumn == null &&
-                (matchColumns == null || matchColumns.size() == 0) &&
-                (background == null || background.size() == 0);
+                (matchColumns == null || matchColumns.isEmpty()) &&
+                (background == null || background.isEmpty());
     }
 
     /** Returns true if study metadata and background metadata have been completely set. */
@@ -78,16 +78,16 @@ public class ICSMetadata
     /** Returns true if the background metadata is complete. */
     public boolean hasCompleteBackground()
     {
-        return (matchColumns != null && matchColumns.size() > 0) &&
-               (background != null && background.size() > 0);
+        return (matchColumns != null && !matchColumns.isEmpty()) &&
+               (background != null && !background.isEmpty());
     }
 
     /** Returns true if the background metadata is partially specified. */
     public boolean hasPartialBackground()
     {
-        if (matchColumns == null || matchColumns.size() == 0)
+        if (matchColumns == null || matchColumns.isEmpty())
             return false;
-        if (background == null || background.size() == 0)
+        if (background == null || background.isEmpty())
             return false;
         return true;
     }
@@ -108,9 +108,9 @@ public class ICSMetadata
 
         if (hasPartialBackground())
         {
-            if (getMatchColumns() == null || getMatchColumns().size() == 0)
+            if (getMatchColumns() == null || getMatchColumns().isEmpty())
                 errors.add("Background metadata requires at least one match column");
-            if (getBackgroundFilter() == null || getBackgroundFilter().size() == 0)
+            if (getBackgroundFilter() == null || getBackgroundFilter().isEmpty())
                 errors.add("Background metadata requires at least one background filter");
         }
 
@@ -159,7 +159,7 @@ public class ICSMetadata
 
     public List<FieldKey> getMatchColumns()
     {
-        if (matchColumns == null || matchColumns.size() == 0)
+        if (matchColumns == null || matchColumns.isEmpty())
             return Collections.emptyList();
         return Collections.unmodifiableList(matchColumns);
     }
@@ -171,7 +171,7 @@ public class ICSMetadata
 
     public List<FilterInfo> getBackgroundFilter()
     {
-        if (background == null || background.size() == 0)
+        if (background == null || background.isEmpty())
             return Collections.emptyList();
         return Collections.unmodifiableList(background);
     }
@@ -220,7 +220,7 @@ public class ICSMetadata
         {
             ICSMetadataType.Background xBackground = xMetadata.addNewBackground();
 
-            if (getMatchColumns() != null && getMatchColumns().size() > 0)
+            if (getMatchColumns() != null && !getMatchColumns().isEmpty())
             {
                 List<String> matchColumns = new ArrayList<>(getMatchColumns().size());
                 for (FieldKey fieldKey : getMatchColumns())
@@ -228,10 +228,10 @@ public class ICSMetadata
                     if (fieldKey != null)
                         matchColumns.add(fieldKey.toString());
                 }
-                xBackground.addNewMatchColumns().setFieldArray(matchColumns.toArray(new String[matchColumns.size()]));
+                xBackground.addNewMatchColumns().setFieldArray(matchColumns.toArray(new String[0]));
             }
 
-            if (getBackgroundFilter() != null && getBackgroundFilter().size() > 0)
+            if (getBackgroundFilter() != null && !getBackgroundFilter().isEmpty())
             {
                 FiltersDef xBackgroundFilter = null;
                 for (FilterInfo filterInfo : getBackgroundFilter())
@@ -256,7 +256,7 @@ public class ICSMetadata
 
     public static ICSMetadata fromXmlString(String value)
     {
-        if (value == null || value.length() == 0)
+        if (value == null || value.isEmpty())
             return null;
 
         ICSMetadata result = new ICSMetadata();

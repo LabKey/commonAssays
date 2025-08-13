@@ -36,7 +36,7 @@ import java.util.Set;
  */
 public class ProteinStringExpression implements StringExpression, Cloneable
 {
-    private String _localURI;
+    private final String _localURI;
 
     public ProteinStringExpression(String localURI)
     {

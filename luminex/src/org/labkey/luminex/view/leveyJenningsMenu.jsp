@@ -14,22 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-/**
-* User: jeckels
-* Date: August 27, 2013
-*/
-
 %>
+<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.luminex.LeveyJenningsForm" %>
 <%@ page import="org.labkey.luminex.LeveyJenningsMenuView" %>
 <%@ page import="org.labkey.luminex.LuminexController" %>
-<%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
-    LeveyJenningsMenuView me = (LeveyJenningsMenuView) HttpView.currentView();
+    LeveyJenningsMenuView me = HttpView.currentView();
     LeveyJenningsMenuView.Bean bean = me.getModelBean();
 %>
 

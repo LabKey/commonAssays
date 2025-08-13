@@ -191,7 +191,7 @@
     <%}%>
 </table>
 <% } %>
-<%=link("Download").href(flowComp.urlDownload()).nofollow()%><br>
+<%=link("Download", flowComp.urlDownload()).nofollow()%><br>
 <%
     DiscussionService service = DiscussionService.get();
     if (service != null)

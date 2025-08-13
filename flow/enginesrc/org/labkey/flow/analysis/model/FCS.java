@@ -173,7 +173,7 @@ public class FCS extends FCSHeader
             int ib = 0;
             for (int p = 0; p < bitCounts.length; p++)
             {
-                int value = 0;
+                int value;
                 switch (bitCounts[p])
                 {
                     case 8:
@@ -245,7 +245,7 @@ public class FCS extends FCSHeader
             int ib = 0;
             for (int p = 0; p < bitCounts.length; p++)
             {
-                float value = 0;
+                float value;
                 switch (bitCounts[p])
                 {
                     case 32:

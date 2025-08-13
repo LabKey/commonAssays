@@ -55,7 +55,7 @@ public class FlowPipelineProvider extends PipelineProvider
         return FlowModule.isActive(context.getContainer());
     }
 
-    private class IsFlowJoWorkspaceFilter extends FileEntryFilter
+    private static class IsFlowJoWorkspaceFilter extends FileEntryFilter
     {
         @Override
         public boolean accept(File pathname)
@@ -139,7 +139,7 @@ public class FlowPipelineProvider extends PipelineProvider
         }
 
         // UNDONE: walk directory once instead of multiple times
-        File[] workspaces = directory.listFiles((FileFilter)new IsFlowJoWorkspaceFilter());
+        File[] workspaces = directory.listFiles(new IsFlowJoWorkspaceFilter());
         if (includeAll || (workspaces != null && workspaces.length > 0))
         {
             ActionURL importWorkspaceURL = new ActionURL(AnalysisScriptController.ImportAnalysisFromPipelineAction.class, context.getContainer());

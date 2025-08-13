@@ -16,7 +16,6 @@
 package org.labkey.ms2;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
@@ -36,7 +35,6 @@ import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 

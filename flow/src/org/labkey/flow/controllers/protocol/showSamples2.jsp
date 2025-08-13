@@ -75,14 +75,14 @@
 
 <% if (st == null) { %>
     No samples have been imported in this folder.<br>
-    <%=link("Create sample type").href(protocol.urlCreateSampleType())%><br>
+    <%=link("Create sample type", protocol.urlCreateSampleType())%><br>
 <% } else { %>
 <p>
 There are <a id="all-samples" href="<%=h(protocol.getSampleTypeDetailsURL(st, getContainer()))%>"><%=sampleCount%> sample descriptions</a> in this folder.<br>
 
-<% if (sampleTypeJoinFields.size() == 0) { %>
+<% if (sampleTypeJoinFields.isEmpty()) { %>
 <p>
-    <%=link("Join samples to FCS File Data").href(protocol.urlFor(JoinSampleTypeAction.class))%><br>
+    <%=link("Join samples to FCS File Data", protocol.urlFor(JoinSampleTypeAction.class))%><br>
     No sample join fields have been defined yet.  The samples are linked to the FCS files using keywords.  When new samples are added or FCS files are loaded, new links will be created.
 <% } else { %>
     Samples are joined to FCSFiles by the following properties (<a href="<%=h(protocol.urlFor(JoinSampleTypeAction.class))%>">edit</a>):

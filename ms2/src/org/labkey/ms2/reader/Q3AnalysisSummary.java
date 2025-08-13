@@ -28,7 +28,7 @@ import javax.xml.stream.XMLStreamException;
  */
 public class Q3AnalysisSummary extends RelativeQuantAnalysisSummary
 {
-    private static Logger _log = LogManager.getLogger(Q3AnalysisSummary.class);
+    private static final Logger _log = LogManager.getLogger(Q3AnalysisSummary.class);
     
     private static final float DEFAULT_MASSTOL = .1f;
 

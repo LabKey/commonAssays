@@ -651,7 +651,7 @@ public class MS2Schema extends UserSchema
             filter.addUrlFilters(url, "InternalName");
         }
         ProteinGroupTableInfo tableInfo = new ProteinGroupTableInfo(this, null, false);
-        tableInfo.setContainerFilter(ContainerFilter.EVERYTHING_UNSAFE);
+        tableInfo.setContainerFilter(ContainerFilter.getUnsafeEverythingFilter());
         sql.append(getSelectSQL(tableInfo, filter, Collections.singleton(FieldKey.fromParts("RowId"))));
     }
 
@@ -701,7 +701,7 @@ public class MS2Schema extends UserSchema
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return createPeptidesTable(ContainerFilter.EVERYTHING_UNSAFE, MS2RunType.values());
+                return createPeptidesTable(ContainerFilter.getUnsafeEverythingFilter(), MS2RunType.values());
             }
         });
 
@@ -906,7 +906,7 @@ public class MS2Schema extends UserSchema
 
     protected SQLFragment getPeptideSelectSQL(SimpleFilter filter, Collection<FieldKey> fieldKeys)
     {
-        TableInfo tiFiltered = getTable(HiddenTableType.PeptidesFilter.name(), ContainerFilter.EVERYTHING_UNSAFE, true, false);
+        TableInfo tiFiltered = getTable(HiddenTableType.PeptidesFilter.name(), ContainerFilter.getUnsafeEverythingFilter(), true, false);
         return getSelectSQL(tiFiltered, filter, fieldKeys);
     }
 
@@ -933,7 +933,7 @@ public class MS2Schema extends UserSchema
         {
             sql.append(separator);
             separator = ", ";
-            sql.append(columnMap.get(fieldKey).getAlias());
+            sql.appendIdentifier(columnMap.get(fieldKey).getAlias());
         }
         sql.append(" FROM (\n");
         sql.append(innerSelect);
@@ -948,7 +948,7 @@ public class MS2Schema extends UserSchema
         QueryDefinition queryDef = QueryService.get().createQueryDefForTable(this, HiddenTableType.PeptidesFilter.toString());
         SimpleFilter filter = new SimpleFilter();
 
-        if (targetSeqIds != null && targetSeqIds.size() > 0)
+        if (targetSeqIds != null && !targetSeqIds.isEmpty())
         {
             filter.addCondition(PeptideManager.getSequencesFilter(targetSeqIds));
         }
@@ -1085,7 +1085,7 @@ public class MS2Schema extends UserSchema
         ColumnInfo proteinGroupColumn = proteinGroupMembershipTable.getColumn("ProteinGroupId");
 
         SQLFragment selectSQL = QueryService.get().getSelectSQL(proteinGroupMembershipTable, Collections.singleton(proteinGroupColumn), null, null, Table.ALL_ROWS, Table.NO_OFFSET, false);
-        SQLFragment filterSQL = new SQLFragment("ProteinGroupId IN (SELECT " + proteinGroupColumn.getAlias() + " FROM (");
+        SQLFragment filterSQL = new SQLFragment("ProteinGroupId IN (SELECT ").appendIdentifier(proteinGroupColumn.getAlias()).append(" FROM (");
         filterSQL.append(selectSQL);
         filterSQL.append(") x)");
 
@@ -1163,7 +1163,7 @@ public class MS2Schema extends UserSchema
 
     private static class NormalizedProteinGroupsTracker
     {
-        private String _name;
+        private final String _name;
 
         public NormalizedProteinGroupsTracker(String name)
         {
@@ -1377,7 +1377,7 @@ public class MS2Schema extends UserSchema
                     }
                     catch (URISyntaxException e)
                     {
-                        throw new UnexpectedException(e);
+                        throw UnexpectedException.wrap(e);
                     }
                 }
             }

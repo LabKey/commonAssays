@@ -20,13 +20,14 @@
 <%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.view.HttpView" %>
 <%@ page import="org.labkey.api.view.JspView" %>
-<%@ page import="org.labkey.ms2.MS2Controller" %>
+<%@ page import="org.labkey.ms2.MS2Controller.FilterHeaderBean" %>
 <%@ page import="org.labkey.ms2.peptideview.MS2RunViewType" %>
 <%@ page import="static org.labkey.api.util.DOM.Attribute.style" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
-    MS2Controller.FilterHeaderBean bean = ((JspView<MS2Controller.FilterHeaderBean>)HttpView.currentView()).getModelBean();
+    JspView<FilterHeaderBean> view = HttpView.currentView();
+    FilterHeaderBean bean = view.getModelBean();
     User user = getUser();
     String runChargeFilterColumnName = bean.run.getChargeFilterColumnName();
     String grouping = getViewContext().cloneActionURL().getParameter("grouping");
@@ -50,12 +51,12 @@
 <labkey:form method="post" action="<%=bean.applyViewURL%>">
     <table id="ms2RunViewConfig" class="lk-fields-table">
         <tr>
-            <td valign=bottom><%=bean.applyView%></td>
-            <td valign=bottom><%= button("Go").submit(true) %></td>
+            <td style="vertical-align: bottom"><%=bean.applyView%></td>
+            <td  style="vertical-align: bottom"><%= button("Go").submit(true) %></td>
             <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-            <td valign=bottom><% if (!user.isGuest()) { %>
+            <td  style="vertical-align: bottom"><% if (!user.isGuest()) { %>
                 <%= button("Save View").href(bean.saveViewURL) %><% } %></td>
-            <td valign=bottom><% if (!user.isGuest()) { %>
+            <td  style="vertical-align: bottom"><% if (!user.isGuest()) { %>
                 <%= button("Manage Views").href(bean.manageViewsURL) %><% } %></td>
         </tr>
     </table>

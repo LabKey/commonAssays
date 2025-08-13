@@ -56,7 +56,7 @@ public class EditFCSAnalysisNameForm extends ProtocolForm
         {
             if (!StringUtils.isEmpty(keyword[i]))
             {
-                if (parts.size() > 0)
+                if (!parts.isEmpty())
                 {
                     parts.add(SEPARATOR);
                 }

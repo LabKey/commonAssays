@@ -22,6 +22,8 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.PropertyManager;
 import org.labkey.api.data.PropertyManager.WritablePropertyMap;
 import org.labkey.api.util.FileUtil;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,24 +31,25 @@ import java.util.Map;
 
 public class FlowSettings
 {
-    static private File _tempAnalysisDirectory;
+    static private FileLike _tempAnalysisDirectory;
     static private final String PROPCAT_FLOW = "flow";
     static private final String PROPNAME_WORKINGDIRECTORY = "workingDirectory";
     static private final String PROPNAME_DELETE_FILES = "deleteFiles";
 
-    static private File getTempAnalysisDirectory()
+    static private FileLike getTempAnalysisDirectory()
     {
         if (_tempAnalysisDirectory != null)
             return _tempAnalysisDirectory;
-        File file;
         try
         {
-            file = FileUtil.createTempFile("FlowAnalysis", "tmp");
-            File ret = new File(file.getParentFile(), "FlowAnalysis");
+            FileLike ret = FileUtil.createTempDirectoryFileLike("FlowAnalysis");
+            FileLike file = ret.resolveChild("FlowAnalysis.tmp");
             if (!ret.exists())
             {
                 FileUtil.mkdir(ret);
             }
+
+            // Clean-up any existing prior analysis file
             file.delete();
             _tempAnalysisDirectory = ret;
             return ret;
@@ -57,12 +60,21 @@ public class FlowSettings
         }
     }
 
+    /**
+     * Get the flow analysis working directory.
+     * Note: This may be outside the FileLike/FileSystemLike paradigm, it is either a temp directory or a value set by the admins
+     *
+     * @return File object representing the Flow analysis working directory.
+     */
     static public File getWorkingDirectory()
     {
+        //Get admin provided setting if it exists
         String path = getWorkingDirectoryPath();
         if (path != null)
             return new File(path);
-        return getTempAnalysisDirectory();
+
+        // Otherwise default to the
+        return FileSystemLike.toFile(getTempAnalysisDirectory());
     }
 
     static public String getWorkingDirectoryPath()
@@ -72,6 +84,12 @@ public class FlowSettings
         return map.get(PROPNAME_WORKINGDIRECTORY);
     }
 
+    /**
+     * Save the Flow Analysis working directory path setting
+     * Note: This may be outside the FileLike/FileSystemLike paradigm
+     *
+     * @param path string file path to the flow analysis working directory
+     */
     static public void setWorkingDirectoryPath(String path)
     {
         Container container = ContainerManager.getRoot();

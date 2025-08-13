@@ -143,7 +143,6 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
             if (words.length >= 2) key += " " + words[1].trim().toUpperCase();
             if (words.length == 1) phrase += " sp.";
             org.put(key, phrase);
-            leftPos = rightPos;
         }
         stopTimer();
         if (org.size() == 1)

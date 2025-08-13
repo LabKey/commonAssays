@@ -38,7 +38,7 @@ import org.springframework.validation.BindException;
  */
 public class FlowProtocolSchema extends AssayProtocolSchema
 {
-    private FlowSchema _flowSchema;
+    private final FlowSchema _flowSchema;
 
     public FlowProtocolSchema(User user, Container container, @NotNull FlowAssayProvider provider, @NotNull ExpProtocol protocol, @Nullable Container targetStudy)
     {

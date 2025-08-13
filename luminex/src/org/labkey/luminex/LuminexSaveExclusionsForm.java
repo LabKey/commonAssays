@@ -146,7 +146,7 @@ public class LuminexSaveExclusionsForm implements ApiJsonForm
         }
 
         // verify that we have at least one commend
-        if (getCommands().size() == 0)
+        if (getCommands().isEmpty())
         {
             errors.reject(null, "No commands provided for exclusion");
         }

@@ -22,7 +22,6 @@ import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
-import org.labkey.api.data.ContainerForeignKey;
 import org.labkey.api.data.ParameterMapStatement;
 import org.labkey.api.data.StatementUtils;
 import org.labkey.api.data.TableInfo;
@@ -65,7 +64,7 @@ public class NabVirusDataTable extends FilteredTable<AssayProtocolSchema> implem
 {
     protected final ExpProtocol _protocol;
     protected final AssayProvider _provider;
-    private Domain _virusDomain = null;
+    private Domain _virusDomain;
 
     public NabVirusDataTable(AssayProtocolSchema schema, ContainerFilter cf, Domain virusDomain)
     {

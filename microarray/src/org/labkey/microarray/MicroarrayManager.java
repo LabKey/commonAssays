@@ -60,6 +60,7 @@ import org.labkey.microarray.query.MicroarrayUserSchema;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -202,7 +203,7 @@ public class MicroarrayManager
         TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSetSchemaTableInfo(), PageFlowUtil.set("RowId"), filter, null);
         List<Integer> rowIds = featureAnnotationSelector.getArrayList(Integer.class);
         // TODO: Order results by container depth
-        if (rowIds.size() > 0)
+        if (!rowIds.isEmpty())
             return rowIds.get(0);
 
         return null;
@@ -224,7 +225,7 @@ public class MicroarrayManager
         TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSetSchemaTableInfo(), PageFlowUtil.set("RowId"), filter, null);
         List<Integer> rowIds = featureAnnotationSelector.getArrayList(Integer.class);
         // TODO: Order results by container depth
-        if (rowIds.size() > 0)
+        if (!rowIds.isEmpty())
             return rowIds.get(0);
 
         return null;
@@ -355,7 +356,7 @@ public class MicroarrayManager
         featureFilter.addCondition(FieldKey.fromParts("FeatureAnnotationSetId"), featureSetRowId);
 
         TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSchemaTableInfo(), PageFlowUtil.set("FeatureId", "RowId"), featureFilter, null);
-        return featureAnnotationSelector.fillValueMap(new CaseInsensitiveHashMap<Integer>());
+        return featureAnnotationSelector.fillValueMap(new CaseInsensitiveHashMap<>());
     }
 
     public void delete(Container container)
@@ -374,7 +375,7 @@ public class MicroarrayManager
     }
 
     // Issue 21134: filter by assay container and protocol
-    public List<Map> getDistinctSamples(ExpProtocol protocol)
+    public Collection<Map<String, Object>> getDistinctSamples(ExpProtocol protocol)
     {
         SQLFragment frag = new SQLFragment("SELECT SampleId, Name FROM ");
         frag.append("(SELECT DISTINCT SampleId FROM ");
@@ -393,7 +394,7 @@ public class MicroarrayManager
 
         SqlSelector selector = new SqlSelector(MicroarrayUserSchema.getSchema(), frag);
 
-        return selector.getArrayList(Map.class);
+        return selector.getMapCollection();
     }
 
 }

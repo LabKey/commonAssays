@@ -17,18 +17,20 @@
 package org.labkey.ms2;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.protein.MassType;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.util.GUID;
 import org.labkey.api.util.MemTracker;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ViewContext;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -36,12 +38,12 @@ import java.util.Map;
 
 public abstract class MS2Run implements Serializable
 {
-    private static Logger _log = LogManager.getLogger(MS2Run.class);
+    private static final Logger _log = LogHelper.getLogger(MS2Run.class, "MS2 runs");
 
     protected final static String[] EMPTY_STRING_ARRAY = new String[0];
 
     protected int run;
-    protected Container container;
+    protected GUID containerId;
     protected String description;
     protected String path;
     protected String fileName;
@@ -187,11 +189,11 @@ public abstract class MS2Run implements Serializable
 
         try
         {
-            MS2Run run = runType.getRunClass().newInstance();
+            MS2Run run = runType.getRunClass().getDeclaredConstructor().newInstance();
             run.setType(runType.name());
             return run;
         }
-        catch (IllegalAccessException | InstantiationException e)
+        catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e)
         {
             throw new RuntimeException(e);
         }
@@ -238,62 +240,6 @@ public abstract class MS2Run implements Serializable
         return _fastaIds;
     }
 
-    // CONSIDER: extend Apache ListOrderedSet (ideally) or our ArrayListMap.
-    public static class ColumnNameList extends ArrayList<String>
-    {
-        public ColumnNameList(Collection<String> columnNames)
-        {
-            for (String s : columnNames)
-            {
-                add(s);
-            }
-        }
-
-        public ColumnNameList(String csvColumnNames)
-        {
-            super(20);
-
-            String[] arrayColumnNames = csvColumnNames.split(",");
-            for (String arrayColumnName : arrayColumnNames)
-                add(arrayColumnName.trim());
-        }
-
-        @Override
-        public boolean add(String o)
-        {
-            return super.add(o.toLowerCase());
-        }
-
-        public ColumnNameList()
-        {
-            super(20);
-        }
-
-        @Override
-        public boolean contains(Object elem)
-        {
-            if (elem instanceof String)
-            {
-                return super.contains(((String)elem).toLowerCase());
-            }
-            return super.contains(elem);
-        }
-
-        public String toCSVString()
-        {
-            StringBuffer sb = new StringBuffer();
-            for (Object o : this)
-            {
-                if (sb.length() > 0)
-                    sb.append(',');
-
-                sb.append(o);
-            }
-            return sb.toString();
-        }
-    }
-
-
     public int getRun()
     {
         return run;
@@ -308,13 +254,13 @@ public abstract class MS2Run implements Serializable
 
     public Container getContainer()
     {
-        return container;
+        return ContainerManager.getForId(containerId);
     }
 
 
     public void setContainer(Container container)
     {
-        this.container = container;
+        this.containerId = container.getEntityId();
     }
 
 

@@ -66,7 +66,7 @@ public final class LuminexPositivityTest extends LuminexTest
         PerlHelper perlHelper = new PerlHelper(getCurrentTest());
         perlHelper.ensurePerlConfig();
 
-        LuminexTest init = (LuminexTest)getCurrentTest();
+        LuminexTest init = getCurrentTest();
         init.goToTestAssayHome();
         ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
 
@@ -125,7 +125,7 @@ public final class LuminexPositivityTest extends LuminexTest
         }
 
         createNewAssayRun(assayName, RUN_ID_BASE + " Check Imported Defaults");
-        checkCheckbox(Locator.name("calculatePositivity"));
+        checkCheckbox(Locator.name("CalculatePositivity"));
         selectPositivityFile(TEST_ASSAY_LUM_FILE13, false);
 
         List<WebElement> analytePropertyRows = PortalHelper.Locators.webPart("Analyte Properties").findElement(getDriver())
@@ -149,7 +149,7 @@ public final class LuminexPositivityTest extends LuminexTest
         // for issue 20549 :upload a run that unchecks the "Calucate Positivity" and then verify the default value for re-runs and new imports
 
         createNewAssayRun(TEST_ASSAY_LUM, RUN_ID_BASE + " No Pos Calc");
-        uncheckCheckbox(Locator.name("calculatePositivity"));
+        uncheckCheckbox(Locator.name("CalculatePositivity"));
         selectPositivityFile(TEST_ASSAY_LUM_FILE12, true);
         clickButton("Save and Finish");
 
@@ -158,7 +158,7 @@ public final class LuminexPositivityTest extends LuminexTest
         verifyThresholdForReImportRun(1, 98);
 
         createNewAssayRun(TEST_ASSAY_LUM, RUN_ID_BASE + " Threshold Default Test");
-        checkCheckbox(Locator.name("calculatePositivity"));
+        checkCheckbox(Locator.name("CalculatePositivity"));
         selectPositivityFile(TEST_ASSAY_LUM_FILE12, true);
         verifyAnalytePosThresholdValue(_analyteNames.get(0), 98);
         clickButton("Cancel");

@@ -4,7 +4,15 @@ import { CurveFitData } from "./models";
 import { getMaxFromData, getMinFromData } from "./utils";
 import { DEFAULT_X_AXIS_PROP } from "./constants";
 
-export function getCurveFitXYPairs(protocolId: number, runId: number, plateName: string, spot: number, data: any[]): Promise<CurveFitData> {
+export type GetCurveFitXYPairs = (
+    protocolId: number,
+    runId: number,
+    plateName: string,
+    spot: number,
+    data: any[]
+) => Promise<CurveFitData>;
+
+export const getCurveFitXYPairs: GetCurveFitXYPairs = (protocolId, runId, plateName, spot, data) => {
     return new Promise((resolve, reject) => {
         const xMin = getMinFromData(data, DEFAULT_X_AXIS_PROP);
         let xMax = getMaxFromData(data, DEFAULT_X_AXIS_PROP);

@@ -17,6 +17,7 @@ package org.labkey.test.components.luminex.importwizard;
 
 import org.labkey.test.Locator;
 import org.labkey.test.components.WebPartPanel;
+import org.labkey.test.components.assay.AssayConstants;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
@@ -67,6 +68,6 @@ public class BatchPropertiesWebPart extends WebPartPanel<BatchPropertiesWebPart.
 
     public static class Locators
     {
-        protected static final Locator sampleInfoRadio = Locator.radioButtonByNameAndValue("participantVisitResolver", "SampleInfo");
+        protected static final Locator sampleInfoRadio = Locator.radioButtonByNameAndValue(AssayConstants.PARTICIPANT_VISIT_RESOLVER_FIELD_NAME, "SampleInfo");
     }
 }

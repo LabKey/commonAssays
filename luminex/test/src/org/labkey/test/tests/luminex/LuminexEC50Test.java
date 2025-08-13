@@ -40,7 +40,7 @@ public class LuminexEC50Test extends LuminexTest
     @BeforeClass
     public static void updateAssayDefinition()
     {
-        LuminexEC50Test init = (LuminexEC50Test)getCurrentTest();
+        LuminexEC50Test init = getCurrentTest();
         init.goToTestAssayHome();
         ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
 
@@ -100,7 +100,7 @@ public class LuminexEC50Test extends LuminexTest
                 assertEquals(" ", ec50.get(i));
                 //auc=populated (for all non-blank analytes)
                 if (!analyte.get(i).startsWith("Blank"))
-                    assertTrue( "AUC was unpopulated for row " + i, auc.get(i).length()>0);
+                    assertTrue( "AUC was unpopulated for row " + i, !auc.get(i).isEmpty());
             }
         }
 

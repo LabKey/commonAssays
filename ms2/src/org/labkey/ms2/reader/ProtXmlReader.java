@@ -30,7 +30,7 @@ import java.util.*;
 
 public class ProtXmlReader
 {
-    private File _file;
+    private final File _file;
     private final MS2Run _run;
 
     public ProtXmlReader(File file, MS2Run run)
@@ -46,9 +46,9 @@ public class ProtXmlReader
 
     public class ProteinGroupIterator implements Iterator<ProteinGroup>
     {
-        private SimpleXMLStreamReader _parser;
+        private final SimpleXMLStreamReader _parser;
         private ProteinGroup _nextProteinGroup = null;
-        private java.io.InputStream _fIn;
+        private final java.io.InputStream _fIn;
 
         public ProteinGroupIterator() throws FileNotFoundException, XMLStreamException
         {
@@ -101,8 +101,8 @@ public class ProtXmlReader
                     ProteinGroup group = new ProteinGroup();
                     String groupNumberString = _parser.getAttributeValue(null, "group_number");
                     String probabilityString = _parser.getAttributeValue(null, "probability");
-                    if (groupNumberString != null && !"".equals(groupNumberString) &&
-                        probabilityString != null && !"".equals(probabilityString))
+                    if (groupNumberString != null && !groupNumberString.isEmpty() &&
+                        probabilityString != null && !probabilityString.isEmpty())
                     {
                         group.setGroupNumber(Integer.parseInt(groupNumberString));
                         group.setProbability(Float.parseFloat(probabilityString));
@@ -166,8 +166,8 @@ public class ProtXmlReader
         private Float _pctSpectrumIds;
         private String _proteinDescription;
 
-        private List<Peptide> _peptides = new ArrayList<>();
-        private List<String> _indistinguishableProteinNames = new ArrayList<>();
+        private final List<Peptide> _peptides = new ArrayList<>();
+        private final List<String> _indistinguishableProteinNames = new ArrayList<>();
         private IcatProteinQuantitation _quantRatio;
         private ITraqProteinQuantitation _iTraqQuantRatio;
         private MS2Run _run;
@@ -490,7 +490,7 @@ public class ProtXmlReader
             //just to carry forward the ends correctly
             String enzymaticTerminiString = parser.getAttributeValue(null, "n_enzymatic_termini");
             if (enzymaticTerminiString == null ||
-                enzymaticTerminiString.length() == 0)
+                    enzymaticTerminiString.isEmpty())
                 enzymaticTerminiString = "2";
             setEnzymaticTermini(Integer.parseInt(enzymaticTerminiString));
 

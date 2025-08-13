@@ -197,7 +197,7 @@ public class FCSAnalyzer
 
     public List<GraphResult> generateGraphs(URI uri, CompensationMatrix comp, ScriptComponent group, Collection<GraphSpec> graphs) throws IOException
     {
-        if (graphs.size() == 0)
+        if (graphs.isEmpty())
         {
             return Collections.EMPTY_LIST;
         }
@@ -389,9 +389,8 @@ public class FCSAnalyzer
         //List<String> aliasParts = new ArrayList<String>(10);
         for (SubsetPart part : subset.getSubsets())
         {
-            if (part instanceof PopulationName)
+            if (part instanceof PopulationName name)
             {
-                PopulationName name = (PopulationName)part;
                 Population population = populationSet.getPopulation(name);
                 if (population == null)
                     return null;
@@ -448,10 +447,8 @@ public class FCSAnalyzer
 
     private SubsetExpression expressionFromGate(Gate gate)
     {
-        if (!(gate instanceof SubsetExpressionGate))
+        if (!(gate instanceof SubsetExpressionGate exprGate))
             return null;
-
-        SubsetExpressionGate exprGate = (SubsetExpressionGate)gate;
 
         try
         {

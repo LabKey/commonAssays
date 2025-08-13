@@ -43,7 +43,7 @@ import java.util.Set;
 public class FlowPropertySet
 {
     static private final Logger _log = LogManager.getLogger(FlowPropertySet.class);
-    private Container _container;
+    private final Container _container;
 
     private Collection<AttributeCache.KeywordEntry> _keywords;
     private Collection<AttributeCache.StatisticEntry> _statistics;
@@ -225,13 +225,13 @@ public class FlowPropertySet
             FlowPropertySet fps = new FlowPropertySet(JunitUtil.getTestContainer());
             fps._subsets = Set.of(subset1);
             fps._subsetNameAncestorMap = FlowPropertySet.getSubsetNameAncestorMap(fps._subsets);
-            simplify1 = fps.simplifySubset(subset1);
-            simplify2 = fps.simplifySubset(subset2);
+            fps.simplifySubset(subset1);
+            fps.simplifySubset(subset2);
 
             fps._subsets = Set.of(subset1, subset2);
             fps._subsetNameAncestorMap = FlowPropertySet.getSubsetNameAncestorMap(fps._subsets);
-            simplify1 = fps.simplifySubset(subset1);
-            simplify2 = fps.simplifySubset(subset2);
+            fps.simplifySubset(subset1);
+            fps.simplifySubset(subset2);
         }
     }
 }

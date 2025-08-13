@@ -14,7 +14,7 @@ import java.util.Set;
 
 public interface ElisaImportHelper
 {
-    public static String PLACEHOLDER_PLATE_NAME = "PLACEHOLDER_PLATE";
+    String PLACEHOLDER_PLATE_NAME = "PLACEHOLDER_PLATE";
 
     /**
      * Gets the set of plate names in this import

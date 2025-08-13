@@ -53,7 +53,7 @@ public abstract class AbstractSequestParams extends Params
         private final String _paramPrefix;
         private final String _fastaDatabase;
 
-        private Variant(String header, String paramPrefix, String fastaDatabase)
+        Variant(String header, String paramPrefix, String fastaDatabase)
         {
             _header = header;
             _fastaDatabase = fastaDatabase;

@@ -17,28 +17,23 @@
 package org.labkey.flow.script;
 
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
-import org.labkey.api.action.UrlProvider;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineStatusFile;
 import org.labkey.api.pipeline.PipelineStatusUrls;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.controllers.FlowController;
-import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.SampleKey;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.reports.FlowReportJob;
 import org.labkey.flow.reports.FlowReportManager;
 
-import java.io.File;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -85,7 +80,7 @@ public abstract class FlowJob extends PipelineJob
         catch (Throwable e)
         {
             _log.error("Exception", e);
-            addStatus("Error " + e.toString());
+            addStatus("Error " + e);
             setStatus(TaskStatus.error, e.toString());
             return;
         }
@@ -203,7 +198,7 @@ public abstract class FlowJob extends PipelineJob
             info = new ViewBackgroundInfo(info.getContainer(), info.getUser(), new ActionURL(FlowController.BeginAction.class, info.getContainer()));
 
         List<FlowReportJob> jobs = FlowReportManager.createReportJobs(info, getPipeRoot());
-        if (jobs.size() > 0)
+        if (!jobs.isEmpty())
             info("Running post-analysis jobs...");
         for (FlowReportJob job : jobs)
         {

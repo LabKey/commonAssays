@@ -45,10 +45,10 @@ import java.util.Set;
  */
 public class ProteinCoverageMapBuilder
 {
-    private ViewContext _context;
-    private Protein _protein;
-    private MS2Run _ms2Run;
-    private SimpleFilter _peptideFilter; // filter with clauses to get peptides for the given seqId
+    private final ViewContext _context;
+    private final Protein _protein;
+    private final MS2Run _ms2Run;
+    private final SimpleFilter _peptideFilter; // filter with clauses to get peptides for the given seqId
     private Pair<Integer, Integer> _allPeptideCounts; // counts of the number of peptides (total and distinct) that meet the filters set on the URL (besides the protein sequence match)
     private Pair<Integer, Integer> _targetPeptideCounts; // counts of the number of peptides (total and distinct) that match the target protein sequence
     private boolean _showAllPeptides;

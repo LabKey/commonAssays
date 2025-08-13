@@ -55,9 +55,9 @@ public class Ms2DataRegionExportHelper extends DataRegionExportHelper
         MS2("MS2 Ions TSV"),
         BIBLIOSPEC("Bibliospec");
 
-        private String _label;
+        private final String _label;
 
-        private FileDownloadType(String label)
+        FileDownloadType(String label)
         {
             _label = label;
         }

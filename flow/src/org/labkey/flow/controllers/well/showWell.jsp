@@ -521,7 +521,7 @@ if (originalFile != null)
         for (FlowFCSAnalysis analysis : originalRelatedFile.getFCSAnalysisOutputs())
             allAnalyses.put(analysis.getRowId(), analysis);
 }
-if (allAnalyses.size() > 0)
+if (!allAnalyses.isEmpty())
 {
     %>
     <br/><br/>

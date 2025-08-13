@@ -20,7 +20,7 @@ import org.labkey.api.query.CustomView;
 import org.labkey.api.query.QueryParam;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryView;
-import org.labkey.api.util.element.Select.SelectBuilder;
+import org.labkey.api.util.SelectBuilder;
 import org.labkey.api.view.ViewContext;
 import org.labkey.ms2.MS2Controller;
 

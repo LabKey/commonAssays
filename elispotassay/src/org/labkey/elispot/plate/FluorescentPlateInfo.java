@@ -27,8 +27,8 @@ import java.util.List;
  */
 public class FluorescentPlateInfo implements PlateInfo
 {
-    private String _measurement;
-    private String _analyte;
+    private final String _measurement;
+    private final String _analyte;
 
     private FluorescentPlateInfo(String measurement, String analyte)
     {
@@ -52,7 +52,6 @@ public class FluorescentPlateInfo implements PlateInfo
 
     /**
      * Factory to parse annotations and create PlateInfo instances
-     * @return
      */
     @Nullable
     public static FluorescentPlateInfo create(List<String> annotations)

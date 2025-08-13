@@ -15,22 +15,22 @@
  * limitations under the License.
  */
 %>
+<%@ page import="org.labkey.api.protein.MassType"%>
+<%@ page import="org.labkey.api.protein.PeptideUtils"%>
 <%@ page import="org.labkey.api.util.Formats"%>
 <%@ page import="org.labkey.api.util.Pair"%>
 <%@ page import="org.labkey.api.view.HttpView"%>
 <%@ page import="org.labkey.api.view.JspView"%>
 <%@ page import="org.labkey.api.view.template.ClientDependencies"%>
 <%@ page import="org.labkey.ms2.MS2Fraction"%>
-<%@ page import="org.labkey.ms2.MS2GZFileRenderer"%>
-<%@ page import="org.labkey.ms2.MS2Manager"%>
+<%@ page import="org.labkey.ms2.MS2GZFileRenderer" %>
+<%@ page import="org.labkey.ms2.MS2Manager" %>
 <%@ page import="org.labkey.ms2.MS2Peptide" %>
 <%@ page import="org.labkey.ms2.MS2RunType" %>
-<%@ page import="org.labkey.api.protein.MassType" %>
 <%@ page import="org.labkey.ms2.ShowPeptideContext" %>
 <%@ page import="org.labkey.ms2.reader.LibraQuantResult" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.Map" %>
-<%@ page import="org.labkey.api.protein.PeptideUtils" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%!
     @Override
@@ -40,7 +40,7 @@
     }
 %>
 <%
-    JspView<ShowPeptideContext> me = (JspView<ShowPeptideContext>) HttpView.currentView();
+    JspView<ShowPeptideContext> me = HttpView.currentView();
     ShowPeptideContext ctx = me.getModelBean();
     MS2Peptide p = ctx.peptide;
     LibraQuantResult libra = p.getLibraQuantResult();
@@ -103,7 +103,7 @@
                     <td class="labkey-form-label">Fraction</td><td><%= h(fraction.getFileName()) %></td>
                 </tr>
                 <tr>
-                    <% if (run.getRunType().getScoreColumnList().size() >= 1) { %>
+                    <% if (!run.getRunType().getScoreColumnList().isEmpty()) { %>
                         <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(0)) %></td><td><%= h(p.getRawScore() == null ? "" : Formats.f3.format(p.getRawScore())) %></td>
                     <% } %>
                     <td class="labkey-form-label">PeptideProphet</td><td><%= h((p.getPeptideProphet() == null) ? "" : Formats.f2.format(p.getPeptideProphet())) %></td>

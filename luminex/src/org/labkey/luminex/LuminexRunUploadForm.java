@@ -107,7 +107,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         {
             String value = getRequest().getParameter(AnalyteDefaultValueService.getAnalytePropertyName(analyteName, dp));
             if (dp.isRequired() && dp.getPropertyDescriptor().getPropertyType() == PropertyType.BOOLEAN &&
-                    (value == null || value.length() == 0))
+                    (value == null || value.isEmpty()))
                 value = Boolean.FALSE.toString();
             value = StringUtils.trimToNull(value);
             properties.put(dp, value);
@@ -118,7 +118,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
     @Override
     public Map<DomainProperty, String> getAnalyteProperties(String analyteName)
     {
-        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
+        Domain analyteDomain = AbstractAssayProvider.getDomainByPrefix(getProtocol(), LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE, false);
         List<? extends DomainProperty> domainProperties = analyteDomain.getProperties();
         return getAnalytePropertyMapFromRequest(domainProperties, analyteName);
     }
@@ -268,7 +268,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
             titration.setName(titrationName);
             for (Titration.Type type : Titration.Type.values())
             {
-                String propertyName = LuminexUploadWizardAction.getTitrationTypeCheckboxName(type, titration);
+                String propertyName = LuminexUploadWizardAction.getTitrationTypeCheckboxNameAndId(type, titration);
                 if (getViewContext().getRequest().getParameter(propertyName) != null)
                 {
                     String hiddenValue = getViewContext().getRequest().getParameter(propertyName);
@@ -293,7 +293,7 @@ public class LuminexRunUploadForm extends AssayRunUploadForm<LuminexAssayProvide
         {
             SinglePointControl singlePointControl = new SinglePointControl();
             singlePointControl.setName(singlePointControlName);
-            String propertyName = LuminexUploadWizardAction.getSinglePointControlCheckboxName(singlePointControlName);
+            String propertyName = LuminexUploadWizardAction.getSinglePointControlCheckboxNameAndId(singlePointControlName);
             if (StringUtils.isNotBlank(getViewContext().getRequest().getParameter(propertyName)))
             {
                 result.add(singlePointControl);

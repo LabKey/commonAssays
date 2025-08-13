@@ -35,6 +35,7 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
+import org.labkey.test.components.assay.AssayConstants;
 import org.labkey.test.components.html.BootstrapMenu;
 import org.labkey.test.components.html.Checkbox;
 import org.labkey.test.pages.ReactAssayDesignerPage;
@@ -61,7 +62,6 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.labkey.test.params.FieldDefinition.DOMAIN_TRICKY_CHARACTERS;
 import static org.labkey.test.util.TestDataGenerator.DOMAIN_SPECIAL_STRING;
 
 @BaseWebDriverTest.ClassTimeout(minutes = 40)
@@ -69,6 +69,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 {
     protected final static String TEST_ASSAY_PRJ_LUMINEX = "LuminexTest Project";
     protected final static String TEST_ASSAY_SUBFOLDER = "Subfolder";//project for luminex test
+
 
     // Issue 51845:
     //  - Luminex assay not working well when assay name contains dot (.)
@@ -103,7 +104,6 @@ public abstract class LuminexTest extends BaseWebDriverTest
     public static final File RTRANSFORM_SCRIPT_FILE_LABKEY = new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/labkey_luminex_transform.R");
     public static final File RTRANSFORM_SCRIPT_FILE_LAB =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/tomaras_luminex_transform.R");
 
-    public static final String ASSAY_ID_FIELD  = "name";
     public static final String ASSAY_DATA_FILE_LOCATION_MULTIPLE_FIELD = "__primaryFile__";
 
     public static final String DATA_TABLE_NAME = "Data";
@@ -121,6 +121,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
     public static final String isotype = "IgG ></% 1";// put back TRICKY_CHARACTERS_NO_QUOTES when issue 20061 is resolved
     public static final String conjugate = "PE ></% 1";// put back TRICKY_CHARACTERS_NO_QUOTES when issue 20061 is resolved
+    public static final Locator.XPathLocator SPECIES_LOCATOR = Locator.name("Species");
 
     public LuminexTest()
     {
@@ -363,7 +364,6 @@ public abstract class LuminexTest extends BaseWebDriverTest
      * click on the exclusion icon associated with the particular well
      * preconditions:  at Test Result page
      * postconditions: at Test Result Page with exclude Replicate Group From Analysis window up
-     * @param wellName
      */
     protected void clickExclusionMenuIconForWell(String wellName, boolean selectReplicateGroups)
     {
@@ -561,7 +561,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         wiz.startImport();
         wiz.checkParticipantVisitResolver();
         clickButtonContainingText("Next");
-        setFormElement(Locator.name(ASSAY_ID_FIELD), runId);
+        setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, runId);
     }
 
     public void goToQCAnalysisPage(String assayName, String submenuText)
@@ -572,7 +572,6 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
     /**
      * Cleanup entry point.
-     * @param afterTest
      */
     @Override
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
@@ -609,15 +608,15 @@ public abstract class LuminexTest extends BaseWebDriverTest
                                            String unkCurveFitInput, String notebookNo, String assayType, String expPerformer,
                                            String testDate, File file, int i, boolean expectDuplicateFile)
     {
-            setFormElement(Locator.name("name"), runId);
-            setFormElement(Locator.name("isotype"), isotype);
-            setFormElement(Locator.name("conjugate"), conjugate);
-            setFormElement(Locator.name("stndCurveFitInput"), stndCurveFitInput);
-            setFormElement(Locator.name("unkCurveFitInput"), unkCurveFitInput);
-            setFormElement(Locator.name("notebookNo"), notebookNo);
-            setFormElement(Locator.name("assayType"), assayType);
-            setFormElement(Locator.name("expPerformer"), expPerformer);
-            setFormElement(Locator.name("testDate"), testDate);
+            setFormElement(AssayConstants.ASSAY_NAME_FIELD_LOCATOR, runId);
+            setFormElement(Locator.name("Isotype"), isotype);
+            setFormElement(Locator.name("Conjugate"), conjugate);
+            setFormElement(Locator.name("StndCurveFitInput"), stndCurveFitInput);
+            setFormElement(Locator.name("UnkCurveFitInput"), unkCurveFitInput);
+            setFormElement(Locator.name("NotebookNo"), notebookNo);
+            setFormElement(Locator.name("AssayType"), assayType);
+            setFormElement(Locator.name("ExpPerformer"), expPerformer);
+            setFormElement(Locator.name("TestDate"), testDate);
             setFormElement(Locator.name("__primaryFile__"), file);
 
             if (expectDuplicateFile)
@@ -641,9 +640,9 @@ public abstract class LuminexTest extends BaseWebDriverTest
     public DataRegionTable uploadPositivityFile(String assayName, @LoggedParam String assayRunId, @LoggedParam File file, String baseVisit, String foldChange, boolean isBackgroundUpload, boolean expectDuplicateFile)
     {
         createNewAssayRun(assayName, assayRunId);
-        checkCheckbox(Locator.name("calculatePositivity"));
-        setFormElement(Locator.name("baseVisit"), baseVisit);
-        setFormElement(Locator.name("positivityFoldChange"), foldChange);
+        checkCheckbox(Locator.name("CalculatePositivity"));
+        setFormElement(Locator.name("BaseVisit"), baseVisit);
+        setFormElement(Locator.name("PositivityFoldChange"), foldChange);
         selectPositivityFile(file, expectDuplicateFile);
         setAnalytePropertyValues();
         finishUploadPositivityFile(assayRunId, isBackgroundUpload);
@@ -682,7 +681,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
         //verify expected values in column
         List<String> var = new DataRegionTable("Runs", getDriver()).getFullColumnValues("QC Flags").get(0);
-        String[] flags = var.toArray(new String[var.size()]);
+        String[] flags = var.toArray(new String[0]);
         for (int i=0; i<flags.length; i++)
         {
             assertEquals(expectedFlags[i], flags[i].trim());
@@ -737,10 +736,10 @@ public abstract class LuminexTest extends BaseWebDriverTest
         assertTextPresent("Titration QC Report");
         DataRegionTable drt = new DataRegionTable("AnalyteTitration", this);
         String isotype = drt.getDataAsText(0, "Isotype");
-        if (isotype.length() == 0)
+        if (isotype.isEmpty())
             isotype = "[None]";
         String conjugate = drt.getDataAsText(0, "Conjugate");
-        if (conjugate.length() == 0)
+        if (conjugate.isEmpty())
             conjugate =  "[None]";
 
         log("verify the calculation failure flag");

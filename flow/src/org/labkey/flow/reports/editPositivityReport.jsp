@@ -70,7 +70,7 @@
   The positivity report requires metadata describing the sample and background information
   of the flow experiment before it can be run.
   <br>
-  <%=link("Edit Metadata").href(editICSMetadataURL)%>
+  <%=link("Edit Metadata", editICSMetadataURL)%>
   </p>
 <% } %>
 
@@ -138,7 +138,7 @@ function Form_onCancel()
 function Form_onDelete()
 {
    <%
-   ActionURL url = null;
+   ActionURL url  ;
    if (d.getReportId() != null)
    {
        url = urlFor(DeleteAction.class).addParameter("reportId", report.getReportId().toString());

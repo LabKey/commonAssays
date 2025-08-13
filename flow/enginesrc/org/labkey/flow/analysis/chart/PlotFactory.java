@@ -54,7 +54,6 @@ public class PlotFactory
      * @param maxValue max value
      * @param bucketCount The maximum number of buckets
      * @param fn function used to space the buckets
-     * @return
      */
     static public double[] getPossibleValues(double minValue, double maxValue, int bucketCount, RangeFunction fn)
     {
@@ -280,7 +279,7 @@ public class PlotFactory
         ValueAxis xAxis = getValueAxis(getLabel(subset, axis), fn);
 
         ValueAxis yAxis = new NumberAxis("Count");
-        double yMax = 0;
+        double yMax = 10;
         for (int i = 1; i < dataset.getItemCount(0) - 1; i ++)
         {
             yMax = Math.max(dataset.getY(0, i), yMax);

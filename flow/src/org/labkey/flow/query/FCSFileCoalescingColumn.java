@@ -16,6 +16,7 @@
 package org.labkey.flow.query;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
@@ -42,13 +43,13 @@ import java.util.Map;
  */
 public class FCSFileCoalescingColumn extends ExprColumn
 {
-    private boolean _relativeFromFCSFile;
+    private final boolean _relativeFromFCSFile;
 
     private Pair<FieldKey, FieldKey> _specimenIdFieldKeys;
     private Pair<FieldKey, FieldKey> _participantIdFieldKeys;
     private Pair<FieldKey, FieldKey> _visitFieldKeys;
     private Pair<FieldKey, FieldKey> _dateFieldKeys;
-    private Pair<FieldKey, FieldKey> _targetStudyFieldKeys;
+    private final Pair<FieldKey, FieldKey> _targetStudyFieldKeys;
 
     public FCSFileCoalescingColumn(TableInfo parent, FieldKey key, JdbcType type, @Nullable ICSMetadata metadata, boolean relativeFromFCSFile)
     {
@@ -74,7 +75,7 @@ public class FCSFileCoalescingColumn extends ExprColumn
                 _dateFieldKeys = Pair.of(dateFieldKey, FlowSchema.rewriteAsOriginalFCSFile(dateFieldKey));
         }
 
-        FieldKey targetStudyFieldKey = relativeFromFCSFile ? FieldKey.fromParts("Run", "TargetStudy") : FieldKey.fromParts("FCSFile", "Run", "TargetStudy");
+        FieldKey targetStudyFieldKey = relativeFromFCSFile ? FieldKey.fromParts("Run", AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME) : FieldKey.fromParts("FCSFile", "Run", "TargetStudy");
         _targetStudyFieldKeys = Pair.of(targetStudyFieldKey, FlowSchema.rewriteAsOriginalFCSFile(targetStudyFieldKey));
     }
 
@@ -134,7 +135,7 @@ public class FCSFileCoalescingColumn extends ExprColumn
         SQLFragment coalesceFrag = new SQLFragment();
         coalesceFrag.append("SELECT\n");
         for (FieldKey pkCol : pkCols)
-            coalesceFrag.append("  ").append(columnMap.get(pkCol).getAlias()).append("\n");
+            coalesceFrag.append("  ").appendIdentifier(columnMap.get(pkCol).getAlias()).append("\n");
 
         for (Map.Entry<String, Pair<FieldKey, FieldKey>> entry : pairs.entrySet())
         {
@@ -143,9 +144,9 @@ public class FCSFileCoalescingColumn extends ExprColumn
 
             coalesceFrag.append(",\n");
             coalesceFrag.append("  COALESCE(\n");
-            coalesceFrag.append(columnMap.get(pair.first).getAlias());
+            coalesceFrag.appendIdentifier(columnMap.get(pair.first).getAlias());
             coalesceFrag.append(", ");
-            coalesceFrag.append(columnMap.get(pair.second).getAlias());
+            coalesceFrag.appendIdentifier(columnMap.get(pair.second).getAlias());
             coalesceFrag.append(") AS ").append(name);
         }
         coalesceFrag.append("\n");
@@ -162,7 +163,7 @@ public class FCSFileCoalescingColumn extends ExprColumn
             frag.append(and);
             frag.append(parentAlias).append(".").append(pkCol);
             frag.append(" = ");
-            frag.append(name).append(".").append(columnMap.get(pkCol).getAlias());
+            frag.append(name).append(".").appendIdentifier(columnMap.get(pkCol).getAlias());
             and = " AND ";
         }
 

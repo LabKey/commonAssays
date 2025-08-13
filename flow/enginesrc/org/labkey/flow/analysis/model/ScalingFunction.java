@@ -17,7 +17,6 @@ package org.labkey.flow.analysis.model;
 
 import org.labkey.flow.analysis.data.NumberArray;
 import org.labkey.flow.analysis.data.FloatArray;
-import org.labkey.flow.analysis.data.ConstrainedNumberArray;
 import org.labkey.flow.analysis.data.DoubleArray;
 
 import static java.lang.Math.max;
@@ -38,8 +37,7 @@ public abstract class ScalingFunction implements Cloneable
 	 * @param scale		linear scaling factor
 	 * @param range		max input value
 	 * @param minValue	min output value
-	 * @return
-	 */
+     */
 	private static ScalingFunction makeFunction(double decade, double scale, double range, double minValue)
 	{
 		ScalingFunction fn;

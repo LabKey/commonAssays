@@ -181,7 +181,6 @@ public class Hyperlog
 	/**
 	 * Computes the value of Taylor series at a point on the scale
 	 * 
-	 * @param scale
 	 * @return value of the inverse hyperlog function
 	 */
 	protected double taylorSeries (double scale)
@@ -201,7 +200,8 @@ public class Hyperlog
 	 *          a data value
 	 * @return the double Hyperlog scale value
 	 */
-	public double scale (double value)
+	@Override
+    public double scale (double value)
 	{
 		// handle true zero separately
 		if (value == 0)
@@ -266,7 +266,8 @@ public class Hyperlog
 	 *          a double scale value
 	 * @return the double data value
 	 */
-	public double inverse (double scale)
+	@Override
+    public double inverse (double scale)
 	{
 		// reflect negative scale regions
 		boolean negative = scale < x1;
@@ -303,7 +304,8 @@ public class Hyperlog
 	 * 
 	 * @return a double array of data values
 	 */
-	public double[] axisLabels ()
+	@Override
+    public double[] axisLabels ()
 	{
 		// number of decades in the positive logarithmic region
 		double p = M - 2 * W;
