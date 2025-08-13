@@ -116,7 +116,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 int plateCol = location.getValue();
 
                 Object dataValue = rowData.get(resultColumnHeader);
-                if (!(dataValue instanceof Integer))
+                if (!(dataValue instanceof Integer || dataValue instanceof Long))
                 {
                     throw createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
                             "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue);
@@ -138,7 +138,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                                 " and virus name : " + virusName);
                 }
 
-                wellValues[plateRow - 1][plateCol - 1] = (Integer) dataValue;
+                wellValues[plateRow - 1][plateCol - 1] = ((Number)dataValue).doubleValue();
                 if (++wellCount == wellsPerPlate)
                 {
                     Plate plate = PlateService.get().createPlate(template, wellValues, null, PlateService.NO_RUNID, plateCount + 1);
