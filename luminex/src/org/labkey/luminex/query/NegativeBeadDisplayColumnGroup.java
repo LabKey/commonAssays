@@ -49,7 +49,10 @@ public class NegativeBeadDisplayColumnGroup extends DisplayColumnGroup
                 InputBuilder.checkbox().name(id).id(id).appendTo(out);
                 StringBuilder onChange = new StringBuilder("b = this.checked;\n");
 
-                getColumns().forEach(col -> {
+                // Index starts at 1 -- always leave the first column visible (Issue 53620)
+                for (int i = 1; i < getColumns().size(); i++)
+                {
+                    DisplayColumn col = getColumns().get(i);
                     if (col.getColumnInfo() != null)
                     {
                         onChange.append("s = document.getElementsByName('")
@@ -59,7 +62,7 @@ public class NegativeBeadDisplayColumnGroup extends DisplayColumnGroup
                             .append(col.getFormFieldName(ctx))
                             .append("')[0].style.display = b || s == 0 ? 'none' : 'block';\n");
                     }
-                });
+                }
 
                 onChange.append(" if (b) { ")
                     .append(inputName)

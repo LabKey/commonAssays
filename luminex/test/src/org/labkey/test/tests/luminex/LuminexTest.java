@@ -660,6 +660,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         setFormElement(Locator.name("__primaryFile__"), file);
         if (expectDuplicateFile)
             waitForText("A file with name '" + file.getName() + "' already exists");
+        scrollIntoView(Locator.lkButton("Next"), true);
         clickButton("Next");
     }
 
