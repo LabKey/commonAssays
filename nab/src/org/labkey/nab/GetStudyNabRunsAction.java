@@ -22,6 +22,7 @@ import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
+import org.labkey.api.collections.LongHashMap;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.security.RequiresPermission;
@@ -41,18 +42,18 @@ import java.util.Set;
 @ApiVersion(10.1)
 public class GetStudyNabRunsAction extends ReadOnlyApiAction<GetStudyNabRunsAction.GetStudyNabRunsForm>
 {
-    Map<Integer, Map<String, Object>> _extraObjectIdProps = new HashMap<>();
+    Map<Long, Map<String, Object>> _extraObjectIdProps = new LongHashMap<>();
 
     public static class GetStudyNabRunsForm extends GetNabRunsBaseForm
     {
-        private int[] _objectIds;
+        private long[] _objectIds;
 
-        public int[] getObjectIds()
+        public long[] getObjectIds()
         {
             return _objectIds;
         }
 
-        public void setObjectIds(int[] objectIds)
+        public void setObjectIds(long[] objectIds)
         {
             _objectIds = objectIds;
         }
@@ -86,10 +87,10 @@ public class GetStudyNabRunsAction extends ReadOnlyApiAction<GetStudyNabRunsActi
 
     protected Collection<ExpRun> getRuns(GetStudyNabRunsForm form, BindException errors)
     {
-        Map<Pair<Integer, String>, ExpProtocol> readableObjectIds = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), form.getObjectIds());
+        Map<Pair<Long, String>, ExpProtocol> readableObjectIds = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), form.getObjectIds());
         Set<ExpRun> runs = new HashSet<>();
 
-        for (Pair<Integer, String> id : readableObjectIds.keySet())
+        for (Pair<Long, String> id : readableObjectIds.keySet())
         {
             // build up additional properties to associate with the object id
             if (!_extraObjectIdProps.containsKey(id.getKey()))

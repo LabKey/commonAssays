@@ -437,8 +437,8 @@ public class ProteinController extends SpringActionController
         @Override
         public boolean handlePost(Object o, BindException errors)
         {
-            Set<Integer> setIds = DataRegionSelection.getSelectedIntegers(getViewContext(), true);
-            for (Integer id : setIds)
+            Set<Long> setIds = DataRegionSelection.getSelectedIntegers(getViewContext(), true);
+            for (Long id : setIds)
             {
                 CustomAnnotationSet set = CustomAnnotationSetManager.getCustomAnnotationSet(getContainer(), id, false);
                 if (set != null)
@@ -606,7 +606,7 @@ public class ProteinController extends SpringActionController
                     descriptors.add(pd);
                 }
 
-                int ownerObjectId = OntologyManager.ensureObject(getContainer(), annotationSet.getLsid());
+                long ownerObjectId = OntologyManager.ensureObject(getContainer(), annotationSet.getLsid());
                 OntologyManager.ImportHelper helper = new CustomAnnotationImportHelper(stmt, connection, annotationSet.getLsid(), lookupStringColumnName);
 
                 OntologyManager.insertTabDelimited(getContainer(), getUser(), ownerObjectId, helper, descriptors, MapDataIterator.of(rows).getDataIterator(new DataIteratorContext()), false, null);

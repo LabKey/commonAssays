@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
+import org.labkey.api.collections.LongHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.RemapCache;
@@ -108,7 +109,7 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
             }
 
             RemapCache cache = new RemapCache();
-            Map<Integer, ExpMaterial> materialCache = new HashMap<>();
+            Map<Long, ExpMaterial> materialCache = new LongHashMap<>();
 
             Map<String, String> runProps = getRunPropertyValues(expRun, runDomain);
 
@@ -149,8 +150,8 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
 
     @Override
     public void insertMatrixData(Container c, User user,
-                                            Map<String, ExpMaterial> samplesMap, DataLoader loader,
-                                            Map<String, String> runProps, Integer dataRowId) throws ExperimentException
+                                 Map<String, ExpMaterial> samplesMap, DataLoader loader,
+                                 Map<String, String> runProps, Long dataRowId) throws ExperimentException
     {
         assert MicroarrayUserSchema.getSchema().getScope().isTransactionActive() : "Should be invoked in the context of an existing transaction";
 
@@ -205,8 +206,8 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
                     if (sampleName.equals(FEATURE_ID_COLUMN_NAME) || row.get(sampleName) == null)
                         continue;
 
-                    statement.setInt(1, dataRowId);
-                    statement.setInt(2, samplesMap.get(sampleName).getRowId());
+                    statement.setLong(1, dataRowId);
+                    statement.setLong(2, samplesMap.get(sampleName).getRowId());
                     statement.setInt(3, featureId);
                     statement.setDouble(4, ((Number) row.get(sampleName)).doubleValue());
                     statement.addBatch();

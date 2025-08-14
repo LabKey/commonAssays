@@ -151,10 +151,10 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     }
 
     @Override
-    public Set<ExpData> getDatasForResultRows(Collection<Integer> rowIds, ExpProtocol protocol, ResolverCache cache)
+    public Set<ExpData> getDatasForResultRows(Collection<Long> rowIds, ExpProtocol protocol, ResolverCache cache)
     {
         Set<ExpData> result = new HashSet<>();
-        for (Integer rowId : rowIds)
+        for (Long rowId : rowIds)
         {
             NabSpecimen nabSpecimen = NabManager.get().getNabSpecimen(rowId);
             if (null != nabSpecimen)
@@ -417,7 +417,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     @Override
     protected void moveAssayResults(List<ExpRun> runs, ExpProtocol protocol, Container sourceContainer, Container targetContainer, User user, AssayMoveData assayMoveData)
     {
-        List<Integer> runRowIds = runs.stream().map(ExpRun::getRowId).toList();
+        List<Long> runRowIds = runs.stream().map(ExpRun::getRowId).toList();
 
         TableInfo wellDataTable = NabManager.getTableInfoWellData();
         SQLFragment updateSql = new SQLFragment("UPDATE ").append(wellDataTable)

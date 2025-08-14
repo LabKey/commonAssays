@@ -97,12 +97,12 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
             _run = FlowRun.fromURL(getViewContext().getActionURL(), getRequest(), getViewContext().getContainer(), getUser());
             if (_run != null)
             {
-                FlowPreference.editScriptRunId.setValue(getRequest(), Integer.toString(_run.getRunId()));
+                FlowPreference.editScriptRunId.setValue(getRequest(), Long.toString(_run.getRunId()));
             }
             _comp = FlowCompensationMatrix.fromURL(getViewContext().getActionURL(), getRequest(), getContainer(), getUser());
             if (_comp != null)
             {
-                FlowPreference.editScriptCompId.setValue(getRequest(), Integer.toString(_comp.getRowId()));
+                FlowPreference.editScriptCompId.setValue(getRequest(), Long.toString(_comp.getRowId()));
             }
             String strWellId = getRequest().getParameter(FlowParam.wellId.toString());
             if (strWellId != null)
@@ -320,14 +320,14 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
         return getContainer().hasPermission(getUser(), UpdatePermission.class) && _runCount == 0;
     }
 
-    public Map<Integer, String> getExperimentRuns()
+    public Map<Long, String> getExperimentRuns()
     {
         return getExperimentRuns(false);
     }
 
-    public Map<Integer, String> getExperimentRuns(boolean realFiles)
+    public Map<Long, String> getExperimentRuns(boolean realFiles)
     {
-        LinkedHashMap<Integer, String> ret = new LinkedHashMap<>();
+        LinkedHashMap<Long, String> ret = new LinkedHashMap<>();
         List<FlowRun> runs = realFiles ?
                 FlowRun.getRunsWithRealFCSFiles(getContainer(), FlowProtocolStep.keywords) :
                 FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);

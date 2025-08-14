@@ -25,6 +25,7 @@ import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateService;
 import org.labkey.api.assay.plate.WellData;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
 import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
@@ -118,9 +119,9 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
         if (wellDataRows.isEmpty())
             throw new ExperimentException("Well data could not be found for run " + run.getName() + ". Run details are not available.");
 
-        Map<Integer, double[][]> matrices = new HashMap<>();
-        Map<Integer, boolean[][]> exclusions = new HashMap<>();
-        Map<Integer, String> plateToVirusMap = new HashMap<>();
+        Map<Integer, double[][]> matrices = new IntHashMap<>();
+        Map<Integer, boolean[][]> exclusions = new IntHashMap<>();
+        Map<Integer, String> plateToVirusMap = new IntHashMap<>();
         for (WellDataRow wellDataRow : wellDataRows)
         {
             Integer plateNum = wellDataRow.getPlateNumber();

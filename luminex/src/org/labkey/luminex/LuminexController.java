@@ -676,9 +676,9 @@ public class LuminexController extends SpringActionController
         protected void deleteObjects(DeleteForm form) throws SQLException, InvalidKeyException, BatchValidationException, QueryUpdateServiceException
         {
             List<Map<String, Object>> keys = new ArrayList<>();
-            Set<Integer> selections = DataRegionSelection.getSelectedIntegers(getViewContext(), true);
+            Set<Long> selections = DataRegionSelection.getSelectedIntegers(getViewContext(), true);
 
-            for (Integer selection : selections)
+            for (var selection : selections)
             {
                 Map<String, Object> entry = new HashMap<>();
                 entry.put("RowId", selection);
@@ -731,7 +731,7 @@ public class LuminexController extends SpringActionController
 
             GuideSetsDeleteBean bean = new GuideSetsDeleteBean(form.getReturnUrl(), form.getDataRegionSelectionKey(), form.getProtocol().getRowId(), getContainer(), form.getProtocol().getName());
 
-            Set<Integer> selections = DataRegionSelection.getSelectedIntegers(getViewContext(), false);
+            Set<Long> selections = DataRegionSelection.getSelectedIntegers(getViewContext(), false);
 
             SimpleFilter filter = new SimpleFilter();
             filter.addInClause(FieldKey.fromParts("RowId"), selections);
@@ -874,7 +874,7 @@ public class LuminexController extends SpringActionController
 
         private final List<GuideSet> _guideSets;
 
-        public GuideSetsDeleteBean(String returnUrl, String selectionKey, int protocolId, Container container, String assayName)
+        public GuideSetsDeleteBean(String returnUrl, String selectionKey, long protocolId, Container container, String assayName)
         {
             _guideSets = new ArrayList<>();
             setReturnUrl(returnUrl);
@@ -912,7 +912,7 @@ public class LuminexController extends SpringActionController
             settings.setBaseSort(new Sort("-RowId")); // Issue 22935
             setHelpTopic("applyGuideSets");
 
-            final int protocolId = _protocol.getRowId();
+            final long protocolId = _protocol.getRowId();
             GraphLinkQueryView view = new GraphLinkQueryView(null, null, _protocol, schema, settings, errors)
             {
                 @Override

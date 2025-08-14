@@ -55,7 +55,7 @@ public class StudyNabGraphAction extends SimpleViewAction<GraphSelectedForm>
     @Override
     public ModelAndView getView(GraphSelectedForm graphForm, BindException errors) throws Exception
     {
-        Map<Pair<Integer, String>, ExpProtocol> ids = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), graphForm.getId());
+        Map<Pair<Long, String>, ExpProtocol> ids = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), graphForm.getId());
         if (ids.values().isEmpty())
             throw new NotFoundException("No IDs available for charting.");
         // We don't care which protocol we get- we just need any valid protocol to get to the provider (which should be
@@ -72,9 +72,9 @@ public class StudyNabGraphAction extends SimpleViewAction<GraphSelectedForm>
                     throw new IllegalStateException("Cannot graph data from different providers on the same chart");
             }
         }
-        int[] objectIds = new int[ids.size()];
+        long[] objectIds = new long[ids.size()];
         int i = 0;
-        for (Pair<Integer, String> id : ids.keySet())
+        for (Pair<Long, String> id : ids.keySet())
         {
             objectIds[i++] = id.getKey();
         }

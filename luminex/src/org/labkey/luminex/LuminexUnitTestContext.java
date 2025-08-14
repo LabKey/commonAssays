@@ -261,7 +261,7 @@ public class LuminexUnitTestContext extends AssayRunUploadForm<LuminexAssayProvi
         mock.checking(new Expectations()
         {{
                 allowing(expProtocol).getRowId();
-                will(returnValue(100));
+                will(returnValue(100L));
                 allowing(expProtocol).getName();
                 will(returnValue(AssayRunAsyncContext.UNIT_TESTING_PROTOCOL_NAME));
          }});

@@ -52,7 +52,7 @@ public class NabRunPropertyMap extends HashMap<String, Object>
     }
 
     public NabRunPropertyMap(DilutionAssayRun assay, boolean includeStats, boolean includeWells, boolean calculateNeut,
-                             boolean includeFitParameters, Map<Integer, Map<String, Object>> extraObjectIdProps)
+                             boolean includeFitParameters, Map<Long, Map<String, Object>> extraObjectIdProps)
     {
         put("runId", assay.getRun().getRowId());
         put("properties", new PropertyNameMap(assay.getRunProperties()));

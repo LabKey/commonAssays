@@ -554,7 +554,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
 
         private void validateProtocol(GuideSet bean) throws ValidationException
         {
-            int protocolId = bean.getProtocolId();
+            long protocolId = bean.getProtocolId();
             if (protocolId == 0)
             {
                 bean.setProtocolId(_protocol.getRowId());

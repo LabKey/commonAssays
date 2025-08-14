@@ -37,7 +37,7 @@ public class LuminexSaveExclusionsForm implements ApiJsonForm
 {
     private Integer _assayId;
     private String _tableName;
-    private Integer _runId;
+    private Long _runId;
 
     private final List<LuminexSingleExclusionCommand> _commands = new ArrayList<>();
 
@@ -55,7 +55,7 @@ public class LuminexSaveExclusionsForm implements ApiJsonForm
 
         _assayId = getIntPropIfExists(json, "assayId");
         _tableName = json.optString("tableName", null);
-        _runId = getIntPropIfExists(json, "runId");
+        _runId = getLongPropIfExists(json, "runId");
 
         JSONArray commands = json.getJSONArray("commands");
         for (int i = 0; i < commands.length(); i++)
@@ -64,7 +64,7 @@ public class LuminexSaveExclusionsForm implements ApiJsonForm
             LuminexSingleExclusionCommand command = new LuminexSingleExclusionCommand();
             command.setCommand(commandJSON.optString("command", null));
             command.setKey(getIntPropIfExists(commandJSON, "key"));
-            command.setDataId(getIntPropIfExists(commandJSON, "dataId"));
+            command.setDataId(getLongPropIfExists(commandJSON, "dataId"));
             command.setDescription(commandJSON.optString("description", null));
             command.setType(commandJSON.optString("type", null));
             command.setDilution(getDoublePropIfExists(commandJSON, "dilution"));
@@ -86,7 +86,7 @@ public class LuminexSaveExclusionsForm implements ApiJsonForm
         return _tableName;
     }
 
-    public Integer getRunId()
+    public Long getRunId()
     {
         return _runId;
     }
@@ -109,6 +109,11 @@ public class LuminexSaveExclusionsForm implements ApiJsonForm
     private Integer getIntPropIfExists(JSONObject json, String propName)
     {
         return json.has(propName) ? json.getInt(propName) : null;
+    }
+
+    private Long getLongPropIfExists(JSONObject json, String propName)
+    {
+        return json.has(propName) ? json.getLong(propName) : null;
     }
 
     private Double getDoublePropIfExists(JSONObject json, String propName)

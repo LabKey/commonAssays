@@ -17,6 +17,7 @@
 package org.labkey.flow.data;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.collections.LongHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.api.DataType;
@@ -52,7 +53,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         }
 
         List<AttrObject> attrs = FlowManager.get().getAttrObjects(flowDatas);
-        Map<Integer, AttrObject> attrMap = new HashMap<>(2*datas.size());
+        Map<Long, AttrObject> attrMap = new LongHashMap<>(2*datas.size());
         for (AttrObject attr : attrs)
         {
             attrMap.put(attr.getDataId(), attr);
@@ -86,17 +87,17 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         return ((FlowDataType) type).newInstance(data);
     }
 
-    static public FlowDataObject fromRowId(int id)
+    static public FlowDataObject fromRowId(long id)
     {
         return fromData(ExperimentService.get().getExpData(id));
     }
 
-    static public List<FlowDataObject> fromRowIds(int... ids)
+    static public List<FlowDataObject> fromRowIds(long... ids)
     {
         return fromDatas(ExperimentService.get().getExpDatas(ids));
     }
 
-    static public List<FlowDataObject> fromRowIds(Collection<Integer> ids)
+    static public List<FlowDataObject> fromRowIds(Collection<Long> ids)
     {
         return fromDatas(ExperimentService.get().getExpDatas(ids));
     }
@@ -180,7 +181,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         return new FlowRun(run);
     }
 
-    public int getRowId()
+    public long getRowId()
     {
         return getData().getRowId();
     }

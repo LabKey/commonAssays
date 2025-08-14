@@ -10,6 +10,7 @@ import org.labkey.api.assay.plate.PlateService;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.Well;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.statistics.CurveFit;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -45,7 +46,7 @@ public class ManualImportHelper extends AbstractElisaImportHelper
     @Override
     public Map<Integer, Plate> getAnalyteToPlate(String plateName) throws ExperimentException
     {
-        Map<Integer, Plate> analyteMap = new HashMap<>();
+        Map<Integer, Plate> analyteMap = new IntHashMap<>();
         PlateReader reader = _provider.getPlateReader(BioTekPlateReader.LABEL);
         if (reader != null)
         {

@@ -55,7 +55,7 @@ public class ImportAnalysisForm implements HasAllowBindParameter
     private AnalysisEngine selectAnalysisEngine = null;
     private boolean createAnalysis;
     private String newAnalysisName;
-    private int existingAnalysisId;
+    private long existingAnalysisId;
     private String targetStudy;
 
     // FCSFile directories selected in the pipeline browser for association with the imported workspace analysis.
@@ -180,12 +180,12 @@ public class ImportAnalysisForm implements HasAllowBindParameter
         this.newAnalysisName = newAnalysisName;
     }
 
-    public int getExistingAnalysisId()
+    public long getExistingAnalysisId()
     {
         return existingAnalysisId;
     }
 
-    public void setExistingAnalysisId(int existingAnalysisId)
+    public void setExistingAnalysisId(long existingAnalysisId)
     {
         this.existingAnalysisId = existingAnalysisId;
     }

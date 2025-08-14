@@ -26,6 +26,8 @@ import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.assay.nab.query.NAbSpecimenTable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.IntHashMap;
+import org.labkey.api.collections.LongArrayList;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
@@ -68,15 +70,15 @@ public abstract class NabDataHandler extends DilutionDataHandler
     }
 
     @Override
-    public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, StatsService.CurveFitType fit, int... dataObjectIds) throws ExperimentException
+    public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, StatsService.CurveFitType fit, long... dataObjectIds) throws ExperimentException
     {
         Map<DilutionSummary, DilutionAssayRun> summaries = new LinkedHashMap<>();
         if (dataObjectIds == null || dataObjectIds.length == 0)
             return summaries;
 
-        Map<Integer, DilutionAssayRun> dataToAssay = new HashMap<>();
-        List<Integer> nabSpecimenIds = new ArrayList<>(dataObjectIds.length);
-        for (int nabSpecimenId : dataObjectIds)
+        Map<Integer, DilutionAssayRun> dataToAssay = new IntHashMap<>();
+        List<Long> nabSpecimenIds = new LongArrayList(dataObjectIds.length);
+        for (long nabSpecimenId : dataObjectIds)
             nabSpecimenIds.add(nabSpecimenId);
         List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);
         for (NabSpecimen nabSpecimen : nabSpecimens)
@@ -114,7 +116,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
     protected void importRows(ExpData data, ExpRun run, ExpProtocol protocol, DataIteratorBuilder rawData, User user) throws ExperimentException
     {
         Map<Integer, String> cutoffFormats = getCutoffFormats(protocol, run);
-        Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen = new HashMap<>();
+        Map<String, Pair<Long, String>> wellGroupNameToNabSpecimen = new HashMap<>();
 
         populateDilutionStats(data, run, protocol, rawData, wellGroupNameToNabSpecimen);
         populateWellData(protocol, run, user, cutoffFormats, wellGroupNameToNabSpecimen);
@@ -124,7 +126,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
      * Populates cutoff and AUC information from the passed in raw data
      */
     public void populateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, DataIteratorBuilder rawData,
-                                      Map<String, Pair<Integer, String>> wellgroupNameToNabSpecimen) throws ExperimentException
+                                      Map<String, Pair<Long, String>> wellgroupNameToNabSpecimen) throws ExperimentException
     {
         _populateDilutionStats(data, run, protocol, rawData, wellgroupNameToNabSpecimen, true, Collections.emptyList(), Collections.emptyList());
     }
@@ -147,7 +149,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
      * @param cutoffRows if commitData is false, then cutoff data will be returned in this collection
      */
     private void _populateDilutionStats(ExpData data, ExpRun run, ExpProtocol protocol, DataIteratorBuilder rawData,
-                                        Map<String, Pair<Integer, String>> wellGroupNameToNabSpecimen, boolean commitData,
+                                        Map<String, Pair<Long, String>> wellGroupNameToNabSpecimen, boolean commitData,
                                         List<Map<String, Object>> specimenRows, List<Map<String, Object>> cutoffRows) throws ExperimentException
     {
         Container container = run.getContainer();
@@ -205,7 +207,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
                 nabSpecimenEntries.put("VirusLsid", createVirusWellGroupLsid(data, virusWellGroupName));
                 nabSpecimenEntries.put(FIT_PARAMETERS_PROPERTY_NAME, group.get(FIT_PARAMETERS_PROPERTY_NAME));
 
-                int nabRowid = 0;
+                long nabRowid = 0;
                 if (commitData)
                 {
                     nabRowid = NabManager.get().insertNabSpecimenRow(null, nabSpecimenEntries);

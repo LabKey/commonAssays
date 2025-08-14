@@ -57,6 +57,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.labkey.api.exp.api.ExperimentService.asInteger;
 
 /**
  * User: kevink
@@ -577,7 +578,7 @@ public class PersistTests
                             "Container", c.getId(),
                             "Name", UPPER_NAME,
                             "Id", -1));
-            upperId = (Integer)map.get("RowId");
+            upperId = asInteger(map.get("RowId"));
 
             // Set the Id column to indicate that it is not an alias
             map.put("Id", upperId);
@@ -591,7 +592,7 @@ public class PersistTests
                                 "Container", c.getId(),
                                 "Name", lower_name,
                                 "Id", -1));
-                lowerId = (Integer)map.get("RowId");
+                lowerId = asInteger(map.get("RowId"));
 
                 // Set the Id column to indicate that it is not an alias
                 map.put("Id", lowerId);

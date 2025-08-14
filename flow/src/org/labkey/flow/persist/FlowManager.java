@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.labkey.api.audit.AuditLogService;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.Aggregate;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -91,6 +92,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertNotNull;
+import static org.labkey.api.exp.api.ExperimentService.asInteger;
 import static org.labkey.flow.data.AttributeType.keyword;
 
 public class FlowManager
@@ -423,7 +425,7 @@ public class FlowManager
         map = Table.insert(null, table, map);
 
         // Set Id to RowId if we aren't inserting an alias
-        Integer rowId = (Integer)map.get("RowId");
+        Integer rowId = asInteger(map.get("RowId"));
         assert rowId != null;
         if (aliasId <= 0)
         {
@@ -871,7 +873,7 @@ public class FlowManager
     /**
      * Get a usage count for an attribute and its aliases.
      */
-    public Map<Integer, Number> getUsageCount(AttributeType type, int rowId)
+    public Map<Long, Number> getUsageCount(AttributeType type, int rowId)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
         if (entry == null)
@@ -892,7 +894,7 @@ public class FlowManager
                 .append("GROUP BY val.").append(valueTableOriginalAttrIdColumn).append("\n");
 
         SqlSelector selector = new SqlSelector(getSchema(), sql);
-        return selector.getValueMap();
+        return selector.getValueMap(Long.class);
     }
 
     /**
@@ -962,7 +964,7 @@ public class FlowManager
                 .append("WHERE fo.rowid = val.objectid\n")
                 .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").appendValue(rowId).append("\n");
 
-        final Map<Integer, Collection<FlowDataObject>> usages = new HashMap<>();
+        final Map<Integer, Collection<FlowDataObject>> usages = new IntHashMap<>();
         SqlSelector selector = new SqlSelector(getSchema(), sql);
         selector.forEachMap(row -> {
             Integer attributeRowId = (Integer)row.get("OriginalAttrId");

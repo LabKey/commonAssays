@@ -258,7 +258,7 @@ public class FlowReportManager
 //        Integer[] ids = Table.executeArray(table, table.getColumn("ObjectURI"), new SimpleFilter("ObjectURI", uri), null, Integer.class);
 //    }
 
-    public static Integer getReportOntologyObjectId(FlowReport report, Container container)
+    public static Long getReportOntologyObjectId(FlowReport report, Container container)
     {
         String uri = getReportExpObjectURI(report, container);
         if (uri == null)
@@ -268,13 +268,13 @@ public class FlowReportManager
         return obj == null ? null : obj.getObjectId();
     }
 
-    public static Integer ensureReportOntologyObjectId(FlowReport report, Container container)
+    public static Long ensureReportOntologyObjectId(FlowReport report, Container container)
     {
         String uri = getReportExpObjectURI(report, container);
         if (uri == null)
             return null;
 
-        return OntologyManager.ensureObject(container, uri, (Integer) null);
+        return OntologyManager.ensureObject(container, uri, (Long) null);
     }
 
     public static String FLOW_REPORT_RESULT_OBJECT_LSID_PART = "FlowReportResult";
@@ -298,7 +298,7 @@ public class FlowReportManager
     public static void deleteReportResults(FlowReport report, Container container)
     {
         // Delete all owned objects of the report's exp.object
-        Integer objectId = getReportOntologyObjectId(report, container);
+        Long objectId = getReportOntologyObjectId(report, container);
         if (objectId != null)
             OntologyManager.deleteOntologyObjects(container, true, objectId);
     }

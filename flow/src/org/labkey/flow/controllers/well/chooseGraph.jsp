@@ -45,10 +45,10 @@
     boolean hasScripts = false;
     boolean hasComps = false;
     FlowWell well = form.getWell();
-    Map<Integer, String> scriptOptions = new LinkedHashMap<>();
+    Map<Long, String> scriptOptions = new LinkedHashMap<>();
     if (form.getScript() == null)
     {
-        scriptOptions.put(0, "None");
+        scriptOptions.put(0L, "None");
     }
     FlowScript wellScript = well.getScript();
     if (wellScript != null)
@@ -71,10 +71,10 @@
         }
     }
 
-    Map<Integer, String> compOptions = new LinkedHashMap<>();
+    Map<Long, String> compOptions = new LinkedHashMap<>();
     if (form.getCompensationMatrix() == null)
     {
-        compOptions.put(0, "None");
+        compOptions.put(0L, "None");
     }
     FlowCompensationMatrix wellCompensationMatrix = well.getCompensationMatrix();
     if (wellCompensationMatrix != null)

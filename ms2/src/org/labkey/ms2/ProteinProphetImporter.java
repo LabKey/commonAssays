@@ -223,7 +223,7 @@ public class ProteinProphetImporter
                         "WHERE p.TrimmedPeptide = t.TrimmedPeptide AND p.Charge = t.Charge AND p.Run = ?";
 
                 mergePeptideStmt = connection.prepareStatement(mergePeptideSQL);
-                mergePeptideStmt.setInt(1, run.getRun());
+                mergePeptideStmt.setLong(1, run.getRun());
                 mergePeptideStmt.executeUpdate();
                 log.info("Finished with moving data into ms2.PeptidesMemberships after " + (System.currentTimeMillis() - insertStartTime) + " ms");
 

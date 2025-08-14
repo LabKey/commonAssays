@@ -25,7 +25,7 @@ public class LuminexReplicate
 {
     private final String _description;
     private final Double _dilution;
-    private final int _dataId;
+    private final long _dataId;
     private Double _expConc;
     private String _type;
 
@@ -55,7 +55,7 @@ public class LuminexReplicate
         return _dilution;
     }
 
-    public int getDataId()
+    public long getDataId()
     {
         return _dataId;
     }
@@ -92,7 +92,7 @@ public class LuminexReplicate
     {
         int result = _description != null ? _description.hashCode() : 0;
         result = 31 * result + (_dilution != null ? _dilution.hashCode() : 0);
-        result = 31 * result + _dataId;
+        result = 31 * result + (int)_dataId;
         result = 31 * result + (_expConc != null ? _expConc.hashCode() : 0);
         result = 31 * result + (_type != null ? _type.hashCode() : 0);
         return result;

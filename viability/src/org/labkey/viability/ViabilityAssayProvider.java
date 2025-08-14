@@ -242,10 +242,10 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public Set<ExpData> getDatasForResultRows(Collection<Integer> rowIds, ExpProtocol protocol, ResolverCache cache)
+    public Set<ExpData> getDatasForResultRows(Collection<Long> rowIds, ExpProtocol protocol, ResolverCache cache)
     {
         Set<ExpData> result = new HashSet<>();
-        for (Integer rowId : rowIds)
+        for (Long rowId : rowIds)
         {
             ExpData data = ViabilityManager.getResultExpData(rowId);
             if (data != null)

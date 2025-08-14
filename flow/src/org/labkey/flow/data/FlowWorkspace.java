@@ -95,7 +95,7 @@ public class FlowWorkspace extends FlowDataObject
         super(data);
     }
 
-    public int getWorkspaceId()
+    public long getWorkspaceId()
     {
         return getRowId();
     }

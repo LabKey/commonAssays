@@ -137,10 +137,10 @@ There are <a id="all-samples" href="<%=h(protocol.getSampleTypeDetailsURL(st, ge
     <% } %>
     <%
         int i = 0;
-        for (Map.Entry<Integer, List<Integer>> entry : linkedSampleIdToFcsFileIds.entrySet())
+        for (Map.Entry<Long, List<Long>> entry : linkedSampleIdToFcsFileIds.entrySet())
         {
             i++;
-            List<Integer> fcsFileIds = entry.getValue();
+            List<Long> fcsFileIds = entry.getValue();
             var sampleId = entry.getKey();
             var sample = samples.get(entry.getKey());
             String sampleName = (String)sample.get(nameFieldKey);
@@ -154,7 +154,7 @@ There are <a id="all-samples" href="<%=h(protocol.getSampleTypeDetailsURL(st, ge
         <% } %>
         <td>
             <%
-                for (Integer fcsFileId : fcsFileIds)
+                for (Long fcsFileId : fcsFileIds)
                 {
                     var fcsFile = fcsFiles.get(fcsFileId);
                     String fcsFileName = (String)fcsFile.get(nameFieldKey);
@@ -170,7 +170,7 @@ There are <a id="all-samples" href="<%=h(protocol.getSampleTypeDetailsURL(st, ge
         <% for (var fcsFileField : fcsFileFields) { %>
         <td valign="top">
             <%
-                for (Integer fcsFileId : fcsFileIds)
+                for (Long fcsFileId : fcsFileIds)
                 {
                     var fcsFile = fcsFiles.get(fcsFileId);
             %><%=h(fcsFile.get(fcsFileField))%><br><%
@@ -202,7 +202,7 @@ There are <a id="all-samples" href="<%=h(protocol.getSampleTypeDetailsURL(st, ge
     </tr>
     <% } %>
     <%
-        for (Integer sampleId : unlinkedSampleIds)
+        for (Long sampleId : unlinkedSampleIds)
         {
             i++;
             var sample = samples.get(sampleId);
@@ -241,7 +241,7 @@ There are <a id="all-samples" href="<%=h(protocol.getSampleTypeDetailsURL(st, ge
     </tr>
     <% } %>
     <%
-        for (Integer fcsFileId : unlinkedFcsFileIds)
+        for (Long fcsFileId : unlinkedFcsFileIds)
         {
             i++;
             Map<FieldKey, Object> fcsFile = fcsFiles.get(fcsFileId);

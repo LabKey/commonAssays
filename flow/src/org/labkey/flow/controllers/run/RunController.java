@@ -708,7 +708,7 @@ public class RunController extends BaseFlowController
                         UnexpectedException.rethrow(e);
                     }
 
-                    Integer jobId = null;
+                    Long jobId = null;
                     if (jobGuid != null)
                         jobId = PipelineService.get().getJobId(getUser(), getContainer(), jobGuid);
 

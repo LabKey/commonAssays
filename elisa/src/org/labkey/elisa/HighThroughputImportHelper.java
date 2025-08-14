@@ -10,6 +10,7 @@ import org.labkey.api.assay.plate.Position;
 import org.labkey.api.assay.plate.PositionImpl;
 import org.labkey.api.assay.plate.Well;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.statistics.CurveFit;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -139,7 +140,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
     @Override
     public Map<Integer, Plate> getAnalyteToPlate(String plateName) throws ExperimentException
     {
-        Map<Integer, Plate> analyteToPlate = new HashMap<>();
+        Map<Integer, Plate> analyteToPlate = new IntHashMap<>();
         for (Map.Entry<Integer, double[][]> entry : _plateMap.get(plateName).getDataMap().entrySet())
         {
             Plate plate = PlateService.get().createPlate(_plateTemplate, entry.getValue(), null);
@@ -171,8 +172,8 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
 
     private static class AnalytePlate
     {
-        private final Map<Integer, Map<String, Double>> _stdConcentrations = new HashMap<>();
-        private final Map<Integer, double[][]> _dataMap = new HashMap<>();
+        private final Map<Integer, Map<String, Double>> _stdConcentrations = new IntHashMap<>();
+        private final Map<Integer, double[][]> _dataMap = new IntHashMap<>();
         private final String _plateName;
         private final Plate _plateTemplate;
         // contains the mapping of (well/analyte) to extra row data to merge during data import

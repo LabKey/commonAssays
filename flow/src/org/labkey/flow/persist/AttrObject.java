@@ -22,7 +22,7 @@ public class AttrObject
 {
     Container _container;
     int _rowId;
-    int _dataId;
+    long _dataId;
     int _typeId;
     String _uri;
 
@@ -36,12 +36,12 @@ public class AttrObject
         _rowId = rowid;
     }
 
-    public int getDataId()
+    public long getDataId()
     {
         return _dataId;
     }
 
-    public void setDataId(int dataId)
+    public void setDataId(long dataId)
     {
         _dataId = dataId;
     }

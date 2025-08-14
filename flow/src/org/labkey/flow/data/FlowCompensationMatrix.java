@@ -185,7 +185,7 @@ public class FlowCompensationMatrix extends FlowDataObject implements Serializab
         }
         return getName();
     }
-    public int getCompId()
+    public long getCompId()
     {
         return getRowId();
     }

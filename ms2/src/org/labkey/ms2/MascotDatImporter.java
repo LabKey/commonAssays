@@ -17,6 +17,7 @@
 package org.labkey.ms2;
 
 import org.apache.logging.log4j.Logger;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.exp.XarContext;
@@ -40,8 +41,8 @@ import java.util.Map;
  */
 public class MascotDatImporter extends PeptideImporter
 {
-    Map<Integer, MascotDatLoader.DatPeptide> _peptides = new HashMap<>();
-    Map<Integer, MascotDatLoader.DatPeptide> _decoyPeptides = new HashMap<>();
+    Map<Integer, MascotDatLoader.DatPeptide> _peptides = new IntHashMap<>();
+    Map<Integer, MascotDatLoader.DatPeptide> _decoyPeptides = new IntHashMap<>();
 
     public MascotDatImporter(User user, Container c, String description, String fullFileName, Logger log, XarContext context)
     {

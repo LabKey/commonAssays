@@ -54,6 +54,8 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.labkey.api.exp.api.ExperimentService.asInteger;
+
 /**
  * User: arauch
  * Date: Aug 18, 2005
@@ -297,7 +299,7 @@ public abstract class MS2Importer
         runMap.put("Type", getType());    // TODO: Change how we handle type: For pepXML, this is null at this point... okay for Comet
 
         Map<String,Object> returnMap = Table.insert(_user, MS2Manager.getTableInfoRuns(), runMap);
-        return (Integer)returnMap.get("Run");
+        return asInteger(returnMap.get("Run"));
     }
 
     protected boolean isMzXmlFile(File file)

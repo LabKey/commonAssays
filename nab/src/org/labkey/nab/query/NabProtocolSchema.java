@@ -53,7 +53,7 @@ import java.util.Set;
 
 public class NabProtocolSchema extends AssayProtocolSchema
 {
-    private static final BlockingCache<Integer, Set<Double>> CUTOFF_CACHE = DatabaseCache.get(NabManager.getSchema().getScope(), 100, "NAbCutoffValues", (key, argument) -> {
+    private static final BlockingCache<Long, Set<Double>> CUTOFF_CACHE = DatabaseCache.get(NabManager.getSchema().getScope(), 100, "NAbCutoffValues", (key, argument) -> {
         ExpProtocol protocol = (ExpProtocol)argument;
         return Collections.unmodifiableSet(DilutionManager.getCutoffValues(protocol));
     });
@@ -128,7 +128,7 @@ public class NabProtocolSchema extends AssayProtocolSchema
         return CUTOFF_CACHE.get(protocol.getRowId(), protocol);
     }
 
-    public static void clearProtocolFromCutoffCache(int protocolId)
+    public static void clearProtocolFromCutoffCache(long protocolId)
     {
         CUTOFF_CACHE.remove(protocolId);
     }

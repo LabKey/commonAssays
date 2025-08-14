@@ -16,6 +16,7 @@
 
 package org.labkey.ms2;
 
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
@@ -25,7 +26,6 @@ import org.labkey.api.protein.ProteinSchema;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +48,7 @@ public class ProteinGroupProteins
 
     private Map<Integer, List<ProteinSummary>> calculateSummaries(ResultSet rs, String columnName)
     {
-        Map<Integer, List<ProteinSummary>> result = new HashMap<>();
+        Map<Integer, List<ProteinSummary>> result = new IntHashMap<>();
 
         int firstGroupId = Integer.MAX_VALUE;
         int lastGroupId = Integer.MIN_VALUE;

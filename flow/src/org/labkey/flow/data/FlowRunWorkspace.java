@@ -49,7 +49,7 @@ public class FlowRunWorkspace extends Workspace
         _groupAnalyses.put(PopulationName.fromString("analysis"), analysis);
         for (FlowFCSFile well : run.getFCSFiles())
         {
-            String key = Integer.toString(well.getWellId());
+            String key = Long.toString(well.getWellId());
             SampleInfo info = new SampleInfo(key, well.getName());
             FCSKeywordData fcs = FCSAnalyzer.get().readAllKeywords(FlowAnalyzer.getFCSRef(well));
             info.putAllKeywords(fcs.getAllKeywords());

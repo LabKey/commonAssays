@@ -408,7 +408,7 @@ public class ReportsController extends BaseFlowController
                         PipelineService.get().queueJob(job);
 
                         // navigate to the job status page
-                        int jobId = PipelineService.get().getJobId(getUser(), getContainer(), job.getJobGUID());
+                        long jobId = PipelineService.get().getJobId(getUser(), getContainer(), job.getJobGUID());
                         throw new RedirectException(urlProvider(PipelineStatusUrls.class).urlDetails(getContainer(), jobId));
                     }
                 }

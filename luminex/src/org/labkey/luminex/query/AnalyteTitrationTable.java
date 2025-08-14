@@ -122,7 +122,7 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
                 @Override
                 public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
                 {
-                    int protocolId = schema.getProtocol().getRowId();
+                    long protocolId = schema.getProtocol().getRowId();
                     int analyte = (int)ctx.get("analyte");
                     int titration = (int)ctx.get("titration");
 
