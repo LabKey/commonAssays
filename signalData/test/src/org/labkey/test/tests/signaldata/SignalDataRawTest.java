@@ -50,6 +50,7 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
     private static final String RESULT_FILENAME_4 = "TD789-12.TXT";
     private static final String RESULT_FILENAME_5 = "TD789-25.TXT";
     private static final String RESULT_FILENAME_6 = "QD123-11.TXT";
+    private static final String RESULT_FILENAME_7 = "QD123-24.TXT";
 
     @Nullable
     @Override
@@ -153,7 +154,8 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
             List.of(
                     getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_4)),
                     getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_5)),
-                    getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_6))
+                    getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_6)),
+                    getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_7))
             ));
     }
 

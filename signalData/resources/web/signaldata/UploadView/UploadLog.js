@@ -116,17 +116,6 @@ Ext4.define('LABKEY.SignalData.UploadLog', {
         return this._grid;
     },
 
-    convertPath : function(v, rec) {
-        console.log(v, rec);
-    },
-
-    getFileName : function(pathname) {
-        if (pathname.indexOf('/') > -1) {
-            return pathname.substring(pathname.lastIndexOf('/') + 1, pathname.length);
-        }
-        return pathname.substring(pathname.lastIndexOf('\\') + 1, pathname.length);
-    },
-
     getColumns: function (assayResultFields) {
         if (!this.columns) {
 
