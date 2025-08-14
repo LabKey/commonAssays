@@ -16,6 +16,7 @@ Ext4.define('LABKEY.SignalData.UploadLog', {
     DATA_FILE: 'DataFile',
     FILE_URL: 'DataFileURL',
     FILENAME: 'FileName',
+
     constructor: function (config) {
         if (!Ext4.ModelManager.isRegistered(this.modelClass)) {
             Ext4.define(this.modelClass, {
@@ -167,7 +168,10 @@ Ext4.define('LABKEY.SignalData.UploadLog', {
                         var fileName = row.get(this.DATA_FILE);
                         var me = this;
 
-                        //Delete File
+                        // don't delete if no file has been uploaded
+                        if (!row.get(this.UPLOAD_TIME))
+                            return;
+
                         this.fileSystem.deletePath({
                             path: this.fileSystem.concatPaths(this.getFullWorkingPath(), fileName),
                             isFile: true,

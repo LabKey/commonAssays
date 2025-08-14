@@ -1,5 +1,5 @@
 Name	DataFile
-TD789-12.TXT	/Users/testuser/Downloads/TD789-12.TXT
-TD789-25.TXT	/Users/testuser/Downloads/TD789-25.TXT
+TD789-12.TXT	/Users/testuser/Downloads/td789-12.txt
+TD789-25.TXT	/Users/testuser/Downloads/TD789-25.txt
 QD123-11.TXT	c:\\home\\windows\\QD123-11.TXT
-QuotedPath.TXT	"c:\user\windows\QD123-24.TXT"
+QuotedPath.TXT	"c:\user\windows\qd123-24.txt"
