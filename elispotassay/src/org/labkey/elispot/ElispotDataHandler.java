@@ -523,7 +523,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         }
     }
 
-    private static Map<String, Object> makeAntigenRow(int runId, String specimenLsid, String wellgroupName, String antigenName,
+    private static Map<String, Object> makeAntigenRow(long runId, String specimenLsid, String wellgroupName, String antigenName,
                                                       Double mean, Double median, String objectUri, String protocolName,
                                                       String antigenWellgroupName, String analyte, Object cytokine)
     {

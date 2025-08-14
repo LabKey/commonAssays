@@ -85,7 +85,7 @@ public class NabManager extends AbstractNabManager
         super.deleteRunData(datas);
 
         // Get dataIds that match the ObjectUri and make filter on NabSpecimen
-        Set<Integer> protocolIds = new HashSet<>();
+        Set<Long> protocolIds = new HashSet<>();
         for (ExpData data : datas)
         {
             ExpRun run = data.getRun();
@@ -97,11 +97,11 @@ public class NabManager extends AbstractNabManager
             }
         }
 
-        for (Integer protocolId : protocolIds)
+        for (Long protocolId : protocolIds)
             NabProtocolSchema.clearProtocolFromCutoffCache(protocolId);
     }
 
-    public ExpRun getNAbRunByObjectId(int objectId)
+    public ExpRun getNAbRunByObjectId(long objectId)
     {
         // objectId is really a nabSpecimenId
         TableInfo tableInfo = getSchema().getTable(NAB_SPECIMEN_TABLE_NAME);
@@ -120,7 +120,7 @@ public class NabManager extends AbstractNabManager
      * Returns the readable study dataset rows that correspond to the specified object ID array
      * @return a map of row information to ExpProtocol, where the row information is a pair of row ID and LSID values.
      */
-    public Map<Pair<Integer, String>, ExpProtocol> getReadableStudyObjectIds(Container studyContainer, User user, int[] objectIds)
+    public Map<Pair<Long, String>, ExpProtocol> getReadableStudyObjectIds(Container studyContainer, User user, long[] objectIds)
     {
         if (objectIds == null || objectIds.length == 0)
             throw new IllegalArgumentException("getReadableStudyObjectIds must be passed a non-empty list of object ids.");
@@ -150,12 +150,12 @@ public class NabManager extends AbstractNabManager
             }
         }
 
-        Collection<Integer> allObjectIds = new HashSet<>();
-        for (int objectId : objectIds)
+        Collection<Long> allObjectIds = new HashSet<>();
+        for (long objectId : objectIds)
             allObjectIds.add(objectId);
         SimpleFilter filter = new SimpleFilter(new SimpleFilter.InClause(FieldKey.fromString("RowId"), allObjectIds));
 
-        final Map<Pair<Integer, String>, ExpProtocol> readableObjectIds = new HashMap<>();
+        final Map<Pair<Long, String>, ExpProtocol> readableObjectIds = new HashMap<>();
 
         // For each readable study data table, find any NAb runs that match the requested objectIds, and add them to the run list:
         for (Map.Entry<TableInfo, ExpProtocol> entry : dataTables.entrySet())
@@ -163,7 +163,7 @@ public class NabManager extends AbstractNabManager
             TableInfo dataTable = entry.getKey();
             final ExpProtocol protocol = entry.getValue();
             TableSelector selector = new TableSelector(dataTable, PageFlowUtil.set("RowId", "Lsid"), filter, null);
-            selector.forEach(rs -> readableObjectIds.put(new Pair<>(rs.getInt("RowId"), rs.getString("Lsid")), protocol));
+            selector.forEach(rs -> readableObjectIds.put(new Pair<>(rs.getLong("RowId"), rs.getString("Lsid")), protocol));
         }
         return readableObjectIds;
     }

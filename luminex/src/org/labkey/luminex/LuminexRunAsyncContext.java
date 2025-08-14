@@ -22,6 +22,7 @@ import org.apache.logging.log4j.util.PropertiesUtil;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.assay.pipeline.AssayRunAsyncContext;
+import org.labkey.api.collections.StringHashMap;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.property.DomainProperty;
@@ -42,10 +43,10 @@ import java.util.Set;
 public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayProvider> implements LuminexRunContext
 {
     private String[] _analyteNames;
-    private final Map<String, Map<Integer, String>> _analytePropertiesById = new HashMap<>();
-    private final Map<String, Map<String, String>> _analyteColumnPropertiesByName = new HashMap<>();
-    private final Map<String, Map<String, String>> _analytePropertiesByName = new HashMap<>();
-    private final Map<String, Set<String>> _titrationsByAnalyte = new HashMap<>();
+    private final Map<String, Map<Integer, String>> _analytePropertiesById = new StringHashMap<>();
+    private final Map<String, Map<String, String>> _analyteColumnPropertiesByName = new StringHashMap<>();
+    private final Map<String, Map<String, String>> _analytePropertiesByName = new StringHashMap<>();
+    private final Map<String, Set<String>> _titrationsByAnalyte = new StringHashMap<>();
     private List<Titration> _titrations;
     private List<SinglePointControl> _singlePointControls;
     private Boolean _retainExclusions;
@@ -146,7 +147,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     {
         if (_analyteProperties == null)
         {
-            _analyteProperties = new HashMap<>();
+            _analyteProperties = new StringHashMap<>();
         }
         Map<DomainProperty, String> result = _analyteProperties.get(analyteName);
         if (result == null)
@@ -167,7 +168,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     {
         if (_analyteColumnProperties == null)
         {
-            _analyteColumnProperties = new HashMap<>();
+            _analyteColumnProperties = new StringHashMap<>();
         }
         Map<ColumnInfo, String> result = _analyteColumnProperties.get(analyteName);
         if (result == null)
@@ -219,7 +220,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
     /** Convert to a map that can be serialized - ColumnInfo can't be */
     private Map<String, String> convertDomainsToNames(Map<DomainProperty, String> properties)
     {
-        Map<String, String> result = new HashMap<>();
+        Map<String, String> result = new StringHashMap<>();
         for (Map.Entry<DomainProperty, String> entry : properties.entrySet())
         {
             result.put(entry.getKey().getName(), entry.getValue());
@@ -229,7 +230,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
 
     private Map<String, String> convertColumnPropertiesToNames(Map<ColumnInfo, String> properties)
     {
-        Map<String, String> result = new HashMap<>();
+        Map<String, String> result = new StringHashMap<>();
         for (Map.Entry<ColumnInfo, String> entry : properties.entrySet())
         {
             result.put(entry.getKey().getName(), entry.getValue());

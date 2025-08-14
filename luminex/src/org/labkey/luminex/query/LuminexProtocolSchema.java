@@ -22,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.query.ResultsQueryView;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.AbstractTableInfo;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.ColumnInfo;
@@ -628,7 +629,7 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
             @Override
             public void renderGridCellContents(RenderContext ctx, HtmlWriter out)
             {
-                Map<Integer, String> pdfs = new HashMap<>();
+                Map<Integer, String> pdfs = new IntHashMap<>();
                 for (Map.Entry<FieldKey, FieldKey> entry : _pdfColumns.entrySet())
                 {
                     Number rowId = (Number)ctx.get(entry.getKey());

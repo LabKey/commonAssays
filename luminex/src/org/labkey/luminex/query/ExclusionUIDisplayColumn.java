@@ -49,11 +49,11 @@ public class ExclusionUIDisplayColumn extends DataColumn
     private final FieldKey _runFieldKey;
     private final FieldKey _wellIDKey;
     private final FieldKey _exclusionCommentKey;
-    private final Integer _protocolId;
+    private final Long _protocolId;
     private final Container _container;
     private final User _user;
 
-    public ExclusionUIDisplayColumn(ColumnInfo colInfo, Integer protocolId, Container container, User user)
+    public ExclusionUIDisplayColumn(ColumnInfo colInfo, Long protocolId, Container container, User user)
     {
         super(colInfo);
         _container = container;

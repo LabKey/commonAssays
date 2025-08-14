@@ -33,10 +33,10 @@ public class ViabilityResult
     private int rowID;
 
     private String containerID;
-    private int protocolID;
-    private int runID;
-    private int dataID;
-    private int objectID;
+    private long protocolID;
+    private long runID;
+    private long dataID;
+    private long objectID;
     private String participantID;
     private Double visitID;
     private Date date;
@@ -157,42 +157,42 @@ public class ViabilityResult
         this.containerID = containerID;
     }
 
-    public int getProtocolID()
+    public long getProtocolID()
     {
         return protocolID;
     }
 
-    public void setProtocolID(int protocolID)
+    public void setProtocolID(long protocolID)
     {
         this.protocolID = protocolID;
     }
 
-    public int getRunID()
+    public long getRunID()
     {
         return runID;
     }
 
-    public void setRunID(int runID)
+    public void setRunID(long runID)
     {
         this.runID = runID;
     }
 
-    public int getDataID()
+    public long getDataID()
     {
         return dataID;
     }
 
-    public void setDataID(int dataID)
+    public void setDataID(long dataID)
     {
         this.dataID = dataID;
     }
 
-    public int getObjectID()
+    public long getObjectID()
     {
         return objectID;
     }
 
-    public void setObjectID(int objectID)
+    public void setObjectID(long objectID)
     {
         this.objectID = objectID;
     }

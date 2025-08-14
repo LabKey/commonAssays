@@ -26,6 +26,7 @@ import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.collections.LongArrayList;
 import org.labkey.api.data.BeanObjectFactory;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
@@ -281,7 +282,7 @@ public class MS2Manager
         return getSchema().getTable("FastaAdmin");
     }
 
-    public static MS2Run getRun(int runId)
+    public static MS2Run getRun(long runId)
     {
         MS2Run run = _getRunFromCache(runId);
 
@@ -463,9 +464,9 @@ public class MS2Manager
         }
     }
 
-    public static List<Integer> getRunIds(List<MS2Run> runs)
+    public static List<Long> getRunIds(List<MS2Run> runs)
     {
-        List<Integer> runIds = new ArrayList<>(runs.size());
+        List<Long> runIds = new LongArrayList(runs.size());
 
         for (MS2Run run : runs)
             runIds.add(run.getRun());
@@ -497,7 +498,7 @@ public class MS2Manager
         return new SqlSelector(getSchema(), sql, path, c, Boolean.FALSE).getObject(ProteinProphetFile.class);
     }
 
-    public static ProteinProphetFile getProteinProphetFileByRun(int runId)
+    public static ProteinProphetFile getProteinProphetFileByRun(long runId)
     {
         return lookupProteinProphetFile(runId, "Run");
     }
@@ -507,7 +508,7 @@ public class MS2Manager
         return lookupProteinProphetFile(proteinProphetFileId, "RowId");
     }
 
-    private static ProteinProphetFile lookupProteinProphetFile(int id, String columnName)
+    private static ProteinProphetFile lookupProteinProphetFile(long id, String columnName)
     {
         String sql = "SELECT " +
                 getTableInfoProteinProphetFiles() + ".* FROM " +
@@ -640,7 +641,7 @@ public class MS2Manager
         }
     }
 
-    public static RelativeQuantAnalysisSummary getQuantSummaryForRun(int runId)
+    public static RelativeQuantAnalysisSummary getQuantSummaryForRun(long runId)
     {
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("run"), runId);
 
@@ -650,7 +651,7 @@ public class MS2Manager
     /**
      * Return the analysis type for relative quantitation in a given run.
      */
-    public static String getQuantAnalysisType(int runId)
+    public static String getQuantAnalysisType(long runId)
     {
         RelativeQuantAnalysisSummary summary = getQuantSummaryForRun(runId);
         return (null == summary ? null : summary.getAnalysisType());
@@ -659,13 +660,13 @@ public class MS2Manager
     /**
      * Return the algorithm used for relative quantitation in a given run.
      */
-    public static String getQuantAnalysisAlgorithm(int runId)
+    public static String getQuantAnalysisAlgorithm(long runId)
     {
         RelativeQuantAnalysisSummary summary = getQuantSummaryForRun(runId);
         return (null == summary ? null : summary.getAnalysisAlgorithm());
     }
 
-    public static PeptideProphetSummary getPeptideProphetSummary(int runId)
+    public static PeptideProphetSummary getPeptideProphetSummary(long runId)
     {
         PeptideProphetSummary summary = _getPeptideProphetSummaryFromCache(runId);
 
@@ -683,7 +684,7 @@ public class MS2Manager
     // Now, verify DELETE permission on old container(s) and move runs to the new container
     public static void moveRuns(final User user, List<MS2Run> runList, Container newContainer) throws UnauthorizedException
     {
-        List<Integer> runIds = new ArrayList<>(runList.size());
+        List<Long> runIds = new LongArrayList(runList.size());
 
         for (MS2Run run : runList)
             runIds.add(run.getRun());
@@ -709,7 +710,7 @@ public class MS2Manager
         _removeRunsFromCache(runIds);
     }
 
-    public static void renameRun(int runId, String newDescription)
+    public static void renameRun(long runId, String newDescription)
     {
         if (newDescription == null || newDescription.isEmpty())
             return;
@@ -720,7 +721,7 @@ public class MS2Manager
     }
 
     // For safety, simply mark runs as deleted.  This allows them to be (manually) restored.
-    public static void markAsDeleted(List<Integer> runIds, Container c, User user)
+    public static void markAsDeleted(List<Long> runIds, Container c, User user)
     {
         if (runIds.isEmpty())
             return;
@@ -728,7 +729,7 @@ public class MS2Manager
         // Save these to delete after we've deleted the runs
         List<ExpRun> experimentRunsToDelete = new ArrayList<>();
 
-        for (Integer runId : runIds)
+        for (Long runId : runIds)
         {
             MS2Run run = getRun(runId.intValue());
             if (run != null)
@@ -756,12 +757,12 @@ public class MS2Manager
 
     public static void markAsDeleted(Container c, User user)
     {
-        List<Integer> runIds = new SqlSelector(getSchema(), "SELECT Run FROM " + getTableInfoRuns() + " WHERE Container=?", c).getArrayList(Integer.class);
+        List<Long> runIds = new SqlSelector(getSchema(), "SELECT Run FROM " + getTableInfoRuns() + " WHERE Container=?", c).getArrayList(Long.class);
         markAsDeleted(runIds, c, user);
     }
 
     // pulled out into separate method so could be called by itself from data handlers
-    public static void markDeleted(List<Integer> runIds, Container c)
+    public static void markDeleted(List<Long> runIds, Container c)
     {
         SQLFragment markDeleted = new SQLFragment("UPDATE " + getTableInfoRuns() + " SET ExperimentRunLSID = NULL, Deleted=?, Modified=? ", Boolean.TRUE, new Date());
         SimpleFilter where = SimpleFilter.createContainerFilter(c);
@@ -992,7 +993,7 @@ public class MS2Manager
         executor.execute("DELETE FROM " + getTableInfoProteinProphetFiles() + " WHERE RowId " + rowIdComparison, params);
     }
 
-    public static MS2Fraction[] getFractions(int runId)
+    public static MS2Fraction[] getFractions(long runId)
     {
         SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("run"), runId);
 
@@ -1144,20 +1145,20 @@ public class MS2Manager
         }
     }
 
-    private static void _addRunToCache(int runId, MS2Run run)
+    private static void _addRunToCache(long runId, MS2Run run)
     {
         RUN_CACHE.put(RUN_CACHE_PREFIX + runId, run);
     }
 
 
-    private static MS2Run _getRunFromCache(int runId)
+    private static MS2Run _getRunFromCache(long runId)
     {
         return RUN_CACHE.get(RUN_CACHE_PREFIX + runId);
     }
 
-    private static void _removeRunsFromCache(List<Integer> runIds)
+    private static void _removeRunsFromCache(List<Long> runIds)
     {
-        for (Integer runId : runIds)
+        for (Long runId : runIds)
             RUN_CACHE.remove(RUN_CACHE_PREFIX + runId);
     }
 
@@ -1168,7 +1169,7 @@ public class MS2Manager
     }
 
 
-    private static PeptideProphetSummary _getPeptideProphetSummaryFromCache(int runId)
+    private static PeptideProphetSummary _getPeptideProphetSummaryFromCache(long runId)
     {
         return PEPTIDE_PROPHET_SUMMARY_CACHE.get(PEPTIDE_PROPHET_SUMMARY_CACHE_PREFIX + runId);
     }
@@ -1521,7 +1522,7 @@ public class MS2Manager
         }
     }
 
-    public static DecoySummaryBean getDecoySummaryForRun(int run, Float desiredFdr)
+    public static DecoySummaryBean getDecoySummaryForRun(long run, Float desiredFdr)
     {
         DbSchema schema = getSchema();
         SQLFragment sql = new SQLFragment("SELECT coalesce(t.targets, 0) targetCount, coalesce(d.decoys,0) decoyCount, coalesce(t.score1, d.score1, 0) scoreThreshold FROM\n")

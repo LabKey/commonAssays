@@ -6,12 +6,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.PageFlowUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -458,7 +458,7 @@ public class CoverageProtein extends SimpleProtein
     {
         final char _c;
         int _levels;
-        final Map<Integer, String> tdMap = new HashMap<>();
+        final Map<Integer, String> tdMap = new IntHashMap<>();
 
         public SequencePos(char c, int curIdx, List<ProteinFeature> features)
         {

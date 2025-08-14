@@ -18,6 +18,7 @@ package org.labkey.flow.data;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpProtocolAction;
@@ -28,7 +29,6 @@ import org.labkey.flow.controllers.FlowParam;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 public class FlowProtocolStep implements Serializable
@@ -179,7 +179,7 @@ public class FlowProtocolStep implements Serializable
     static public void initProtocol(User user, FlowProtocol flowProtocol) throws Exception
     {
         ExpProtocol protocol = flowProtocol.getExpObject();
-        Map<Integer, ExpProtocolAction> existingSteps = new HashMap();
+        Map<Integer, ExpProtocolAction> existingSteps = new IntHashMap<>();
         for (ExpProtocolAction existingStep : protocol.getSteps())
         {
             existingSteps.put(existingStep.getActionSequence(), existingStep);

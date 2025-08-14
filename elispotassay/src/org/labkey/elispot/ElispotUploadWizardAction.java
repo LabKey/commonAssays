@@ -17,6 +17,7 @@
 package org.labkey.elispot;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
@@ -45,6 +46,7 @@ import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.assay.PreviouslyUploadedDataCollector;
 import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.InsertView;
 import org.labkey.elispot.plate.PlateInfo;
 import org.springframework.validation.BindException;
@@ -70,6 +72,8 @@ import java.util.Set;
 @RequiresPermission(InsertPermission.class)
 public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUploadForm, ElispotAssayProvider>
 {
+    private static final Logger LOG = LogHelper.getLogger(ElispotUploadWizardAction.class, "Elispot upload errors");
+
     public ElispotUploadWizardAction()
     {
         super(ElispotRunUploadForm.class);
@@ -566,6 +570,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
             }
             catch (ExperimentException e)
             {
+                LOG.error("Unexpected exception", e);
                 errors.reject(SpringActionController.ERROR_MSG, e.getMessage());
             }
 

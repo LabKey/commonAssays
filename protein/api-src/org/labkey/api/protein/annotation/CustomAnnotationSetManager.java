@@ -97,7 +97,7 @@ public class CustomAnnotationSetManager
         }
     }
 
-    public static CustomAnnotationSet getCustomAnnotationSet(Container c, int id, boolean includeProject)
+    public static CustomAnnotationSet getCustomAnnotationSet(Container c, long id, boolean includeProject)
     {
         SQLFragment sql = new SQLFragment();
         sql.append("SELECT * FROM ");

@@ -24,13 +24,13 @@ import org.labkey.api.exp.ExpQCFlag;
 public class CVQCFlag extends ExpQCFlag
 {
     private int _analyte;
-    private int _dataId;
+    private long _dataId;
     private String _wellType;
     private String _wellDescription;
 
     public CVQCFlag() {}
 
-    public CVQCFlag(int runId, String flagType, String description, int analyte, int dataId, String wellType, String wellDescription)
+    public CVQCFlag(long runId, String flagType, String description, int analyte, long dataId, String wellType, String wellDescription)
     {
         super(runId, flagType, description);
         setAnalyte(analyte);
@@ -51,12 +51,12 @@ public class CVQCFlag extends ExpQCFlag
         setIntKey1(analyte);
     }
 
-    public int getDataId()
+    public long getDataId()
     {
         return _dataId;
     }
 
-    public void setDataId(int dataId)
+    public void setDataId(long dataId)
     {
         _dataId = dataId;
         setIntKey2(dataId);
@@ -111,11 +111,11 @@ public class CVQCFlag extends ExpQCFlag
     @Override
     public int hashCode()
     {
-        int result = getRunId();
+        int result = (int)getRunId();
         result = 31 * result + (getFlagType() != null ? getFlagType().hashCode() : 0);
         result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
         result = 31 * result + _analyte;
-        result = 31 * result + _dataId;
+        result = 31 * result + (int)_dataId;
         result = 31 * result + (_wellType != null ? _wellType.hashCode() : 0);
         result = 31 * result + (_wellDescription != null ? _wellDescription.hashCode() : 0);
         return result;

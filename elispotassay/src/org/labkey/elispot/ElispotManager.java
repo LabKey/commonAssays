@@ -15,10 +15,11 @@
  */
 package org.labkey.elispot;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.collections.ConcurrentCaseInsensitiveSortedMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
@@ -37,16 +38,12 @@ import org.labkey.api.exp.api.StorageProvisioner;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
-import org.labkey.api.assay.AbstractAssayProvider;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Created by davebradlee on 3/19/15.
- */
 public class ElispotManager
 {
     private static final Logger _log = LogManager.getLogger(ElispotManager.class);
@@ -82,14 +79,13 @@ public class ElispotManager
         throw new IllegalStateException("Domain not found for protocol: " + protocol.getName());
     }
 
-    public int insertRunDataRow(User user, Map<String, Object> fields)
+    public void insertRunDataRow(User user, Map<String, Object> fields)
     {
-        Map<String, Object> results = Table.insert(user, getTableInfoElispotRunData(), fields);
-        return (Integer)results.get("RowId");
+        Table.insert(user, getTableInfoElispotRunData(), fields);
     }
 
     @Nullable
-    public RunDataRow getRunDataRow(int rowId)
+    public RunDataRow getRunDataRow(long rowId)
     {
         Filter filter = new SimpleFilter(FieldKey.fromString("RowId"), rowId);
         return new TableSelector(getTableInfoElispotRunData()).getObject(filter, RunDataRow.class);
@@ -135,10 +131,9 @@ public class ElispotManager
         Table.update(user, getTableInfoElispotRunData(), fields, fields.get("RowId"));
     }
 
-    public String insertAntigenRow(User user, Map<String, Object> fields, ExpProtocol protocol)
+    public void insertAntigenRow(User user, Map<String, Object> fields, ExpProtocol protocol)
     {
-        Map<String, Object> results = Table.insert(user, getTableInfoElispotAntigen(protocol), fields);
-        return results.get("AntigenLsid").toString();
+        Table.insert(user, getTableInfoElispotAntigen(protocol), fields);
     }
 
     public void updateAntigenRow(User user, Map<String, Object> fields, ExpProtocol protocol)
@@ -184,14 +179,14 @@ public class ElispotManager
         try (DbScope.Transaction transaction = scope.ensureTransaction())
         {
             // Delete all rows based on the runId
-            Set<Integer> runIds = new HashSet<>();
+            Set<Long> runIds = new HashSet<>();
             for (ExpData data : datas)
             {
                 runIds.add(data.getRunId());
             }
 
             // Since runIds may be from different folders, delete from each separately
-            for (Integer runId : runIds)
+            for (var runId : runIds)
             {
                 if (null != runId)
                 {

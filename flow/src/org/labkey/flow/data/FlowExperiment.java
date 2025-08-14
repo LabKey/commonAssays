@@ -70,7 +70,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return new FlowExperiment(exp);
     }
 
-    static public FlowExperiment fromExperimentId(int id)
+    static public FlowExperiment fromExperimentId(long id)
     {
         ExpExperiment experiment = ExperimentService.get().getExpExperiment(id);
         if (experiment == null)
@@ -211,7 +211,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return getExpObject();
     }
 
-    public int getExperimentId()
+    public long getExperimentId()
     {
         return getExperiment().getRowId();
     }

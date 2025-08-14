@@ -254,10 +254,10 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public Set<ExpData> getDatasForResultRows(Collection<Integer> rowIds, ExpProtocol protocol, ResolverCache cache)
+    public Set<ExpData> getDatasForResultRows(Collection<Long> rowIds, ExpProtocol protocol, ResolverCache cache)
     {
         Set<ExpData> result = new HashSet<>();
-        for (Integer rowId : rowIds)
+        for (var rowId : rowIds)
         {
             FlowDataObject fdo = FlowDataObject.fromRowId(rowId);
             if (fdo != null)
@@ -273,7 +273,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    protected String getSourceLSID(String runLSID, int dataId, int resultRowId)
+    protected String getSourceLSID(String runLSID, long dataId, int resultRowId)
     {
         // SourceLSID is used by assay to render links back to the original data for rows
         // that have been linked to a study dataset.
@@ -512,10 +512,10 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public Set<Container> getAssociatedStudyContainers(ExpProtocol protocol, Collection<Integer> rowIds)
+    public Set<Container> getAssociatedStudyContainers(ExpProtocol protocol, Collection<Long> rowIds)
     {
         Set<Container> result = new HashSet<>();
-        for (Integer dataRowId : rowIds)
+        for (var dataRowId : rowIds)
         {
             Container container = null;
             ExpData data = getDataForDataRow(dataRowId, protocol);

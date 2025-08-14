@@ -23,6 +23,7 @@ import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
+import org.labkey.api.collections.LongArrayList;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.Results;
@@ -145,18 +146,18 @@ public class GetNabRunsAction extends ReadOnlyApiAction<GetNabRunsAction.GetNabR
 
         QueryView queryView = QueryView.create(getViewContext(), assaySchema, settings, errors);
         DataView dataView = queryView.createDataView();
-        List<Integer> rowIds = new ArrayList<>();
+        List<Long> rowIds = new LongArrayList();
         try (Results results = dataView.getDataRegion().getResults(dataView.getRenderContext()))
         {
             while (results.next())
-                rowIds.add(results.getInt("RowId"));
+                rowIds.add(results.getLong("RowId"));
         }
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
         }
         List<ExpRun> runs = new ArrayList<>();
-        for (Integer rowId : rowIds)
+        for (Long rowId : rowIds)
         {
             ExpRun run = ExperimentService.get().getExpRun(rowId.intValue());
             if (run != null)
@@ -195,7 +196,6 @@ public class GetNabRunsAction extends ReadOnlyApiAction<GetNabRunsAction.GetNabR
         {
             runList.add(new NabRunPropertyMap(dataHandler.getAssayResults(run, form.getViewContext().getUser()),
                     form.isIncludeStats(), form.isIncludeWells(), form.isCalculateNeut(), form.isIncludeFitParameters()));
-
         }
         // Recursively replace all +Infinity, -Infinity, and NaN values with JSON-legal values
         return new ApiSimpleResponse(response);

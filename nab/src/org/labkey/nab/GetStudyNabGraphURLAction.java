@@ -42,11 +42,11 @@ public class GetStudyNabGraphURLAction extends ReadOnlyApiAction<GraphSelectedFo
     @Override
     public ApiResponse execute(GraphSelectedForm form, BindException errors)
     {
-        Map<Pair<Integer, String>, ExpProtocol> readableIds = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), form.getId());
+        Map<Pair<Long, String>, ExpProtocol> readableIds = NabManager.get().getReadableStudyObjectIds(getContainer(), getUser(), form.getId());
 
         StringBuilder objectIdParam = new StringBuilder();
         String sep = "";
-        for (Pair<Integer, String> id : readableIds.keySet())
+        for (Pair<Long, String> id : readableIds.keySet())
         {
             objectIdParam.append(sep).append(id.getKey());
             sep = ",";

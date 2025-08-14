@@ -78,7 +78,7 @@ public abstract class AbstractLuminexControlAnalyte implements Serializable
         return analyte;
     }
 
-    public ExpRun getRun(int rowId)
+    public ExpRun getRun(long rowId)
     {
         ExpRun run = ExperimentService.get().getExpRun(rowId);
         if (run == null)

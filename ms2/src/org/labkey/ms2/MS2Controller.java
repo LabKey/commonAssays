@@ -44,6 +44,7 @@ import org.labkey.api.action.SpringActionController;
 import org.labkey.api.admin.AdminUrls;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheManager;
+import org.labkey.api.collections.LongArrayList;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerDisplayColumn;
@@ -362,7 +363,7 @@ public class MS2Controller extends SpringActionController
     }
 
     /** @return URL with .lastFilter if user has configured their default view that way and with a run id */
-    public static ActionURL getShowRunURL(User user, Container c, int runId)
+    public static ActionURL getShowRunURL(User user, Container c, long runId)
     {
         ActionURL url = getShowRunURL(user, c);
         url.addParameter(RunForm.PARAMS.run, String.valueOf(runId));
@@ -2062,9 +2063,9 @@ public class MS2Controller extends SpringActionController
         public boolean handlePost(FormType form, BindException errors) throws RunListException
         {
             ActionURL currentURL = getViewContext().getActionURL();
-            int runListId = RunListCache.cacheSelectedRuns(getRequiresSameType(), form, getViewContext());
+            long runListId = RunListCache.cacheSelectedRuns(getRequiresSameType(), form, getViewContext());
             _successUrl = currentURL.clone();
-            _successUrl.addParameter("runList", Integer.toString(runListId));
+            _successUrl.addParameter("runList", Long.toString(runListId));
 
             return true;
         }
@@ -2572,7 +2573,7 @@ public class MS2Controller extends SpringActionController
                 exportRows = new ArrayList<>();
             }
 
-            List<Long> peptideIds = new ArrayList<>(exportRows.size());
+            List<Long> peptideIds = new LongArrayList(exportRows.size());
 
             // Technically, should only limit this in Excel export case... but there's no way to individually select 65K peptides
             for (int i = 0; i < Math.min(exportRows.size(), ExcelWriter.ExcelDocumentType.xlsx.getMaxRows()); i++)
@@ -3322,7 +3323,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public ModelAndView getView(DetailsForm form, BindException errors)
         {
-            int runId;
+            long runId;
             int seqId;
             if (form.run != 0)
             {
@@ -3909,7 +3910,7 @@ public class MS2Controller extends SpringActionController
     public static class SeqRunIdPair
     {
         private int _seqId;
-        private int _run;
+        private long _run;
 
         public void setSeqId(int seqId)
         {
@@ -3921,12 +3922,12 @@ public class MS2Controller extends SpringActionController
             return _seqId;
         }
 
-        public void setRun(int run)
+        public void setRun(long run)
         {
             _run = run;
         }
 
-        public int getRun()
+        public long getRun()
         {
             return _run;
         }
@@ -4585,7 +4586,7 @@ public class MS2Controller extends SpringActionController
             run, expanded, grouping, highestScore
         }
 
-        int run = 0;
+        long run = 0;
         int fraction = 0;
         int tryptic;
         boolean expanded = false;
@@ -4616,12 +4617,12 @@ public class MS2Controller extends SpringActionController
             return this.highestScore;
         }
 
-        public void setRun(int run)
+        public void setRun(long run)
         {
             this.run = run;
         }
 
-        public int getRun()
+        public long getRun()
         {
             return run;
         }

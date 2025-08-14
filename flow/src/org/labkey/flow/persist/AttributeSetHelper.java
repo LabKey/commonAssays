@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SqlSelector;
@@ -168,7 +169,7 @@ public class AttributeSetHelper
                 // Issue 41225: flow: import failure for duplicate aliased statistics
                 // Track the list of statistics and values for each preferredId key.
                 // If there is a duplicate statistic (e.g., two stats that are aliased) verify they have the same value.
-                Map<Integer, List<Map.Entry<StatisticSpec, Double>>> valuesForPreferredId = new HashMap<>();
+                Map<Integer, List<Map.Entry<StatisticSpec, Double>>> valuesForPreferredId = new IntHashMap<>();
 
                 String sql = "INSERT INTO " + mgr.getTinfoStatistic() + " (ObjectId, StatisticId, OriginalStatisticId, Value) VALUES (?,?,?,?)";
                 List<List<?>> paramsList = new ArrayList<>();

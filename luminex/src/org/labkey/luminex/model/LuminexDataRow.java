@@ -65,7 +65,7 @@ public class LuminexDataRow
     private String _concInRangeString;
     private Double _concInRange;
     private String _concInRangeOORIndicator;
-    private int _data;
+    private long _data;
     private Double _dilution;
     private String _dataRowGroup;
     private String _ratio;
@@ -80,7 +80,7 @@ public class LuminexDataRow
 
     /** Unfortunate to have these denormalized values here, but required for acceptable query performance */
     private Container _container;
-    private int _protocol;
+    private long _protocol;
 
     // Extra properties that aren't stored directly in the database
     private String _dataFile;
@@ -294,12 +294,12 @@ public class LuminexDataRow
         _concInRangeOORIndicator = concInRangeOORIndicator;
     }
 
-    public void setData(int data)
+    public void setData(long data)
     {
         _data = data;
     }
 
-    public int getData()
+    public long getData()
     {
         return _data;
     }
@@ -474,12 +474,12 @@ public class LuminexDataRow
         _container = container;
     }
 
-    public int getProtocol()
+    public long getProtocol()
     {
         return _protocol;
     }
 
-    public void setProtocol(int protocol)
+    public void setProtocol(long protocol)
     {
         _protocol = protocol;
     }

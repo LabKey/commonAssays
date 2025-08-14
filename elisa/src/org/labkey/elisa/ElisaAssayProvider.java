@@ -434,7 +434,7 @@ public class ElisaAssayProvider extends AbstractPlateBasedAssayProvider
     protected void moveAssayResults(List<ExpRun> runs, ExpProtocol protocol, Container sourceContainer, Container targetContainer, User user, AssayMoveData assayMoveData) throws ExperimentException
     {
         super.moveAssayResults(runs, protocol, sourceContainer, targetContainer, user, assayMoveData); // assay results
-        List<Integer> runRowIds = runs.stream().map(ExpRun::getRowId).toList();
+        List<Long> runRowIds = runs.stream().map(ExpRun::getRowId).toList();
 
         // move specimen
         String tableName = AssayProtocolSchema.DATA_TABLE_NAME;

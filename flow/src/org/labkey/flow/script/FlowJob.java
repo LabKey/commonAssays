@@ -168,7 +168,7 @@ public abstract class FlowJob extends PipelineJob
     {
         if (_statusHref == null)
         {
-            Integer jobId = PipelineService.get().getJobId(getUser(), getContainer(), getJobGUID());
+            Long jobId = PipelineService.get().getJobId(getUser(), getContainer(), getJobGUID());
             if (jobId != null)
             {
                 _statusHref = PageFlowUtil.urlProvider(PipelineStatusUrls.class).urlDetails(getContainer(), jobId);

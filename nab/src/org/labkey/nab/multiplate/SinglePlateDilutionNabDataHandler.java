@@ -23,6 +23,8 @@ import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.PlateService;
 import org.labkey.api.assay.plate.WellGroup;
+import org.labkey.api.collections.IntHashMap;
+import org.labkey.api.collections.LongArrayList;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
@@ -98,7 +100,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
             int plateCount = 0;
             double[][] wellValues = new double[template.getRows()][template.getColumns()];
             List<Plate> plates = new ArrayList<>();
-            Map<Integer, String> plateToVirusMap = new HashMap<>();
+            Map<Integer, String> plateToVirusMap = new IntHashMap<>();
 
             for (Map<String, Object> rowData : loader)
             {
@@ -114,7 +116,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                 int plateCol = location.getValue();
 
                 Object dataValue = rowData.get(resultColumnHeader);
-                if (!(dataValue instanceof Integer))
+                if (!(dataValue instanceof Integer || dataValue instanceof Long))
                 {
                     throw createParseError(dataFile, "No valid result value found on line " + line + ".  Expected integer " +
                             "result values in the last data file column (\"" + resultColumnHeader + "\") found: " + dataValue);
@@ -136,7 +138,7 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
                                 " and virus name : " + virusName);
                 }
 
-                wellValues[plateRow - 1][plateCol - 1] = (Integer) dataValue;
+                wellValues[plateRow - 1][plateCol - 1] = ((Number)dataValue).doubleValue();
                 if (++wellCount == wellsPerPlate)
                 {
                     Plate plate = PlateService.get().createPlate(template, wellValues, null, PlateService.NO_RUNID, plateCount + 1);
@@ -204,15 +206,15 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     }
 
     @Override
-    public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, StatsService.CurveFitType fit, int... dataObjectIds) throws ExperimentException
+    public Map<DilutionSummary, DilutionAssayRun> getDilutionSummaries(User user, StatsService.CurveFitType fit, long... dataObjectIds) throws ExperimentException
     {
         Map<DilutionSummary, DilutionAssayRun> summaries = new LinkedHashMap<>();
         if (dataObjectIds == null || dataObjectIds.length == 0)
             return summaries;
 
-        Map<Integer, DilutionAssayRun> dataToAssay = new HashMap<>();
-        List<Integer> nabSpecimenIds = new ArrayList<>(dataObjectIds.length);
-        for (int nabSpecimenId : dataObjectIds)
+        Map<Integer, DilutionAssayRun> dataToAssay = new IntHashMap<>();
+        List<Long> nabSpecimenIds = new LongArrayList(dataObjectIds.length);
+        for (long nabSpecimenId : dataObjectIds)
             nabSpecimenIds.add(nabSpecimenId);
         List<NabSpecimen> nabSpecimens = NabManager.get().getNabSpecimens(nabSpecimenIds);
 

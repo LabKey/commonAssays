@@ -51,7 +51,7 @@ public class ChooseGraphForm extends ViewForm
         return _wellId;
     }
 
-    public int getCompId()
+    public long getCompId()
     {
         if (_compId != 0)
             return _compId;
@@ -64,7 +64,7 @@ public class ChooseGraphForm extends ViewForm
         return 0;
     }
 
-    public int getScriptId()
+    public long getScriptId()
     {
         if (_scriptId != 0)
             return _scriptId;

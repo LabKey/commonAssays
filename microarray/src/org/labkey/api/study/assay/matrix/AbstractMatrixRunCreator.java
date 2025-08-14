@@ -127,7 +127,7 @@ public abstract class AbstractMatrixRunCreator <ProviderType extends AbstractAss
         AssayRunUploadContext<ProviderType> context,
         Map<ExpMaterial, String> inputMaterials,
         @NotNull RemapCache cache,
-        @NotNull Map<Integer, ExpMaterial> materialCache
+        @NotNull Map<Long, ExpMaterial> materialCache
     ) throws ExperimentException
     {
         // Attach the materials found in the matrix file to the run

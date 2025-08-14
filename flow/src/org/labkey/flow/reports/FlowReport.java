@@ -185,7 +185,7 @@ abstract public class FlowReport extends AbstractReport
      * The exp.object in the Container for this FlowReport instance.
      * The report results will use this as the owner id.
      */
-    public @Nullable Integer getOntologyObjectId(Container container)
+    public @Nullable Long getOntologyObjectId(Container container)
     {
         return FlowReportManager.getReportOntologyObjectId(this, container);
     }
@@ -194,7 +194,7 @@ abstract public class FlowReport extends AbstractReport
      * The exp.object in the Container for this FlowReport instance.
      * The report results will use this as the owner id.
      */
-    public @Nullable Integer ensureOntologyObjectId(Container container)
+    public @Nullable Long ensureOntologyObjectId(Container container)
     {
         return FlowReportManager.ensureReportOntologyObjectId(this, container);
     }

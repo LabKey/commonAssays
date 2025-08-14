@@ -156,7 +156,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
         return dataRowLsid.build();
     }
 
-    public static Lsid getAntigenLsid(String antigenWellgroupName, String sampleName, int runId, String assayName, String analyte)
+    public static Lsid getAntigenLsid(String antigenWellgroupName, String sampleName, long runId, String assayName, String analyte)
     {
         assert (antigenWellgroupName != null);
         assert (sampleName != null);

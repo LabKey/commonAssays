@@ -210,12 +210,12 @@ public class FlowRun extends FlowObject<ExpRun>
         return new FlowCompensationMatrix(datas.get(0));
     }
     
-    public int getRunId()
+    public long getRunId()
     {
         return getExperimentRun().getRowId();
     }
 
-    static public FlowRun fromRunId(int id)
+    static public FlowRun fromRunId(long id)
     {
         if (id == 0)
             return null;
@@ -260,7 +260,7 @@ public class FlowRun extends FlowObject<ExpRun>
         return getScript().getAnalysisScript();
     }
 
-    private int getScriptId()
+    private long getScriptId()
     {
         List<? extends ExpData> datas = getExperimentRun().getInputDatas(InputRole.AnalysisScript.toString(), ExpProtocol.ApplicationType.ExperimentRun);
         if (datas.isEmpty())

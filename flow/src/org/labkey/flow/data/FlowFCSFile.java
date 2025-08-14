@@ -53,7 +53,7 @@ public class FlowFCSFile extends FlowWell
         super(data);
     }
 
-    static public List<FlowFCSFile> fromWellIds(int... ids)
+    static public List<FlowFCSFile> fromWellIds(long... ids)
     {
         List<FlowFCSFile> wells = new ArrayList<>(ids.length);
         List<FlowDataObject> flowobjs = fromRowIds(ids);

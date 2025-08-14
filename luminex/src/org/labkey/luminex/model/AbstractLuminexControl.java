@@ -15,8 +15,6 @@
  */
 package org.labkey.luminex.model;
 
-import org.labkey.luminex.model.Titration;
-
 import java.io.Serializable;
 
 /**
@@ -26,7 +24,7 @@ import java.io.Serializable;
 public abstract class AbstractLuminexControl implements Serializable
 {
     private int _rowId;
-    private int _runId;
+    private long _runId;
     private String _name;
 
     public AbstractLuminexControl() {}
@@ -47,12 +45,12 @@ public abstract class AbstractLuminexControl implements Serializable
         _rowId = rowId;
     }
 
-    public int getRunId()
+    public long getRunId()
     {
         return _runId;
     }
 
-    public void setRunId(int runId)
+    public void setRunId(long runId)
     {
         _runId = runId;
     }

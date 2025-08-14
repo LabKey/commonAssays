@@ -44,17 +44,17 @@ public class SelectedSamples
     {
         private boolean _selected;
         // FlowFCSFile rowid (may be 0 or null if there is no match)
-        private Integer _matchedFile;
+        private Long _matchedFile;
 
         // FlowFCSFile rowid (may be null if there are no candidates)
-        private int[] _candidateFile;
+        private long[] _candidateFile;
         private List<FlowFCSFile> _candidateFCSFiles;
 
         public ResolvedSample()
         {
         }
 
-        public ResolvedSample(boolean selected, int matchedFile, List<FlowFCSFile> candidateFCSFiles)
+        public ResolvedSample(boolean selected, long matchedFile, List<FlowFCSFile> candidateFCSFiles)
         {
             _selected = selected;
             _matchedFile = matchedFile;
@@ -66,7 +66,7 @@ public class SelectedSamples
             else
             {
                 _candidateFCSFiles = candidateFCSFiles;
-                _candidateFile = new int[candidateFCSFiles.size()];
+                _candidateFile = new long[candidateFCSFiles.size()];
                 for (int i = 0, len = candidateFCSFiles.size(); i < len; i++)
                     _candidateFile[i] = candidateFCSFiles.get(i).getRowId();
             }
@@ -82,12 +82,12 @@ public class SelectedSamples
             _selected = selected;
         }
 
-        public Integer getMatchedFile()
+        public Long getMatchedFile()
         {
             return _matchedFile;
         }
 
-        public void setMatchedFile(Integer matchedFile)
+        public void setMatchedFile(Long matchedFile)
         {
             _matchedFile = matchedFile;
         }
@@ -97,7 +97,7 @@ public class SelectedSamples
             return _matchedFile != null && _matchedFile > 0;
         }
 
-        public int[] getCandidateFile()
+        public long[] getCandidateFile()
         {
             return _candidateFile;
         }
@@ -111,7 +111,7 @@ public class SelectedSamples
             return _candidateFCSFiles;
         }
 
-        public void setCandidateFile(int[] candidateFile)
+        public void setCandidateFile(long[] candidateFile)
         {
             _candidateFile = candidateFile;
         }
