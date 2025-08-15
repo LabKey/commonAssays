@@ -15,31 +15,22 @@
  */
 package org.labkey.elispot.query;
 
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
-import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.StorageProvisioner;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.assay.AbstractAssayProvider;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssaySchema;
-import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * User: klum
- * Date: Jan 27, 2011
- * Time: 1:45:11 PM
- */
 public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
 {
     public ElispotRunAntigenTable(final AssaySchema schema, ContainerFilter cf, final Domain domain, ExpProtocol protocol)
@@ -72,34 +63,6 @@ public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
         fieldKeys.add(FieldKey.fromParts("RunId"));
         fieldKeys.add(FieldKey.fromParts("SpecimenLsid", "Property", "ParticipantId"));
         return fieldKeys;
-    }
-
-    @Override
-    protected ColumnInfo resolveColumn(String name)
-    {
-        ColumnInfo result = super.resolveColumn(name);
-
-        if ("Properties".equalsIgnoreCase(name))
-        {
-            // Hook up a column that joins back to this table so that the columns formerly under the Properties
-            // node can still be queried there.
-            var wrapped = wrapColumn("Properties", getRealTable().getColumn("ObjectId"));
-            wrapped.setIsUnselectable(true);
-            LookupForeignKey fk = new LookupForeignKey(getContainerFilter(), "ObjectId", null)
-            {
-                @Override
-                public TableInfo getLookupTableInfo()
-                {
-                    Domain domain = AbstractAssayProvider.getDomainByPrefix(_protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP, false);
-                    return new ElispotRunAntigenTable(_userSchema, getLookupContainerFilter(), domain, _protocol);
-                }
-            };
-            fk.setPrefixColumnCaption(false);
-            wrapped.setFk(fk);
-            result = wrapped;
-        }
-
-        return result;
     }
 
     @Override
