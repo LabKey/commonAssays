@@ -39,7 +39,6 @@ public class RunDataRow
     private Double _activity;
     private Double _intensity;
     private String _objectUri;
-    private int _objectId;          // TODO: remove when we remove use of exp.Object
 
     private Map<String, Object> _antigenRow = null;
 
@@ -192,16 +191,6 @@ public class RunDataRow
     public void setObjectUri(String objectUri)
     {
         _objectUri = objectUri;
-    }
-
-    public int getObjectId()
-    {
-        return _objectId;
-    }
-
-    public void setObjectId(int objectId)
-    {
-        _objectId = objectId;
     }
 
     public String getAntigenLsid()

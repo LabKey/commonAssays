@@ -109,7 +109,6 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
                 String dataRowLsid = ElispotDataHandler.getDataRowLsid(runData.get(0).getLSID(), rowPos, colPos).toString();
 
                 Map<String, Object> runDataFields = new HashMap<>();
-                runDataFields.put("ObjectId", 0);
                 runDataFields.put("ObjectUri", dataRowLsid);
                 runDataFields.put("RunId", run.getRowId());
                 runDataFields.put(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY, row.get(ELISPOT_INPUT_MATERIAL_DATA_PROPERTY));

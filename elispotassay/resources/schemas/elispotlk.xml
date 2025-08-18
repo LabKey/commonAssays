@@ -37,7 +37,6 @@
             <column columnName="Activity"/>
             <column columnName="Intensity"/>
             <column columnName="ObjectUri"/>
-            <column columnName="ObjectId"/>
         </columns>
     </table>
     <table tableName="Antigen" tableDbType="NOT_IN_DB">
