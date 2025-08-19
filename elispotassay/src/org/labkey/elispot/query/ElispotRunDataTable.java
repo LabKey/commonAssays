@@ -17,12 +17,15 @@
 package org.labkey.elispot.query;
 
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.assay.AbstractAssayProvider;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssaySchema;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
+import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataColumn;
-import org.labkey.api.data.DisplayColumn;
-import org.labkey.api.data.DisplayColumnFactory;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
@@ -31,12 +34,6 @@ import org.labkey.api.exp.api.SampleTypeService;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.query.ExpMaterialTable;
 import org.labkey.api.query.FieldKey;
-import org.labkey.api.query.LookupForeignKey;
-import org.labkey.api.assay.AbstractAssayProvider;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssaySchema;
-import org.labkey.api.assay.AssayService;
-import org.labkey.api.assay.plate.PlateReader;
 import org.labkey.api.query.QueryForeignKey;
 import org.labkey.api.util.HtmlString;
 import org.labkey.elispot.ElispotAssayProvider;
@@ -47,10 +44,6 @@ import org.labkey.elispot.ElispotProtocolSchema;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * User: Karl Lum
- * Date: Jan 21, 2008
- */
 public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
 {
     public ElispotRunDataTable(final AssaySchema schema, ContainerFilter cf, final ExpProtocol protocol)
@@ -109,33 +102,6 @@ public class ElispotRunDataTable extends PlateBasedAssayRunDataTable
         var antigenLsidColumn = getMutableColumn(FieldKey.fromParts("AntigenLsid"));
         antigenLsidColumn.setLabel("Antigen");
         antigenLsidColumn.setFk(QueryForeignKey.from(getUserSchema(), getContainerFilter()).to(ElispotProtocolSchema.ANTIGEN_TABLE_NAME, "AntigenLsid", null));
-    }
-
-    @Override
-    protected ColumnInfo resolveColumn(String name)
-    {
-        ColumnInfo result = super.resolveColumn(name);
-
-        if ("Properties".equalsIgnoreCase(name))
-        {
-            // Hook up a column that joins back to this table so that the columns formerly under the Properties
-            // node can still be queried there.
-            var wrapped = wrapColumn("Properties", getRealTable().getColumn("ObjectId"));
-            wrapped.setIsUnselectable(true);
-            LookupForeignKey fk = new LookupForeignKey(getContainerFilter(), "ObjectId", null)
-            {
-                @Override
-                public TableInfo getLookupTableInfo()
-                {
-                    return new ElispotRunDataTable(_userSchema, getLookupContainerFilter(), _protocol);
-                }
-            };
-            fk.setPrefixColumnCaption(false);
-            wrapped.setFk(fk);
-            result = wrapped;
-        }
-
-        return result;
     }
 
     @Override

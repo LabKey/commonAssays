@@ -14,13 +14,7 @@
  * limitations under the License.
  */
 
-/* elispotlk-15.10-15.20.sql */
-
 CREATE SCHEMA elispotlk;
-GO
--- Until 21.11.5, the elispotassay module did not claim ownership of the "elispotantigen" schema. So, deleting that
--- module and its schema would leave "elispotantigen" behind and any subsequent bootstrap would fail. See #44610.
-EXEC core.fn_dropIfExists '*', 'elispotantigen', 'SCHEMA';
 GO
 CREATE SCHEMA elispotantigen;
 GO
@@ -53,34 +47,6 @@ CREATE TABLE elispotlk.rundata
 );
 
 CREATE INDEX idx_elispotrundata_runid ON elispotlk.rundata(RunId);
-
-INSERT INTO elispotlk.rundata (RunId, Specimenlsid, SpotCount, WellgroupName, WellgroupLocation, NormalizedSpotCount, AntigenWellgroupName, ObjectUri, ObjectId)
-SELECT
-    RunId,SpecimenLSID, SpotCount, WellGroupName, WellgroupLocation, NormalizedSpotCount,
-    CASE WHEN AntigenWellgroupNameTemp IS NULL THEN AntigenName ELSE AntigenWellgroupNameTemp END AS AntigenWellgroupName,
-    ObjectURI, ObjectId
-FROM (
-	SELECT
-		(SELECT RunId FROM exp.Data d, exp.Object parent WHERE d.LSID = parent.ObjectURI and parent.ObjectId = o.OwnerObjectId) AS RunId,
-
-		(SELECT StringValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:SpecimenLsid' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS SpecimenLSID,
-		(SELECT FloatValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:SpotCount' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS SpotCount,
-		(SELECT StringValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:WellgroupName' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS WellGroupName,
-		(SELECT StringValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:WellgroupLocation' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS WellgroupLocation,
-		(SELECT FloatValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:NormalizedSpotCount' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS NormalizedSpotCount,
-		(SELECT StringValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-			WHERE pd.PropertyURI LIKE '%:AntigenWellgroupName' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS AntigenWellgroupNameTemp,
-        (SELECT StringValue FROM exp.ObjectProperty op, exp.PropertyDescriptor pd
-            WHERE pd.PropertyURI LIKE '%:AntigenName' AND op.PropertyId = pd.PropertyId AND op.ObjectId = o.ObjectId) AS AntigenName,
-		ObjectURI,
-		ObjectId
-	FROM exp.Object o WHERE ObjectURI LIKE '%ElispotAssayDataRow%') x
-	WHERE specimenlsid IS NOT NULL AND RunID IS NOT NULL;
 
 ALTER TABLE elispotlk.rundata ADD Cytokine NVARCHAR(4000);
 ALTER TABLE elispotlk.rundata ADD SpotSize REAL;
