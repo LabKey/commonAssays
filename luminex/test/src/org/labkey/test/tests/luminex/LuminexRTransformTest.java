@@ -127,6 +127,7 @@ public final class LuminexRTransformTest extends LuminexTest
         setFormElement(Locator.name("StndCurveFitInput"), "FI");
         setFormElement(Locator.name("UnkCurveFitInput"), "FI-Bkgd-Neg");
         setFormElement(Locator.name("__primaryFile__"), TEST_ASSAY_LUM_FILE4);
+        scrollIntoView(Locator.lkButton("Next"), true);
         clickButton("Next", defaultWaitForPage * 2);
 
         // make sure the Standard checkboxes are checked
@@ -140,12 +141,11 @@ public final class LuminexRTransformTest extends LuminexTest
         setFormElement(Locator.xpath("//input[@type='text' and contains(@name, '_LotNumber')][1]"), TEST_ANALYTE_LOT_NUMBER);
         // set negative control and negative bead values
         checkCheckbox(Locator.name("_analyte_" + ANALYTE3 + "_NegativeControl"));
+        checkCheckbox(Locator.name("_analyte_" + ANALYTE1 + "_NegativeBeadCheckBox")); // Issue 53620: "Same" checkbox for subtract negative bead
         selectOptionByText(Locator.name("_analyte_" + ANALYTE1 + "_NegativeBead"), ANALYTE3);
-        selectOptionByText(Locator.name("_analyte_" + ANALYTE2 + "_NegativeBead"), ANALYTE3);
         // switch to using MyNegative bead for subtraction
         checkCheckbox(Locator.name("_analyte_" + ANALYTE4 + "_NegativeControl"));
         selectOptionByText(Locator.name("_analyte_" + ANALYTE1 + "_NegativeBead"), ANALYTE4);
-        selectOptionByText(Locator.name("_analyte_" + ANALYTE2 + "_NegativeBead"), ANALYTE4);
         clickButton("Save and Finish");
     }
 

@@ -444,8 +444,10 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                     ).appendTo(out);
 
                     StringBuilder onchange = new StringBuilder("b = this.checked;");
-                    for (DisplayColumn col : getColumns())
+                    // Index starts at 1 -- always leave the first column visible (Issue 53620)
+                    for (int i = 1; i < getColumns().size(); i++)
                     {
+                        DisplayColumn col = getColumns().get(i);
                         onchange.append("document.getElementsByName('").append(col.getFormFieldName(ctx)).append("')[0].style.display = b ? 'none' : 'block';\n");
                     }
                     onchange.append("if (b) { ").append(groupName).append("Updated(); }");
