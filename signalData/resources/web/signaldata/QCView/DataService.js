@@ -247,6 +247,9 @@ Ext4.define('LABKEY.SignalData.DataService', {
                                     name = name[0];
                                     var filePath = "";
                                     var dataFile = run.dataRows[r]['DataFile'];
+                                    // dataFile values can be empty, indicating no file was uploaded for the results row, ignore these.
+                                    if (!dataFile)
+                                        continue;
 
                                     var osDelimiter = '/';
                                     var fileName = dataFile.split(osDelimiter).pop();  //Hack to make fileLink and pipe resolve file

@@ -39,6 +39,7 @@ import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.webdav.WebdavResource;
 import org.labkey.api.webdav.WebdavService;
 import org.labkey.signaldata.assay.SignalDataAssayDataHandler;
+import org.labkey.vfs.FileLike;
 import org.springframework.validation.BindException;
 
 import java.io.File;
@@ -83,11 +84,10 @@ public class SignalDataController extends SpringActionController
             {
                 containerPath = root.getContainer().getPath();
                 webdavURL = root.getWebdavURL();
-                if (!SignalDataAssayDataHandler.NAMESPACE.isEmpty())
-                    webdavURL = webdavURL.resolve(SignalDataAssayDataHandler.NAMESPACE);
+                webdavURL = webdavURL.resolve(SignalDataAssayDataHandler.NAMESPACE);
 
                 //Create folder if needed
-                File sdFileRoot = new File(root.getRootPath(), SignalDataAssayDataHandler.NAMESPACE);
+                FileLike sdFileRoot = root.getRootFileLike().resolveChild(SignalDataAssayDataHandler.NAMESPACE);
                 if(!sdFileRoot.exists())
                     sdFileRoot.mkdirs();
             }

@@ -17,16 +17,19 @@
 package org.labkey.signaldata;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
-import org.labkey.api.module.CodeOnlyModule;
+import org.labkey.api.data.UpgradeCode;
+import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleProperty;
 import org.labkey.api.view.WebPartFactory;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
-public class SignalDataModule extends CodeOnlyModule
+public class SignalDataModule extends DefaultModule
 {
     public static final String NAME = "SignalData";
     public static final String QC_PROVIDER_PROPERTY_NAME = "QCViewProviderModule";
@@ -65,6 +68,30 @@ public class SignalDataModule extends CodeOnlyModule
     @Override
     public void doStartup(ModuleContext moduleContext)
     {
+    }
+
+    @Override
+    public @Nullable Double getSchemaVersion()
+    {
+        return 25.001;
+    }
+
+    @Override
+    public boolean hasScripts()
+    {
+        return true;
+    }
+
+    @Override
+    public @NotNull Collection<String> getSchemaNames()
+    {
+        return List.of("signaldata");
+    }
+
+    @Override
+    public @Nullable UpgradeCode getUpgradeCode()
+    {
+        return new SignalDataUpgradeCode();
     }
 
     @Override
