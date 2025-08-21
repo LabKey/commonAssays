@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyStorageSpec;
+import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpData;
@@ -269,7 +270,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         DomainKind<?> domainKind = PropertyService.get().getDomainKindByName(ElispotAntigenDomainKind.KINDNAME);
         for (PropertyStorageSpec propSpec : domainKind.getBaseProperties(null))
         {
-            DomainProperty prop = antigenWellGroupDomain.addProperty(propSpec);
+            DomainProperty prop = antigenWellGroupDomain.addProperty(propSpec, Lsid.encodePart(propSpec.getName()));
             prop.setShownInInsertView(false);
             prop.setShownInUpdateView(false);
             prop.setShownInDetailsView(false);
