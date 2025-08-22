@@ -270,7 +270,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
         DomainKind<?> domainKind = PropertyService.get().getDomainKindByName(ElispotAntigenDomainKind.KINDNAME);
         for (PropertyStorageSpec propSpec : domainKind.getBaseProperties(null))
         {
-            DomainProperty prop = antigenWellGroupDomain.addProperty(propSpec, Lsid.encodePart(propSpec.getName()));
+            DomainProperty prop = antigenWellGroupDomain.addProperty(propSpec, propSpec.getName());
             prop.setShownInInsertView(false);
             prop.setShownInUpdateView(false);
             prop.setShownInDetailsView(false);
