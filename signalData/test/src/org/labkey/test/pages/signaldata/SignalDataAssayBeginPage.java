@@ -54,7 +54,7 @@ public class SignalDataAssayBeginPage
     }
 
     @NotNull
-    private DataRegionTable getDataRegionTable()
+    public DataRegionTable getDataRegionTable()
     {
         return new DataRegionTable("aqwp101", _test.getDriver());
     }

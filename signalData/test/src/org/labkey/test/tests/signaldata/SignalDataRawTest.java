@@ -26,6 +26,7 @@ import org.labkey.test.categories.Daily;
 import org.labkey.test.pages.signaldata.SignalDataAssayBeginPage;
 import org.labkey.test.pages.signaldata.SignalDataRunViewerPage;
 import org.labkey.test.pages.signaldata.SignalDataUploadPage;
+import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.signaldata.SignalDataInitializer;
@@ -34,7 +35,9 @@ import org.openqa.selenium.WebElement;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 @Category({Daily.class})
@@ -42,7 +45,6 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
 {
     private static final String PROJECT_NAME = "SignalDataRawTest";
     private static final String DEFAULT_RUN = "TestRun001";
-    private static final String ADDITIONAL_RUN = "TestRun002";
     private static final String ASSAY_DATA_LOC = "SignalDataAssayData/" + DEFAULT_RUN;
     private static final String RESULT_FILENAME_1 = "LGC12392.TXT";
     private static final String RESULT_FILENAME_2 = "LGC14332.TXT";
@@ -128,6 +130,8 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
     public void testFileImport()
     {
         File metadataFile = getFile("RunsMetadata/datafiles.tsv");
+        Map<String, List<String>> expectedData = Map.of("StringValue", List.of("StringOne", "StringTwo", "StringThree"),
+                "IntegerValue", List.of("1", "2", "3"));
         SignalDataAssayBeginPage beginPage = importRun("importTest1",
                 metadataFile,
                 List.of(getFile(String.join("/", ASSAY_DATA_LOC, "BLANK235.TXT"))),
@@ -135,7 +139,8 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
                         getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_1)),
                         getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_2)),
                         getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_3))
-                ));
+                ),
+                expectedData, 3);
 
         ///////////  Check clearing run  ///////////
         log("Check clearing a run during import");
@@ -156,14 +161,34 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
                     getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_5)),
                     getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_6)),
                     getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_7))
-            ));
+            ), Collections.EMPTY_MAP, 4);
+
+        // test import of files with a subset of the metadata files
+        importRun("importTest3",
+                getFile("RunsMetadata/datafiles.tsv"),
+                List.of(getFile(String.join("/", ASSAY_DATA_LOC, "BLANK235.TXT"))),
+                List.of(
+                        getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_1)),
+                        getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_3))
+                ),
+                expectedData, 3);
+
+        importRun("importTest4",
+                getFile("RunsMetadata/datafiles2.tsv"),
+                Collections.emptyList(),
+                List.of(
+                        getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_6)),
+                        getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_7))
+                ), Collections.EMPTY_MAP, 4);
     }
 
     private SignalDataAssayBeginPage importRun(
         String runName,
         File metadataFile,
         List<File> unspecifiedDataFiles,
-        List<File> dataFiles
+        List<File> dataFiles,
+        Map<String, List<String>> expectedData,
+        int expectedResultRows
     )
     {
         SignalDataAssayBeginPage beginPage = navigateToAssayLandingPage();
@@ -187,12 +212,19 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
         uploadPage.saveRun();
         beginPage.waitForPageLoad();
         log("Verifying run was added");
-        beginPage.waitForGridValue(runName, uploadCount);
+        beginPage.waitForGridValue(runName, expectedResultRows);
 
         // verify the uploaded files in the run
         beginPage.setSearchBox(runName);
-        assertEquals("Incorrect number of rows for imported run " + runName, dataFiles.size(), beginPage.getRowCount());
+        assertEquals("Incorrect number of rows for imported run " + runName, expectedResultRows, beginPage.getRowCount());
 
+        // verify any data row values
+        DataRegionTable table = beginPage.getDataRegionTable();
+        for (Map.Entry<String, List<String>> entry : expectedData.entrySet())
+        {
+            List<String> values = table.getColumnDataAsText(entry.getKey());
+            assertArrayEquals(values.toArray(), entry.getValue().toArray());
+        }
         return beginPage;
     }
 
