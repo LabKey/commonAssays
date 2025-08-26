@@ -40,7 +40,7 @@ LABKEY.SignalData.initializeDataFileUploadForm = function (metadataFormId, eleme
         workingDirectory: getTempFolderName(),
         flex: 2,
         results: resultFileContents,
-        resultFields: assay.domains[assay.name + ' Results Fields'],
+        resultFields: assay.domains[assay.name + ' Result Fields'],
         listeners: {
             removefile: function(name, count) {
                 if (count == 0) {
