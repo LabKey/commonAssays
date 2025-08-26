@@ -133,8 +133,7 @@ public final class LuminexRTransformTest extends LuminexTest
         // make sure the Standard checkboxes are checked
         checkCheckbox(Locator.name("_titrationRole_standard_Standard1"));
         checkCheckbox(Locator.name("titration_" + ANALYTE1 + "_Standard1"));
-        checkCheckbox(Locator.name("titration_" + ANALYTE2 + "_Standard1"));
-        checkCheckbox(Locator.name("titration_" + ANALYTE3 + "_Standard1"));
+        checkCheckbox(Locator.name("titration_" + ANALYTE1 + "_Standard1CheckBox")); // Issue 53620: "Same" checkbox for standards
         // make sure that that QC Control checkbox is checked
         checkCheckbox(Locator.name("_titrationRole_qccontrol_Standard1"));
         // set LotNumber for the first analyte

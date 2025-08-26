@@ -57,18 +57,15 @@ public class NegativeBeadDisplayColumnGroup extends DisplayColumnGroup
                     DisplayColumn col = getColumns().get(i);
                     if (col.getColumnInfo() != null)
                     {
-                        onChange.append("s = document.getElementsByName('")
-                            .append(col.getFormFieldName(ctx))
-                            .append("')[0].options.length;\n")
-                            .append("document.getElementsByName('")
-                            .append(col.getFormFieldName(ctx))
-                            .append("')[0].style.display = b || s == 0 ? 'none' : 'block';\n");
+                        // Issue 53620: instead of hiding the input, set it "disabled" via CSS (but not actually disabled so it will still submit)
+                        onChange.append("document.getElementsByName('").append(col.getFormFieldName(ctx)).append("')[0].style.opacity = b ? 0.6 : 1;\n");
+                        onChange.append("document.getElementsByName('").append(col.getFormFieldName(ctx)).append("')[0].style.pointerEvents = b ? 'none' : 'all';\n");
                     }
                 }
 
                 onChange.append(" if (b) { ")
                     .append(inputName)
-                    .append("Updated(); }");
+                    .append("Updated(); }\n");
                 HttpView.currentPageConfig().addHandler(id, "change", onChange.toString());
 
                 return ret;

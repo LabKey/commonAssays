@@ -443,14 +443,16 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                         InputBuilder.checkbox().name(id).id(id)
                     ).appendTo(out);
 
-                    StringBuilder onchange = new StringBuilder("b = this.checked;");
+                    StringBuilder onchange = new StringBuilder("b = this.checked;\n");
                     // Index starts at 1 -- always leave the first column visible (Issue 53620)
                     for (int i = 1; i < getColumns().size(); i++)
                     {
                         DisplayColumn col = getColumns().get(i);
-                        onchange.append("document.getElementsByName('").append(col.getFormFieldName(ctx)).append("')[0].style.display = b ? 'none' : 'block';\n");
+                        // Issue 53620: instead of hiding the input, set it "disabled" via CSS (but not actually disabled so it will still submit)
+                        onchange.append("document.getElementsByName('").append(col.getFormFieldName(ctx)).append("')[0].style.opacity = b ? 0.6 : 1;\n");
+                        onchange.append("document.getElementsByName('").append(col.getFormFieldName(ctx)).append("')[0].style.pointerEvents = b ? 'none' : 'all';\n");
                     }
-                    onchange.append("if (b) { ").append(groupName).append("Updated(); }");
+                    onchange.append("if (b) { ").append(groupName).append("Updated(); }\n");
                     HttpView.currentPageConfig().addHandler(id, "change", onchange.toString());
                 }
 
