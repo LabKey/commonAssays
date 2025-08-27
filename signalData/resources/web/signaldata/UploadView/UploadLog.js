@@ -68,7 +68,7 @@ Ext4.define('LABKEY.SignalData.UploadLog', {
                 fields.push({
                     name: field.name,
                     type: 'string',
-                    convert: field.fieldKey === 'DataFile' ? fileNameFromPath : null
+                    convert: field.fieldKey === this.DATA_FILE ? fileNameFromPath : null
                 });
             }, this);
 
