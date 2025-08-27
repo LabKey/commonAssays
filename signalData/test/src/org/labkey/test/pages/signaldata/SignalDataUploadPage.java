@@ -25,7 +25,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.io.File;
-import java.util.Arrays;
+import java.util.List;
 
 import static org.labkey.test.WebDriverWrapper.WAIT_FOR_JAVASCRIPT;
 import static org.labkey.test.WebDriverWrapper.sleep;
@@ -50,11 +50,11 @@ public class SignalDataUploadPage
         _test.waitForElement(Locators.runIdentifier);
     }
 
-    public void uploadFile(File... file)
+    public void uploadFile(List<File> files)
     {
         sleep(1_000);
         WebElement dropFileInputEl = Locators.dropFileInput.findElement(_test.getDriver());
-        _test.setInput(dropFileInputEl, Arrays.asList(file));
+        _test.setInput(dropFileInputEl, files);
     }
 
     public void waitForProgressBars(int count)
@@ -68,7 +68,7 @@ public class SignalDataUploadPage
 
     public void uploadIncorrectFile(File file)
     {
-        uploadFile(file);
+        uploadFile(List.of(file));
         WebElement msgBox = Locators.fileNotUploadedMsgBox(file.getName()).waitForElement(_test.getDriver(), WAIT_FOR_JAVASCRIPT);
         msgBox.sendKeys(Keys.ESCAPE);
         _test.shortWait().until(ExpectedConditions.invisibilityOf(msgBox));

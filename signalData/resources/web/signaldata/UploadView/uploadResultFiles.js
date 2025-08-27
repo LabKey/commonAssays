@@ -376,17 +376,20 @@ LABKEY.SignalData.initializeDataFileUploadForm = function (metadataFormId, eleme
 
         var dataRows = [];
         var dataInputs = [];
-
         var rows = uploadLog.getStore().getRange();
-
         var runFolder = getRunFolderName();
+
         rows.forEach(function (row){
             var dataRow = {};
             row.fields.eachKey(function(key){
-                dataRow[key] = row.get(key);
+
+                // if there was no actual file uploaded, ignore the dataFile field value so we don't
+                // try to validate on the server
+                if (key !== uploadLog.DATA_FILE || row.get('file'))
+                    dataRow[key] = row.get(key);
             });
 
-            if(row.get('file')) {
+            if (row.get('file')) {
                 dataRow[uploadLog.DATA_FILE] = decodeURI(dataRow[uploadLog.FILE_URL]).replace('file:','');
 
                 dataInputs.push({

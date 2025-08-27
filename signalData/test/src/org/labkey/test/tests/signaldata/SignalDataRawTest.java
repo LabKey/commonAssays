@@ -26,6 +26,7 @@ import org.labkey.test.categories.Daily;
 import org.labkey.test.pages.signaldata.SignalDataAssayBeginPage;
 import org.labkey.test.pages.signaldata.SignalDataRunViewerPage;
 import org.labkey.test.pages.signaldata.SignalDataUploadPage;
+import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.signaldata.SignalDataInitializer;
@@ -34,7 +35,9 @@ import org.openqa.selenium.WebElement;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 @Category({Daily.class})
@@ -46,6 +49,10 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
     private static final String RESULT_FILENAME_1 = "LGC12392.TXT";
     private static final String RESULT_FILENAME_2 = "LGC14332.TXT";
     private static final String RESULT_FILENAME_3 = "MPP82113.TXT";
+    private static final String RESULT_FILENAME_4 = "TD789-12.TXT";
+    private static final String RESULT_FILENAME_5 = "TD789-25.TXT";
+    private static final String RESULT_FILENAME_6 = "QD123-11.TXT";
+    private static final String RESULT_FILENAME_7 = "QD123-24.TXT";
 
     @Nullable
     @Override
@@ -122,56 +129,103 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
     @Test
     public void testFileImport()
     {
-        final File METADATA_FILE = getFile("RunsMetadata/datafiles.tsv");
+        File metadataFile = getFile("RunsMetadata/datafiles.tsv");
+        Map<String, List<String>> expectedData = Map.of("StringValue", List.of("StringOne", "StringTwo", "StringThree"),
+                "IntegerValue", List.of("1", "2", "3"));
+        SignalDataAssayBeginPage beginPage = importRun("importTest1",
+                metadataFile,
+                List.of(getFile(String.join("/", ASSAY_DATA_LOC, "BLANK235.TXT"))),
+                List.of(
+                        getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_1)),
+                        getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_2)),
+                        getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_3))
+                ),
+                expectedData, 3);
 
+        ///////////  Check clearing run  ///////////
+        log("Check clearing a run during import");
+        //Create new run
+        SignalDataUploadPage uploadPage = beginPage.navigateToImportPage();
+        uploadPage.uploadMetadataFile(metadataFile);
+        uploadPage.setRunIDField("cleared run");
+        assertElementPresent(Ext4Helper.Locators.getGridRow()); //Check grid has elements
+        uploadPage.clearRun();
+        navigateToAssayLandingPage();  //Should not cause unload warning
+
+        // test upload of metadata file with full data file paths
+        importRun("importTest2",
+            getFile("RunsMetadata/datafiles2.tsv"),
+            Collections.emptyList(),
+            List.of(
+                    getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_4)),
+                    getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_5)),
+                    getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_6)),
+                    getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_7))
+            ), Collections.EMPTY_MAP, 4);
+
+        // test import of files with a subset of the metadata files
+        importRun("importTest3",
+                getFile("RunsMetadata/datafiles.tsv"),
+                List.of(getFile(String.join("/", ASSAY_DATA_LOC, "BLANK235.TXT"))),
+                List.of(
+                        getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_1)),
+                        getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_3))
+                ),
+                expectedData, 3);
+
+        importRun("importTest4",
+                getFile("RunsMetadata/datafiles2.tsv"),
+                Collections.emptyList(),
+                List.of(
+                        getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_6)),
+                        getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_7))
+                ), Collections.EMPTY_MAP, 4);
+    }
+
+    private SignalDataAssayBeginPage importRun(
+        String runName,
+        File metadataFile,
+        List<File> unspecifiedDataFiles,
+        List<File> dataFiles,
+        Map<String, List<String>> expectedData,
+        int expectedResultRows
+    )
+    {
         SignalDataAssayBeginPage beginPage = navigateToAssayLandingPage();
         SignalDataUploadPage uploadPage = beginPage.navigateToImportPage();
 
         log("Uploading metadata file");
-        uploadPage.uploadMetadataFile(METADATA_FILE);
+        uploadPage.uploadMetadataFile(metadataFile);
 
-        log("Attempting to upload a data file not specified in metadata");
-        uploadPage.uploadIncorrectFile(getFile(ASSAY_DATA_LOC + "/" + "BLANK235.TXT"));
+        for (File dataFile : unspecifiedDataFiles)
+        {
+            log("Attempting to upload a data file not specified in metadata");
+            uploadPage.uploadIncorrectFile(dataFile);
+        }
 
         log("Uploading data files");
-        int uploadCount = 3;
-        uploadPage.uploadFile(
-                getFile(ASSAY_DATA_LOC + "/" + RESULT_FILENAME_1),
-                getFile(ASSAY_DATA_LOC + "/" + RESULT_FILENAME_2),
-                getFile(ASSAY_DATA_LOC + "/" + RESULT_FILENAME_3));
-        uploadPage.waitForProgressBars(3);
+        int uploadCount = dataFiles.size();
+        uploadPage.uploadFile(dataFiles);
+        uploadPage.waitForProgressBars(uploadCount);
 
-// TODO: Not clear what delete should do- just make file unavailable?
-//        log("Delete a file");
-//        uploadPage.deleteFile(RESULT_FILENAME_3);
-
-        String runName = "importTest1";
         uploadPage.setRunIDField(runName);
         uploadPage.saveRun();
         beginPage.waitForPageLoad();
         log("Verifying run was added");
-        beginPage.waitForGridValue(runName, uploadCount);
+        beginPage.waitForGridValue(runName, expectedResultRows);
 
-        // While we're here, a better test of the Run Identifier search filter now that we have 2 runs
+        // verify the uploaded files in the run
         beginPage.setSearchBox(runName);
-        assertEquals("Incorrect number of rows for imported run " + runName, uploadCount, beginPage.getRowCount());
+        assertEquals("Incorrect number of rows for imported run " + runName, expectedResultRows, beginPage.getRowCount());
 
-        // TODO: Not clear what delete should do- just make file unavailable?
-//        //Check if deleted file was added as result
-//        beginPage.setSearchBox(RESULT_FILENAME_3); //Filter results to deleted filename
-//        assertEquals("Deleted file found in search", 0, beginPage.getRowCount());
-//        beginPage.clearSearchBox();
-//
-        ///////////  Check clearing run  ///////////
-        log("Check clearing a run during import");
-        //Create new run
-        uploadPage = beginPage.navigateToImportPage();
-        uploadPage.uploadMetadataFile(METADATA_FILE);
-        runName = "importTest2";
-        uploadPage.setRunIDField(runName);
-        assertElementPresent(Ext4Helper.Locators.getGridRow()); //Check grid has elements
-        uploadPage.clearRun();
-        navigateToAssayLandingPage();  //Should not cause unload warning
+        // verify any data row values
+        DataRegionTable table = beginPage.getDataRegionTable();
+        for (Map.Entry<String, List<String>> entry : expectedData.entrySet())
+        {
+            List<String> values = table.getColumnDataAsText(entry.getKey());
+            assertArrayEquals(values.toArray(), entry.getValue().toArray());
+        }
+        return beginPage;
     }
 
     private File getFile(String relativePath)

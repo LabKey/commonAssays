@@ -7,7 +7,6 @@
     </exp:PropertyDescriptor>
     <exp:PropertyDescriptor>
         <exp:Name>DataFile</exp:Name>
-        <exp:Required>true</exp:Required>
         <exp:RangeURI>http://cpas.fhcrc.org/exp/xml#fileLink</exp:RangeURI>
         <exp:Label>Data File</exp:Label>
     </exp:PropertyDescriptor>

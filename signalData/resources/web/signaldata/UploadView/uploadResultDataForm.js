@@ -140,6 +140,7 @@ LABKEY.SignalData.initializeUploadForm = function(metadataFormElId, metadataFile
             }],
             submit:function(){
                 LABKEY.Ajax.request({
+                    method: 'POST',
                     url: LABKEY.ActionURL.buildURL("assay", "assayFileUpload", LABKEY.ActionURL.getContainer()),
                     params: { protocolId: assay.id, fileName: metadataTSVId + '.txt', fileContent: this.getTsvInput() },
                     success: function(response) {
