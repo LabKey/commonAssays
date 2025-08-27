@@ -42,7 +42,7 @@ public class CometSearchProtocol extends AbstractMS2SearchProtocol<CometPipeline
     }
 
     @Override
-    public AbstractFileAnalysisProtocolFactory getFactory()
+    public CometSearchProtocolFactory getFactory()
     {
         return CometSearchProtocolFactory.get();
     }
