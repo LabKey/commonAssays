@@ -182,7 +182,7 @@ public class PeptideProphetGraphs
 
             if (count == increment)
             {
-                negative += negative * ratioRandom; // add back random positives
+                negative += (int)(negative * ratioRandom); // add back random positives
                 if (negative > count)
                     negative = count;
                 score /= (float) count; // mean score
