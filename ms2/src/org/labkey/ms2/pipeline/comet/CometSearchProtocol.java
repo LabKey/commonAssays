@@ -19,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineValidationException;
-import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
@@ -42,7 +41,7 @@ public class CometSearchProtocol extends AbstractMS2SearchProtocol<CometPipeline
     }
 
     @Override
-    public AbstractFileAnalysisProtocolFactory getFactory()
+    public CometSearchProtocolFactory getFactory()
     {
         return CometSearchProtocolFactory.get();
     }

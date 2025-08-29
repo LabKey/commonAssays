@@ -149,7 +149,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     // once URL decoded, the value looks like this:
     //  CAexample_mini.0110.0110.1
 
-    public static final Pattern QUERY_TITLE_SCAN_REGEX = Pattern.compile("\\.??(\\d{1,6})\\.(\\d{1,6})\\.(\\d)\\.??[a-zA-z0-9_]*?$");
+    public static final Pattern QUERY_TITLE_SCAN_REGEX = Pattern.compile("\\.??(\\d{1,6})\\.(\\d{1,6})\\.(\\d)\\.??[a-zA-Z0-9_]*?$");
     // the title line may also look like this:
     // title=Spectrum270258%20scans%3a6721%2c
     // decoded to:

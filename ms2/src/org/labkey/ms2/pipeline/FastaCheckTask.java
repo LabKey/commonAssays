@@ -55,7 +55,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
         }
 
         @Override
-        public PipelineJob.Task createTask(PipelineJob job)
+        public FastaCheckTask createTask(PipelineJob job)
         {
             return new FastaCheckTask(this, job);
         }

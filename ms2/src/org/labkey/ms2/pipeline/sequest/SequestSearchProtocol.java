@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineValidationException;
-import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
@@ -43,7 +43,7 @@ public class SequestSearchProtocol extends AbstractMS2SearchProtocol<SequestPipe
     }
 
     @Override
-    public AbstractFileAnalysisProtocolFactory getFactory()
+    public SequestSearchProtocolFactory getFactory()
     {
         return SequestSearchProtocolFactory.get();
     }
@@ -65,7 +65,7 @@ public class SequestSearchProtocol extends AbstractMS2SearchProtocol<SequestPipe
         if(dbNames.isEmpty())
             throw new IllegalArgumentException("A sequence database must be selected.");
 
-        File fileSequenceDB = new File(getDirSeqRoot(), dbNames.get(0));
+        File fileSequenceDB = FileUtil.appendPath(getDirSeqRoot(), org.labkey.api.util.Path.parse(dbNames.get(0)));
         if (!fileSequenceDB.exists())
             throw new IllegalArgumentException("Sequence database '" + dbNames.get(0) + "' is not found in local FASTA root.");
 

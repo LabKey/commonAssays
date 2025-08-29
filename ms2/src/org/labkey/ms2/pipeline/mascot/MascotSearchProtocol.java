@@ -18,7 +18,6 @@ package org.labkey.ms2.pipeline.mascot;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocolFactory;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 
@@ -39,7 +38,7 @@ public class MascotSearchProtocol extends AbstractMS2SearchProtocol<MascotPipeli
     }
 
     @Override
-    public AbstractFileAnalysisProtocolFactory getFactory()
+    public MascotSearchProtocolFactory getFactory()
     {
         return MascotSearchProtocolFactory.get();
     }
