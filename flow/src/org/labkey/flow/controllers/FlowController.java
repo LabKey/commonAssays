@@ -164,7 +164,7 @@ public class FlowController extends BaseFlowController
             run = schema.getRun();
 //            script = schema.getScript();
 
-            QueryView view = schema.createView(getViewContext(), settings);
+            QueryView view = schema.createView(getViewContext(), settings, errors);
             if (view.getQueryDef() == null)
             {
                 throw new NotFoundException("Query definition '" + settings.getQueryName() + "' in flow schema not found");

@@ -17,6 +17,7 @@
 package org.labkey.flow.controllers.editscript;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.fhcrc.cpas.flow.script.xml.ChannelDef;
 import org.fhcrc.cpas.flow.script.xml.ChannelSubsetDef;
 import org.fhcrc.cpas.flow.script.xml.CompensationCalculationDef;
@@ -263,14 +264,14 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
 
     private boolean subsetNameMatches(String subsetUser, String subsetWorkspace, Sign sign, String channel)
     {
-        if (StringUtils.equals(subsetUser, subsetWorkspace))
+        if (Strings.CS.equals(subsetUser, subsetWorkspace))
             return true;
-        if (StringUtils.equals(subsetUser, channel + subsetWorkspace))
+        if (Strings.CS.equals(subsetUser, channel + subsetWorkspace))
             return true;
         String strSign = sign == Sign.positive ? "+" : "-";
-        if (StringUtils.equals(subsetUser, channel + strSign + subsetWorkspace))
+        if (Strings.CS.equals(subsetUser, channel + strSign + subsetWorkspace))
             return true;
-        if (StringUtils.equals(subsetUser, strSign + subsetWorkspace))
+        if (Strings.CS.equals(subsetUser, strSign + subsetWorkspace))
             return true;
         return false;
     }
