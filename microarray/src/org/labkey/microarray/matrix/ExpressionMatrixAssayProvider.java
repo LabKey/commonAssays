@@ -16,7 +16,7 @@
 
 package org.labkey.microarray.matrix;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.fhcrc.cpas.exp.xml.ExperimentRunType;
 import org.fhcrc.cpas.exp.xml.SimpleTypeNames;
 import org.fhcrc.cpas.exp.xml.SimpleValueType;
@@ -234,7 +234,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
                 }
                 for (SimpleValueType sv : xrun.getProperties().getSimpleValArray())
                 {
-                    if (StringUtils.equals("featureSet",sv.getName()))
+                    if (Strings.CS.equals("featureSet",sv.getName()))
                     {
                         int featureAnnotationSetRowId = (int)Float.parseFloat(sv.getStringValue());
                         String featureAnnotationSetName = mapRowIdName.get(featureAnnotationSetRowId);
@@ -267,7 +267,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
                 }
                 for (SimpleValueType sv : xrun.getProperties().getSimpleValArray())
                 {
-                    if (StringUtils.equals(FEATURE_SET_PROPERTY_NAME,sv.getName()))
+                    if (Strings.CS.equals(FEATURE_SET_PROPERTY_NAME,sv.getName()))
                     {
                         String featureAnnotationSetName = sv.getStringValue();
                         Long featureAnnotationRowId = mapNameRowId.get(featureAnnotationSetName);
