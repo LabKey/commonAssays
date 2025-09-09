@@ -244,15 +244,54 @@ Ext4.define('LABKEY.SignalData.UploadLog', {
         if (Ext4.isFunction(callback)) {
             var me = this;
             var destination = this.fileSystem.concatPaths(this.fileSystem.getBaseURL(), targetDirectory);
-            this.fileSystem.renamePath({
-                source: this.getWorkingPath(),
-                destination: destination,
-                isFile: false,
-                success: function () {
-                    me.resolveFileResources(targetDirectory, callback, scope, runProperties);
+
+            const getResourcesCallback = function(files) {
+                if (files && files.length > 0) {
+                    // files currently exist, validate and resolve before creating the run
+                    me.resolveDataFileURL(files, callback, scope, runProperties);
                 }
-            });
+                else {
+                    // files need to be moved to the target directory
+                    this.fileSystem.renamePath({
+                        source: this.getWorkingPath(),
+                        destination: destination,
+                        isFile: false,
+                        success: function () {
+                            me.resolveFileResources(targetDirectory, callback, scope, runProperties);
+                        }
+                    });
+                }
+            };
+
+            // get the list of files in the target directory (if any)
+            this.getTargetDirResources(targetDirectory, getResourcesCallback, this);
         }
+    },
+
+    /**
+     * Returns the list of data files in the target directory. Uploaded run data files are moved from
+     * a temporary location to the target directory when the run is created.
+     */
+    getTargetDirResources : function (targetDirectory, callback, callbackScope) {
+        var fileUri = this.fileSystem.concatPaths(this.fileSystem.getAbsoluteURL(), targetDirectory);
+        LABKEY.Ajax.request({
+            url: fileUri,
+            method: 'GET',
+            params: {method: 'JSON'},
+            success: function (response) {
+                var json = Ext4.decode(response.responseText);
+                var files = [];
+                if (Ext4.isDefined(json) && Ext4.isArray(json.files))
+                    files = json.files;
+
+                callback.call(callbackScope, files);
+            },
+            failure: function() {
+                // this is normal in the case where the target directory does not yet exist or
+                // the files have not yet been moved there
+                callback.call(callbackScope, []);
+            }
+        });
     },
 
     resolveFileResources: function (targetDirectory, callback, callbackScope, runProperties) {
@@ -269,9 +308,10 @@ Ext4.define('LABKEY.SignalData.UploadLog', {
                     }
                 }
             },
-            failure: function () {
-            }
-            , scope: this
+            failure: LABKEY.Utils.getCallbackWrapper(function(json, response, opts) {
+                LABKEY.Utils.alert('Error', 'Unable to resolve file resources : ' + response.exception);
+            }, this, true),
+            scope: this
         }, this);
     },
 
