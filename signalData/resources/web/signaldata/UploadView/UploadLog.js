@@ -321,41 +321,42 @@ Ext4.define('LABKEY.SignalData.UploadLog', {
     resolveDataFileURL: function (files, callback, scope, runProperties) {
         if (Ext4.isFunction(callback)) {
 
-            var received = 0;
-            var newFiles = [];
-
             var me = this;
-
-            function done(file, results) {
-
-                var store = me.getStore();
-                var idx = store.find(me.DATA_FILE, file.text);
-                var process = store.getAt(idx);
-
-                //Set upload time
-                process.set(me.FILENAME, results[me.DATA_FILE]);
-                process.set(me.FILE_URL, results['DataFileUrl']);
-                process.set('file', file);
-                newFiles.push(file);
-                received++;
-
-                if (received == files.length) {
-                    callback.call(scope || me, newFiles, runProperties);
-                }
-            }
-
-            //TODO: This should be refactored to use a single ajax call for the array
+            var paths = [];
+            var fileNames = [];
             files.forEach(function (file) {
-                LABKEY.Ajax.request({
-                    url: LABKEY.ActionURL.buildURL('SignalData', 'getSignalDataResource.api'),
-                    method: 'POST',
-                    params: {path: decodeURIComponent(file.id), test: true},
-                    success: function (response) {
-                        done(file, Ext4.decode(response.responseText));
-                    },
-                    scope: this
-                });
+                paths.push(decodeURIComponent(file.id));
+                fileNames.push(file.text);
             }, this);
+
+            LABKEY.Ajax.request({
+                url: LABKEY.ActionURL.buildURL('SignalData', 'getSignalDataResource.api'),
+                method: 'POST',
+                jsonData: {
+                    paths : paths,
+                    files : fileNames
+                },
+                success: function (response) {
+                    let result = Ext4.decode(response.responseText);
+                    let store = this.getStore();
+
+                    Ext4.each(result.files, function(file) {
+
+                        var idx = store.find(this.DATA_FILE, file["FileName"]);
+                        var rec = store.getAt(idx);
+
+                        if (rec) {
+                            //Set upload time in the store record
+                            rec.set(me.FILENAME, file[this.DATA_FILE]);
+                            rec.set(me.FILE_URL, file['DataFileUrl']);
+                            rec.set('file', true);
+                        }
+                    }, this);
+
+                    callback.call(scope || me, runProperties);
+                },
+                scope: this
+            });
         }
     },
 

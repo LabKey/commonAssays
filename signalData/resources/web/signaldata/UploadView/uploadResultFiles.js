@@ -372,7 +372,7 @@ LABKEY.SignalData.initializeDataFileUploadForm = function (metadataFormId, eleme
         }, this);
     }
 
-    var generateAndSaveRun = function(files, fieldValues) {
+    var generateAndSaveRun = function(fieldValues) {
 
         var dataRows = [];
         var dataInputs = [];

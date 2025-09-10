@@ -22,7 +22,6 @@ import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
-import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
@@ -32,10 +31,11 @@ import org.labkey.api.files.FileContentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryUpdateService;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.permissions.UpdatePermission;
 import org.labkey.api.util.FileUtil;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.webdav.WebdavResource;
 import org.labkey.api.webdav.WebdavService;
 import org.labkey.signaldata.assay.SignalDataAssayDataHandler;
@@ -43,9 +43,8 @@ import org.labkey.vfs.FileLike;
 import org.springframework.validation.BindException;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -101,115 +100,99 @@ public class SignalDataController extends SpringActionController
 
     public static class SignalDataResourceForm
     {
-        public String _path;
-        public boolean _test = false;
+        private List<String> _paths;
+        private List<String> _files;
 
-        public String getPath()
+        public List<String> getFiles()
         {
-            return _path;
+            return _files;
         }
 
-        public void setPath(String path)
+        public void setFiles(List<String> files)
         {
-            _path = path;
+            _files = files;
         }
 
-        public boolean isTest()
+        public List<String> getPaths()
         {
-            return _test;
+            return _paths;
         }
 
-        public void setTest(boolean test)
+        public void setPaths(List<String> paths)
         {
-            _test = test;
+            _paths = paths;
         }
     }
 
-
-    @RequiresPermission(ReadPermission.class)
+    @RequiresPermission(UpdatePermission.class)
     public static class getSignalDataResourceAction extends MutatingApiAction<SignalDataResourceForm>
     {
         @Override
-        public ApiResponse execute(SignalDataResourceForm form, BindException errors)
+        public ApiResponse execute(SignalDataResourceForm form, BindException errors) throws Exception
         {
-            String path = form.getPath();
-            WebdavResource resource = WebdavService.get().lookup(path);
-            Map<String, String> props = new HashMap<>();
+            List<Map<String, String>> results = new ArrayList<>();
             Container c = getContainer();
+            FileContentService svc = FileContentService.get();
+            TableInfo ti = ExpSchema.TableType.Data.createTable(new ExpSchema(getUser(), c), ExpSchema.TableType.Data.toString(), null);
+            QueryUpdateService qus = ti.getUpdateService();
+            int maxUrlSize = ExperimentService.get().getTinfoData().getColumn("DataFileURL").getScale();
+            int idx = 0;
 
-            if (null != resource)
+            for (String path : form.getPaths())
             {
-                FileContentService svc = FileContentService.get();
-                ExpData data = svc.getDataObject(resource, c);
+                WebdavResource resource = WebdavService.get().lookup(path);
+                String fileName = form.getFiles().get(idx++);
 
-                if (form.isTest() && data == null)
+                if (null != resource)
                 {
-                    // Generate the data to help the test, replicating what DavController would do for us
-                    File file = resource.getFile();
-                    if (null != file)
+                    ExpData data = svc.getDataObject(resource, c);
+                    if (data == null)
                     {
-                        data = ExperimentService.get().createData(c, UPLOADED_FILE);
-                        data.setName(file.getName());
-                        data.setDataFileURI(file.toURI());
-
-                        int scale = ExperimentService.get().getTinfoData().getColumn("DataFileURL").getScale();
-                        String dataFileURL = data.getDataFileUrl();
-                        if (dataFileURL == null || dataFileURL.length() <= scale)
+                        // create the ExpData object if it doesn't already exist
+                        File file = resource.getFile();
+                        if (null != file)
                         {
-                            data.save(getUser());
-                        }
-                        else
-                        {
-                            // If the path is too long to store, bail out without creating an exp.data row
-                        }
-                    }
-                }
+                            data = ExperimentService.get().createData(c, UPLOADED_FILE);
+                            data.setName(file.getName());
+                            data.setDataFileURI(file.toURI());
 
-                if (null != data)
-                {
-                    TableInfo ti = ExpSchema.TableType.Data.createTable(new ExpSchema(getUser(), c), ExpSchema.TableType.Data.toString(), null);
-                    QueryUpdateService qus = ti.getUpdateService();
-
-                    try
-                    {
-                        File canonicalFile = FileUtil.getAbsoluteCaseSensitiveFile(resource.getFile());
-                        String url = canonicalFile.toURI().toURL().toString();
-                        Map<String, Object> keys = Collections.singletonMap(ExpDataTable.Column.DataFileUrl.name(), url);
-                        List<Map<String, Object>> rows = qus.getRows(getUser(), c, Collections.singletonList(keys));
-
-                        if (rows.size() == 1)
-                        {
-                            for (Map.Entry<String, Object> entry : rows.get(0).entrySet())
+                            String dataFileURL = data.getDataFileUrl();
+                            if (dataFileURL == null || dataFileURL.length() <= maxUrlSize)
                             {
-                                Object value = entry.getValue();
-
-                                if (null != value)
-                                {
-                                    props.put(entry.getKey(), String.valueOf(value));
-                                }
+                                data.save(getUser());
+                            }
+                            else
+                            {
+                                throw new ValidationException(String.format("The data file URL is too long to store in the database (max %d).", maxUrlSize));
                             }
                         }
                     }
-                    catch (MalformedURLException e)
+
+                    if (null != data)
                     {
-                        throw UnexpectedException.wrap(e);
-                    }
-                    catch (SQLException e)
-                    {
-                        throw new RuntimeSQLException(e);
-                    }
-                    catch (RuntimeException re)
-                    {
-                        throw re;
-                    }
-                    catch (Exception e)
-                    {
-                        throw new RuntimeException(e);
+                        File canonicalFile = FileUtil.getAbsoluteCaseSensitiveFile(resource.getFile());
+                        String url = canonicalFile.toURI().toURL().toString();
+                        List<Map<String, Object>> rows = qus.getRows(getUser(), c, Collections.singletonList(Map.of(ExpDataTable.Column.DataFileUrl.name(), url)));
+
+                        if (rows.size() == 1)
+                        {
+                            Map<String, String> props = new HashMap<>();
+                            props.put("FilePath", path);
+                            props.put("FileName", fileName);
+                            results.add(props);
+                            for (Map.Entry<String, Object> entry : rows.get(0).entrySet())
+                            {
+                                Object value = entry.getValue();
+                                if (null != value)
+                                    props.put(entry.getKey(), String.valueOf(value));
+                            }
+                        }
+                        else
+                            throw new RuntimeException(String.format("Unexpected number of rows returned for DataFileUrl '%s': %d", url, rows.size()));
                     }
                 }
             }
-
-            return new ApiSimpleResponse(props);
+            return new ApiSimpleResponse(Map.of("files", results));
         }
     }
 }
