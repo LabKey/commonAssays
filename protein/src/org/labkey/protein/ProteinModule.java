@@ -36,6 +36,7 @@ import org.labkey.api.protein.ProteomicsWebPartFactory;
 import org.labkey.api.protein.annotation.CustomAnnotationSetManager;
 import org.labkey.api.protein.annotation.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.fasta.FastaDbLoader;
+import org.labkey.api.protein.go.GoLoader;
 import org.labkey.api.protein.query.CustomAnnotationSchema;
 import org.labkey.api.protein.query.ProteinUserSchema;
 import org.labkey.api.protein.search.MSSearchWebpart;
@@ -135,13 +136,14 @@ public class ProteinModule extends DefaultModule
             public void beforeSchema(DbSchema targetSchema)
             {
                 new SqlExecutor(targetSchema).execute("ALTER TABLE prot.Organisms DROP CONSTRAINT FK_ProtOrganisms_ProtIdentifiers");
+                GoLoader.dropGoIndexes();
             }
 
             @Override
             public void afterSchema(DbSchema targetSchema)
             {
                 new SqlExecutor(targetSchema).execute("ALTER TABLE prot.Organisms ADD CONSTRAINT FK_ProtOrganisms_ProtIdentifiers FOREIGN KEY (IdentId) REFERENCES prot.Identifiers (IdentId)");
-            }
+                GoLoader.dropGoIndexes();            }
         });
     }
 
