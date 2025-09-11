@@ -270,7 +270,7 @@ Ext4.define('LABKEY.SignalData.UploadLog', {
 
     /**
      * Returns the list of data files in the target directory. Uploaded run data files are moved from
-     * a temporary location to the target directory when the run is created.
+     * a temporary location to the target directory before the run is created.
      */
     getTargetDirResources : function (targetDirectory, callback, callbackScope) {
         var fileUri = this.fileSystem.concatPaths(this.fileSystem.getAbsoluteURL(), targetDirectory);
