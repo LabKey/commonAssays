@@ -211,10 +211,9 @@
                         paths : paths,
                         files : fileNames
                     },
-                    success: function (response) {
-                        let result = Ext4.decode(response.responseText);
-                        callback.call(scope || this, result.files);
-                    },
+                    success: LABKEY.Utils.getCallbackWrapper(function(response) {
+                        callback.call(scope || this, response.files);
+                    }, this, true),
                     scope: this
                 });
             }

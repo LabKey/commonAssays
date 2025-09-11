@@ -22,6 +22,7 @@ import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
@@ -133,64 +134,68 @@ public class SignalDataController extends SpringActionController
             List<Map<String, String>> results = new ArrayList<>();
             Container c = getContainer();
             FileContentService svc = FileContentService.get();
-            TableInfo ti = ExpSchema.TableType.Data.createTable(new ExpSchema(getUser(), c), ExpSchema.TableType.Data.toString(), null);
+            TableInfo ti = new ExpSchema(getUser(), getContainer()).getDatasTable();
             QueryUpdateService qus = ti.getUpdateService();
-            int maxUrlSize = ExperimentService.get().getTinfoData().getColumn("DataFileURL").getScale();
+            int maxUrlSize = ExperimentService.get().getTinfoData().getColumn(ExpDataTable.Column.DataFileUrl.name()).getScale();
             int idx = 0;
 
-            for (String path : form.getPaths())
+            try (DbScope.Transaction transaction = DbScope.getLabKeyScope().ensureTransaction())
             {
-                WebdavResource resource = WebdavService.get().lookup(path);
-                String fileName = form.getFiles().get(idx++);
-
-                if (null != resource)
+                for (String path : form.getPaths())
                 {
-                    ExpData data = svc.getDataObject(resource, c);
-                    if (data == null)
-                    {
-                        // create the ExpData object if it doesn't already exist
-                        File file = resource.getFile();
-                        if (null != file)
-                        {
-                            data = ExperimentService.get().createData(c, UPLOADED_FILE);
-                            data.setName(file.getName());
-                            data.setDataFileURI(file.toURI());
+                    WebdavResource resource = WebdavService.get().lookup(path);
+                    String fileName = form.getFiles().get(idx++);
 
-                            String dataFileURL = data.getDataFileUrl();
-                            if (dataFileURL == null || dataFileURL.length() <= maxUrlSize)
+                    if (null != resource)
+                    {
+                        ExpData data = svc.getDataObject(resource, c);
+                        if (data == null)
+                        {
+                            // create the ExpData object if it doesn't already exist
+                            File file = resource.getFile();
+                            if (null != file)
                             {
-                                data.save(getUser());
+                                data = ExperimentService.get().createData(c, UPLOADED_FILE);
+                                data.setName(file.getName());
+                                data.setDataFileURI(file.toURI());
+
+                                String dataFileURL = data.getDataFileUrl();
+                                if (dataFileURL == null || dataFileURL.length() <= maxUrlSize)
+                                {
+                                    data.save(getUser());
+                                }
+                                else
+                                {
+                                    throw new ValidationException(String.format("The data file URL is too long to store in the database (max %d).", maxUrlSize));
+                                }
+                            }
+                        }
+
+                        if (null != data)
+                        {
+                            File canonicalFile = FileUtil.getAbsoluteCaseSensitiveFile(resource.getFile());
+                            String url = canonicalFile.toURI().toURL().toString();
+                            List<Map<String, Object>> rows = qus.getRows(getUser(), c, Collections.singletonList(Map.of(ExpDataTable.Column.DataFileUrl.name(), url)));
+
+                            if (rows.size() == 1)
+                            {
+                                Map<String, String> props = new HashMap<>();
+                                props.put("FilePath", path);
+                                props.put("FileName", fileName);
+                                results.add(props);
+                                for (Map.Entry<String, Object> entry : rows.get(0).entrySet())
+                                {
+                                    Object value = entry.getValue();
+                                    if (null != value)
+                                        props.put(entry.getKey(), String.valueOf(value));
+                                }
                             }
                             else
-                            {
-                                throw new ValidationException(String.format("The data file URL is too long to store in the database (max %d).", maxUrlSize));
-                            }
+                                throw new RuntimeException(String.format("Unexpected number of rows returned for DataFileUrl '%s': %d", url, rows.size()));
                         }
-                    }
-
-                    if (null != data)
-                    {
-                        File canonicalFile = FileUtil.getAbsoluteCaseSensitiveFile(resource.getFile());
-                        String url = canonicalFile.toURI().toURL().toString();
-                        List<Map<String, Object>> rows = qus.getRows(getUser(), c, Collections.singletonList(Map.of(ExpDataTable.Column.DataFileUrl.name(), url)));
-
-                        if (rows.size() == 1)
-                        {
-                            Map<String, String> props = new HashMap<>();
-                            props.put("FilePath", path);
-                            props.put("FileName", fileName);
-                            results.add(props);
-                            for (Map.Entry<String, Object> entry : rows.get(0).entrySet())
-                            {
-                                Object value = entry.getValue();
-                                if (null != value)
-                                    props.put(entry.getKey(), String.valueOf(value));
-                            }
-                        }
-                        else
-                            throw new RuntimeException(String.format("Unexpected number of rows returned for DataFileUrl '%s': %d", url, rows.size()));
                     }
                 }
+                transaction.commit();
             }
             return new ApiSimpleResponse(Map.of("files", results));
         }

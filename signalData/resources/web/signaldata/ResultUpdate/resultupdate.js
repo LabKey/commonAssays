@@ -68,14 +68,12 @@ var init = function(assay, row){
                     paths: [decodeURIComponent(file.internalId)],
                     files: [file.name]
                 },
-                success: function (response) {
-                    var result = Ext4.decode(response.responseText);
-                    Ext4.each(result.files, function(file) {
-
+                success: LABKEY.Utils.getCallbackWrapper(function(response) {
+                    Ext4.each(response.files, function(file) {
                         var updatedRow = setRunFields(form, file);
                         updateRunResult(updatedRow, file);
                     }, this);
-                },
+                }, this, true),
                 scope: this
             });
         }
