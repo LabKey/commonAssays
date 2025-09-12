@@ -23,6 +23,7 @@ import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DatabaseMigrationService;
 import org.labkey.api.data.DatabaseMigrationService.DefaultMigrationHandler;
 import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
@@ -39,6 +40,7 @@ import org.labkey.api.protein.go.GoLoader;
 import org.labkey.api.protein.query.CustomAnnotationSchema;
 import org.labkey.api.protein.query.ProteinUserSchema;
 import org.labkey.api.protein.search.MSSearchWebpart;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.usageMetrics.UsageMetricsService;
 import org.labkey.api.view.BaseWebPartFactory;
 import org.labkey.api.view.Portal;
@@ -136,6 +138,16 @@ public class ProteinModule extends DefaultModule
             {
                 new SqlExecutor(getSchema()).execute("ALTER TABLE prot.Organisms DROP CONSTRAINT FK_ProtOrganisms_ProtIdentifiers");
                 GoLoader.dropGoIndexes();
+            }
+
+            @Override
+            public @Nullable FieldKey getContainerFieldKey(TableInfo sourceTable)
+            {
+                return switch (sourceTable.getName())
+                {
+                    case "AnnotationTypes", "AnnotInsertions", "FastaFiles", "FastaLoads", "GoGraphPath", "GoTerm", "GoTerm2Term", "GoTermDefinition", "GoTermSynonym", "Identifiers", "IdentTypes", "InfoSources", "SprotOrgMap" -> SITE_WIDE_TABLE;
+                    default -> super.getContainerFieldKey(sourceTable);
+                };
             }
 
             @Override
