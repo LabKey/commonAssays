@@ -22,7 +22,6 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DatabaseMigrationService;
 import org.labkey.api.data.DatabaseMigrationService.DefaultMigrationHandler;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.files.FileContentService;
@@ -130,19 +129,19 @@ public class ProteinModule extends DefaultModule
         }
 
         ProteinService.get().registerProteinSearchView(new ProteinSearchViewProvider());
-        DatabaseMigrationService.get().registerHandler(ProteinSchema.getSchema(), new DefaultMigrationHandler()
+        DatabaseMigrationService.get().registerHandler(new DefaultMigrationHandler(ProteinSchema.getSchema())
         {
             @Override
-            public void beforeSchema(DbSchema targetSchema)
+            public void beforeSchema()
             {
-                new SqlExecutor(targetSchema).execute("ALTER TABLE prot.Organisms DROP CONSTRAINT FK_ProtOrganisms_ProtIdentifiers");
+                new SqlExecutor(getSchema()).execute("ALTER TABLE prot.Organisms DROP CONSTRAINT FK_ProtOrganisms_ProtIdentifiers");
                 GoLoader.dropGoIndexes();
             }
 
             @Override
-            public void afterSchema(DbSchema targetSchema)
+            public void afterSchema()
             {
-                new SqlExecutor(targetSchema).execute("ALTER TABLE prot.Organisms ADD CONSTRAINT FK_ProtOrganisms_ProtIdentifiers FOREIGN KEY (IdentId) REFERENCES prot.Identifiers (IdentId)");
+                new SqlExecutor(getSchema()).execute("ALTER TABLE prot.Organisms ADD CONSTRAINT FK_ProtOrganisms_ProtIdentifiers FOREIGN KEY (IdentId) REFERENCES prot.Identifiers (IdentId)");
                 GoLoader.dropGoIndexes();            }
         });
     }
