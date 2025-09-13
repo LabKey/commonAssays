@@ -145,8 +145,8 @@ public class ProteinModule extends DefaultModule
             {
                 return switch (sourceTable.getName())
                 {
-                    case "AnnotationTypes", "AnnotInsertions", "FastaFiles", "FastaLoads", "GoGraphPath", "GoTerm", "GoTerm2Term", "GoTermDefinition", "GoTermSynonym", "Identifiers", "IdentTypes", "InfoSources", "SprotOrgMap" -> SITE_WIDE_TABLE;
-                    default -> super.getContainerFieldKey(sourceTable);
+                    case "CustomAnnotation", "CustomAnnotationSet" -> super.getContainerFieldKey(sourceTable);
+                    default -> SITE_WIDE_TABLE;
                 };
             }
 
@@ -154,7 +154,8 @@ public class ProteinModule extends DefaultModule
             public void afterSchema()
             {
                 new SqlExecutor(getSchema()).execute("ALTER TABLE prot.Organisms ADD CONSTRAINT FK_ProtOrganisms_ProtIdentifiers FOREIGN KEY (IdentId) REFERENCES prot.Identifiers (IdentId)");
-                GoLoader.dropGoIndexes();            }
+                GoLoader.dropGoIndexes();
+            }
         });
     }
 
