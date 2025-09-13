@@ -296,10 +296,7 @@ public class FlowModule extends SpringModule
         if (null != svc)
         {
             FlowManager mgr = FlowManager.get();
-            if (null != mgr)
-            {
-                svc.registerUsageMetrics(NAME, mgr::getUsageMetrics);
-            }
+            svc.registerUsageMetrics(NAME, mgr::getUsageMetrics);
         }
 
         FlowSchema.registerContainerListener();
