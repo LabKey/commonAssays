@@ -73,7 +73,7 @@ var init = function(assay, row){
                         var updatedRow = setRunFields(form, file);
                         updateRunResult(updatedRow, file);
                     }, this);
-                }, this, true),
+                }, this),
                 scope: this
             });
         }

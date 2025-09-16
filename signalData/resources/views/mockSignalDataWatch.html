@@ -213,7 +213,7 @@
                     },
                     success: LABKEY.Utils.getCallbackWrapper(function(response) {
                         callback.call(scope || this, response.files);
-                    }, this, true),
+                    }, this),
                     scope: this
                 });
             }
