@@ -219,15 +219,11 @@ public class MS2Module extends SpringModule implements ProteomicsModule
         MS2Controller.registerAdminConsoleLinks();
 
         SearchService ss = SearchService.get();
-
-        if (null != ss)
-        {
-            ss.addDocumentParser(new MzXMLDocumentParser());
-            ss.addDocumentParser(new MzMLDocumentParser());
-            ss.addDocumentParser(new DatDocumentParser());
-            ss.addDocumentParser(new SequestLogDocumentParser());
-            ss.addDocumentParser(new MGFDocumentParser());
-        }
+        ss.addDocumentParser(new MzXMLDocumentParser());
+        ss.addDocumentParser(new MzMLDocumentParser());
+        ss.addDocumentParser(new DatDocumentParser());
+        ss.addDocumentParser(new SequestLogDocumentParser());
+        ss.addDocumentParser(new MGFDocumentParser());
 
         FileContentService fcs = FileContentService.get();
         if (fcs != null)

@@ -281,9 +281,7 @@ public class FlowModule extends SpringModule
         AssayService.get().registerAssayProvider(new FlowAssayProvider());
 
         FolderTypeManager.get().registerFolderType(this, new FlowFolderType(this));
-        SearchService ss = SearchService.get();
-        if (null != ss)
-            ss.addDocumentParser(FCSHeader.documentParser);
+        SearchService.get().addDocumentParser(FCSHeader.documentParser);
         FlowController.registerAdminConsoleLinks();
 
         FileContentService fcs = FileContentService.get();
@@ -298,10 +296,7 @@ public class FlowModule extends SpringModule
         if (null != svc)
         {
             FlowManager mgr = FlowManager.get();
-            if (null != mgr)
-            {
-                svc.registerUsageMetrics(NAME, mgr::getUsageMetrics);
-            }
+            svc.registerUsageMetrics(NAME, mgr::getUsageMetrics);
         }
 
         FlowSchema.registerContainerListener();
