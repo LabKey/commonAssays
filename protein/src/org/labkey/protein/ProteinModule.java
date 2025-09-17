@@ -141,6 +141,15 @@ public class ProteinModule extends DefaultModule
             }
 
             @Override
+            public List<TableInfo> getTablesToCopy()
+            {
+                // Temporary: we've proven we can copy the GO tables, but they take a long time; skip them for now. TODO: Remove this override for production testing
+                return super.getTablesToCopy().stream()
+                    .filter(tableInfo -> !tableInfo.getName().startsWith("Go"))
+                    .toList();
+            }
+
+            @Override
             public @Nullable FieldKey getContainerFieldKey(TableInfo sourceTable)
             {
                 return switch (sourceTable.getName())
@@ -154,7 +163,7 @@ public class ProteinModule extends DefaultModule
             public void afterSchema()
             {
                 new SqlExecutor(getSchema()).execute("ALTER TABLE prot.Organisms ADD CONSTRAINT FK_ProtOrganisms_ProtIdentifiers FOREIGN KEY (IdentId) REFERENCES prot.Identifiers (IdentId)");
-                GoLoader.dropGoIndexes();
+                GoLoader.createGoIndexes();
             }
         });
     }
