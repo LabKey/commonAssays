@@ -15,10 +15,14 @@
  */
 package org.labkey.luminex;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayDomainKind;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainUtil;
 import org.labkey.api.security.User;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -27,6 +31,22 @@ import java.util.Set;
  */
 public class LuminexAnalyteDomainKind extends AssayDomainKind
 {
+    private static final Set<String> RESERVED_NAMES;
+    static {
+        RESERVED_NAMES = new CaseInsensitiveHashSet(getAssayReservedPropertyNames());
+        RESERVED_NAMES.addAll(DomainUtil.getNamesAndLabels(
+                List.of("Name",
+                        "FitProb",
+                        "RegressionType",
+                        "ResVar",
+                        "StdCurve",
+                        "MinStandardRecovery",
+                        "MaxStandardRecovery",
+                        LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME,
+                        LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME
+                )
+        ));
+    }
     public LuminexAnalyteDomainKind()
     {
         super(LuminexAssayProvider.ASSAY_DOMAIN_ANALYTE);
@@ -39,27 +59,9 @@ public class LuminexAnalyteDomainKind extends AssayDomainKind
     }
 
     @Override
-    public Set<String> getReservedPropertyNames(Domain domain, User user)
+    public @NotNull Set<String> getReservedPropertyNames(Domain domain, User user)
     {
-        Set<String> result = getAssayReservedPropertyNames();
-        result.add("Name");
-        result.add("FitProb");
-        result.add("Fit Prob");
-        result.add("RegressionType");
-        result.add("Regression Type");
-        result.add("ResVar");
-        result.add("Res Var");
-        result.add("StdCurve");
-        result.add("Std Curve");
-        result.add("MinStandardRecovery");
-        result.add("Min Standard Recovery");
-        result.add("MaxStandardRecovery");
-        result.add("Max Standard Recovery");
-        result.add(LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME);
-        result.add(LuminexDataHandler.POSITIVITY_THRESHOLD_DISPLAY_NAME);
-        result.add(LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME);
-        result.add(LuminexDataHandler.NEGATIVE_BEAD_DISPLAY_NAME);
-        return result;
+        return RESERVED_NAMES;
     }
 
     @Override

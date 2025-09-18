@@ -15,8 +15,11 @@
  */
 package org.labkey.luminex;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayDomainKind;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainUtil;
 import org.labkey.api.security.User;
 import org.labkey.luminex.query.LuminexDataTable;
 import org.labkey.luminex.query.LuminexProtocolSchema;
@@ -30,6 +33,20 @@ import java.util.Set;
  */
 public class LuminexDataDomainKind extends AssayDomainKind
 {
+    public static final Set<String> RESERVED_NAMES;
+
+    static {
+        // Standard reserved names
+        RESERVED_NAMES = new CaseInsensitiveHashSet(getAssayReservedPropertyNames());
+        // All from the basic Luminex data table
+        RESERVED_NAMES.addAll(DomainUtil.getNamesAndLabels(LuminexProtocolSchema.getTableInfoDataRow().getColumnNameSet()));
+        // Also reserve the aliased names of the columns
+        for (Map.Entry<String,String> entry : LuminexDataTable.REMAPPED_SCHEMA_COLUMNS.entrySet())
+        {
+            RESERVED_NAMES.addAll(DomainUtil.getNameAndLabels(entry.getKey()));
+            RESERVED_NAMES.addAll(DomainUtil.getNameAndLabels(entry.getValue()));
+        }
+    }
     public LuminexDataDomainKind()
     {
         super(LuminexAssayProvider.ASSAY_DOMAIN_CUSTOM_DATA);
@@ -42,20 +59,8 @@ public class LuminexDataDomainKind extends AssayDomainKind
     }
 
     @Override
-    public Set<String> getReservedPropertyNames(Domain domain, User user)
+    public @NotNull Set<String> getReservedPropertyNames(Domain domain, User user)
     {
-        // Standard reserved names
-        Set<String> result = getAssayReservedPropertyNames();
-
-        // All from the basic Luminex data table
-        result.addAll(LuminexProtocolSchema.getTableInfoDataRow().getColumnNameSet());
-
-        // Also reserve the aliased names of the columns
-        for (Map.Entry<String,String> entry : LuminexDataTable.REMAPPED_SCHEMA_COLUMNS.entrySet())
-        {
-            result.add(entry.getKey());
-            result.add(entry.getValue());
-        }
-        return result;
+        return RESERVED_NAMES;
     }
 }
