@@ -37,6 +37,7 @@ import org.labkey.flow.analysis.web.ScriptAnalyzer;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.ObjectType;
+import org.labkey.vfs.FileLike;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.OutputKeys;
@@ -51,6 +52,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -383,7 +385,7 @@ public class Main
         if (analysisResultsFile.getName().endsWith(".zip"))
         {
             // NOTE: Duplicated code in AnalysisScriptController
-            File statisticsFile;
+            FileLike statisticsFile;
             java.util.zip.ZipFile zipFile;
             try
             {
@@ -409,12 +411,13 @@ public class Main
             // UNDONE: instead of unzipping into temp dir, make zip VirtualFile impl readable.
             try
             {
-                File tmpDir = FileUtil.createTempDirectory("flow").toFile();
-                tmpDir.deleteOnExit();
+                FileLike tmpDirFileLike = FileUtil.createTempDirectoryFileLike("flow");
+                Path tmpDirFilePath = tmpDirFileLike.toNioPathForWrite();
+                tmpDirFilePath.toFile().deleteOnExit();
 
-                ZipUtil.unzipToDirectory(analysisResultsFile, tmpDir);
-                statisticsFile = new File(tmpDir, zipEntry.getName());
-                rootDir = new FileSystemFile(statisticsFile.getParentFile());
+                ZipUtil.unzipToDirectory(analysisResultsFile.toPath(), tmpDirFilePath);
+                statisticsFile = tmpDirFileLike.resolveChild(zipEntry.getName());
+                rootDir = new FileSystemFile(statisticsFile.getParent().toNioPathForRead());
             }
             catch (IOException ioe)
             {

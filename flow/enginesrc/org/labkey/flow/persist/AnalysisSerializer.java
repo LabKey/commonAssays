@@ -42,6 +42,7 @@ import org.labkey.flow.analysis.model.SampleIdMap;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetSpec;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -253,7 +254,7 @@ public class AnalysisSerializer
         }
     }
 
-    public static File extractArchive(File file, File tempDir)
+    public static File extractArchive(File file, FileLike tempDir)
             throws IOException
     {
         File statisticsFile = null;
@@ -271,13 +272,13 @@ public class AnalysisSerializer
 
             ZipFile zipFile = new ZipFile(file);
 
-            File importDir;
+            FileLike importDir;
             String zipBaseName = FileUtil.getBaseName(file);
             ZipEntry zipEntry = zipFile.getEntry(AnalysisSerializer.STATISTICS_FILENAME);
             if (zipEntry != null)
             {
                 // Create extra directory under tempDir to extract into.
-                importDir = new File(tempDir, zipBaseName);
+                importDir = tempDir.resolveChild(zipBaseName);
             }
             else
             {
@@ -288,12 +289,13 @@ public class AnalysisSerializer
             if (zipEntry == null)
                 throw new IOException("Couldn't find '" + AnalysisSerializer.STATISTICS_FILENAME + "' or '" + zipBaseName + "/" + AnalysisSerializer.STATISTICS_FILENAME + "' in the zip archive.");
 
-            //File importDir = File.createTempFile(zipBaseName, null, tempDir);
-            if (importDir.exists() && !FileUtil.deleteDir(importDir))
+            if (importDir.exists() && !FileUtil.deleteDir(importDir.toNioPathForWrite()))
                 throw new IOException("Could not delete the directory \"" + importDir + "\"");
 
-            ZipUtil.unzipToDirectory(file, importDir);
-            statisticsFile = new File(importDir, zipEntry.getName());
+            ZipUtil.unzipToDirectory(file.toPath(), importDir.toNioPathForWrite());
+            FileLike statisticsFileLike = importDir.resolveChild(zipEntry.getName());
+            if (statisticsFileLike.exists())
+                statisticsFile = statisticsFileLike.toNioPathForRead().toFile();
         }
 
         if (statisticsFile == null)
