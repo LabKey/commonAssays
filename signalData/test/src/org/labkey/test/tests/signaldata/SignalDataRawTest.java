@@ -233,6 +233,7 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
         fileData.add(List.of("Has All", RESULT_FILENAME_2, "DEF", "456"));
         File metadataFile = TestDataUtils.writeRowsToTsv("Missing Require Result Field.tsv", fileData);
 
+        log("Validate error condition of a required field is missing.");
         uploadWithErrorAction(errorAssay,
                 metadataFile,
                 "Missing Required Run",
@@ -244,6 +245,7 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
         fileData.add(List.of("Incompatible Data Type", RESULT_FILENAME_2, "DEF", "GHI"));
         metadataFile = TestDataUtils.writeRowsToTsv("Invalid Data Type.tsv", fileData);
 
+        log("Validate error condition when there is an invalid value (string for an int).");
         uploadWithErrorAction(errorAssay,
                 metadataFile,
                 "Invalid Data Type",
@@ -255,9 +257,10 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
         fileData.add(List.of("Range Validation Error", RESULT_FILENAME_2, "DEF", "2"));
         metadataFile = TestDataUtils.writeRowsToTsv("Range Validation Error.tsv", fileData);
 
+        log("Validate error condition when field value fails range validation.");
         uploadWithErrorAction(errorAssay,
                 metadataFile,
-                "Invalid Data Type",
+                "Invalid Range",
                 String.format("Int: Value '2' for field '%s' is invalid. Value must be greater than 5.", intField.getName()));
 
     }
