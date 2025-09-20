@@ -131,8 +131,6 @@ public class CompensationMatrix implements Serializable
     public CompensationMatrix(String name, String str) throws Exception
     {
         this(name);
-        // TODO: with `setNamespaceAware(true)`, is the following still needed?
-        // DocumentBuilderFactory.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.NAMESPACES_FEATURE, true)
         DocumentBuilder db = XmlBeansUtil.DOCUMENT_BUILDER_FACTORY.newDocumentBuilder();
         try (var rdr = new StringReader(str))
         {
