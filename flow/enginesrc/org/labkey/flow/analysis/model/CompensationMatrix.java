@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.XmlBeansUtil;
 import org.labkey.flow.analysis.data.NumberArray;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -32,7 +33,6 @@ import org.xml.sax.InputSource;
 
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -131,9 +131,7 @@ public class CompensationMatrix implements Serializable
     public CompensationMatrix(String name, String str) throws Exception
     {
         this(name);
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setFeature(Constants.SAX_FEATURE_PREFIX + Constants.NAMESPACES_FEATURE, true);
-        DocumentBuilder db = dbf.newDocumentBuilder();
+        DocumentBuilder db = XmlBeansUtil.DOCUMENT_BUILDER_FACTORY.newDocumentBuilder();
         try (var rdr = new StringReader(str))
         {
             Document doc = db.parse(new InputSource(rdr));
@@ -556,7 +554,7 @@ public class CompensationMatrix implements Serializable
         Document doc;
         try
         {
-            doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+            doc = XmlBeansUtil.DOCUMENT_BUILDER_FACTORY.newDocumentBuilder().newDocument();
         }
         catch (ParserConfigurationException e)
         {

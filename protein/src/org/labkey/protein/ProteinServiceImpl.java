@@ -48,6 +48,7 @@ import org.labkey.api.reader.Readers;
 import org.labkey.api.security.User;
 import org.labkey.api.util.DeadlockPreventingException;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.XmlBeansUtil;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.JspView;
@@ -60,7 +61,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -314,9 +314,7 @@ public class ProteinServiceImpl implements ProteinService
                         }
                     }
 
-                    DocumentBuilderFactory dbf =
-                            DocumentBuilderFactory.newInstance();
-                    DocumentBuilder db = dbf.newDocumentBuilder();
+                    DocumentBuilder db = XmlBeansUtil.DOCUMENT_BUILDER_FACTORY.newDocumentBuilder();
                     InputSource is = new InputSource();
                     is.setCharacterStream(new StringReader(response.toString()));
 

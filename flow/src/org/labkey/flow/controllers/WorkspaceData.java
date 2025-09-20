@@ -42,6 +42,7 @@ import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.AttributeCache;
+import org.labkey.vfs.FileLike;
 import org.springframework.validation.Errors;
 
 import java.io.File;
@@ -206,8 +207,8 @@ public class WorkspaceData implements Serializable
                 else if (path.endsWith(".zip"))
                 {
                     // Extract external analysis zip into pipeline
-                    File tempDir = pipeRoot.resolvePath(PipelineService.UNZIP_DIR);
-                    if (tempDir.exists() && !FileUtil.deleteDir(tempDir))
+                    FileLike tempDir = pipeRoot.resolvePathToFileLike(PipelineService.UNZIP_DIR);
+                    if (tempDir != null && tempDir.exists() && !FileUtil.deleteDir(tempDir.toNioPathForWrite()))
                         throw new IOException("Failed to delete temp directory");
 
                     String originalPath = path;
