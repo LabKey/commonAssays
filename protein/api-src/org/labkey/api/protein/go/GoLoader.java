@@ -143,14 +143,25 @@ public abstract class GoLoader implements Closeable
         });
     }
 
-    private void loadGoFromGz() throws SQLException, IOException, ServletException
+    public static void dropGoIndexes()
     {
         DbSchema schema = ProteinSchema.getSchema();
+        new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "drop_go_indexes", ""));
+    }
+
+    public static void createGoIndexes()
+    {
+        DbSchema schema = ProteinSchema.getSchema();
+        new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "create_go_indexes", ""));
+    }
+
+    private void loadGoFromGz() throws SQLException, IOException, ServletException
+    {
         Map<String, GoLoadBean> map = getGoLoadMap();
         long start = System.currentTimeMillis();
 
         clearGoLoaded();
-        new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "drop_go_indexes", ""));
+        dropGoIndexes();
 
         logStatus("Starting to load GO annotation files");
         logStatus("");
@@ -175,7 +186,7 @@ public abstract class GoLoader implements Closeable
             }
         }
 
-        new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "create_go_indexes", ""));
+        createGoIndexes();
         long elapsed = System.currentTimeMillis() - start;
 
         logStatus("Successfully loaded all GO annotation files (" + DateUtil.formatDuration(elapsed) + ")");

@@ -22,8 +22,8 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DatabaseMigrationService;
 import org.labkey.api.data.DatabaseMigrationService.DefaultMigrationHandler;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.SqlExecutor;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.files.FileContentService;
 import org.labkey.api.files.TableUpdaterFileListener;
@@ -36,9 +36,11 @@ import org.labkey.api.protein.ProteomicsWebPartFactory;
 import org.labkey.api.protein.annotation.CustomAnnotationSetManager;
 import org.labkey.api.protein.annotation.ProteinAnnotationPipelineProvider;
 import org.labkey.api.protein.fasta.FastaDbLoader;
+import org.labkey.api.protein.go.GoLoader;
 import org.labkey.api.protein.query.CustomAnnotationSchema;
 import org.labkey.api.protein.query.ProteinUserSchema;
 import org.labkey.api.protein.search.MSSearchWebpart;
+import org.labkey.api.query.FieldKey;
 import org.labkey.api.usageMetrics.UsageMetricsService;
 import org.labkey.api.view.BaseWebPartFactory;
 import org.labkey.api.view.Portal;
@@ -129,18 +131,30 @@ public class ProteinModule extends DefaultModule
         }
 
         ProteinService.get().registerProteinSearchView(new ProteinSearchViewProvider());
-        DatabaseMigrationService.get().registerHandler(ProteinSchema.getSchema(), new DefaultMigrationHandler()
+        DatabaseMigrationService.get().registerHandler(new DefaultMigrationHandler(ProteinSchema.getSchema())
         {
             @Override
-            public void beforeSchema(DbSchema targetSchema)
+            public void beforeSchema()
             {
-                new SqlExecutor(targetSchema).execute("ALTER TABLE prot.Organisms DROP CONSTRAINT FK_ProtOrganisms_ProtIdentifiers");
+                new SqlExecutor(getSchema()).execute("ALTER TABLE prot.Organisms DROP CONSTRAINT FK_ProtOrganisms_ProtIdentifiers");
+                GoLoader.dropGoIndexes();
             }
 
             @Override
-            public void afterSchema(DbSchema targetSchema)
+            public @Nullable FieldKey getContainerFieldKey(TableInfo sourceTable)
             {
-                new SqlExecutor(targetSchema).execute("ALTER TABLE prot.Organisms ADD CONSTRAINT FK_ProtOrganisms_ProtIdentifiers FOREIGN KEY (IdentId) REFERENCES prot.Identifiers (IdentId)");
+                return switch (sourceTable.getName())
+                {
+                    case "CustomAnnotation", "CustomAnnotationSet" -> super.getContainerFieldKey(sourceTable);
+                    default -> SITE_WIDE_TABLE;
+                };
+            }
+
+            @Override
+            public void afterSchema()
+            {
+                new SqlExecutor(getSchema()).execute("ALTER TABLE prot.Organisms ADD CONSTRAINT FK_ProtOrganisms_ProtIdentifiers FOREIGN KEY (IdentId) REFERENCES prot.Identifiers (IdentId)");
+                GoLoader.createGoIndexes();
             }
         });
     }
