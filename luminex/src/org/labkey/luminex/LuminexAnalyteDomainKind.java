@@ -33,8 +33,7 @@ public class LuminexAnalyteDomainKind extends AssayDomainKind
 {
     private static final Set<String> RESERVED_NAMES;
     static {
-        RESERVED_NAMES = new CaseInsensitiveHashSet(getAssayReservedPropertyNames());
-        RESERVED_NAMES.addAll(DomainUtil.getNamesAndLabels(
+        RESERVED_NAMES = DomainUtil.getNamesAndLabels(
                 List.of("Name",
                         "FitProb",
                         "RegressionType",
@@ -45,7 +44,8 @@ public class LuminexAnalyteDomainKind extends AssayDomainKind
                         LuminexDataHandler.POSITIVITY_THRESHOLD_COLUMN_NAME,
                         LuminexDataHandler.NEGATIVE_BEAD_COLUMN_NAME
                 )
-        ));
+        );
+        RESERVED_NAMES.addAll(getAssayReservedPropertyNames());
     }
     public LuminexAnalyteDomainKind()
     {

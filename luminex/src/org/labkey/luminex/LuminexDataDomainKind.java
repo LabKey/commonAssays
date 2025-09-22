@@ -24,6 +24,7 @@ import org.labkey.api.security.User;
 import org.labkey.luminex.query.LuminexDataTable;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,15 +38,17 @@ public class LuminexDataDomainKind extends AssayDomainKind
 
     static {
         // Standard reserved names
-        RESERVED_NAMES = new CaseInsensitiveHashSet(getAssayReservedPropertyNames());
+        Set<String> names = new HashSet<>(getAssayReservedPropertyNames());
         // All from the basic Luminex data table
-        RESERVED_NAMES.addAll(DomainUtil.getNamesAndLabels(LuminexProtocolSchema.getTableInfoDataRow().getColumnNameSet()));
+        names.addAll(LuminexProtocolSchema.getTableInfoDataRow().getColumnNameSet());
         // Also reserve the aliased names of the columns
         for (Map.Entry<String,String> entry : LuminexDataTable.REMAPPED_SCHEMA_COLUMNS.entrySet())
         {
-            RESERVED_NAMES.addAll(DomainUtil.getNameAndLabels(entry.getKey()));
-            RESERVED_NAMES.addAll(DomainUtil.getNameAndLabels(entry.getValue()));
+            names.add(entry.getKey());
+            names.add(entry.getValue());
         }
+
+        RESERVED_NAMES = DomainUtil.getNamesAndLabels(names);
     }
     public LuminexDataDomainKind()
     {

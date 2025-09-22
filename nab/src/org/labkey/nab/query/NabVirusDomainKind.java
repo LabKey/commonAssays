@@ -47,8 +47,8 @@ public class NabVirusDomainKind extends AssayDomainKind
         baseFields.add(new PropertyStorageSpec(DATLSID_COLUMN_NAME, JdbcType.VARCHAR));
 
         _baseFields = Collections.unmodifiableSet(baseFields);
-        RESERVED_PROPERTY_NAMES = new CaseInsensitiveHashSet(getAssayReservedPropertyNames());
-        RESERVED_PROPERTY_NAMES.addAll(DomainUtil.getNamesAndLabels(_baseFields.stream().map(PropertyStorageSpec::getName).collect(Collectors.toSet())));
+        RESERVED_PROPERTY_NAMES = DomainUtil.getNamesAndLabels(_baseFields.stream().map(PropertyStorageSpec::getName).collect(Collectors.toSet()));
+        RESERVED_PROPERTY_NAMES.addAll(getAssayReservedPropertyNames());
     }
 
     public NabVirusDomainKind()
