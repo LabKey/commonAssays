@@ -18,9 +18,11 @@ package org.labkey.test.pages.signaldata;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.WebDriverWrapper;
+import org.labkey.test.components.bootstrap.ModalDialog;
 import org.labkey.test.components.ext4.Window;
 import org.labkey.test.util.Ext4Helper;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 
@@ -109,6 +111,15 @@ public class SignalDataUploadPage
         WebElement saveButton = Locators.saveButton.findElement(_test.getDriver());
         WebDriverWrapper.waitFor(() -> !saveButton.getAttribute("class").contains("disabled"), "Unable to save, button is disabled", 1000);
         _test.clickAndWait(Locators.saveButton);
+    }
+
+    public Window saveRunExpectingError(WebDriver webDriver)
+    {
+        WebElement saveButton = Locators.saveButton.findElement(_test.getDriver());
+        WebDriverWrapper.waitFor(() -> !saveButton.getAttribute("class").contains("disabled"), "Unable to save, button is disabled", 1000);
+        _test.click(Locators.saveButton);
+
+        return Window(_test.getDriver()).withTitle("Error").waitFor();
     }
 
     private static class Locators

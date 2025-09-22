@@ -366,13 +366,13 @@ LABKEY.SignalData.initializeDataFileUploadForm = function (metadataFormId, eleme
                     window.location = returnUrl;
                 },this);
             },
-            failure: function(response){
-                //TODO: Should probably do something here...
-            }
+            failure: LABKEY.Utils.getCallbackWrapper(function(json, response, opts) {
+                LABKEY.Utils.alert('Error', 'Unable to save run : ' + response.exception);
+            }, this, true)
         }, this);
     }
 
-    var generateAndSaveRun = function(files, fieldValues) {
+    var generateAndSaveRun = function(fieldValues) {
 
         var dataRows = [];
         var dataInputs = [];

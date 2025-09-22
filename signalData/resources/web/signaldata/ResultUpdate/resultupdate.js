@@ -34,8 +34,8 @@ var getResultData = function(assay) {
         requiredVersion: 13.2,
         filterArray: [LABKEY.Filter.create('RowId', LABKEY.ActionURL.getParameter('rowId'))],
         success: function(results){
-            if (results.length > 0) {
-                init(assay, results.getRow(0));
+            if (results.rowCount > 0) {
+                init(assay, results.rows[0]);
             }
             else {
                 // Use an ExtJS alert instead of a raw browser alert to avoid alarming the crawler
@@ -64,12 +64,16 @@ var init = function(assay, row){
             LABKEY.Ajax.request({
                 url: LABKEY.ActionURL.buildURL('SignalData', 'getSignalDataResource.api'),
                 method: 'POST',
-                params: {path: decodeURIComponent(file.internalId), test: true},
-                success: function (response) {
-                    var fileResource = Ext4.decode(response.responseText);
-                    var updatedRow = setRunFields(form, fileResource);
-                    updateRunResult(updatedRow, fileResource);
+                params: {
+                    paths: [decodeURIComponent(file.internalId)],
+                    files: [file.name]
                 },
+                success: LABKEY.Utils.getCallbackWrapper(function(response) {
+                    Ext4.each(response.files, function(file) {
+                        var updatedRow = setRunFields(form, file);
+                        updateRunResult(updatedRow, file);
+                    }, this);
+                }, this),
                 scope: this
             });
         }

@@ -244,15 +244,54 @@ Ext4.define('LABKEY.SignalData.UploadLog', {
         if (Ext4.isFunction(callback)) {
             var me = this;
             var destination = this.fileSystem.concatPaths(this.fileSystem.getBaseURL(), targetDirectory);
-            this.fileSystem.renamePath({
-                source: this.getWorkingPath(),
-                destination: destination,
-                isFile: false,
-                success: function () {
-                    me.resolveFileResources(targetDirectory, callback, scope, runProperties);
+
+            const getResourcesCallback = function(files) {
+                if (files && files.length > 0) {
+                    // files currently exist, validate and resolve before creating the run
+                    me.resolveDataFileURL(files, callback, scope, runProperties);
                 }
-            });
+                else {
+                    // files need to be moved to the target directory
+                    this.fileSystem.renamePath({
+                        source: this.getWorkingPath(),
+                        destination: destination,
+                        isFile: false,
+                        success: function () {
+                            me.resolveFileResources(targetDirectory, callback, scope, runProperties);
+                        }
+                    });
+                }
+            };
+
+            // get the list of files in the target directory (if any)
+            this.getTargetDirResources(targetDirectory, getResourcesCallback, this);
         }
+    },
+
+    /**
+     * Returns the list of data files in the target directory. Uploaded run data files are moved from
+     * a temporary location to the target directory before the run is created.
+     */
+    getTargetDirResources : function (targetDirectory, callback, callbackScope) {
+        var fileUri = this.fileSystem.concatPaths(this.fileSystem.getAbsoluteURL(), targetDirectory);
+        LABKEY.Ajax.request({
+            url: fileUri,
+            method: 'GET',
+            params: {method: 'JSON'},
+            success: function (response) {
+                var json = Ext4.decode(response.responseText);
+                var files = [];
+                if (Ext4.isDefined(json) && Ext4.isArray(json.files))
+                    files = json.files;
+
+                callback.call(callbackScope, files);
+            },
+            failure: function() {
+                // this is normal in the case where the target directory does not yet exist or
+                // the files have not yet been moved there
+                callback.call(callbackScope, []);
+            }
+        });
     },
 
     resolveFileResources: function (targetDirectory, callback, callbackScope, runProperties) {
@@ -269,9 +308,10 @@ Ext4.define('LABKEY.SignalData.UploadLog', {
                     }
                 }
             },
-            failure: function () {
-            }
-            , scope: this
+            failure: LABKEY.Utils.getCallbackWrapper(function(json, response, opts) {
+                LABKEY.Utils.alert('Error', 'Unable to resolve file resources : ' + response.exception);
+            }, this, true),
+            scope: this
         }, this);
     },
 
@@ -281,41 +321,42 @@ Ext4.define('LABKEY.SignalData.UploadLog', {
     resolveDataFileURL: function (files, callback, scope, runProperties) {
         if (Ext4.isFunction(callback)) {
 
-            var received = 0;
-            var newFiles = [];
-
             var me = this;
-
-            function done(file, results) {
-
-                var store = me.getStore();
-                var idx = store.find(me.DATA_FILE, file.text);
-                var process = store.getAt(idx);
-
-                //Set upload time
-                process.set(me.FILENAME, results[me.DATA_FILE]);
-                process.set(me.FILE_URL, results['DataFileUrl']);
-                process.set('file', file);
-                newFiles.push(file);
-                received++;
-
-                if (received == files.length) {
-                    callback.call(scope || me, newFiles, runProperties);
-                }
-            }
-
-            //TODO: This should be refactored to use a single ajax call for the array
+            var paths = [];
+            var fileNames = [];
             files.forEach(function (file) {
-                LABKEY.Ajax.request({
-                    url: LABKEY.ActionURL.buildURL('SignalData', 'getSignalDataResource.api'),
-                    method: 'POST',
-                    params: {path: decodeURIComponent(file.id), test: true},
-                    success: function (response) {
-                        done(file, Ext4.decode(response.responseText));
-                    },
-                    scope: this
-                });
+                paths.push(decodeURIComponent(file.id));
+                fileNames.push(file.text);
             }, this);
+
+            LABKEY.Ajax.request({
+                url: LABKEY.ActionURL.buildURL('SignalData', 'getSignalDataResource.api'),
+                method: 'POST',
+                jsonData: {
+                    paths : paths,
+                    files : fileNames
+                },
+                success: function (response) {
+                    let result = Ext4.decode(response.responseText);
+                    let store = this.getStore();
+
+                    Ext4.each(result.files, function(file) {
+
+                        var idx = store.find(this.DATA_FILE, file["FileName"]);
+                        var rec = store.getAt(idx);
+
+                        if (rec) {
+                            //Set upload time in the store record
+                            rec.set(me.FILENAME, file[this.DATA_FILE]);
+                            rec.set(me.FILE_URL, file['DataFileUrl']);
+                            rec.set('file', true);
+                        }
+                    }, this);
+
+                    callback.call(scope || me, runProperties);
+                },
+                scope: this
+            });
         }
     },
 

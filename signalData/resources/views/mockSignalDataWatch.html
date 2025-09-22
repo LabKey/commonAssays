@@ -61,23 +61,23 @@
                 }
             });
 
-            var dataRows = [],
-                dataInputs = [];
+            var dataRows = [], dataInputs = [];
 
             Ext4.each(fileSet, function(file) {
+                var fileName = file['FileName'];
                 dataRows.push({
-                    Name: file.text,
-                    DataFile: SIGNAL_DATA_FILE_ROOT + file.text,
+                    Name: fileName,
+                    DataFile: SIGNAL_DATA_FILE_ROOT + fileName,
                     TestType: 'SMP'
                 });
                 dataInputs.push({
-                    name: file.text,
-                    dataFileURL: file.dataFileURL
+                    name: fileName,
+                    dataFileURL: file['DataFileUrl']
                 });
             });
-
             run.dataRows = dataRows;
             run.dataInputs = dataInputs;
+
             return run;
         }
 
@@ -197,33 +197,24 @@
         {
             if (Ext4.isFunction(callback)) {
 
-                var received = 0;
-                var newFiles = [];
+                var paths = [];
+                var fileNames = [];
+                files.forEach(function (file) {
+                    paths.push(decodeURIComponent(file.id));
+                    fileNames.push(file.text);
+                }, this);
 
-                function done(file, results)
-                {
-                    Ext4.each(files, function(f) {
-                        if (f.text === file.text) {
-                            f['dataFileURL'] = results['DataFileUrl'];
-                            newFiles.push(f);
-                        }
-                    });
-                    received++;
-
-                    if (received == files.length) {
-                        callback.call(scope || this, newFiles);
-                    }
-                }
-
-                Ext4.each(files, function(file) {
-                    LABKEY.Ajax.request({
-                        url: LABKEY.ActionURL.buildURL('signaldata', 'getSignalDataResource.api'),
-                        method: 'POST',
-                        params: { path: decodeURIComponent(file.id), test: true },
-                        success: function(response) {
-                            done(file, Ext4.decode(response.responseText));
-                        }
-                    });
+                LABKEY.Ajax.request({
+                    url: LABKEY.ActionURL.buildURL('SignalData', 'getSignalDataResource.api'),
+                    method: 'POST',
+                    jsonData: {
+                        paths : paths,
+                        files : fileNames
+                    },
+                    success: LABKEY.Utils.getCallbackWrapper(function(response) {
+                        callback.call(scope || this, response.files);
+                    }, this),
+                    scope: this
                 });
             }
         }
