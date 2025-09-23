@@ -300,6 +300,8 @@ public class ProteinServiceImpl implements ProteinService
                 HttpURLConnection con = (HttpURLConnection) obj.openConnection();
                 con.setRequestProperty("Accept", "application/xml");
                 con.setRequestMethod("GET");
+                con.setConnectTimeout(20_000);
+                con.setReadTimeout(20_000);
                 int responseCode = con.getResponseCode();
                 if (responseCode == HttpURLConnection.HTTP_OK)
                 { // success
