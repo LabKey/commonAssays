@@ -15,11 +15,14 @@
  */
 package org.labkey.nab.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayDomainKind;
+import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.PropertyStorageSpec;
 import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainUtil;
 import org.labkey.api.security.User;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabManager;
@@ -27,12 +30,14 @@ import org.labkey.nab.NabManager;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class NabVirusDomainKind extends AssayDomainKind
 {
     public static final String VIRUS_LSID_COLUMN_NAME = "virusLsid";
     public static final String DATLSID_COLUMN_NAME = "dataLsid";
     private static final Set<PropertyStorageSpec> _baseFields;
+    private static final Set<String> RESERVED_PROPERTY_NAMES;
 
     static
     {
@@ -42,6 +47,8 @@ public class NabVirusDomainKind extends AssayDomainKind
         baseFields.add(new PropertyStorageSpec(DATLSID_COLUMN_NAME, JdbcType.VARCHAR));
 
         _baseFields = Collections.unmodifiableSet(baseFields);
+        RESERVED_PROPERTY_NAMES = DomainUtil.getNamesAndLabels(_baseFields.stream().map(PropertyStorageSpec::getName).collect(Collectors.toSet()));
+        RESERVED_PROPERTY_NAMES.addAll(getAssayReservedPropertyNames());
     }
 
     public NabVirusDomainKind()
@@ -74,13 +81,8 @@ public class NabVirusDomainKind extends AssayDomainKind
     }
 
     @Override
-    public Set<String> getReservedPropertyNames(Domain domain, User user)
+    public @NotNull Set<String> getReservedPropertyNames(Domain domain, User user)
     {
-        Set<String> names = getAssayReservedPropertyNames();
-
-        for (PropertyStorageSpec spec : getBaseProperties(domain))
-            names.add(spec.getName());
-
-        return names;
+        return RESERVED_PROPERTY_NAMES;
     }
 }

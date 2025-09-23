@@ -15,6 +15,7 @@
  */
 package org.labkey.elispot.query;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayDomainKind;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.JdbcType;
@@ -87,7 +88,7 @@ public class ElispotAntigenDomainKind extends AssayDomainKind
     }
 
     @Override
-    public Set<String> getReservedPropertyNames(Domain domain, User user)
+    public @NotNull Set<String> getReservedPropertyNames(Domain domain, User user)
     {
         return getAssayReservedPropertyNames();
     }
