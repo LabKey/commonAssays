@@ -84,7 +84,7 @@ public class FastaProtein
         if (header.startsWith("gi|"))
         {
             firstAliasIndex = header.indexOf(" gi|", 2) + 1;
-            if (firstAliasIndex < 0 || firstAliasIndex > 30)
+            if (firstAliasIndex > 30)
                 firstAliasIndex = 0;
         }
 
