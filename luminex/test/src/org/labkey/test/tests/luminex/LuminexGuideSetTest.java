@@ -41,6 +41,8 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.labkey.test.util.PermissionsHelper.EDITOR_ROLE;
+import static org.labkey.test.util.PermissionsHelper.READER_ROLE;
 
 @Category({Daily.class, Assays.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 28)
@@ -579,7 +581,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         String editor = "editor1_luminex@luminex.test";
         String reader = "reader1_luminex@luminex.test";
 
-        createAndImpersonateUser(editor, "Editor");
+        createAndImpersonateUser(editor, EDITOR_ROLE);
 
         beginAt(ljUrl);
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
@@ -587,7 +589,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         stopImpersonating();
         _userHelper.deleteUsers(true, editor);
 
-        createAndImpersonateUser(reader, "Reader");
+        createAndImpersonateUser(reader, READER_ROLE);
 
         beginAt(ljUrl);
         _guideSetHelper.setUpLeveyJenningsGraphParams("GS Analyte B");
