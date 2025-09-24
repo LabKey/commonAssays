@@ -372,7 +372,7 @@ public class ProteinServiceImpl implements ProteinService
                 {
                     if (responseCode != 404)
                     {
-                        LOG.error("HTTP GET failed to " + url + " with error code " + responseCode);
+                        LOG.warn("HTTP GET failed to " + url + " with error code " + responseCode);
                     }
                     else
                     {
