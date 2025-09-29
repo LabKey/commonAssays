@@ -63,11 +63,11 @@ public class LibraTest extends MS2TestBase
     protected void configure()
     {
         _containerHelper.createProject(getProjectName(), "MS2");
-        setPipelineRoot(TestFileUtils.getSampleData("xarfiles/ms2pipe/iTRAQ/").getAbsolutePath());
+        setPipelineRoot(TestFileUtils.getSampleData("xarfiles/ms2pipe/").getAbsolutePath());
         clickProject(getProjectName());
 
         clickButton("Process and Import Data");
-        _fileBrowserHelper.importFile("xtandem/Libra/iTRAQ.search.xar.xml", "Import Experiment");
+        _fileBrowserHelper.importFile("/iTRAQ/xtandem/Libra/iTRAQ.search.xar.xml", "Import Experiment");
         goToModule("Pipeline");
         waitForPipelineJobsToComplete(1, "Experiment Import - iTRAQ.search.xar.xml", false);
     }
