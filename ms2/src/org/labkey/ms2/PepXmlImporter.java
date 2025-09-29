@@ -301,9 +301,16 @@ public class PepXmlImporter extends PeptideImporter
             {
                 return f;
             }
+
+            if (NetworkDrive.exists(mzXMLFile) && mzXMLFile.isFile())
+            {
+                return mzXMLFile;
+            }
+
+            return f; // return file under root, even if it doesn't exist
         }
 
-        return mzXmlFileName == null ? null : new File(mzXmlFileName);
+        return null;
     }
 
     public static boolean isFractionsFile(File pepXmlFile, String joinedBaseName)
