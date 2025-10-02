@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.announcements.DiscussionService" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
@@ -25,10 +24,10 @@
 <%@ page import="org.labkey.flow.controllers.FlowParam" %>
 <%@ page import="org.labkey.flow.controllers.well.WellController" %>
 <%@ page import="org.labkey.flow.data.FlowCompensationMatrix" %>
-<%@ page import="org.labkey.flow.data.FlowDataType"%>
+<%@ page import="org.labkey.flow.data.FlowDataType" %>
 <%@ page import="org.labkey.flow.data.FlowRun"%>
 <%@ page import="org.labkey.flow.data.FlowWell"%>
-<%@ page import="org.labkey.flow.view.SetCommentView" %>
+<%@ page import="org.labkey.flow.view.SetCommentView"%>
 <%@ page import="org.labkey.flow.view.SetGraphSizeView" %>
 <%@ page import="java.text.DecimalFormat" %>
 <%@ page import="java.util.HashMap" %>
@@ -192,17 +191,3 @@
 </table>
 <% } %>
 <%=link("Download", flowComp.urlDownload()).nofollow()%><br>
-<%
-    DiscussionService service = DiscussionService.get();
-    if (service != null)
-    {
-        DiscussionService.DiscussionView discussion = service.getDiscussionArea(
-                getViewContext(),
-                flowComp.getLSID(),
-                flowComp.urlShow(),
-                "Discussion of " + flowComp.getLabel(),
-                false, true);
-        if (discussion != null)
-            include(discussion, out);
-    }
-%>
