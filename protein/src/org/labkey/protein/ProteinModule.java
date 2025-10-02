@@ -180,7 +180,7 @@ public class ProteinModule extends DefaultModule
     }
 
     @Override
-    public @NotNull Set<Class> getIntegrationTests()
+    public @NotNull Set<Class<?>> getIntegrationTests()
     {
         return Set.of(
             ProteinController.TestCase.class
@@ -188,7 +188,7 @@ public class ProteinModule extends DefaultModule
     }
 
     @Override
-    public @NotNull Set<Class> getUnitTests()
+    public @NotNull Set<Class<?>> getUnitTests()
     {
         return Set.of(
             FastaDbLoader.TestCase.class
