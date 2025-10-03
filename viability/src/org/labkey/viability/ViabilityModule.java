@@ -84,8 +84,7 @@ public class ViabilityModule extends DefaultModule
     }
 
     @Override
-    @NotNull
-    public Set<Class> getIntegrationTests()
+    public @NotNull Set<Class<?>> getIntegrationTests()
     {
         return Set.of(
             ViabilityAssayDataHandler.TestCase.class,

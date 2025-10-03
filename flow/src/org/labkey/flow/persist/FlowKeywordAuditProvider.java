@@ -50,7 +50,8 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
 
     static final List<FieldKey> defaultVisibleColumns = new ArrayList<>();
 
-    static {
+    static
+    {
         defaultVisibleColumns.add(FieldKey.fromParts(COLUMN_NAME_CREATED));
         defaultVisibleColumns.add(FieldKey.fromParts(COLUMN_NAME_CREATED_BY));
         defaultVisibleColumns.add(FieldKey.fromParts(COLUMN_NAME_IMPERSONATED_BY));
@@ -58,6 +59,11 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
         defaultVisibleColumns.add(FieldKey.fromParts(COLUMN_NAME_KEYWORD_NAME));
         defaultVisibleColumns.add(FieldKey.fromParts(COLUMN_NAME_KEYWORD_OLD_VALUE));
         defaultVisibleColumns.add(FieldKey.fromParts(COLUMN_NAME_KEYWORD_NEW_VALUE));
+    }
+
+    public FlowKeywordAuditProvider()
+    {
+        super(new FlowKeywordAuditDomainKind());
     }
 
     @Override
@@ -73,12 +79,6 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
         table.getMutableColumn(COLUMN_NAME_FILE).setURLTargetWindow("_blank");
 
         return table;
-    }
-
-    @Override
-    protected AbstractAuditDomainKind getDomainKind()
-    {
-        return new FlowKeywordAuditDomainKind();
     }
 
     @Override

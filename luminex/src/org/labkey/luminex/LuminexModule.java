@@ -92,9 +92,8 @@ public class LuminexModule extends DefaultModule
         return Collections.singleton(LuminexProtocolSchema.DB_SCHEMA_NAME);
     }
 
-    @NotNull
     @Override
-    public Set<Class> getUnitTests()
+    public @NotNull Set<Class<?>> getUnitTests()
     {
         return Set.of(
             AssayQCFlagColumn.TestCase.class,

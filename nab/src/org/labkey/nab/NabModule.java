@@ -116,9 +116,8 @@ public class NabModule extends DefaultModule
         PropertyService.get().registerDomainKind(new NabVirusDomainKind());
     }
 
-    @NotNull
     @Override
-    public Set<Class> getUnitTests()
+    public @NotNull Set<Class<?>> getUnitTests()
     {
         return Set.of(PlateParserTests.class);
     }
