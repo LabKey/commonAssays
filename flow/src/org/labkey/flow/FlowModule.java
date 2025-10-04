@@ -312,8 +312,7 @@ public class FlowModule extends SpringModule
 
 
     @Override
-    @NotNull
-    public Set<Class> getUnitTests()
+    public @NotNull Set<Class<?>> getUnitTests()
     {
         return Set.of(
             AnalysisSerializer.TestCase.class,
@@ -329,9 +328,8 @@ public class FlowModule extends SpringModule
         );
     }
 
-    @NotNull
     @Override
-    public Set<Class> getIntegrationTests()
+    public @NotNull Set<Class<?>> getIntegrationTests()
     {
         return Set.of(
             FlowController.TestCase.class,

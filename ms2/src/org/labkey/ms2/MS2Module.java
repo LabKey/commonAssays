@@ -117,7 +117,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 25.000;
+        return 25.001;
     }
 
     @Override
@@ -299,8 +299,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     }
 
     @Override
-    @NotNull
-    public Set<Class> getIntegrationTests()
+    public @NotNull Set<Class<?>> getIntegrationTests()
     {
         return Set.of(
             Comet2014ParamsBuilder.FullParseTestCase.class,
@@ -312,8 +311,7 @@ public class MS2Module extends SpringModule implements ProteomicsModule
     }
 
     @Override
-    @NotNull
-    public Set<Class> getUnitTests()
+    public @NotNull Set<Class<?>> getUnitTests()
     {
         return Set.of(
             BibliospecSpectrumRenderer.TestCase.class,

@@ -45,7 +45,7 @@ public class LuminexModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 25.000;
+        return 25.001;
     }
 
     @Override
@@ -92,9 +92,8 @@ public class LuminexModule extends DefaultModule
         return Collections.singleton(LuminexProtocolSchema.DB_SCHEMA_NAME);
     }
 
-    @NotNull
     @Override
-    public Set<Class> getUnitTests()
+    public @NotNull Set<Class<?>> getUnitTests()
     {
         return Set.of(
             AssayQCFlagColumn.TestCase.class,
