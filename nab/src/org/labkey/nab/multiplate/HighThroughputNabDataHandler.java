@@ -16,7 +16,6 @@
 package org.labkey.nab.multiplate;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.logging.log4j.Logger;
 import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.SampleProperty;
@@ -27,31 +26,24 @@ import org.labkey.api.assay.plate.WellData;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
-import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.XarContext;
-import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.assay.transform.TransformDataHandler;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabDataHandler;
-import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -237,18 +229,6 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
         }
 
         applyDilution(wells, sampleInput, properties, reverseDirection, sampleProperties);
-    }
-
-    @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
-    {
-        DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
-
-        Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
-        List<Map<String, Object>> rows = parser.getResults();
-        datas.put(NAB_TRANSFORMED_DATA_TYPE, MapDataIterator.of(rows));
-
-        return datas;
     }
 
     @Override

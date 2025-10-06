@@ -356,18 +356,6 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
-    {
-        DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
-
-        Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
-        List<Map<String, Object>> rows = parser.getResults();
-        datas.put(NAB_TRANSFORMED_DATA_TYPE, MapDataIterator.of(rows));
-
-        return datas;
-    }
-
-    @Override
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());
@@ -393,7 +381,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                     AssayProvider provider = AssayService.get().getProvider(protocol);
                     AssayProtocolSchema protocolSchema = provider.createProtocolSchema(user, protocol.getContainer(), protocol, null);
                     TableInfo virusTable = protocolSchema.createTable(DilutionManager.VIRUS_TABLE_NAME, null);
-                    if (virusTable instanceof FilteredTable ft)
+                    if (virusTable instanceof FilteredTable<?> ft)
                     {
                         if (virusTable.getColumn(FieldKey.fromParts(NabVirusDomainKind.DATLSID_COLUMN_NAME)) != null)
                         {
