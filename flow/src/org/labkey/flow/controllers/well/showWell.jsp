@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.announcements.DiscussionService" %>
 <%@ page import="org.labkey.api.exp.OntologyManager" %>
 <%@ page import="org.labkey.api.exp.api.ExpMaterial" %>
 <%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
@@ -26,7 +25,8 @@
 <%@ page import="org.labkey.api.security.User" %>
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
-<%@ page import="org.labkey.api.util.DateUtil"%>
+<%@ page import="org.labkey.api.util.DateUtil" %>
+<%@ page import="org.labkey.api.util.JavaScriptFragment"%>
 <%@ page import="org.labkey.api.util.PageFlowUtil" %>
 <%@ page import="org.labkey.api.util.Tuple3" %>
 <%@ page import="org.labkey.api.util.URIUtil" %>
@@ -58,7 +58,6 @@
 <%@ page import="java.util.Map" %>
 <%@ page import="java.util.regex.Matcher" %>
 <%@ page import="java.util.regex.Pattern" %>
-<%@ page import="org.labkey.api.util.JavaScriptFragment" %>
 <%@ page extends="org.labkey.flow.controllers.well.WellController.Page" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -592,22 +591,7 @@ if (getRun() != null)
     %><%=link("Experiment Run Graph Details", urlProvider(ExperimentUrls.class).getRunGraphDetailURL(getRun().getExperimentRun(), well.getData()))%><br><%
 }
 
-%></p><%
-
-    DiscussionService service = DiscussionService.get();
-    if (service != null)
-    {
-        DiscussionService.DiscussionView discussion = service.getDiscussionArea(
-                getViewContext(),
-                well.getLSID(),
-                well.urlShow(),
-                "Discussion of " + well.getLabel(),
-                false, true);
-        if (discussion != null)
-            include(discussion, out);
-    }
-%>
-
+%></p>
 
 <%!
 boolean canReadPipelineFiles(User user, PipeRoot root)

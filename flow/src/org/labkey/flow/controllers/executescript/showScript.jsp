@@ -16,7 +16,6 @@
  */
 %>
 <%@ page import="org.labkey.api.action.NullSafeBindException" %>
-<%@ page import="org.labkey.api.announcements.DiscussionService" %>
 <%@ page import="org.labkey.api.data.CompareType" %>
 <%@ page import="org.labkey.api.data.Table" %>
 <%@ page import="org.labkey.api.query.FieldKey" %>
@@ -92,19 +91,3 @@ The analysis section describes which gates in the analysis, as well as the stati
     }
 } %>
 </div>
-
-<%
-    DiscussionService service = DiscussionService.get();
-    if (service != null)
-    {
-        DiscussionService.DiscussionView discussion = service.getDiscussionArea(
-                context,
-                script.getLSID(),
-                script.urlShow(),
-                "Discussion of " + script.getLabel(),
-                false, true);
-        if (discussion != null)
-            include(discussion, out);
-    }
-%>
-
