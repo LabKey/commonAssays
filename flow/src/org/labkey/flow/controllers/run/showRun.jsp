@@ -16,11 +16,10 @@
  */
 %>
 <%@ page buffer="none" %>
-<%@ page import="org.labkey.api.announcements.DiscussionService" %>
-<%@ page import="org.labkey.api.attachments.Attachment"%>
+<%@ page import="org.labkey.api.attachments.Attachment" %>
 <%@ page import="org.labkey.api.data.Container"%>
 <%@ page import="org.labkey.api.data.ContainerManager"%>
-<%@ page import="org.labkey.api.exp.api.ExperimentUrls" %>
+<%@ page import="org.labkey.api.exp.api.ExperimentUrls"%>
 <%@ page import="org.labkey.api.portal.ProjectUrls" %>
 <%@ page import="org.labkey.api.security.User" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
@@ -38,7 +37,6 @@
 <%@ page import="org.labkey.flow.data.FlowRun" %>
 <%@ page import="org.labkey.flow.view.FlowQueryView" %>
 <%@ page import="org.labkey.flow.view.SetCommentView" %>
-<%@ page import="java.util.Map" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -115,25 +113,11 @@
         %><%=link("Download Analysis zip", run.urlFor(RunController.ExportAnalysis.class).addParameter("selectionType", "runs")).nofollow()%><br><%
     }
 
-
     for (Attachment a : run.getAttachments())
     {
         %><div>
         <a href="<%=h(run.getAttachmentDownloadURL(a))%>"><i class="<%=h(Attachment.getFileIconFontCls(a.getName()))%>"></i> <%=h(a.getName())%></a>
         </div><%
-    }
-
-    DiscussionService service = DiscussionService.get();
-    if (service != null)
-    {
-        DiscussionService.DiscussionView discussion = service.getDiscussionArea(
-                getViewContext(),
-                run.getLSID(),
-                run.urlShow(),
-                "Discussion of " + run.getLabel(),
-                false, true);
-        if (discussion != null)
-            include(discussion, out);
     }
 %>
 </p>
