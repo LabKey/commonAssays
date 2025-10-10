@@ -262,9 +262,9 @@ public class AnalysisSerializer
         {
             statisticsFile = file;
         }
-        else if (file.isDirectory() && new File(file, AnalysisSerializer.STATISTICS_FILENAME).isFile())
+        else if (file.isDirectory() && FileUtil.appendName(file, AnalysisSerializer.STATISTICS_FILENAME).isFile())
         {
-            statisticsFile = new File(file, AnalysisSerializer.STATISTICS_FILENAME);
+            statisticsFile = FileUtil.appendName(file, AnalysisSerializer.STATISTICS_FILENAME);
         }
         else if (file.getName().endsWith(".zip"))
         {

@@ -95,7 +95,7 @@ public class Main
 
     private static File uniqueFile(File dir, String name)
     {
-        File file = new File(dir, name);
+        File file = FileUtil.appendName(dir, name);
         if (file.exists())
         {
             String base = name;
@@ -108,7 +108,7 @@ public class Main
             }
 
             for (int i = 1; file.exists(); i++)
-                file = new File(dir, base + i + ext);
+                file = FileUtil.appendName(dir, base + i + ext);
         }
 
         return file;
@@ -244,7 +244,7 @@ public class Main
         {
             XmlOptions options = new XmlOptions();
             options.setSavePrettyPrint();
-            doc.save(new File(outDir, name), options);
+            doc.save(FileUtil.appendName(outDir, name), options);
         }
         catch (IOException ioe)
         {

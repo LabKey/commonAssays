@@ -212,7 +212,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             // UNDONE: comp matrix
         }
 
-        File statisticsFile = new File(_analysisPathRoot, AnalysisSerializer.STATISTICS_FILENAME);
+        File statisticsFile = FileUtil.appendName(_analysisPathRoot, AnalysisSerializer.STATISTICS_FILENAME);
 
         FlowRun run = saveAnalysis(getUser(), getContainer(), getExperiment(),
                 _analysisRunName, statisticsFile, getOriginalImportedFile(),
@@ -229,7 +229,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         );
 
         // Add attachments to the run
-        File attachmentsDir = new File(_analysisPathRoot, "attachments");
+        File attachmentsDir = FileUtil.appendName(_analysisPathRoot, "attachments");
         if (attachmentsDir.isDirectory())
         {
             AttachmentService svc = AttachmentService.get();

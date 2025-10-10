@@ -24,6 +24,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.security.User;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.util.massSpecDataFileType;
@@ -277,7 +278,7 @@ public class PepXmlImporter extends PeptideImporter
             // Check two directories up from the pepXML file, where the pipeline normally reads the mzXML file.
             if (dir.getParentFile() != null && dir.getParentFile().getParentFile() != null)
             {
-                f = new File(dir.getParentFile().getParentFile(), mzXMLFile.getName());
+                f = FileUtil.appendName(dir.getParentFile().getParentFile(), mzXMLFile.getName());
                 if (NetworkDrive.exists(f) && f.isFile())
                 {
                     return f;
@@ -296,7 +297,7 @@ public class PepXmlImporter extends PeptideImporter
 					return f;
 				}
             }
-            f = new File(dir, mzXMLFile.getName());
+            f = FileUtil.appendName(dir, mzXMLFile.getName());
             if (NetworkDrive.exists(f) && f.isFile())
             {
                 return f;

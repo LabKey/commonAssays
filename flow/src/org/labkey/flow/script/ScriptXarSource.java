@@ -41,12 +41,12 @@ public class ScriptXarSource extends XarSource
         _root = root;
         _doc = doc;
         _workingDirectory = workingDirectory;
-        _logFile = new File(_workingDirectory, "flow.xar.log");
+        _logFile = FileUtil.appendName(_workingDirectory, "flow.xar.log");
 
         // For informational purposes, write out the XAR file.
         try
         {
-            File xarfile = new File(_workingDirectory, "flow.xar.xml");
+            File xarfile = FileUtil.appendName(_workingDirectory, "flow.xar.xml");
 
             try (FileWriter writer = new FileWriter(xarfile))
             {
