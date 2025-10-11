@@ -89,10 +89,10 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     static class ElispotFileParser implements ElispotDataFileParser
     {
         private final ExpData _data;
-        private final File _dataFile;
+        private final FileLike _dataFile;
         private final XarContext _context;
 
-        public ElispotFileParser(ExpData data, File dataFile, XarContext context)
+        public ElispotFileParser(ExpData data, FileLike dataFile, XarContext context)
         {
             _data = data;
             _dataFile = dataFile;
@@ -199,7 +199,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     }
 
     @Override
-    public ElispotDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context)
+    public ElispotDataFileParser getDataFileParser(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context)
     {
         return new ElispotFileParser(data, dataFile, context);
     }
@@ -213,7 +213,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
     @Override
     public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
     {
-        ElispotDataFileParser parser = getDataFileParser(data, dataFile.toNioPathForRead().toFile(), info, log, context);
+        ElispotDataFileParser parser = getDataFileParser(data, dataFile, info, log, context);
 
         Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
         List<Map<String, Object>> rows = parser.getResults();
@@ -222,7 +222,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
         return datas;
     }
 
-    public static Map<PlateInfo, Plate> initializePlates(ExpProtocol protocol, File dataFile, Plate template, PlateReader reader) throws ExperimentException
+    public static Map<PlateInfo, Plate> initializePlates(ExpProtocol protocol, FileLike dataFile, Plate template, PlateReader reader) throws ExperimentException
     {
         AssayProvider provider = AssayService.get().getProvider(protocol);
         Map<PlateInfo, Plate> plateMap = new HashMap<>();

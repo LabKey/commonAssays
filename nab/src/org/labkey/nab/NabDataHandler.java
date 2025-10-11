@@ -295,7 +295,7 @@ public abstract class NabDataHandler extends DilutionDataHandler implements Vali
     /**
      * Parse a list of values into multiple plates.
      */
-    protected List<double[][]> parseList(File dataFile, List<Map<String, Object>> rows, String locationColumnHeader, String resultColumnHeader,
+    protected List<double[][]> parseList(FileLike dataFile, List<Map<String, Object>> rows, String locationColumnHeader, String resultColumnHeader,
                                          int maxPlates, int expectedRows, int expectedCols, List<ExperimentException> errors)
     {
         int wellsPerPlate = expectedRows * expectedCols;
@@ -384,7 +384,7 @@ public abstract class NabDataHandler extends DilutionDataHandler implements Vali
      * Translate a well location value, e.g. "B04", into a (row, column) pair of coordinates.
      */
     @Nullable
-    protected Pair<Integer, Integer> getWellLocation(File dataFile, String locationColumnHeader, int expectedRows, int expectedCols, Map<String, Object> line, int lineNumber) throws ExperimentException
+    protected Pair<Integer, Integer> getWellLocation(FileLike dataFile, String locationColumnHeader, int expectedRows, int expectedCols, Map<String, Object> line, int lineNumber) throws ExperimentException
     {
         Object locationValue = line.get(locationColumnHeader);
         if (!(locationValue instanceof String location) || location.length() < 2)

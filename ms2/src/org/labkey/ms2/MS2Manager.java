@@ -88,6 +88,8 @@ import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
 import org.labkey.ms2.reader.RandomAccessMzxmlIteratorFactory;
 import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
 import org.labkey.ms2.reader.SimpleScan;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -337,7 +339,7 @@ public class MS2Manager
         try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
         {
             Container container = run.getContainer();
-            final File pepXMLFile = new File(run.getPath(), run.getFileName());
+            final FileLike pepXMLFile = FileSystemLike.wrapFile(new File(run.getPath(), run.getFileName()));
 
             // Check if this 
             ExpData existingPepXmlData = ExperimentService.get().getExpDataByURL(pepXMLFile, container);
@@ -383,7 +385,7 @@ public class MS2Manager
                 @Override
                 public Path getRootPath()
                 {
-                    return pepXMLFile.getParentFile().toPath();
+                    return pepXMLFile.getParent().toNioPathForRead();
                 }
 
                 @Override
@@ -443,7 +445,7 @@ public class MS2Manager
                 outputDatas.put(protXMLData, TPPTask.PROT_XML_INPUT_ROLE);
             }
 
-            expRun.setFilePathRoot(pepXMLFile.getParentFile());
+            expRun.setFilePathRoot(pepXMLFile.getParent().toNioPathForRead().toFile());
             ViewBackgroundInfo info = new ViewBackgroundInfo(container, user, null);
             expRun = ExperimentService.get().saveSimpleExperimentRun(expRun, Collections.emptyMap(), inputDatas, Collections.emptyMap(),
                     outputDatas, Collections.emptyMap(), info, LOG, false);

@@ -28,8 +28,11 @@ import org.labkey.api.study.assay.SampleMetadataInputFormat;
 import org.labkey.nab.NabAssayProvider;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.labkey.vfs.FileLike;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,12 +54,13 @@ public class SinglePlateDilutionSamplePropertyHelper extends PlateSampleFileProp
         if (_sampleProperties != null)
             return _sampleProperties;
 
-        File metadataFile = getSampleMetadata(request);
+        FileLike metadataFile = getSampleMetadata(request);
         if (metadataFile == null)
             return null;
 
         Map<String, Map<DomainProperty, String>> allProperties = new HashMap<>();
-        try (ExcelLoader loader = new ExcelLoader(metadataFile, true))
+        try (InputStream in = metadataFile.openInputStream();
+             ExcelLoader loader = new ExcelLoader(in, true, null))
         {
             Map<String, WellGroup> sampleGroupNames = getSampleWellGroupNameMap();
 

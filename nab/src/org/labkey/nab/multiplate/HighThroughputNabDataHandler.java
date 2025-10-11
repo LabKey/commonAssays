@@ -39,8 +39,8 @@ import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabDataHandler;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -64,18 +64,18 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     protected static final String LOCATION_COLUMNN_HEADER = "Well Location";
 
     @Override
-    protected List<Plate> createPlates(File dataFile, Plate template) throws ExperimentException
+    protected List<Plate> createPlates(FileLike dataFile, Plate template) throws ExperimentException
     {
         DataLoader loader = null;
         try
         {
             if (dataFile.getName().toLowerCase().endsWith(".csv"))
             {
-                loader = new TabLoader(dataFile, true);
+                loader = new TabLoader(dataFile.openInputStream(), true, null);
                 ((TabLoader) loader).parseAsCSV();
             }
             else
-                loader = new ExcelLoader(dataFile, true);
+                loader = new ExcelLoader(dataFile.openInputStream(), true, null);
 
             final int expectedRows = template.getRows();
             final int expectedCols = template.getColumns();
@@ -142,12 +142,12 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     }
 
     @Override
-    protected double[][] getCellValues(final File dataFile, Plate nabTemplate)
+    protected double[][] getCellValues(final FileLike dataFile, Plate nabTemplate)
     {
         throw new IllegalStateException("getCellValues should not be called for High Throughput handlers.");
     }
 
-    protected List<double[][]> parse(File dataFile, ColumnDescriptor[] columns, List<Map<String, Object>> rows, int expectedRows, int expectedCols) throws ExperimentException
+    protected List<double[][]> parse(FileLike dataFile, ColumnDescriptor[] columns, List<Map<String, Object>> rows, int expectedRows, int expectedCols) throws ExperimentException
     {
         // attempt to parse list-style data
         if (columns != null && columns.length > 0)

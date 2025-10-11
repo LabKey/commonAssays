@@ -29,6 +29,8 @@ import org.labkey.api.security.User;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.TPPTask;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -46,8 +48,9 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
     }
 
     @Override
-    public void importFile(@NotNull ExpData data, File dataFile, @NotNull ViewBackgroundInfo info, @NotNull Logger log, @NotNull XarContext context) throws ExperimentException
+    public void importFile(@NotNull ExpData data, @NotNull FileLike dataFileLike, @NotNull ViewBackgroundInfo info, @NotNull Logger log, @NotNull XarContext context) throws ExperimentException
     {
+        File dataFile = FileSystemLike.toFile(dataFileLike);
         if (context.getJob() != null && "false".equalsIgnoreCase(context.getJob().getParameters().get(IMPORT_PROPHET_RESULTS)))
         {
             log.info("Skipping import of file " + dataFile);
