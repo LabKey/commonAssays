@@ -124,11 +124,11 @@ import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.ViewContext;
 import org.labkey.nab.qc.NabWellQCFlag;
 import org.labkey.nab.query.NabProtocolSchema;
+import org.labkey.vfs.FileLike;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.io.File;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -235,12 +235,12 @@ public class NabAssayController extends SpringActionController
             {
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
             }
-            File file = getDataHandler(run).getDataFile(run);
+            FileLike file = getDataHandler(run).getDataFile(run);
             if (file == null)
             {
                 throw new NotFoundException("Data file for run " + run.getName() + " was not found.  Deleted from the file system?");
             }
-            PageFlowUtil.streamFile(getViewContext().getResponse(), file, true);
+            PageFlowUtil.streamFile(getViewContext().getResponse(), file.toNioPathForRead().toFile(), true);
             return null;
         }
 
@@ -437,7 +437,7 @@ public class NabAssayController extends SpringActionController
     public class DeleteRunAction extends FormHandlerAction<DeleteRunForm>
     {
         private ExpRun _run;
-        private File _file;
+        private FileLike _file;
 
         @Override
         public void validateCommand(DeleteRunForm form, Errors errors)
@@ -473,7 +473,7 @@ public class NabAssayController extends SpringActionController
             if (form.isReupload())
             {
                 ActionURL reuploadURL = new ActionURL(NabUploadWizardAction.class, getContainer());
-                reuploadURL.addParameter("dataFile", _file.getPath());
+                reuploadURL.addParameter("dataFile", _file.toNioPathForRead().toFile().getPath());
 
                 return reuploadURL;
             }
@@ -641,7 +641,7 @@ public class NabAssayController extends SpringActionController
             }
 
             AssayProvider provider = AssayService.get().getProvider(protocol);
-            if (provider == null || !(provider instanceof NabAssayProvider nabProvider))
+            if (!(provider instanceof NabAssayProvider nabProvider))
             {
                 String message = "Protocol " + sampleSpreadsheetForm.getProtocol() + " is not a NAb protocol: " + protocol.getName();
                 throw new NotFoundException(message);
@@ -906,13 +906,12 @@ public class NabAssayController extends SpringActionController
 
         Set<Integer> colPos = new TreeSet<>();
         Set<Integer> rowPos = new TreeSet<>();
-        List<Integer> colOrder = new ArrayList<>();
         for (Position position : virusGroup.getPositions())
         {
             colPos.add(position.getColumn());
             rowPos.add(position.getRow());
         }
-        colOrder.addAll(colPos);
+        List<Integer> colOrder = new ArrayList<>(colPos);
         colPos.clear();
         for (Position position : cellGroup.getPositions())
         {

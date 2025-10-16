@@ -16,6 +16,8 @@
 
 package org.labkey.test.ms2;
 
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.Path;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.TestFileUtils;
 import org.labkey.test.TestTimeoutException;
@@ -112,12 +114,12 @@ abstract public class MS2TestBase extends BaseWebDriverTest
             return;
 
         File rootDir = new File(PIPELINE_PATH);
-        delete(new File(rootDir, "bov_sample/xars"));
-        delete(new File(rootDir, "bov_sample/"+search_type+"/test1/CAexample_mini.log"));
-        delete(new File(rootDir, "bov_sample/"+search_type+"/test2"));
-        delete(new File(rootDir, ".labkey/protocols/mass_spec/TestMS2Protocol.xml"));
-        delete(new File(rootDir, ".labkey/protocols/"+search_type+"/default.xml"));
-        delete(new File(rootDir, ".labkey/protocols/"+search_type+"/test2.xml"));
+        delete(FileUtil.appendPath(rootDir, Path.parse("bov_sample/xars")));
+        delete(FileUtil.appendPath(rootDir, Path.parse("bov_sample/"+search_type+"/test1/CAexample_mini.log")));
+        delete(FileUtil.appendPath(rootDir, Path.parse("bov_sample/"+search_type+"/test2")));
+        delete(FileUtil.appendPath(rootDir, Path.parse(".labkey/protocols/mass_spec/TestMS2Protocol.xml")));
+        delete(FileUtil.appendPath(rootDir, Path.parse(".labkey/protocols/"+search_type+"/default.xml")));
+        delete(FileUtil.appendPath(rootDir, Path.parse(".labkey/protocols/"+search_type+"/test2.xml")));
     }
 
     protected void navigateToFolder(String folderName)

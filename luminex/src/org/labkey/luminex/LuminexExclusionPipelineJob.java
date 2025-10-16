@@ -27,8 +27,6 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
 
-import java.io.File;
-
 public class LuminexExclusionPipelineJob extends PipelineJob
 {
     private LuminexSaveExclusionsForm _form;
@@ -46,8 +44,7 @@ public class LuminexExclusionPipelineJob extends PipelineJob
     {
         super(LuminexAssayProvider.NAME, info, root);
 
-        File logFile = new File(root.getLogDirectory(), FileUtil.makeFileNameWithTimestamp("luminex_exclusion", "log"));
-        setLogFile(logFile);
+        setLogFile(root.getLogDirectoryFileLike(true).resolveChild(FileUtil.makeFileNameWithTimestamp("luminex_exclusion", "log")).toNioPathForWrite());
 
         _form = form;
         _exclusionType = LuminexManager.ExclusionType.valueOf(form.getTableName());

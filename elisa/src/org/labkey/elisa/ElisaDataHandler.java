@@ -107,7 +107,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
         return true;
     }
 
-    private ElisaImportHelper getImportHelper(AssayUploadXarContext context, PlateBasedAssayProvider provider, ExpProtocol protocol, File dataFile) throws ExperimentException
+    private ElisaImportHelper getImportHelper(AssayUploadXarContext context, PlateBasedAssayProvider provider, ExpProtocol protocol, FileLike dataFile) throws ExperimentException
     {
         if (provider.getMetadataInputFormat(protocol).equals(SampleMetadataInputFormat.MANUAL))
         {
@@ -135,7 +135,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
             Map<String, DomainProperty> sampleProperties = plateProvider.getSampleWellGroupDomain(protocol)
                     .getProperties().stream()
                     .collect(Collectors.toMap(DomainProperty::getName, dp -> dp));
-            ElisaImportHelper importHelper = getImportHelper(xarContext, plateProvider, protocol, dataFile.toNioPathForRead().toFile());
+            ElisaImportHelper importHelper = getImportHelper(xarContext, plateProvider, protocol, dataFile);
 
             for (String plateName : importHelper.getPlates())
             {
@@ -148,7 +148,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                         SimpleRegression regression = new SimpleRegression(true);
                         Map<String, Double> standardConcentrations = importHelper.getStandardConcentrations(plateName, analytePlateEntry.getKey());
 
-                        CurveFit standardCurve = calculateStandardCurve(run, plate, regression, standardConcentrations, runDomain);
+                        CurveFit<?> standardCurve = calculateStandardCurve(run, plate, regression, standardConcentrations, runDomain);
                         if (standardCurve != null && standardCurve.getParameters() == null)
                             throw new ExperimentException("Unable to fit the standard concentrations to a curve, please check the input data and try again");
 
@@ -321,7 +321,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
      * data and can be used to generate an R squared value.
      */
     @Nullable
-    private CurveFit calculateStandardCurve(ExpRun run, Plate plate, @Nullable SimpleRegression regression, Map<String, Double> standardConcentrations,
+    private CurveFit<?> calculateStandardCurve(ExpRun run, Plate plate, @Nullable SimpleRegression regression, Map<String, Double> standardConcentrations,
                                             Domain runDomain) throws ExperimentException
     {
         // compute the calibration curve, there could be multiple control groups but one contains the standards
@@ -333,7 +333,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
 
             for (WellGroup replicate : stdWellGroup.getOverlappingGroups(WellGroup.Type.REPLICATE))
             {
-                maxValue = replicate.getMean() > maxValue ? replicate.getMean() : maxValue;
+                maxValue = Math.max(replicate.getMean(), maxValue);
             }
 
             for (WellGroup replicate : stdWellGroup.getOverlappingGroups(WellGroup.Type.REPLICATE))
@@ -358,7 +358,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
 
                 // Compute curve fit parameters based on the selected curve fit (default to linear for legacy assay designs)
                 StatsService.CurveFitType curveFitType = ElisaManager.getRunCurveFitType(runDomain, run);
-                CurveFit curveFit = StatsService.get().getCurveFit(curveFitType, points.toArray(DoublePoint[]::new));
+                CurveFit<?> curveFit = StatsService.get().getCurveFit(curveFitType, points.toArray(DoublePoint[]::new));
                 curveFit.setLogXScale(false);
                 curveFit.setAssumeCurveDecreasing(false);
 

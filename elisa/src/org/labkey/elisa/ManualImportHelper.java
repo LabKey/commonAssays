@@ -20,6 +20,7 @@ import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.elisa.actions.ElisaRunUploadForm;
 import org.labkey.elisa.plate.BioTekPlateReader;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.util.HashMap;
@@ -32,7 +33,7 @@ import java.util.Set;
  */
 public class ManualImportHelper extends AbstractElisaImportHelper
 {
-    public ManualImportHelper(AssayUploadXarContext context, PlateBasedAssayProvider provider, ExpProtocol protocol, File dataFile)
+    public ManualImportHelper(AssayUploadXarContext context, PlateBasedAssayProvider provider, ExpProtocol protocol, FileLike dataFile)
     {
         super(context, provider, protocol, dataFile);
     }

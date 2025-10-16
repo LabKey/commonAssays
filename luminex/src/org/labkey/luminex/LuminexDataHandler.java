@@ -165,17 +165,17 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     }
 
     @Override
-    public void importFile(@NotNull ExpData data, File dataFile, @NotNull ViewBackgroundInfo info, @NotNull Logger log, @NotNull XarContext context) throws ExperimentException
+    public void importFile(@NotNull ExpData data, @NotNull FileLike dataFile, @NotNull ViewBackgroundInfo info, @NotNull Logger log, @NotNull XarContext context) throws ExperimentException
     {
         if (!dataFile.exists())
         {
-            log.warn("Could not find file " + dataFile.getAbsolutePath() + " on disk for data with LSID " + data.getLSID());
+            log.warn("Could not find file " + dataFile + " on disk for data with LSID " + data.getLSID());
             return;
         }
         ExpRun expRun = data.getRun();
         if (expRun == null)
         {
-            throw new ExperimentException("Could not load Luminex file " + dataFile.getAbsolutePath() + " because it is not owned by an experiment run");
+            throw new ExperimentException("Could not load Luminex file " + dataFile + " because it is not owned by an experiment run");
         }
 
         LuminexExcelParser parser;
@@ -187,7 +187,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
         else
         {
-            parser = new LuminexExcelParser(expRun.getProtocol(), Collections.singleton(dataFile));
+            parser = LuminexExcelParser.create(expRun.getProtocol(), Collections.singleton(dataFile));
         }
         // The parser has already collapsed the data from multiple files into a single set of data,
         // so don't bother importing it twice if it came from separate files. This can happen if you aren't using a

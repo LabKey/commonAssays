@@ -19,6 +19,7 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.StringUtilsLabKey;
 
 import java.io.*;
@@ -368,7 +369,7 @@ public class FCS extends FCSHeader
                 return ext.equals(".fcs") || ext.equals(".facs") || ext.equals(".lmd");
             }
             else
-                return isFCSFile(new File(dir,name));
+                return isFCSFile(FileUtil.appendName(dir, name));
         }
     }
 

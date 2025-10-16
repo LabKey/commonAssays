@@ -41,8 +41,8 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.util.Pair;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabManager;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,18 +69,18 @@ public class SinglePlateDilutionNabDataHandler extends HighThroughputNabDataHand
     }
 
     @Override
-    protected List<Plate> createPlates(File dataFile, Plate template) throws ExperimentException
+    protected List<Plate> createPlates(FileLike dataFile, Plate template) throws ExperimentException
     {
         DataLoader loader = null;
         try
         {
             if (dataFile.getName().toLowerCase().endsWith(".csv"))
             {
-                loader = new TabLoader(dataFile, true);
+                loader = new TabLoader(dataFile.openInputStream(), true, null);
                 ((TabLoader) loader).parseAsCSV();
             }
             else
-                loader = new ExcelLoader(dataFile, true);
+                loader = new ExcelLoader(dataFile.openInputStream(), true, null);
 
             int wellsPerPlate = template.getRows() * template.getColumns();
 

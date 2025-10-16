@@ -72,7 +72,6 @@ import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -221,7 +220,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles, AssayRunUploadForm context)
+    public List<AssayDataCollector> getDataCollectors(@Nullable Map<String, org.labkey.vfs.FileLike> uploadedFiles, AssayRunUploadForm context)
     {
         throw new UnsupportedOperationException();
     }

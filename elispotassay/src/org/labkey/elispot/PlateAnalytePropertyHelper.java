@@ -61,7 +61,7 @@ public class PlateAnalytePropertyHelper extends SamplePropertyHelper<String>
             if (runPropMap.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
             {
                 reader = form.getProvider().getPlateReader(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME));
-                for (PlateUtils.GridInfo grid : reader.loadMultiGridFile(template, file.toNioPathForRead().toFile()))
+                for (PlateUtils.GridInfo grid : reader.loadMultiGridFile(template, file))
                 {
                     // attempt to parse the plate grid annotation into a PlateInfo object
                     FluorescentPlateInfo plateInfo = FluorescentPlateInfo.create(grid.getAnnotations());

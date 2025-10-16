@@ -519,7 +519,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 if (runPropMap.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
                 {
                     reader = provider.getPlateReader(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME));
-                    plates = ElispotDataHandler.initializePlates(form.getProtocol(), data.get(0).getFile(), template, reader);
+                    plates = ElispotDataHandler.initializePlates(form.getProtocol(), data.get(0).getFileLike(), template, reader);
                 }
 
                 boolean subtractBackground = NumberUtils.toInt(runPropMap.get(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME), 0) > 0;

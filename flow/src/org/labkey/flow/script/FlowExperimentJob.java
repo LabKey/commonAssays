@@ -69,7 +69,7 @@ public abstract class FlowExperimentJob extends FlowJob
     private void initStatus() throws IOException
     {
         String guid = GUID.makeGUID();
-        File logFile = new File(_containerFolder, guid + ".flow.log");
+        File logFile = FileUtil.appendName(_containerFolder, guid + ".flow.log");
         logFile.createNewFile();
         setLogFile(logFile);
     }
@@ -138,7 +138,7 @@ public abstract class FlowExperimentJob extends FlowJob
     protected File getWorkingFolder(Container container) throws IOException
     {
         File dirRoot = FlowAnalyzer.getAnalysisDirectory();
-        File dirFolder = new File(dirRoot, "Folder" + container.getRowId());
+        File dirFolder = FileUtil.appendName(dirRoot, "Folder" + container.getRowId());
         if (!dirFolder.exists())
         {
             if (!FileUtil.mkdirs(dirFolder))
@@ -163,7 +163,7 @@ public abstract class FlowExperimentJob extends FlowJob
         }
         for (int i = 1; ; i ++)
         {
-            File dirData = new File(dirRun, step.getLabel() + i);
+            File dirData = FileUtil.appendName(dirRun, step.getLabel() + i);
             if (!dirData.exists())
             {
                 if (!FileUtil.mkdirs(dirData))

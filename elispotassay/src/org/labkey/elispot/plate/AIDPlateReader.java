@@ -22,9 +22,10 @@ import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.DataLoaderFactory;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -55,13 +56,14 @@ public class AIDPlateReader extends TextPlateReader
     }
 
     @Override
-    public double[][] loadFile(Plate template, File dataFile) throws ExperimentException
+    public double[][] loadFile(Plate template, FileLike dataFile) throws ExperimentException
     {
         String fileName = dataFile.getName().toLowerCase();
         if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))
         {
             DataLoaderFactory factory = DataLoader.get().findFactory(dataFile, null);
-            try (DataLoader loader = factory.createLoader(dataFile, false))
+            try (InputStream in = dataFile.openInputStream();
+                DataLoader loader = factory.createLoader(in, false))
             {
                 return PlateUtils.parseGrid(dataFile, loader.load(), template.getRows(), template.getColumns(), this);
             }
@@ -77,13 +79,14 @@ public class AIDPlateReader extends TextPlateReader
     }
 
     @Override
-    public List<PlateUtils.GridInfo> loadMultiGridFile(Plate template, File dataFile) throws ExperimentException
+    public List<PlateUtils.GridInfo> loadMultiGridFile(Plate template, FileLike dataFile) throws ExperimentException
     {
         String fileName = dataFile.getName().toLowerCase();
         if (fileName.endsWith(".xls") || fileName.endsWith(".xlsx"))
         {
             DataLoaderFactory factory = DataLoader.get().findFactory(dataFile, null);
-            try (DataLoader loader = factory.createLoader(dataFile, false))
+            try (InputStream in = dataFile.openInputStream();
+                 DataLoader loader = factory.createLoader(in, false))
             {
                 return PlateUtils.parseAllGrids(dataFile, loader.load(), template.getRows(), template.getColumns(), this);
             }
