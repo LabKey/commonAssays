@@ -20,6 +20,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.Path;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Daily;
@@ -169,7 +171,7 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
                     getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_5)),
                     getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_6)),
                     getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_7))
-            ), Collections.EMPTY_MAP, 4);
+            ), Collections.emptyMap(), 4);
 
         // test import of files with a subset of the metadata files
         importRun(SignalDataInitializer.RAW_SignalData_ASSAY,
@@ -189,7 +191,7 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
                 List.of(
                         getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_6)),
                         getFile(String.join("/", ASSAY_DATA_LOC, RESULT_FILENAME_7))
-                ), Collections.EMPTY_MAP, 4);
+                ), Collections.emptyMap(), 4);
     }
 
     @Test
@@ -287,7 +289,7 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
         uploadPage.waitForProgressBars(uploadCount);
 
         uploadPage.setRunIDField(runId);
-        Window dialog = uploadPage.saveRunExpectingError(getDriver());
+        Window<?> dialog = uploadPage.saveRunExpectingError(getDriver());
 
         String actualMsg = dialog.getBody();
 
@@ -350,7 +352,7 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
 
     private File getFile(String relativePath)
     {
-        File file = new File(SignalDataInitializer.RAW_SignalData_SAMPLE_DATA, relativePath);
+        File file = FileUtil.appendPath(SignalDataInitializer.RAW_SignalData_SAMPLE_DATA, Path.parse(relativePath));
         if (!file.exists())
             throw new RuntimeException("Can't find path: " + file.getAbsolutePath());
         return file;

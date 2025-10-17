@@ -30,6 +30,7 @@ import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.fasta.FastaProtein;
 import org.labkey.api.query.AliasManager;
 import org.labkey.api.reader.SimpleXMLStreamReader;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
@@ -358,7 +359,7 @@ public class ProteinProphetImporter
             if (pepXMLFile == null)
             {
                 // Second, try the file name in the XML in the current directory
-                pepXMLFile = new File(_file.getParentFile(), new File(pepXMLFileName).getName());
+                pepXMLFile = FileUtil.appendName(_file.getParentFile(), new File(pepXMLFileName).getName());
                 attemptedFiles.add(pepXMLFile.getAbsolutePath());
                 if (!NetworkDrive.exists(pepXMLFile))
                 {

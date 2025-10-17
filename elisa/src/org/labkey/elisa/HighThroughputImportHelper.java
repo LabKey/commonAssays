@@ -21,9 +21,10 @@ import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.DataLoaderFactory;
 import org.labkey.api.reader.DataLoaderService;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +38,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
     private final Map<String, AnalytePlate> _plateMap = new HashMap<>();
     private Plate _plateTemplate;
 
-    public HighThroughputImportHelper(AssayUploadXarContext context, PlateBasedAssayProvider provider, ExpProtocol protocol, File dataFile) throws ExperimentException
+    public HighThroughputImportHelper(AssayUploadXarContext context, PlateBasedAssayProvider provider, ExpProtocol protocol, FileLike dataFile) throws ExperimentException
     {
         super(context, provider, protocol, dataFile);
         ensureData();
@@ -47,7 +48,8 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
     {
         _plateTemplate = _provider.getPlate(_protocol.getContainer(), _protocol);
         DataLoaderFactory factory = DataLoaderService.get().findFactory(_dataFile, null);
-        try (DataLoader loader = factory.createLoader(_dataFile, true))
+        try (InputStream in = _dataFile.openInputStream();
+             DataLoader loader = factory.createLoader(in, true))
         {
             String signalColumnName = "Signal";
 

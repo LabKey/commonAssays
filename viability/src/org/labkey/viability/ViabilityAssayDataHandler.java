@@ -45,6 +45,7 @@ import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AbstractAssayTsvDataHandler;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayService;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
@@ -430,7 +431,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         @Test
         public void testTsv() throws Exception
         {
-            ViabilityTsvDataHandler.Parser parser = new ViabilityTsvDataHandler.Parser(null, null, new File(getViabilitySampleDirectory(), "simple.tsv"));
+            ViabilityTsvDataHandler.Parser parser = new ViabilityTsvDataHandler.Parser(null, null, FileUtil.appendName(getViabilitySampleDirectory(), "simple.tsv"));
 
             List<Map<String, Object>> rows = parser.getResultData();
             assertEquals("Expected 3 rows", 3, rows.size());
@@ -459,7 +460,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         @Test
         public void testGuava() throws Exception
         {
-            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(getViabilitySampleDirectory(), "small.VIA.csv"));
+            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, FileUtil.appendName(getViabilitySampleDirectory(), "small.VIA.csv"));
 
             List<Map<String, Object>> rows = parser.getResultData();
             assertEquals("Expected 7 rows", 7, rows.size());
@@ -488,7 +489,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         @Test
         public void testViabilityAndCountFormat() throws Exception
         {
-            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(getViabilitySampleDirectory(), "muse_ex.csv"));
+            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, FileUtil.appendName(getViabilitySampleDirectory(), "muse_ex.csv"));
 
             List<Map<String, Object>> rows = parser.getResultData();
             assertEquals("Expected 8 rows", 8, rows.size());
@@ -518,7 +519,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
         @Test
         public void testExpressPlus() throws Exception
         {
-            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, new File(getViabilitySampleDirectory(), "122810.EP5.CSV"));
+            GuavaDataHandler.Parser parser = new GuavaDataHandler.Parser(null, null, FileUtil.appendName(getViabilitySampleDirectory(), "122810.EP5.CSV"));
 
             List<Map<String, Object>> rows = parser.getResultData();
             assertEquals("Expected 16 rows", 16, rows.size());

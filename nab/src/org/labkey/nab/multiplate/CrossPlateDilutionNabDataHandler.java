@@ -68,12 +68,7 @@ public class CrossPlateDilutionNabDataHandler extends HighThroughputNabDataHandl
                     throw new ExperimentException("Unable to find sample metadata for sample well group \"" + name +
                             "\": your sample metadata file may contain incorrect well group names, or it may not list all required samples.");
                 }
-                List<WellGroup> materialWellGroups = mapping.get(material);
-                if (materialWellGroups == null)
-                {
-                    materialWellGroups = new ArrayList<>();
-                    mapping.put(material, materialWellGroups);
-                }
+                List<WellGroup> materialWellGroups = mapping.computeIfAbsent(material, k -> new ArrayList<>());
                 materialWellGroups.add(specimenGroup);
             }
         }

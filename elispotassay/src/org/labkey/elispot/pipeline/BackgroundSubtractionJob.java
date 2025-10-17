@@ -46,6 +46,7 @@ import org.labkey.elispot.ElispotDataHandler;
 import org.labkey.elispot.ElispotManager;
 import org.labkey.elispot.RunDataRow;
 import org.labkey.elispot.plate.PlateInfo;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -185,12 +186,12 @@ public class BackgroundSubtractionJob extends PipelineJob
 
         if (reader != null)
         {
-            File dataFile = data.get(0).getFile();
+            FileLike dataFile = data.get(0).getFileLike();
 
             if (dataFile.exists())
             {
                 // TODO: how to handle background subtraction for fluorospot scans
-                for (Map.Entry<PlateInfo, Plate> entry : ElispotDataHandler.initializePlates(run.getProtocol(), data.get(0).getFile(), template, reader).entrySet())
+                for (Map.Entry<PlateInfo, Plate> entry : ElispotDataHandler.initializePlates(run.getProtocol(), dataFile, template, reader).entrySet())
                 {
                     if (entry.getKey().getMeasurement().equals(ElispotDataHandler.SFU_PROPERTY_NAME))
                     {

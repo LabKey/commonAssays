@@ -16,7 +16,6 @@
 package org.labkey.nab.multiplate;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.logging.log4j.Logger;
 import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.SampleProperty;
@@ -27,31 +26,24 @@ import org.labkey.api.assay.plate.WellData;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.collections.IntHashMap;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
-import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.XarContext;
-import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.assay.transform.TransformDataHandler;
 import org.labkey.api.reader.ColumnDescriptor;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.reader.TabLoader;
-import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.nab.NabAssayProvider;
 import org.labkey.nab.NabDataHandler;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -72,18 +64,18 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     protected static final String LOCATION_COLUMNN_HEADER = "Well Location";
 
     @Override
-    protected List<Plate> createPlates(File dataFile, Plate template) throws ExperimentException
+    protected List<Plate> createPlates(FileLike dataFile, Plate template) throws ExperimentException
     {
         DataLoader loader = null;
         try
         {
             if (dataFile.getName().toLowerCase().endsWith(".csv"))
             {
-                loader = new TabLoader(dataFile, true);
+                loader = new TabLoader(dataFile.openInputStream(), true, null);
                 ((TabLoader) loader).parseAsCSV();
             }
             else
-                loader = new ExcelLoader(dataFile, true);
+                loader = new ExcelLoader(dataFile.openInputStream(), true, null);
 
             final int expectedRows = template.getRows();
             final int expectedCols = template.getColumns();
@@ -150,12 +142,12 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     }
 
     @Override
-    protected double[][] getCellValues(final File dataFile, Plate nabTemplate)
+    protected double[][] getCellValues(final FileLike dataFile, Plate nabTemplate)
     {
         throw new IllegalStateException("getCellValues should not be called for High Throughput handlers.");
     }
 
-    protected List<double[][]> parse(File dataFile, ColumnDescriptor[] columns, List<Map<String, Object>> rows, int expectedRows, int expectedCols) throws ExperimentException
+    protected List<double[][]> parse(FileLike dataFile, ColumnDescriptor[] columns, List<Map<String, Object>> rows, int expectedRows, int expectedCols) throws ExperimentException
     {
         // attempt to parse list-style data
         if (columns != null && columns.length > 0)
@@ -237,18 +229,6 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
         }
 
         applyDilution(wells, sampleInput, properties, reverseDirection, sampleProperties);
-    }
-
-    @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
-    {
-        DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
-
-        Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
-        List<Map<String, Object>> rows = parser.getResults();
-        datas.put(NAB_TRANSFORMED_DATA_TYPE, MapDataIterator.of(rows));
-
-        return datas;
     }
 
     @Override

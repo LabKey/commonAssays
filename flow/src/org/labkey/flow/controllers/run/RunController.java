@@ -658,7 +658,7 @@ public class RunController extends BaseFlowController
                     if (_exportToScriptLocation != null)
                         dir = new File(_exportToScriptLocation);
                     else
-                        dir = new File(FileUtil.getTempDirectory(), "flow-export-to-script");
+                        dir = FileUtil.appendName(FileUtil.getTempDirectory(), "flow-export-to-script");
 
                     if ("zip".equalsIgnoreCase(_exportToScriptFormat))
                     {
@@ -667,7 +667,7 @@ public class RunController extends BaseFlowController
                     }
                     else
                     {
-                        File child = new File(dir, FileUtil.makeLegalName(name + "_" + getTimestamp()));
+                        File child = FileUtil.appendName(dir, FileUtil.makeLegalName(name + "_" + getTimestamp()));
                         FileUtil.mkdirs(child);
                         return new FileSystemFile(child);
                     }
@@ -780,7 +780,7 @@ public class RunController extends BaseFlowController
             _deleteOnComplete = deleteOnComplete;
 
             // setup the log file
-            File logFile = new File(root.getLogDirectory(), FileUtil.makeFileNameWithTimestamp("export-to-script", "log"));
+            File logFile = FileUtil.appendName(root.getLogDirectory(), FileUtil.makeFileNameWithTimestamp("export-to-script", "log"));
             setLogFile(logFile);
         }
 

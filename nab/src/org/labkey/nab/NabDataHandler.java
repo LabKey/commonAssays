@@ -18,6 +18,7 @@ package org.labkey.nab;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
@@ -36,16 +37,21 @@ import org.labkey.api.dataiterator.DataIteratorUtil;
 import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.OntologyManager;
+import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.qc.DataLoaderSettings;
+import org.labkey.api.qc.ValidationDataHandler;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.security.User;
 import org.labkey.api.util.Pair;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.nab.query.NabProtocolSchema;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,7 +63,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class NabDataHandler extends DilutionDataHandler
+public abstract class NabDataHandler extends DilutionDataHandler implements ValidationDataHandler
 {
     public static final Logger LOG = LogManager.getLogger(NabDataHandler.class);
 
@@ -121,6 +127,8 @@ public abstract class NabDataHandler extends DilutionDataHandler
         populateDilutionStats(data, run, protocol, rawData, wellGroupNameToNabSpecimen);
         populateWellData(protocol, run, user, cutoffFormats, wellGroupNameToNabSpecimen);
     }
+
+
 
     /**
      * Populates cutoff and AUC information from the passed in raw data
@@ -260,6 +268,18 @@ public abstract class NabDataHandler extends DilutionDataHandler
     }
 
     @Override
+    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
+    {
+        DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
+
+        Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
+        List<Map<String, Object>> rows = parser.getResults();
+        datas.put(NAB_TRANSFORMED_DATA_TYPE, MapDataIterator.of(rows));
+
+        return datas;
+    }
+
+    @Override
     public void beforeDeleteData(List<ExpData> datas, User user) throws ExperimentException
     {
         try
@@ -275,7 +295,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
     /**
      * Parse a list of values into multiple plates.
      */
-    protected List<double[][]> parseList(File dataFile, List<Map<String, Object>> rows, String locationColumnHeader, String resultColumnHeader,
+    protected List<double[][]> parseList(FileLike dataFile, List<Map<String, Object>> rows, String locationColumnHeader, String resultColumnHeader,
                                          int maxPlates, int expectedRows, int expectedCols, List<ExperimentException> errors)
     {
         int wellsPerPlate = expectedRows * expectedCols;
@@ -307,13 +327,13 @@ public abstract class NabDataHandler extends DilutionDataHandler
                 }
 
                 Integer value = null;
-                if (dataValue instanceof Integer)
-                    value = (Integer)dataValue;
-                if (dataValue instanceof String)
+                if (dataValue instanceof Integer i)
+                    value = i;
+                if (dataValue instanceof String s)
                 {
                     try
                     {
-                        double d = Double.valueOf((String)dataValue);
+                        double d = Double.valueOf(s);
                         value = (int)Math.round(d);
                     }
                     catch (NumberFormatException nfe)
@@ -364,7 +384,7 @@ public abstract class NabDataHandler extends DilutionDataHandler
      * Translate a well location value, e.g. "B04", into a (row, column) pair of coordinates.
      */
     @Nullable
-    protected Pair<Integer, Integer> getWellLocation(File dataFile, String locationColumnHeader, int expectedRows, int expectedCols, Map<String, Object> line, int lineNumber) throws ExperimentException
+    protected Pair<Integer, Integer> getWellLocation(FileLike dataFile, String locationColumnHeader, int expectedRows, int expectedCols, Map<String, Object> line, int lineNumber) throws ExperimentException
     {
         Object locationValue = line.get(locationColumnHeader);
         if (!(locationValue instanceof String location) || location.length() < 2)

@@ -18,6 +18,8 @@ package org.labkey.test.tests.ms2;
 
 import org.junit.Assert;
 import org.junit.experimental.categories.Category;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.Path;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
@@ -1212,7 +1214,7 @@ public class MS2Test extends AbstractMS2ImportTest
     private void cleanPipeline()
     {
         File rootDir = new File(PIPELINE_PATH);
-        delete(new File(rootDir, ".labkey/protocols/rollup/Protocol Rollup 1.xml"));
+        delete(FileUtil.appendPath(rootDir, Path.parse(".labkey/protocols/rollup/Protocol Rollup 1.xml")));
     }
 
     //TODO: Create MS2RunView component for this stuff

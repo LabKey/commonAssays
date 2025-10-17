@@ -17,6 +17,7 @@
 package org.labkey.elispot;
 
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.assay.plate.Position;
 import org.labkey.api.data.Container;
@@ -39,8 +40,8 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,10 +80,10 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
         List<Map<String, Object>> getResults() throws ExperimentException;
     }
 
-    public abstract ElispotDataFileParser getDataFileParser(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context);
+    public abstract ElispotDataFileParser getDataFileParser(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context);
 
     @Override
-    public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    public void importFile(@NotNull ExpData data, @NotNull FileLike dataFile, @NotNull ViewBackgroundInfo info, @NotNull Logger log, @NotNull XarContext context) throws ExperimentException
     {
         ExpRun run = data.getRun();
 

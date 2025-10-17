@@ -133,7 +133,7 @@ public abstract class AbstractMatrixRunCreator <ProviderType extends AbstractAss
         // Attach the materials found in the matrix file to the run
         try
         {
-            File dataFile = getPrimaryFile(context);
+            FileLike dataFile = getPrimaryFile(context);
             try (TabLoader loader = AbstractMatrixDataHandler.createTabLoader(dataFile, getIdColumnName(), getIdColumnAliases()))
             {
                 ColumnDescriptor[] cols = loader.getColumns();
@@ -156,13 +156,10 @@ public abstract class AbstractMatrixRunCreator <ProviderType extends AbstractAss
         }
     }
 
-    private File getPrimaryFile(AssayRunUploadContext<?> context) throws ExperimentException
+    private FileLike getPrimaryFile(AssayRunUploadContext<?> context) throws ExperimentException
     {
         Map<String, FileLike> files = context.getUploadedData();
         assert files.containsKey(AssayDataCollector.PRIMARY_FILE);
-        FileLike fl = files.get(AssayDataCollector.PRIMARY_FILE);
-        if (null == fl)
-            return null;
-        return fl.toNioPathForRead().toFile();
+        return files.get(AssayDataCollector.PRIMARY_FILE);
     }
 }

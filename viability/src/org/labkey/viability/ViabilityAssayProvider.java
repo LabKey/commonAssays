@@ -452,7 +452,7 @@ public class ViabilityAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public List<AssayDataCollector> getDataCollectors(Map<String, File> uploadedFiles, AssayRunUploadForm context)
+    public List<AssayDataCollector> getDataCollectors(@Nullable Map<String, org.labkey.vfs.FileLike> uploadedFiles, AssayRunUploadForm context)
     {
         ViabilityAssayRunUploadForm form = (ViabilityAssayRunUploadForm)context;
         if (form.getReRunId() != null && !form.isDelete())

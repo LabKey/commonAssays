@@ -16,7 +16,6 @@
 
 package org.labkey.nab;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayDataType;
@@ -38,18 +37,15 @@ import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.dataiterator.DataIteratorBuilder;
-import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.PropertyDescriptor;
-import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.DataType;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.DomainProperty;
-import org.labkey.api.qc.DataLoaderSettings;
 import org.labkey.api.assay.transform.TransformDataHandler;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.FilteredTable;
@@ -61,7 +57,6 @@ import org.labkey.api.reader.ExcelLoader;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileType;
-import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.nab.query.NabVirusDomainKind;
 import org.labkey.vfs.FileLike;
 
@@ -104,17 +99,18 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    protected double[][] getCellValues(final File dataFile, Plate nabTemplate) throws ExperimentException
+    protected double[][] getCellValues(final FileLike dataFile, Plate nabTemplate) throws ExperimentException
     {
         final int expectedRows = nabTemplate.getRows();
         final int expectedCols = nabTemplate.getColumns();
 
         try
         {
+            File f = dataFile.toNioPathForRead().toFile();
             // Special case for excel - The ExcelLoader only returns data for a single sheet so we need to create a new ExcelLoader for each sheet
-            if (ExcelLoader.isExcel(dataFile))
+            if (ExcelLoader.isExcel(f))
             {
-                try (ExcelFactory.WorkbookMetadata md = ExcelFactory.getMetadata(dataFile))
+                try (ExcelFactory.WorkbookMetadata md = ExcelFactory.getMetadata(f))
                 {
                     for (int i = 0, len = md.getSheetNames().size(); i < len; i++)
                     {
@@ -135,7 +131,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
 
                             DataLoader createLoader(boolean hasColumnHeaders)
                             {
-                                ExcelLoader loader = new ExcelLoader(dataFile, md, hasColumnHeaders, null);
+                                ExcelLoader loader = new ExcelLoader(f, md, hasColumnHeaders, null);
                                 loader.setInferTypes(false);
                                 loader.setIncludeBlankLines(true);
                                 loader.setSheetIndex(sheetNum);
@@ -163,13 +159,13 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                     @Override
                     DataLoader createList() throws IOException, ExperimentException
                     {
-                        return createLoader(dataFile, true);
+                        return createLoader(f, true);
                     }
 
                     @Override
                     DataLoader createGrid() throws IOException, ExperimentException
                     {
-                        return createLoader(dataFile, false);
+                        return createLoader(f, false);
                     }
 
                     @Override
@@ -200,7 +196,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
         abstract void close(DataLoader loader);
     }
 
-    protected double[][] parse(File dataFile, Load load, int expectedRows, int expectedCols) throws ExperimentException, IOException
+    protected double[][] parse(FileLike dataFile, Load load, int expectedRows, int expectedCols) throws ExperimentException, IOException
     {
         // First, attempt to parse list-style data using column headers.
         DataLoader loader = load.createList();
@@ -356,18 +352,6 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     }
 
     @Override
-    public Map<DataType, DataIteratorBuilder> getValidationDataMap(ExpData data, FileLike dataFile, ViewBackgroundInfo info, Logger log, XarContext context, DataLoaderSettings settings) throws ExperimentException
-    {
-        DilutionDataFileParser parser = getDataFileParser(data, dataFile, info);
-
-        Map<DataType, DataIteratorBuilder> datas = new HashMap<>();
-        List<Map<String, Object>> rows = parser.getResults();
-        datas.put(NAB_TRANSFORMED_DATA_TYPE, MapDataIterator.of(rows));
-
-        return datas;
-    }
-
-    @Override
     public Priority getPriority(ExpData data)
     {
         Lsid lsid = new Lsid(data.getLSID());
@@ -393,7 +377,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                     AssayProvider provider = AssayService.get().getProvider(protocol);
                     AssayProtocolSchema protocolSchema = provider.createProtocolSchema(user, protocol.getContainer(), protocol, null);
                     TableInfo virusTable = protocolSchema.createTable(DilutionManager.VIRUS_TABLE_NAME, null);
-                    if (virusTable instanceof FilteredTable ft)
+                    if (virusTable instanceof FilteredTable<?> ft)
                     {
                         if (virusTable.getColumn(FieldKey.fromParts(NabVirusDomainKind.DATLSID_COLUMN_NAME)) != null)
                         {

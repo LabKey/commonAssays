@@ -416,7 +416,7 @@ public class WorkspaceData implements Serializable
     {
         try
         {
-            if (file.isDirectory() && new File(file, AnalysisSerializer.STATISTICS_FILENAME).isFile())
+            if (file.isDirectory() && FileUtil.appendName(file, AnalysisSerializer.STATISTICS_FILENAME).isFile())
             {
                 return AnalysisSerializer.readAnalysis(file);
             }

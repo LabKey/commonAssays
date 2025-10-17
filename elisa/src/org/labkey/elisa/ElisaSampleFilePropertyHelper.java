@@ -16,8 +16,10 @@ import org.labkey.api.reader.DataLoaderService;
 import org.labkey.api.study.assay.SampleMetadataInputFormat;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.io.File;
+import org.labkey.vfs.FileLike;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -41,13 +43,14 @@ public class ElisaSampleFilePropertyHelper extends PlateSampleFilePropertyHelper
         if (_sampleProperties != null)
             return _sampleProperties;
 
-        File metadataFile = getSampleMetadata(request);
+        FileLike metadataFile = getSampleMetadata(request);
         if (metadataFile == null)
             throw new ExperimentException("No metadata or data file provided");
 
         Map<String, Map<DomainProperty, String>> allProperties = new HashMap<>();
         DataLoaderFactory factory = DataLoaderService.get().findFactory(metadataFile, null);
-        try (DataLoader loader = factory.createLoader(metadataFile, true))
+        try (InputStream in = metadataFile.openInputStream();
+             DataLoader loader = factory.createLoader(in, true))
         {
             validateRequiredColumns(loader.getColumns());
 

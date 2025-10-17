@@ -17,6 +17,8 @@ package org.labkey.test.ms2;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.Path;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Daily;
@@ -105,7 +107,7 @@ public class QuantitationTest extends AbstractXTandemTest
     protected void cleanPipe(String search_type)
     {
         File rootDir = new File(PIPELINE_PATH);
-        delete(new File(rootDir, ".labkey/protocols/"+search_type+"/" + LIBRA_PROTOCOL_NAME + ".xml"));
-        delete(new File(rootDir, "bov_sample/"+search_type+"/" + LIBRA_PROTOCOL_NAME));
+        delete(FileUtil.appendPath(rootDir, Path.parse(".labkey/protocols/"+search_type+"/" + LIBRA_PROTOCOL_NAME + ".xml")));
+        delete(FileUtil.appendPath(rootDir, Path.parse("bov_sample/"+search_type+"/" + LIBRA_PROTOCOL_NAME)));
     }
 }

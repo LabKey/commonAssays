@@ -23,6 +23,8 @@ import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,13 +44,13 @@ public class PlateParserTests
         _context = new Mockery();
     }
 
-    public double[][] parse(File file, Plate template) throws ExperimentException
+    public double[][] parse(FileLike file, Plate template) throws ExperimentException
     {
         SinglePlateNabDataHandler handler = new SinglePlateNabDataHandler();
         return handler.getCellValues(file, template);
     }
 
-    public void assertCells(String nabFile, double[][] expected, File file, Plate template) throws ExperimentException
+    public void assertCells(String nabFile, double[][] expected, FileLike file, Plate template) throws ExperimentException
     {
         double[][] actual = parse(file, template);
         if (actual == null)
@@ -62,10 +64,10 @@ public class PlateParserTests
         }
     }
 
-    public double[][] parseExpected(File file) throws IOException
+    public double[][] parseExpected(FileLike file) throws IOException
     {
         List<double[]> values = new ArrayList<>(8);
-        for (String line : Files.readAllLines(file.toPath(), Charset.defaultCharset()))
+        for (String line : Files.readAllLines(file.toNioPathForRead(), Charset.defaultCharset()))
         {
             String[] s = line.split("\\t");
             double[] cells = new double[s.length];
@@ -122,9 +124,9 @@ public class PlateParserTests
             File nabFile = JunitUtil.getSampleData(null, test.first);
             File expectedFile = JunitUtil.getSampleData(null, test.second);
 
-            final double[][] expected = parseExpected(expectedFile);
+            final double[][] expected = parseExpected(FileSystemLike.wrapFile(expectedFile));
             Plate template = template(nabFile.getName(), expected.length, expected[0].length);
-            assertCells(test.first, expected, nabFile, template);
+            assertCells(test.first, expected, FileSystemLike.wrapFile(nabFile), template);
         }
     }
 

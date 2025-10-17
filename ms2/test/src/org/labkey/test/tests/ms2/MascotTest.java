@@ -20,6 +20,8 @@ import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.Path;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
@@ -505,6 +507,6 @@ public class MascotTest extends AbstractMS2SearchEngineTest
             return;
 
         File rootDir = new File(PIPELINE_PATH);
-        delete(new File(rootDir, "databases/mascot"));
+        delete(FileUtil.appendPath(rootDir, Path.parse("databases/mascot")));
     }
 }

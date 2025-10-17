@@ -38,7 +38,7 @@ import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.flowdata.xml.FlowData;
 import org.labkey.flow.flowdata.xml.FlowdataDocument;
 
-import java.io.File;
+import org.labkey.vfs.FileLike;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.List;
@@ -63,7 +63,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
     }
 
     @Override
-    public void exportFile(ExpData data, File dataFile, User user, OutputStream out)
+    public void exportFile(ExpData data, FileLike dataFile, User user, OutputStream out)
     {
         try
         {
@@ -115,7 +115,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
     }
 
     @Override
-    public void importFile(@NotNull ExpData data, File dataFile, @NotNull ViewBackgroundInfo info, @NotNull Logger log, @NotNull XarContext context) throws ExperimentException
+    public void importFile(@NotNull ExpData data, @NotNull FileLike dataFile, @NotNull ViewBackgroundInfo info, @NotNull Logger log, @NotNull XarContext context) throws ExperimentException
     {
         try
         {
@@ -123,7 +123,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
             {
                 if (AttributeSetHelper.fromData(data) == null)
                 {
-                    FlowdataDocument doc = FlowdataDocument.Factory.parse(dataFile);
+                    FlowdataDocument doc = FlowdataDocument.Factory.parse(dataFile.openInputStream());
                     FlowData flowdata = doc.getFlowdata();
                     URI uriFile = null;
                     if (flowdata.getUri() != null)
@@ -142,7 +142,7 @@ public class FlowDataHandler extends AbstractExperimentDataHandler
             else if (dataFile.getName().endsWith("." + EXT_SCRIPT))
             {
                 FlowScript script = new FlowScript(data);
-                script.setAnalysisScript(info.getUser(), PageFlowUtil.getFileContentsAsString(dataFile));
+                script.setAnalysisScript(info.getUser(), PageFlowUtil.getStreamContentsAsString(dataFile.openInputStream()));
             }
         }
         catch (Exception e)

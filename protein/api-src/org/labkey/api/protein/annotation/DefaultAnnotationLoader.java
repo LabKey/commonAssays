@@ -26,6 +26,7 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -53,13 +54,13 @@ public abstract class DefaultAnnotationLoader extends PipelineJob
         {
             throw new IOException("No pipeline root configured for the /Shared project");
         }
-        File logDir = pipelineRoot.resolvePath("proteinAnnotationImport");
-        FileUtil.mkdir(logDir);
+        FileLike logDir = pipelineRoot.resolvePathToFileLike("proteinAnnotationImport");
+        logDir.mkdir();
         if (!logDir.isDirectory())
         {
             throw new IOException("Could not create directory for log file: " + logDir);
         }
-        setLogFile(new File(logDir, file.getName() + "." + DateUtil.formatDateTime(new Date(), FORMAT_STRING) + ".log"));
+        setLogFile(logDir.resolveChild(file.getName() + "." + DateUtil.formatDateTime(new Date(), FORMAT_STRING) + ".log").toNioPathForWrite());
     }
 
     @Override

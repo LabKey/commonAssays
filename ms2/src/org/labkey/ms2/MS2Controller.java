@@ -4819,7 +4819,7 @@ public class MS2Controller extends SpringActionController
                 if (!paramsFile.exists() && TPPTask.FT_PEP_XML.isType(run.getFileName()))
                 {
                     String basename = TPPTask.FT_PEP_XML.getBaseName(new File(run.getPath() + "/" + run.getFileName()));
-                    paramsFile = new File(paramsFile.getParentFile(), basename + "." + run.getParamsFileName());
+                    paramsFile = FileUtil.appendName(paramsFile.getParentFile(), basename + "." + run.getParamsFileName());
                 }
             }
             if (!NetworkDrive.exists(paramsFile))

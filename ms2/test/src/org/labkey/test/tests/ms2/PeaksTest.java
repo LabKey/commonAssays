@@ -19,6 +19,8 @@ package org.labkey.test.tests.ms2;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.Path;
 import org.labkey.test.Locator;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.Daily;
@@ -128,6 +130,6 @@ public class PeaksTest extends AbstractMS2SearchEngineTest
         super.cleanPipe(search_type);
 
         File rootDir = new File(PIPELINE_PATH);
-        delete(new File(rootDir, "peaks/peaks.log"));
+        delete(FileUtil.appendPath(rootDir, Path.parse("peaks/peaks.log")));
     }
 }

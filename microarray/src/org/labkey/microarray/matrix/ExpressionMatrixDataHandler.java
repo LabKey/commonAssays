@@ -18,6 +18,7 @@ package org.labkey.microarray.matrix;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.collections.LongHashMap;
 import org.labkey.api.data.Container;
@@ -42,6 +43,7 @@ import org.labkey.api.assay.matrix.AbstractMatrixDataHandler;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.microarray.MicroarrayManager;
 import org.labkey.microarray.query.MicroarrayUserSchema;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,19 +80,19 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
     {
         return ExpressionMatrixAssayProvider.DATA_TYPE;
     }
-    
+
     @Override
-    public void importFile(ExpData data, File dataFile, ViewBackgroundInfo info, Logger log, XarContext context) throws ExperimentException
+    public void importFile(@NotNull ExpData data, @NotNull FileLike dataFile, @NotNull ViewBackgroundInfo info, @NotNull Logger log, @NotNull XarContext context) throws ExperimentException
     {
         if (!dataFile.exists())
         {
-            log.warn("Could not find file " + dataFile.getAbsolutePath() + " on disk for data with LSID " + data.getLSID());
+            log.warn("Could not find file " + dataFile + " on disk for data with LSID " + data.getLSID());
             return;
         }
         ExpRun expRun = data.getRun();
         if (expRun == null)
         {
-            throw new ExperimentException("Could not load ExpressionMatrix file " + dataFile.getAbsolutePath() + " because it is not owned by an experiment run");
+            throw new ExperimentException("Could not load ExpressionMatrix file " + dataFile + " because it is not owned by an experiment run");
         }
 
         try

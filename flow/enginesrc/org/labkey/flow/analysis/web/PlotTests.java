@@ -20,6 +20,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.JunitUtil;
+import org.labkey.api.util.Path;
 import org.labkey.api.writer.PrintWriters;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.CompensationMatrix;
@@ -78,11 +79,10 @@ public class PlotTests extends Assert
         for (FCSAnalyzer.GraphResult graph : graphs)
         {
             String imgName = AnalysisSerializer.generateFriendlyImageName(graph.spec);
-            File image = new File(outDir, imgName);
+            File image = FileUtil.appendName(outDir, imgName);
             FileOutputStream fos = new FileOutputStream(image);
             IOUtils.write(graph.bytes, fos);
             images.put(imgName, graph.spec);
-            System.out.println("  " + graph.spec);
         }
         return images;
     }
@@ -106,7 +106,7 @@ public class PlotTests extends Assert
         generateHtml(outDir, workspaceFile, fcsFile, expectedImageDir, generatedImages);
 
         Desktop desktop = Desktop.getDesktop();
-        desktop.browse(new File(outDir, "index.html").toURI());
+        desktop.browse(FileUtil.appendName(outDir, "index.html").toURI());
     }
 
     private void generateHtml(File outDir, File workspaceFile, File fcsFile, File expectedImageDir, Map<String, GraphSpec> generatedImages) throws IOException
@@ -162,8 +162,8 @@ public class PlotTests extends Assert
             sb.append("</b></td>");
             sb.append("</tr>");
             sb.append("<tr>");
-            sb.append("<td valign=top><img src='").append(new File(expectedImageDir, imageName)).append("'></td>");
-            sb.append("<td valign=top><img src='").append(new File(outDir, imageName)).append("'></td>");
+            sb.append("<td valign=top><img src='").append(FileUtil.appendName(expectedImageDir, imageName)).append("'></td>");
+            sb.append("<td valign=top><img src='").append(FileUtil.appendName(outDir, imageName)).append("'></td>");
             sb.append("</tr>");
         }
 
@@ -174,7 +174,7 @@ public class PlotTests extends Assert
         sb.append("</body>");
         sb.append("</html>");
 
-        try (PrintWriter writer = PrintWriters.getPrintWriter(new File(outDir, "index.html")))
+        try (PrintWriter writer = PrintWriters.getPrintWriter(FileUtil.appendName(outDir, "index.html")))
         {
             writer.append(sb.toString());
             writer.flush();
@@ -198,7 +198,7 @@ public class PlotTests extends Assert
     @Test
     public void advanced() throws Exception
     {
-        File outDir         = new File(outDir(), "flow/advanced");
+        File outDir         = FileUtil.appendPath(outDir(), Path.parse("flow/advanced"));
         File workspaceFile  = JunitUtil.getSampleData(null, "flow/advanced/advanced-v7.6.5.wsp");
         File fcsFile        = JunitUtil.getSampleData(null, "flow/advanced/931115-B02- Sample 01.fcs");
         File expectedImages = JunitUtil.getSampleData(null, "flow/advanced/931115-B02_graphs_v7.6.5");
@@ -212,10 +212,10 @@ public class PlotTests extends Assert
     @Test
     public void HVTN078() throws Exception
     {
-        File outDir         = new File(outDir(), "HVTN/HVTN078");
-        File workspaceFile  = new File(dataDir(), "HVTN/HVTN078/1325-L-078.xml");
-        File fcsFile        = new File(dataDir(), "HVTN/HVTN078/1012833.fcs");
-        File expectedImages = new File(dataDir(), "HVTN/HVTN078/1012833_graphs_v9.4.10");
+        File outDir         = FileUtil.appendPath(outDir(), Path.parse("HVTN/HVTN078"));
+        File workspaceFile  = FileUtil.appendPath(dataDir(), Path.parse("HVTN/HVTN078/1325-L-078.xml"));
+        File fcsFile        = FileUtil.appendPath(dataDir(), Path.parse("HVTN/HVTN078/1012833.fcs"));
+        File expectedImages = FileUtil.appendPath(dataDir(), Path.parse("HVTN/HVTN078/1012833_graphs_v9.4.10"));
 
         generatePlotsAndCompare(outDir, workspaceFile, fcsFile, expectedImages);
     }
@@ -227,10 +227,10 @@ public class PlotTests extends Assert
     @Test
     public void IAVI315() throws Exception
     {
-        File outDir         = new File(outDir(), "IAVI/315");
-        File workspaceFile  = new File(dataDir(), "IAVI/315/workspace.xml");
-        File fcsFile        = new File(dataDir(), "IAVI/315/SEB_SEB315_A12.fcs");
-        File expectedImages = new File(dataDir(), "IAVI/315/SEB_SEB315_A12_graphs_v9.4.10");
+        File outDir         = FileUtil.appendPath(outDir(), Path.parse("IAVI/315"));
+        File workspaceFile  = FileUtil.appendPath(dataDir(), Path.parse("IAVI/315/workspace.xml"));
+        File fcsFile        = FileUtil.appendPath(dataDir(), Path.parse("IAVI/315/SEB_SEB315_A12.fcs"));
+        File expectedImages = FileUtil.appendPath(dataDir(), Path.parse("IAVI/315/SEB_SEB315_A12_graphs_v9.4.10"));
 
         generatePlotsAndCompare(outDir, workspaceFile, fcsFile, expectedImages);
     }
@@ -240,10 +240,10 @@ public class PlotTests extends Assert
     @Test
     public void ITN027AI() throws Exception
     {
-        File outDir         = new File(outDir(), "ITN/ITN027AI");
-        File workspaceFile  = new File(dataDir(), "ITN/ITN027AI/ITN027AI_tube131.xml");
-        File fcsFile        = new File(dataDir(), "ITN/ITN027AI/ITN-131-01.LMD");
-        File expectedImages = new File(dataDir(), "ITN/ITN027AI/ITN-131-01_graphs_v8.8.7");
+        File outDir         = FileUtil.appendPath(outDir(),  Path.parse("ITN/ITN027AI"));
+        File workspaceFile  = FileUtil.appendPath(dataDir(), Path.parse("ITN/ITN027AI/ITN027AI_tube131.xml"));
+        File fcsFile        = FileUtil.appendPath(dataDir(), Path.parse("ITN/ITN027AI/ITN-131-01.LMD"));
+        File expectedImages = FileUtil.appendPath(dataDir(), Path.parse("ITN/ITN027AI/ITN-131-01_graphs_v8.8.7"));
 
         generatePlotsAndCompare(outDir, workspaceFile, fcsFile, expectedImages);
     }
@@ -251,10 +251,10 @@ public class PlotTests extends Assert
     @Test
     public void ITN030ST() throws Exception
     {
-        File outDir         = new File(outDir(), "ITN/ITN030ST");
-        File workspaceFile  = new File(dataDir(), "ITN/ITN030ST/workspace.wsp");
-        File fcsFile        = new File(dataDir(), "ITN/ITN030ST/10047201_SH01_I007.fcs");
-        File expectedImages = new File(dataDir(), "ITN/ITN030ST/10047201_SH01_I007_graphs_v7.6.5");
+        File outDir         = FileUtil.appendPath(outDir(), Path.parse("ITN/ITN030ST"));
+        File workspaceFile  = FileUtil.appendPath(dataDir(), Path.parse("ITN/ITN030ST/workspace.wsp"));
+        File fcsFile        = FileUtil.appendPath(dataDir(), Path.parse("ITN/ITN030ST/10047201_SH01_I007.fcs"));
+        File expectedImages = FileUtil.appendPath(dataDir(), Path.parse("ITN/ITN030ST/10047201_SH01_I007_graphs_v7.6.5"));
 
         generatePlotsAndCompare(outDir, workspaceFile, fcsFile, expectedImages);
     }
@@ -262,10 +262,10 @@ public class PlotTests extends Assert
     @Test
     public void ITNPilot() throws Exception
     {
-        File outDir         = new File(outDir(), "ITN/Pilot");
-        File workspaceFile  = new File(dataDir(), "ITN/Pilot/workspace.xml");
-        File fcsFile        = new File(dataDir(), "ITN/Pilot/ITN64.fcs");
-        File expectedImages = new File(dataDir(), "ITN/Pilot/ITN64_graphs_v9.4.10");
+        File outDir         = FileUtil.appendPath(outDir(), Path.parse("ITN/Pilot"));
+        File workspaceFile  = FileUtil.appendPath(dataDir(), Path.parse("ITN/Pilot/workspace.xml"));
+        File fcsFile        = FileUtil.appendPath(dataDir(), Path.parse("ITN/Pilot/ITN64.fcs"));
+        File expectedImages = FileUtil.appendPath(dataDir(), Path.parse("ITN/Pilot/ITN64_graphs_v9.4.10"));
 
         generatePlotsAndCompare(outDir, workspaceFile, fcsFile, expectedImages);
     }
@@ -273,10 +273,10 @@ public class PlotTests extends Assert
     @Test
     public void LabKeyDemo() throws Exception
     {
-        File outDir         = new File(outDir(), "labkey-demo");
-        File workspaceFile  = new File(dataDir(), "labkey-demo/labkey-demo.xml");
-        File fcsFile        = new File(dataDir(), "labkey-demo/119166.fcs");
-        File expectedImages = new File(dataDir(), "labkey-demo/119166_graphs_v9.4.10");
+        File outDir         = FileUtil.appendPath(outDir(), Path.parse("labkey-demo"));
+        File workspaceFile  = FileUtil.appendPath(dataDir(), Path.parse("labkey-demo/labkey-demo.xml"));
+        File fcsFile        = FileUtil.appendPath(dataDir(), Path.parse("labkey-demo/119166.fcs"));
+        File expectedImages = FileUtil.appendPath(dataDir(), Path.parse("labkey-demo/119166_graphs_v9.4.10"));
 
         generatePlotsAndCompare(outDir, workspaceFile, fcsFile, expectedImages);
     }
@@ -284,10 +284,10 @@ public class PlotTests extends Assert
     @Test
     public void LetvinFACSCalibur() throws Exception
     {
-        File outDir         = new File(outDir(), "Letvin/FACSCalibur");
-        File workspaceFile  = new File(dataDir(), "Letvin/FACSCalibur/workspace.xml");
-        File fcsFile        = new File(dataDir(), "Letvin/FACSCalibur/64.001");
-        File expectedImages = new File(dataDir(), "Letvin/FACSCalibur/64.001_graphs_v9.4.10");
+        File outDir         = FileUtil.appendPath(outDir(), Path.parse("Letvin/FACSCalibur"));
+        File workspaceFile  = FileUtil.appendPath(dataDir(), Path.parse("Letvin/FACSCalibur/workspace.xml"));
+        File fcsFile        = FileUtil.appendPath(dataDir(), Path.parse("Letvin/FACSCalibur/64.001"));
+        File expectedImages = FileUtil.appendPath(dataDir(), Path.parse("Letvin/FACSCalibur/64.001_graphs_v9.4.10"));
 
         generatePlotsAndCompare(outDir, workspaceFile, fcsFile, expectedImages);
     }
@@ -295,10 +295,10 @@ public class PlotTests extends Assert
     @Test
     public void LetvinLargeFCS() throws Exception
     {
-        File outDir         = new File(outDir(), "Letvin/LargeFCS");
-        File workspaceFile  = new File(dataDir(), "Letvin/LargeFCS/workspace.xml");
-        File fcsFile        = new File(dataDir(), "Letvin/LargeFCS/BLOOD P11C STIM_AS31_B04.fcs");
-        File expectedImages = new File(dataDir(), "Letvin/LargeFCS/AS31_B04_graphs_v9.4.10");
+        File outDir         = FileUtil.appendPath(outDir(), Path.parse("Letvin/LargeFCS"));
+        File workspaceFile  = FileUtil.appendPath(dataDir(), Path.parse("Letvin/LargeFCS/workspace.xml"));
+        File fcsFile        = FileUtil.appendPath(dataDir(), Path.parse("Letvin/LargeFCS/BLOOD P11C STIM_AS31_B04.fcs"));
+        File expectedImages = FileUtil.appendPath(dataDir(), Path.parse("Letvin/LargeFCS/AS31_B04_graphs_v9.4.10"));
 
         generatePlotsAndCompare(outDir, workspaceFile, fcsFile, expectedImages);
     }
@@ -306,10 +306,10 @@ public class PlotTests extends Assert
     @Test
     public void YirongWang() throws Exception
     {
-        File outDir         = new File(outDir(), "YirongWang");
-        File workspaceFile  = new File(dataDir(), "YirongWang/workspace.wsp");
-        File fcsFile        = new File(dataDir(), "YirongWang/001.fcs");
-        File expectedImages = new File(dataDir(), "YirongWang/001_graphs_v7.6.5");
+        File outDir         = FileUtil.appendPath(outDir(), Path.parse("YirongWang"));
+        File workspaceFile  = FileUtil.appendPath(dataDir(), Path.parse("YirongWang/workspace.wsp"));
+        File fcsFile        = FileUtil.appendPath(dataDir(), Path.parse("YirongWang/001.fcs"));
+        File expectedImages = FileUtil.appendPath(dataDir(), Path.parse("YirongWang/001_graphs_v7.6.5"));
 
         generatePlotsAndCompare(outDir, workspaceFile, fcsFile, expectedImages);
     }

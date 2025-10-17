@@ -14,8 +14,8 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ProvenanceService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,11 +26,11 @@ public abstract class AbstractElisaImportHelper implements ElisaImportHelper
     protected AssayUploadXarContext _context;
     protected PlateBasedAssayProvider _provider;
     protected ExpProtocol _protocol;
-    protected File _dataFile;
+    protected FileLike _dataFile;
     protected Container _container;
     Map<Position, String> _specimenGroupMap;
 
-    public AbstractElisaImportHelper(AssayUploadXarContext context, PlateBasedAssayProvider provider, ExpProtocol protocol, File dataFile)
+    public AbstractElisaImportHelper(AssayUploadXarContext context, PlateBasedAssayProvider provider, ExpProtocol protocol, FileLike dataFile)
     {
         _context = context;
         _provider = provider;
