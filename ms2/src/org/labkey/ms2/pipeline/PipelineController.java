@@ -48,6 +48,7 @@ import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.ms2.pipeline.tandem.XTandemSearchProtocolFactory;
+import org.labkey.vfs.FileLike;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -98,7 +99,7 @@ public class PipelineController extends SpringActionController
         @Override
         public boolean handlePost(PipelinePathForm form, BindException errors)
         {
-            for (File file : form.getValidatedFiles(getContainer()))
+            for (FileLike file : form.getValidatedFiles(getContainer()))
             {
                 if (!file.isFile())
                 {
@@ -125,8 +126,8 @@ public class PipelineController extends SpringActionController
                 {
                     // If the data was created by our pipeline, try to get the name
                     // to look like the normal generated name.
-                    protocolName = file.getParentFile().getName();
-                    dirDataOriginal = file.getParentFile().getParentFile();
+                    protocolName = file.getParent().getName();
+                    dirDataOriginal = file.getParent().getParent().toNioPathForRead().toFile();
                     if (dirDataOriginal != null &&
                             dirDataOriginal.getName().equals(XTandemSearchProtocolFactory.get().getName()))
                     {

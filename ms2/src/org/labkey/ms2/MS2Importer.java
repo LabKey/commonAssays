@@ -41,6 +41,7 @@ import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.util.massSpecDataFileType;
 import org.labkey.ms2.reader.AbstractMzxmlIterator;
 import org.labkey.ms2.reader.SimpleScan;
+import org.labkey.vfs.FileLike;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -302,14 +303,14 @@ public abstract class MS2Importer
         return asInteger(returnMap.get("Run"));
     }
 
-    protected boolean isMzXmlFile(File file)
+    protected boolean isMzXmlFile(FileLike file)
     {
         String name = file.getName().toLowerCase();
         return name.endsWith(".mzxml") || name.endsWith(".mzxml.gz");
     }
 
 
-    protected int createFraction(User user, Container c, int runId, String path, File file) throws IOException
+    protected int createFraction(User user, Container c, int runId, String path, FileLike file) throws IOException
     {
         MS2Fraction fraction = new MS2Fraction();
         fraction.setRun(runId);
@@ -321,7 +322,7 @@ public abstract class MS2Importer
             int totalScans = loadScanCounts(file, fraction);
             _log.info("Finished parsing to get scan counts. Total: " + totalScans + ", MS1: " + fraction.getMS1ScanCount() + ", MS2: " + fraction.getMS2ScanCount() + ", MS3: " + fraction.getMS3ScanCount() + ", MS4:" + fraction.getMS4ScanCount());
 
-            fraction.setMzXmlURL(FileUtil.resolveFile(FileUtil.getAbsoluteCaseSensitiveFile(file)).toPath().toUri().toString());
+            fraction.setMzXmlURL(FileUtil.resolveFile(FileUtil.getAbsoluteCaseSensitiveFile(file.toNioPathForRead().toFile())).toPath().toUri().toString());
 
             massSpecDataFileType msdft = new massSpecDataFileType();
             String peptideFileName  = msdft.getBaseName(file); // strip off .mzxml or .mzxml.gz
@@ -343,7 +344,7 @@ public abstract class MS2Importer
     }
 
     /** @return the total number of scans in the file */
-    public static int loadScanCounts(File mzXmlFile, MS2Fraction fraction) throws IOException
+    public static int loadScanCounts(FileLike mzXmlFile, MS2Fraction fraction) throws IOException
     {
         int scanCount = 0;
         if (NetworkDrive.exists(mzXmlFile))
@@ -543,43 +544,6 @@ public abstract class MS2Importer
         sql.append("            ms2.PeptidesData.Fraction = ?");
 
         _updateSeqIdEndOfLookupStringSql = sql.getSQL();
-    }
-
-    private static final String _updateSeqIdInexactMatchSql;
-
-    static
-    {
-        SQLFragment sql = new SQLFragment();
-
-        /*
-            UPDATE ms2.peptidesdata p SET SeqId = (
-            SELECT
-                CASE (SELECT count(*) FROM prot.fastasequences fs
-                        WHERE fs.FastaId = ? AND fs.LookupString LIKE CONCAT('%', Protein, '%'))
-                WHEN 1 THEN
-	                (SELECT SeqId FROM prot.fastasequences fs
-                        WHERE fs.FastaId = ? AND fs.LookupString LIKE CONCAT('%', Protein, '%'))
-	            ELSE
-		            NULL
-	            END
-           )
-           WHERE p.SeqId IS NULL AND FRACTION = ?
-         */
-
-        sql.append("UPDATE ").append(MS2Manager.getTableInfoPeptidesData());
-        sql.append(" SET SeqId = (");
-        sql.append("    SELECT " );
-        sql.append("        CASE (SELECT COUNT(*) FROM ").append(ProteinSchema.getTableInfoFastaSequences()).append(" fs ");
-        sql.append("                WHERE fs.FastaId = ? AND fs.LookupString LIKE ").append(MS2Manager.getSqlDialect().concatenate("'%'", "Protein", "'%'")).append(")");
-        sql.append("        WHEN 1 THEN " );
-        sql.append("            (SELECT SeqId FROM ").append(ProteinSchema.getTableInfoFastaSequences()).append(" fs ");
-        sql.append("                WHERE fs.FastaId = ? AND fs.LookupString LIKE ").append(MS2Manager.getSqlDialect().concatenate("'%'", "Protein", "'%'")).append(")");
-        sql.append("        ELSE  ");
-        sql.append("            NULL");
-        sql.append("        END)");
-        sql.append(" WHERE SeqId IS NULL AND Fraction = ?");
-
-        _updateSeqIdInexactMatchSql = sql.getSQL();
     }
 
     private static final SQLFragment _updateSequencePositionSql;

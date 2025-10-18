@@ -22,6 +22,7 @@ import org.labkey.api.pipeline.PipelineJobException;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -40,7 +41,7 @@ public enum QuantitationAlgorithm
     xpress
     {
         @Override
-        public String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<File, String> configFile)
+        public String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<FileLike, String> configFile)
         {
             return new String[] { "-X" + StringUtils.join(getCommonXpressQ3Params(params, pathMzXml).iterator(), ' ') };
         }
@@ -48,7 +49,7 @@ public enum QuantitationAlgorithm
     libra
     {
         @Override
-        public String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<File, String> configFile) throws PipelineJobException
+        public String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<FileLike, String> configFile) throws PipelineJobException
         {
             String normalizationChannelString = params.get(ParameterNames.LIBRA_NORMALIZATION_CHANNEL_PARAM);
             if (normalizationChannelString == null)
@@ -59,7 +60,7 @@ public enum QuantitationAlgorithm
         }
 
         @Override
-        protected Pair<File, String> getConfigFile(Map<String, String> params, PipeRoot root, WorkDirectory wd) throws PipelineJobException, IOException
+        protected Pair<FileLike, String> getConfigFile(Map<String, String> params, PipeRoot root, WorkDirectory wd) throws PipelineJobException, IOException
         {
             String libraConfigName = params.get(ParameterNames.LIBRA_CONFIG_NAME_PARAM);
             if (libraConfigName == null)
@@ -71,13 +72,13 @@ public enum QuantitationAlgorithm
                 throw new PipelineJobException("Libra configuration files containing a space are not supported");
             }
             LibraProtocolFactory factory = new LibraProtocolFactory();
-            Path result = factory.getProtocolFile(root, libraConfigName, false);
+            FileLike result = factory.getProtocolFile(root, libraConfigName, false);
             if (!NetworkDrive.exists(result))
             {
                 throw new PipelineJobException("Libra config file does not exist: " + result);
             }
-            wd.inputFile(result.toFile(), true);
-            return new Pair<>(result.toFile(), TPPTask.LIBRA_CONFIG_INPUT_ROLE);
+            wd.inputFile(result, true);
+            return new Pair<>(result, TPPTask.LIBRA_CONFIG_INPUT_ROLE);
     }};
 
     protected List<String> getCommonXpressQ3Params(Map<String, String> params, String pathMzXml)
@@ -154,10 +155,10 @@ public enum QuantitationAlgorithm
 
     /** @return Libra config file, in its original location, or null if we're not using Libra */
     protected @Nullable
-    Pair<File, String> getConfigFile(Map<String, String> params, PipeRoot root, WorkDirectory wd) throws PipelineJobException, IOException
+    Pair<FileLike, String> getConfigFile(Map<String, String> params, PipeRoot root, WorkDirectory wd) throws PipelineJobException, IOException
     {
         return null;
     }
 
-    public abstract String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<File, String> configFile) throws PipelineJobException, FileNotFoundException;
+    public abstract String[] getCommand(Map<String, String> params, String pathMzXml, TPPTask.Factory factory, Pair<FileLike, String> configFile) throws PipelineJobException, FileNotFoundException;
 }

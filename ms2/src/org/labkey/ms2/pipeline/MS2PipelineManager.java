@@ -21,12 +21,12 @@ import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.cmd.ConvertTaskId;
 import org.labkey.api.security.User;
-import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.Path;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
-import org.labkey.ms2.pipeline.tandem.XTandemSearchTask;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.*;
 import java.net.URI;
@@ -62,7 +62,7 @@ public class MS2PipelineManager
         @Override
         public boolean accept(File file)
         {
-            if (MascotSearchTask.isNativeOutputFile(file))
+            if (MascotSearchTask.isNativeOutputFile(FileSystemLike.wrapFile(file)))
                 return true;
 
             if (TPPTask.isPepXMLFile(file))
@@ -77,15 +77,6 @@ public class MS2PipelineManager
         }
     }
 
-    public static class XtanXmlFileFilter extends PipelineProvider.FileEntryFilter
-    {
-        @Override
-        public boolean accept(File file)
-        {
-            return XTandemSearchTask.getNativeFileType(FileType.gzSupportLevel.SUPPORT_GZ).isType(file);
-        }
-    }
-
     public static PipelineProvider.FileEntryFilter getUploadFilter()
     {
         return new UploadFileFilter();
@@ -93,7 +84,7 @@ public class MS2PipelineManager
 
     public static PipelineProvider.FileEntryFilter getAnalyzeFilter()
     {
-        TaskFactory factory = PipelineJobService.get().getTaskFactory(MZXML_CONVERTER_TASK_ID);
+        TaskFactory<?> factory = PipelineJobService.get().getTaskFactory(MZXML_CONVERTER_TASK_ID);
         if (factory != null)
             return new PipelineProvider.FileTypesEntryFilter(factory.getInputTypes());
 
@@ -107,56 +98,6 @@ public class MS2PipelineManager
             };
     }
 
-    public static List<String> getSequenceDirList(File dir, String path)
-    {
-        File[] dbFiles = dir.listFiles(new SequenceDbFileFilter());
-
-        if (dbFiles == null)
-            return null;
-
-        ArrayList<String> dirList = new ArrayList<>();
-
-        for (File dbFile : dbFiles)
-        {
-            if (dbFile.isDirectory())
-                dirList.add(path + dbFile.getName() + "/");
-            else
-                dirList.add(dbFile.getName());
-        }
-
-        return dirList;
-    }
-
-    public static List<String> addSequenceDbPaths(File dir, String path, List<String> m)
-    {
-        File[] dbFiles = dir.listFiles(new SequenceDbFileFilter());
-
-        if (dbFiles == null)
-            return null;
-        ArrayList<File> listSubdirs = new ArrayList<>();
-        int fileCount  = 0;
-        for (File dbFile : dbFiles)
-        {
-            if (dbFile.isDirectory())
-            {
-                listSubdirs.add(dbFile);
-                m.add(path + dbFile.getName() + "/");
-            }
-            else
-            {
-              fileCount++;
-            }
-        }
-        if(fileCount == 0)
-        {
-            m.remove(path);
-        }
-        for (File subdir : listSubdirs)
-        {
-             addSequenceDbPaths(subdir, path + subdir.getName() + "/", m);
-        }
-        return m;
-    }
 
     public static File getSequenceDBFile(File fileRoot, String name)
     {
@@ -219,14 +160,14 @@ public class MS2PipelineManager
         return root.resolvePath(DEFAULT_FASTA_DIR);
     }
 
-    public static File getLocalMascotFile(String sequenceRoot, String db, String release)
+    public static File getLocalMascotFile(File sequenceRoot, String db, String release)
     {
-        return new File(sequenceRoot+File.separator+"mascot"+File.separator+db, release);
+        return FileUtil.appendPath(sequenceRoot, Path.parse("mascot/" + db + "/" + release));
     }
 
-    public static File getLocalMascotFileHash(String sequenceRoot, String db, String release)
+    public static File getLocalMascotFileHash(File sequenceRoot, String db, String release)
     {
-        return new File(sequenceRoot+File.separator+"mascot"+File.separator+db, release+".hash");
+        return FileUtil.appendPath(sequenceRoot, Path.parse("mascot/" + db + "/" + release+".hash"));
     }
 
     public static boolean exists(File file, Set<File> knownFiles, Set<File> checkedDirectories)

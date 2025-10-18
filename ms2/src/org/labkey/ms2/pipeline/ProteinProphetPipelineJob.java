@@ -25,10 +25,10 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.*;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.XarContext;
+import org.labkey.vfs.FileLike;
 
 import javax.xml.stream.XMLStreamException;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -39,20 +39,20 @@ import java.sql.SQLException;
  */
 public class ProteinProphetPipelineJob extends PipelineJob
 {
-    private final File _file;
+    private final FileLike _file;
 
     @JsonCreator
-    protected ProteinProphetPipelineJob(@JsonProperty("_file") File file)
+    protected ProteinProphetPipelineJob(@JsonProperty("_file") FileLike file)
     {
         _file = file;
     }
 
-    public ProteinProphetPipelineJob(ViewBackgroundInfo info, File file, PipeRoot root)
+    public ProteinProphetPipelineJob(ViewBackgroundInfo info, FileLike file, PipeRoot root)
     {
         super(ProteinProphetPipelineProvider.NAME, info, root);
         _file = file;
 
-        setLogFile(new File(_file.getParentFile(), _file.getName() + ".log"));
+        setLogFile(_file.getParent().resolveChild(_file.getName() + ".log").toNioPathForWrite());
     }
 
     @Override

@@ -216,7 +216,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
                 // Invoke makedb
                 List<String> args = new ArrayList<>();
-                File makeDBExecutable = new File(_factory.getSequestInstallDir(), "makedb");
+                File makeDBExecutable = FileUtil.appendName(_factory.getSequestInstallDirAsFile(), "makedb");
                 args.add(makeDBExecutable.getAbsolutePath());
                 args.add("-O" + indexFileBase);
                 args.add("-P" + fileWorkParams.getAbsolutePath());
@@ -295,7 +295,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
             // Perform Sequest search
             List<String> sequestArgs = new ArrayList<>();
-            File sequestExecutable = new File(_factory.getSequestInstallDir(), "sequest");
+            File sequestExecutable = FileUtil.appendName(_factory.getSequestInstallDirAsFile(), "sequest");
             sequestArgs.add(sequestExecutable.getAbsolutePath());
             sequestArgs.addAll(_factory.getSequestOptions());
             sequestArgs.add("-R" + dtaListFile.getAbsolutePath());
@@ -312,7 +312,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
                 // out2xml assumes that the mzXML file base name will match the DTA directory name, so rename the file
                 // temporarily
-                File guidMzXMLFile = new File(localMzXML.getParent(), AbstractMS2SearchProtocol.FT_MZXML.getDefaultName(dtaDirName));
+                File guidMzXMLFile = FileUtil.appendName(localMzXML.getParentFile(), AbstractMS2SearchProtocol.FT_MZXML.getDefaultName(dtaDirName));
                 if (useGUIDFilename)
                 {
                     localMzXML.renameTo(guidMzXMLFile);

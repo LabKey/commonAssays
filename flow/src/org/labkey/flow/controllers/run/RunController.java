@@ -604,13 +604,13 @@ public class RunController extends BaseFlowController
             return _success = true;
         }
 
-        private void writeManifest(String manifestJson, String dir) throws IOException
+        private void writeManifest(String manifestJson, File dir) throws IOException
         {
             if (manifestJson == null || manifestJson.isEmpty())
                 return;
 
 
-            File file = new File(dir,MANIFEST_FILENAME);
+            File file = FileUtil.appendName(dir, MANIFEST_FILENAME);
             FileOutputStream statisticsFile = new FileOutputStream(file);
 
             try (PrintWriter pw = PrintWriters.getPrintWriter(statisticsFile))
@@ -694,7 +694,7 @@ public class RunController extends BaseFlowController
                     ViewBackgroundInfo vbi = new ViewBackgroundInfo(getContainer(), getUser(), null);
 
                     ExportAnalysisManifest analysisManifest = buildExportAnalysisManifest(form, files);
-                    writeManifest(analysisManifest.toJSON(), vf.getLocation());
+                    writeManifest(analysisManifest.toJSON(), location);
 
                     PipelineJob job = new ExportToScriptJob(_guid, _exportToScriptPath, _exportToScriptCommandLine, _exportToScriptFormat, form.getLabel(), location, _exportToScriptTimeout, _exportToScriptDeleteOnComplete, vbi, root);
                     String jobGuid = null;

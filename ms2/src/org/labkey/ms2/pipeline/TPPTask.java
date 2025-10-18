@@ -38,6 +38,7 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.util.ProtXMLFileType;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -120,6 +121,11 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
     }
 
     public static boolean isPepXMLFile(File file)
+    {
+        return FT_PEP_XML.isType(file);
+    }
+
+    public static boolean isPepXMLFile(FileLike file)
     {
         return FT_PEP_XML.isType(file);
     }
@@ -288,7 +294,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
             QuantitationAlgorithm quantitationAlgorithm = getQuantitionAlgorithm(params);
             // Non-null if we're doing Libra quantitation
-            @Nullable Pair<File, String> quantConfigFile = quantitationAlgorithm == null ? null : quantitationAlgorithm.getConfigFile(params, getJob().getPipeRoot(), _wd);
+            @Nullable Pair<FileLike, String> quantConfigFile = quantitationAlgorithm == null ? null : quantitationAlgorithm.getConfigFile(params, getJob().getPipeRoot(), _wd);
 
             // First step takes all the pepXMLs as inputs and either runs PeptideProphet (non-join) or rolls them up (join)
             RecordedAction pepXMLAction = new RecordedAction(PEPTIDE_PROPHET_ACTION_NAME);
@@ -651,7 +657,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         return null;
     }
 
-    private String[] getQuantitationCmd(Map<String, String> params, String pathMzXml, Pair<File, String> configFile) throws FileNotFoundException, PipelineJobException
+    private String[] getQuantitationCmd(Map<String, String> params, String pathMzXml, Pair<FileLike, String> configFile) throws FileNotFoundException, PipelineJobException
     {
         QuantitationAlgorithm paramAlgorithm = getQuantitionAlgorithm(params);
         if (paramAlgorithm == null)

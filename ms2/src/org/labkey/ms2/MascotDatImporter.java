@@ -25,12 +25,13 @@ import org.labkey.api.security.User;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.reader.MS2Loader;
 import org.labkey.ms2.reader.MascotDatLoader;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -59,11 +60,11 @@ public class MascotDatImporter extends PeptideImporter
     public void importRun(MS2Progress progress) throws IOException, XMLStreamException
     {
 
-        File f = new File(_path + "/" + _fileName);
-        NetworkDrive.ensureDrive(f.getPath());
+        FileLike f = FileSystemLike.wrapFile(new File(_path)).resolveChild(_fileName);
+        NetworkDrive.ensureDrive(f);
          _fractionId = createFraction(_user, _container, _runId, _path, f);
         MS2Loader.PeptideFraction fraction = new MS2Loader.PeptideFraction();
-        fraction.setSpectrumPath(f.getPath());
+        fraction.setSpectrumPath(f.toNioPathForRead().toFile().getPath());
 
         try (MascotDatLoader loader = new MascotDatLoader(f, _log))
         {

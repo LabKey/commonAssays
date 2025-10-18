@@ -291,7 +291,7 @@ public class AnalysisScriptController extends BaseFlowController
         }
         else
         {
-            files.addAll(form.getValidatedFiles(getContainer()));
+            files.addAll(form.getValidatedFiles(getContainer()).stream().map(FileLike::toNioPathForRead).map(Path::toFile).toList());
         }
 
         Set<File> usedPaths = new HashSet<>();
@@ -390,7 +390,7 @@ public class AnalysisScriptController extends BaseFlowController
             if (form.isCurrent())
                 files = Collections.singletonList(pr.resolvePath(form.getPath()));
             else
-                files = form.getValidatedFiles(form.getContainer());
+                files = form.getValidatedFiles(form.getContainer()).stream().map(FileLike::toNioPathForRead).map(Path::toFile).toList();
 
             // validate target study
             Container targetStudy = getTargetStudy(form.getTargetStudy(), errors);

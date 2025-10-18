@@ -19,6 +19,7 @@ import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.api.util.FileUtil;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
@@ -57,7 +58,7 @@ public final class LuminexPositivityTest extends LuminexTest
     private Boolean _expectedNegativeControlValue = false;
     private Boolean _newNegativeControlValue = false;
     private static final String _negControlAnalyte = _analyteNames.get(1);
-    private static final File POSITIVITY_RTRANSFORM_SCRIPT_FILE =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/description_parsing_example.pl");
+    private static final File POSITIVITY_RTRANSFORM_SCRIPT_FILE = FileUtil.appendPath(TestFileUtils.getLabKeyRoot(), org.labkey.api.util.Path.parse("server/modules/commonAssays/luminex/resources/transformscripts/description_parsing_example.pl"));
     private static final String RUN_ID_BASE = "Positivity";
 
     @BeforeClass

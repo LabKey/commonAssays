@@ -18,11 +18,14 @@ package org.labkey.ms2.reader;
 
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.MS2Modification;
+import org.labkey.vfs.FileLike;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -35,19 +38,19 @@ public abstract class MS2Loader
 {
     protected Logger _log;
     protected long _fileLength;
-    protected File _file;
+    protected FileLike _file;
 
     protected static final int STREAM_BUFFER_SIZE = 128 * 1024;
 
-    protected void init(File f, Logger log) throws FileNotFoundException, XMLStreamException
+    protected void init(FileLike f, Logger log) throws XMLStreamException, IOException
     {
-        if (f.exists())
+        if (NetworkDrive.exists(f))
         {
             _file = f;
-            _fileLength = f.length();
+            _fileLength = f.getSize();
         }
         else
-            throw new FileNotFoundException(f.getAbsolutePath());
+            throw new FileNotFoundException(f.toString());
 
         _log = log;
     }

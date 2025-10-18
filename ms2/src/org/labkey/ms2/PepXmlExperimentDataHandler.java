@@ -133,7 +133,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
                 return;
             }
 
-            MS2Run run = MS2Manager.addRun(info, log, dataFile, restart, context);
+            MS2Run run = MS2Manager.addRun(info, log, dataFileLike, restart, context);
 
             if (run == null || run.statusId != MS2Importer.STATUS_SUCCESS)
             {

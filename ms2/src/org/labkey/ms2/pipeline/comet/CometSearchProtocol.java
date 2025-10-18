@@ -22,6 +22,7 @@ import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,8 +49,8 @@ public class CometSearchProtocol extends AbstractMS2SearchProtocol<CometPipeline
 
     @Override
     public CometPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                              PipeRoot root, List<Path> filesInput,
-                                              Path fileParameters, @Nullable Map<String, String> variableMap
+                                              PipeRoot root, List<FileLike> filesInput,
+                                              FileLike fileParameters, @Nullable Map<String, String> variableMap
     ) throws IOException
     {
         return new CometPipelineJob(this, info, root, getName(),

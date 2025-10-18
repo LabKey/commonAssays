@@ -22,6 +22,7 @@ import org.labkey.api.pipeline.TaskId;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,8 +55,8 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
                              ViewBackgroundInfo info,
                              PipeRoot root,
                              String name,
-                             List<Path> filesMzXML,
-                             Path fileInputXML) throws IOException
+                             List<FileLike> filesMzXML,
+                             FileLike fileInputXML) throws IOException
     {
         super(protocol, MascotCPipelineProvider.name, info, root, name, fileInputXML, filesMzXML);
 
@@ -69,7 +70,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
         writeInputFilesToLog();
     }
 
-    public MascotPipelineJob(MascotPipelineJob job, File fileFraction)
+    public MascotPipelineJob(MascotPipelineJob job, FileLike fileFraction)
     {
         super(job, fileFraction);
 
@@ -110,7 +111,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
     }
 
     @Override
-    public AbstractFileAnalysisJob createSingleFileJob(File file)
+    public AbstractFileAnalysisJob createSingleFileJob(FileLike file)
     {
         return new MascotPipelineJob(this, file);
     }

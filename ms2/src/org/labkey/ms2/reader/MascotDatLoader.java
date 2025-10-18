@@ -27,6 +27,7 @@ import org.labkey.ms2.MS2Modification;
 import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.SpectrumException;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
+import org.labkey.vfs.FileLike;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedReader;
@@ -204,10 +205,10 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
 
     private static final String _nonStandardAminoAcids = "BJOUXZ";
 
-    public MascotDatLoader(File f, Logger log) throws IOException, XMLStreamException
+    public MascotDatLoader(FileLike f, Logger log) throws IOException, XMLStreamException
     {
         init(f, log);
-        _reader = new BufferedReader(new InputStreamReader(new FileInputStream(f), StringUtilsLabKey.DEFAULT_CHARSET));
+        _reader = new BufferedReader(new InputStreamReader(f.openInputStream(), StringUtilsLabKey.DEFAULT_CHARSET));
         findBoundaryMarker();
     }
 

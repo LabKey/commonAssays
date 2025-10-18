@@ -36,6 +36,8 @@ import org.labkey.ms2.reader.PepXmlLoader.PepXmlPeptide;
 import org.labkey.ms2.reader.PepXmlLoader.PeptideIterator;
 import org.labkey.ms2.reader.PeptideProphetHandler;
 import org.labkey.ms2.reader.PeptideProphetSummary;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -63,8 +65,8 @@ public class PepXmlImporter extends PeptideImporter
         {
             boolean runUpdated = false;  // Set to true after we update the run information (after importing the first fraction)
 
-            File f = new File(_path + "/" + _fileName);
-            NetworkDrive.ensureDrive(f.getPath());
+            FileLike f = FileSystemLike.wrapFile(new File(_path)).resolveChild(_fileName);
+            NetworkDrive.ensureDrive(f);
             loader = new PepXmlLoader(f, _log);
 
             PeptideProphetSummary summary = loader.getPeptideProphetSummary();
@@ -186,7 +188,7 @@ public class PepXmlImporter extends PeptideImporter
                 mzXMLFile = FT_MZXML.getFile(pepXmlDir.getParentFile().getParentFile(), newFilename);
             }
 
-            if (mzXMLFile == null || !NetworkDrive.exists(mzXMLFile))
+            if (!NetworkDrive.exists(mzXMLFile))
             {
                 // If not there, look in the same directory as the MS2 results
                 mzXMLFile = FT_MZXML.getFile(pepXmlDir, newFilename);
@@ -206,7 +208,7 @@ public class PepXmlImporter extends PeptideImporter
         }
 
         File mzXMLFile = getMzXMLFile(fraction);
-        _fractionId = createFraction(_user, _container, _runId, _path, mzXMLFile);
+        _fractionId = createFraction(_user, _container, _runId, _path, FileSystemLike.wrapFile(mzXMLFile));
     }
 
 
@@ -256,9 +258,9 @@ public class PepXmlImporter extends PeptideImporter
             }
         }
 
-        SpectrumImporter sl = new SpectrumImporter(gzFileName, "", mzXmlFile, scans, progress, _fractionId, _log, shouldLoadSpectra, shouldLoadRetentionTimes);
+        SpectrumImporter sl = new SpectrumImporter(gzFileName, "", FileSystemLike.wrapFile(mzXmlFile), scans, progress, _fractionId, _log, shouldLoadSpectra, shouldLoadRetentionTimes);
         sl.upload();
-        updateFractionSpectrumFileName(sl.getFile());
+        updateFractionSpectrumFileName(sl.getFile() == null ? null : sl.getFile().toNioPathForRead().toFile());
     }
 
 

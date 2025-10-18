@@ -29,10 +29,10 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -82,10 +82,10 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                                         ViewBackgroundInfo info,
                                         PipeRoot root,
                                         String protocolName,
-                                        Path fileParameters,
-                                        List<Path> filesInput) throws IOException
+                                        FileLike fileParameters,
+                                        List<FileLike> filesInput) throws IOException
     {
-        super(protocol, providerName, info, root, protocolName, fileParameters, filesInput, true, false);
+        super(protocol, providerName, info, root, protocolName, fileParameters, filesInput, true);
 
         _dirSequenceRoot = MS2PipelineManager.getSequenceDatabaseRoot(info.getContainer(), false);
 
@@ -106,7 +106,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
         }
     }
 
-    public AbstractMS2SearchPipelineJob(AbstractMS2SearchPipelineJob job, File fileFraction)
+    public AbstractMS2SearchPipelineJob(AbstractMS2SearchPipelineJob job, FileLike fileFraction)
     {
         super(job, fileFraction);
 
