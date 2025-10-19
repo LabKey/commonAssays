@@ -60,7 +60,7 @@ public abstract class DefaultAnnotationLoader extends PipelineJob
         {
             throw new IOException("Could not create directory for log file: " + logDir);
         }
-        setLogFile(logDir.resolveChild(file.getName() + "." + DateUtil.formatDateTime(new Date(), FORMAT_STRING) + ".log").toNioPathForWrite());
+        setLogFile(logDir.resolveChild(file.getName() + "." + DateUtil.formatDateTime(new Date(), FORMAT_STRING) + ".log"));
     }
 
     @Override

@@ -52,7 +52,7 @@ public class ProteinProphetPipelineJob extends PipelineJob
         super(ProteinProphetPipelineProvider.NAME, info, root);
         _file = file;
 
-        setLogFile(_file.getParent().resolveChild(_file.getName() + ".log").toNioPathForWrite());
+        setLogFile(_file.getParent().resolveChild(_file.getName() + ".log"));
     }
 
     @Override
