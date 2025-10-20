@@ -57,6 +57,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
 
 /**
  * <code>PipelineController</code>
@@ -113,7 +114,7 @@ public class PipelineController extends SpringActionController
                 // to look like the normal generated name.
 
                 String protocolName;
-                File dirDataOriginal;
+                FileLike dirDataOriginal;
                 String description;
                 if (MascotSearchTask.isNativeOutputFile(file))
                 {
@@ -127,14 +128,14 @@ public class PipelineController extends SpringActionController
                     // If the data was created by our pipeline, try to get the name
                     // to look like the normal generated name.
                     protocolName = file.getParent().getName();
-                    dirDataOriginal = file.getParent().getParent().toNioPathForRead().toFile();
+                    dirDataOriginal = file.getParent().getParent();
                     if (dirDataOriginal != null &&
                             dirDataOriginal.getName().equals(XTandemSearchProtocolFactory.get().getName()))
                     {
-                        dirDataOriginal = dirDataOriginal.getParentFile();
+                        dirDataOriginal = dirDataOriginal.getParent();
                     }
                     description = AbstractFileAnalysisJob.
-                            getDataDescription(dirDataOriginal, baseName, AbstractFileAnalysisProtocol.LEGACY_JOINED_BASENAME, protocolName);
+                            getDataDescription(dirDataOriginal, baseName, AbstractFileAnalysisProtocol.LEGACY_JOINED_BASENAME, protocolName, Collections.emptyList());
                 }
 
                 ViewBackgroundInfo info = getViewBackgroundInfo();
