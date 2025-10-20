@@ -382,6 +382,10 @@ public class ProteinProphetImporter
                     }
                 }
             }
+            if (NetworkDrive.exists(pepXMLFile))
+            {
+                break;
+            }
         }
 
         log.info("Resolved referenced PepXML file to " + pepXMLFile.getPath());
