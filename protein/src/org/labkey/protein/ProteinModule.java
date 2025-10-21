@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DatabaseMigrationService;
-import org.labkey.api.data.DatabaseMigrationService.DefaultMigrationHandler;
+import org.labkey.api.data.DatabaseMigrationService.DefaultMigrationSchemaHandler;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
@@ -131,7 +131,7 @@ public class ProteinModule extends DefaultModule
         }
 
         ProteinService.get().registerProteinSearchView(new ProteinSearchViewProvider());
-        DatabaseMigrationService.get().registerHandler(new DefaultMigrationHandler(ProteinSchema.getSchema())
+        DatabaseMigrationService.get().registerSchemaHandler(new DefaultMigrationSchemaHandler(ProteinSchema.getSchema())
         {
             @Override
             public void beforeSchema()
