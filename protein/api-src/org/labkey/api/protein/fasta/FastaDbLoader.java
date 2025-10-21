@@ -115,7 +115,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
     {
         try
         {
-            setLogFile(getLogFile());
+            setLogFile(getLogFileLike());
             info("Starting annotation load for " + _file);
             setStatus("RUNNING");
             parseFile(getLogger());

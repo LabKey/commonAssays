@@ -51,7 +51,7 @@ public class XTandemToXMLTask extends AbstractMS2SearchTask<XTandemToXMLTask.Fac
         }
 
         @Override
-        public PipelineJob.Task createTask(PipelineJob job)
+        public XTandemToXMLTask createTask(PipelineJob job)
         {
             return new XTandemToXMLTask(this, job);
         }

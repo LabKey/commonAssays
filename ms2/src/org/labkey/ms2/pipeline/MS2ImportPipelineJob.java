@@ -72,8 +72,8 @@ public class MS2ImportPipelineJob extends PipelineJob
         // not be in the same directory as the imported file if there is a supplemental pipeline
         // directory configured. See issue 27440.
         String relativePath = getPipeRoot().relativePath(_file.getParent());
-        relativePath += File.separator + FT_LOG.getName(_file.getParent(), basename);
-        File logFile = getPipeRoot().resolvePath(relativePath);
+        relativePath += "/" + FT_LOG.getName(_file.getParent(), basename);
+        FileLike logFile = getPipeRoot().resolvePathToFileLike(relativePath);
         setLogFile(logFile);
 
         // If there is an existing status file, make sure this job does not

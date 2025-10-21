@@ -544,7 +544,7 @@ public class AnalysisScriptController extends BaseFlowController
         @Override
         public ModelAndView getView(PipelinePathForm form, BindException errors)
         {
-            Path f = form.getValidatedSinglePath(getContainer());
+            FileLike f = form.getValidatedSingleFile(getContainer());
             PipeRoot root = Objects.requireNonNull(PipelineService.get().findPipelineRoot(getContainer()));
             String workspacePath = "/" + root.relativePath(f).replace('\\', '/');
 

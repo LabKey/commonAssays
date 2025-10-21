@@ -202,7 +202,7 @@ public abstract class FlowJob extends PipelineJob
             info("Running post-analysis jobs...");
         for (FlowReportJob job : jobs)
         {
-            job.setLogFile(getLogFile());
+            job.setLogFile(getLogFileLike());
             job.setLogLevel(getLogLevel());
             job.setSubmitted();
             job.run();

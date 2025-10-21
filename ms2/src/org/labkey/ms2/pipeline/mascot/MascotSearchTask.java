@@ -118,7 +118,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
         }
 
         @Override
-        public PipelineJob.Task createTask(PipelineJob job)
+        public MascotSearchTask createTask(PipelineJob job)
         {
             return new MascotSearchTask(this, job);
         }
@@ -247,7 +247,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             getJob().info("Retrieving database information ("+sequenceRelease+")...");
             Map<String,String> returns = mascotClient.getDBInfo(sequenceDB, sequenceRelease);
             String status = returns.get("STATUS");
-            if (null == status || !"OK".equals(status))
+            if (!"OK".equals(status))
             {
                 getJob().error("Failed to get database from Mascot server.");
                 String exceptionMessage=returns.get("exceptionmessage");

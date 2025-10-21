@@ -86,6 +86,7 @@ import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.view.ExportAnalysisForm;
 import org.labkey.flow.view.ExportAnalysisManifest;
+import org.labkey.vfs.FileLike;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -780,7 +781,7 @@ public class RunController extends BaseFlowController
             _deleteOnComplete = deleteOnComplete;
 
             // setup the log file
-            File logFile = FileUtil.appendName(root.getLogDirectory(), FileUtil.makeFileNameWithTimestamp("export-to-script", "log"));
+            FileLike logFile = root.getLogDirectoryFileLike(true).resolveChild(FileUtil.makeFileNameWithTimestamp("export-to-script", "log"));
             setLogFile(logFile);
         }
 
