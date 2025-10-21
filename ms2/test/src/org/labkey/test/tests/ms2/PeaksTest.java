@@ -84,7 +84,7 @@ public class PeaksTest extends AbstractMS2SearchEngineTest
         clickButton("Process and Import Data");
         _fileBrowserHelper.importFile("peaks/peaks.pep.xml", "Import Search Results");
 
-        String runLabel =  "ms2pipe/peaks (peaks)";
+        String runLabel = "peaks (peaks)";
         waitForRunningPipelineJobs(MAX_WAIT_SECONDS * 1000);
         waitForElement(Locator.linkWithText(runLabel));
 

@@ -1158,7 +1158,7 @@ public class MS2Test extends AbstractMS2ImportTest
     {
         clickButton("Process and Import Data");
         _fileBrowserHelper.importFile("pepXML/truncated.pep.xml", "Import Search Results");
-        String ms2Run = "ms2pipe/truncated (pepXML)";
+        String ms2Run = "truncated (pepXML)";
         waitForRunningPipelineJobs(defaultWaitForPage);
         clickAndWait(Locator.linkWithText(ms2Run));
 
