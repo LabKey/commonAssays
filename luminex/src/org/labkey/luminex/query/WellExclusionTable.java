@@ -333,7 +333,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                     {
                         AssayProvider provider = AssayService.get().getProvider(run);
                         AssayRunDatabaseContext context = provider.createRunDatabaseContext(run, _userSchema.getUser(), null);
-                        provider.getRunCreator().saveExperimentRun(context, AssayService.get().findBatch(run), run, false);
+                        provider.getRunCreator().saveExperimentRun(context, AssayService.get().findBatch(run), run, false, null);
                     }
                 }
                 catch (ExperimentException e)
