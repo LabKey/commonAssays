@@ -26,7 +26,6 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.assay.actions.AssayRunUploadForm;
 import org.labkey.api.assay.AssayDataType;
-import org.labkey.api.assay.AssayRunCreator;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.User;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
@@ -107,7 +106,7 @@ public abstract class HighThroughputNabAssayProvider extends NabAssayProvider
     }
 
     @Override
-    public AssayRunCreator<?> getRunCreator()
+    public PlateBasedRunCreator getRunCreator()
     {
         return new PlateBasedRunCreator<>(this);
     }

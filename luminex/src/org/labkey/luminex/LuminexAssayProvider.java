@@ -51,7 +51,6 @@ import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.AssayPipelineProvider;
 import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssayRunCreator;
 import org.labkey.api.assay.AssayRunDatabaseContext;
 import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.assay.AssayTableMetadata;
@@ -113,7 +112,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     public void registerLsidHandler()
     {
         super.registerLsidHandler();
-        LsidManager.get().registerHandler(LUMINEX_DATA_ROW_LSID_PREFIX, new LsidManager.ExpObjectLsidHandler()
+        LsidManager.get().registerHandler(LUMINEX_DATA_ROW_LSID_PREFIX, new LsidManager.ExpObjectLsidHandler<>()
         {
             @Override
             public ExpData getObject(Lsid lsid)
@@ -454,7 +453,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public AssayRunDatabaseContext createRunDatabaseContext(ExpRun run, User user, HttpServletRequest request)
+    public AssayRunDatabaseContext<?> createRunDatabaseContext(ExpRun run, User user, HttpServletRequest request)
     {
         return new LuminexRunDatabaseContext(run, user, request);
     }
@@ -466,7 +465,7 @@ public class LuminexAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public AssayRunCreator getRunCreator()
+    public LuminexRunCreator getRunCreator()
     {
         return new LuminexRunCreator(this);
     }

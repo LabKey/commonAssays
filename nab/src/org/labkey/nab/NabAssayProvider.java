@@ -23,7 +23,6 @@ import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.AssayPipelineProvider;
 import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayProviderSchema;
-import org.labkey.api.assay.AssayRunCreator;
 import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.assay.actions.AssayRunUploadForm;
@@ -32,6 +31,7 @@ import org.labkey.api.assay.dilution.AbstractDilutionAssayProvider;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.nab.NabSpecimen;
 import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.PlateBasedRunCreator;
 import org.labkey.api.assay.plate.PlateSamplePropertyHelper;
 import org.labkey.api.assay.plate.WellGroup;
 import org.labkey.api.data.Container;
@@ -55,6 +55,7 @@ import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.PipelineProvider;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.query.SchemaKey;
 import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.study.assay.ParticipantVisitResolverType;
@@ -201,7 +202,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
         addProperty(sampleWellGroupDomain, SAMPLE_DILUTION_FACTOR_PROPERTY_NAME, SAMPLE_DILUTION_FACTOR_PROPERTY_CAPTION, PropertyType.DOUBLE).setRequired(true);
         DomainProperty method = addProperty(sampleWellGroupDomain, SAMPLE_METHOD_PROPERTY_NAME, SAMPLE_METHOD_PROPERTY_CAPTION, PropertyType.STRING);
         method.setImportAliasSet(new HashSet<>(Collections.singletonList("Well Method")));
-        method.setLookup(new Lookup(lookupContainer, AssaySchema.NAME + "." + getResourceName(), NabProviderSchema.SAMPLE_PREPARATION_METHOD_TABLE_NAME));
+        method.setLookup(new Lookup(lookupContainer, SchemaKey.fromParts(AssaySchema.NAME, getResourceName()), NabProviderSchema.SAMPLE_PREPARATION_METHOD_TABLE_NAME));
         method.setRequired(true);
     }
 
@@ -374,7 +375,7 @@ public class NabAssayProvider extends AbstractDilutionAssayProvider<NabRunUpload
     }
 
     @Override
-    public AssayRunCreator getRunCreator()
+    public PlateBasedRunCreator<?> getRunCreator()
     {
         return new NabRunCreator(this);
     }

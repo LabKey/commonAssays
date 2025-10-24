@@ -73,10 +73,10 @@ public class WellExclusionTable extends AbstractExclusionTable
     {
         super(LuminexProtocolSchema.getTableInfoWellExclusion(), schema, cf, filter);
 
-        getMutableColumn("DataId").setLabel("Data File");
-        getMutableColumn("DataId").setFk(new ExpSchema(schema.getUser(), schema.getContainer()).getDataIdForeignKey(cf));
+        getMutableColumnOrThrow("DataId").setLabel("Data File");
+        getMutableColumnOrThrow("DataId").setFk(new ExpSchema(schema.getUser(), schema.getContainer()).getDataIdForeignKey(cf));
 
-        getMutableColumn("Analytes").setFk(new MultiValuedForeignKey(new LookupForeignKey(cf, "WellExclusionId", null)
+        getMutableColumnOrThrow("Analytes").setFk(new MultiValuedForeignKey(new LookupForeignKey(cf, "WellExclusionId", null)
         {
             @Override
             public TableInfo getLookupTableInfo()
@@ -84,7 +84,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                 return _userSchema.createWellExclusionAnalyteTable(getLookupContainerFilter());
             }
         }, "AnalyteId"));
-        getMutableColumn("Analytes").setUserEditable(false);
+        getMutableColumnOrThrow("Analytes").setUserEditable(false);
 
         SQLFragment joinSQL = new SQLFragment(" FROM ");
         joinSQL.append(LuminexProtocolSchema.getTableInfoDataRow(), "dr");
@@ -123,8 +123,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                 if (null != result)
                 {
                     // get the list of unique wells (by splitting the concatenated string)
-                    TreeSet<String> uniqueWells = new TreeSet<>();
-                    uniqueWells.addAll(Arrays.asList(result.toString().split(MultiValuedRenderContext.VALUE_DELIMITER_REGEX)));
+                    TreeSet<String> uniqueWells = new TreeSet<>(Arrays.asList(result.toString().split(MultiValuedRenderContext.VALUE_DELIMITER_REGEX)));
 
                     // put the unique wells back into a comma separated string
                     StringBuilder sb = new StringBuilder();
@@ -332,7 +331,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                     for (ExpRun run : _runsToRefresh)
                     {
                         AssayProvider provider = AssayService.get().getProvider(run);
-                        AssayRunDatabaseContext context = provider.createRunDatabaseContext(run, _userSchema.getUser(), null);
+                        AssayRunDatabaseContext<?> context = provider.createRunDatabaseContext(run, _userSchema.getUser(), null);
                         provider.getRunCreator().saveExperimentRun(context, AssayService.get().findBatch(run), run, false);
                     }
                 }
