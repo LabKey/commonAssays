@@ -16,16 +16,12 @@
 
 package org.labkey.flow.persist;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.security.User;
 
-public class FlowContainerListener extends ContainerManager.AbstractContainerListener
+public class FlowContainerListener implements ContainerManager.ContainerListener
 {
-    static final private Logger _log = LogManager.getLogger(FlowContainerListener.class);
-
     /**
      * Delete all Flow data from the container.
      * This code should not really be necessary since all flow data should get deleted when the associated Experiment Data object is deleted.
