@@ -124,7 +124,6 @@ import org.labkey.flow.reports.FlowReportManager;
 import org.labkey.flow.view.FlowQueryView;
 import org.springframework.validation.BindException;
 
-import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1974,11 +1973,6 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         {
             fastflowCache.removeUsingFilter(new Cache.StringPrefixFilter(c.getId() + "/"));
         }
-
-        @Override public void containerCreated(Container c, User user) { }
-        @Override public void containerMoved(Container c, Container oldParent, User user) { }
-        @NotNull @Override public Collection<String> canMove(Container c, Container newParent, User user) { return Collections.emptyList(); }
-        @Override public void propertyChange(PropertyChangeEvent evt) { }
     };
 
     public static void registerContainerListener()
