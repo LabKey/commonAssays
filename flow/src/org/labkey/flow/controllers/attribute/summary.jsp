@@ -44,8 +44,8 @@
             FlowEntry primary = entry.getKey();
             Collection<FlowEntry> aliases = entry.getValue();
 
-            Map<Integer, Number> counts = FlowManager.get().getUsageCount(primary._type, primary._rowId);
-            Number primaryUsages = counts.get(primary._rowId);
+            Map<Long, Number> counts = FlowManager.get().getUsageCount(primary._type, primary._rowId);
+            Number primaryUsages = counts.get((long)primary._rowId);
     %>
     <tr>
         <td>

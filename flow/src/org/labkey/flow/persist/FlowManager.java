@@ -287,12 +287,12 @@ public class FlowManager
     public static class FlowEntry implements Comparable<FlowEntry>
     {
         public final AttributeType _type;
-        public final Integer _rowId;
+        public final int _rowId;
         public final String _containerId;
         public final String _name;
-        public final Integer _aliasId;
+        public final int _aliasId;
 
-        public FlowEntry(@NotNull AttributeType type, @NotNull Integer rowId, @NotNull String containerId, @NotNull String name, @NotNull Integer aliasId)
+        public FlowEntry(@NotNull AttributeType type, @NotNull int rowId, @NotNull String containerId, @NotNull String name, @NotNull Integer aliasId)
         {
             _type = type;
             _rowId = rowId;
@@ -303,7 +303,7 @@ public class FlowManager
 
         public boolean isAlias()
         {
-            return !_rowId.equals(_aliasId);
+            return _rowId != _aliasId;
         }
 
         @Override
@@ -314,7 +314,7 @@ public class FlowManager
 
             FlowEntry flowEntry = (FlowEntry) o;
 
-            if (!_rowId.equals(flowEntry._rowId)) return false;
+            if (_rowId != flowEntry._rowId) return false;
             if (_type != flowEntry._type) return false;
 
             return true;
@@ -324,7 +324,7 @@ public class FlowManager
         public int hashCode()
         {
             int result = _type.hashCode();
-            result = 31 * result + _rowId.hashCode();
+            result = 31 * result + Integer.hashCode(_rowId);
             return result;
         }
 
@@ -547,7 +547,7 @@ public class FlowManager
                     return;
 
                 // If this existing entry is already an alias of entry, do nothing
-                if (existing._aliasId.equals(entry._rowId))
+                if (existing._aliasId == entry._rowId)
                     return;
 
                 // If this existing entry doesn't have any aliases, we can make this existing entry an alias of the entry.
@@ -857,7 +857,7 @@ public class FlowManager
     /**
      * Get a usage count for an attribute and its aliases.
      */
-    public Map<Integer, Number> getUsageCount(AttributeType type, int rowId)
+    public Map<Long, Number> getUsageCount(AttributeType type, int rowId)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
         if (entry == null)
@@ -877,7 +877,7 @@ public class FlowManager
                 .append("GROUP BY val.").append(valueTableOriginalAttrIdColumn).append("\n");
 
         SqlSelector selector = new SqlSelector(getSchema(), sql);
-        return selector.getValueMap(Integer.class);
+        return selector.getValueMap(Long.class);
     }
 
     /**
