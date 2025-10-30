@@ -48,7 +48,6 @@ import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpSampleType;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.SamplesSchema;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.query.BatchValidationException;
@@ -628,7 +627,6 @@ public class FlowManager
     // Update any attribute usages of the current rowId to the new rowId, keeping the original id the same
     private int updateAttributeValuesPreferredId(@NotNull String containerId, @NotNull AttributeType type, int currentRowId, int newRowId)
     {
-        TableInfo attrTable = attributeTable(type);
         TableInfo valueTable = valueTable(type);
         String valueTableAttrIdColumn = valueTableAttrIdColumn(type);
 
@@ -739,20 +737,6 @@ public class FlowManager
         });
 
         return aliases;
-    }
-
-    public Collection<Integer> getAliasIds(final FlowEntry entry)
-    {
-        //_log.info("getAliasIds");
-        // Get the attributes that have an id equal to the entry and exclude the entry itself.
-        TableInfo table = attributeTable(entry._type);
-        SimpleFilter filter = new SimpleFilter();
-        filter.addCondition(table.getColumn("Container"), entry._containerId);
-        filter.addCondition(table.getColumn("Id"), entry._rowId);
-        filter.addCondition(table.getColumn("RowId"), entry._rowId, CompareType.NEQ);
-        TableSelector selector = new TableSelector(table, Collections.singleton("RowId"), filter, null);
-
-        return selector.getArrayList(Integer.class);
     }
 
     public Map<FlowEntry, Collection<FlowEntry>> getAliases(Container c, final AttributeType type)
@@ -873,13 +857,12 @@ public class FlowManager
     /**
      * Get a usage count for an attribute and its aliases.
      */
-    public Map<Long, Number> getUsageCount(AttributeType type, int rowId)
+    public Map<Integer, Number> getUsageCount(AttributeType type, int rowId)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
         if (entry == null)
             return Collections.emptyMap();
 
-        TableInfo attrTable = attributeTable(type);
         TableInfo valueTable = valueTable(type);
         String valueTableAttrIdColumn = valueTableAttrIdColumn(type);
         String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(type);
@@ -894,7 +877,7 @@ public class FlowManager
                 .append("GROUP BY val.").append(valueTableOriginalAttrIdColumn).append("\n");
 
         SqlSelector selector = new SqlSelector(getSchema(), sql);
-        return selector.getValueMap(Long.class);
+        return selector.getValueMap(Integer.class);
     }
 
     /**
@@ -913,7 +896,6 @@ public class FlowManager
         if (entry == null)
             return Collections.emptyList();
 
-        TableInfo attrTable = attributeTable(entry._type);
         TableInfo valueTable = valueTable(entry._type);
         String valueTableAttrIdColumn = valueTableAttrIdColumn(entry._type);
         String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(entry._type);
@@ -949,7 +931,6 @@ public class FlowManager
         if (entry == null)
             return Collections.emptyMap();
 
-        TableInfo attrTable = attributeTable(type);
         TableInfo valueTable = valueTable(type);
         String valueTableAttrIdColumn = valueTableAttrIdColumn(type);
         String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(type);
@@ -1094,15 +1075,6 @@ public class FlowManager
         }
     }
 
-    public void deleteAttributes(ExpData data)
-    {
-        AttrObject obj = getAttrObject(data);
-        if (obj == null)
-            return;
-        deleteAttributes(new Integer[] {obj.getRowId()});
-    }
-
-
     private void deleteObjectIds(Integer[] oids, Set<Container> containers)
     {
         DbScope scope = getSchema().getScope();
@@ -1212,7 +1184,7 @@ public class FlowManager
         String sampleLabel = data.getName();
         ensureKeywordName(c, sampleLabel, keyword, true);
 
-        AttributeCache.Entry a = AttributeCache.KEYWORDS.byAttribute(c, keyword);
+        AttributeCache.Entry<?, ?> a = AttributeCache.KEYWORDS.byAttribute(c, keyword);
         assert a != null : "Expected to find keyword entry for '" + keyword + "'";
         int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
         int originalId = a.getRowId();
@@ -1478,7 +1450,7 @@ public class FlowManager
 
         // count(fcsfile)
         TableInfo table = schema.getTable(FlowTableType.FCSFiles, null);
-        List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.BaseType.COUNT));
+        List<Aggregate> aggregates = Collections.singletonList(new Aggregate(FieldKey.fromParts("RowId"), Aggregate.BaseType.COUNT));
         List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
 
         // filter to those wells that were imported from a Keywords run
@@ -1489,8 +1461,8 @@ public class FlowManager
         Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
         //TODO: multiple aggregates
         Aggregate.Result result = agg.get(aggregates.get(0).getColumnName()).get(0);
-        if (result != null && result.getValue() instanceof Number)
-            return ((Number)result.getValue()).intValue();
+        if (result != null && result.getValue() instanceof Number n)
+            return n.intValue();
 
         return 0;
     }
@@ -1503,7 +1475,7 @@ public class FlowManager
         filter.addCondition(FieldKey.fromParts("FCSFileCount"), 0, CompareType.NEQ);
         filter.addCondition(FieldKey.fromParts("ProtocolStep"), "Keywords", CompareType.EQUAL);
         TableInfo table = schema.getTable(FlowTableType.Runs, null);
-        List<Aggregate> aggregates = Collections.singletonList(new Aggregate("RowId", Aggregate.BaseType.COUNT));
+        List<Aggregate> aggregates = Collections.singletonList(new Aggregate(FieldKey.fromParts("RowId"), Aggregate.BaseType.COUNT));
         List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
         Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
         Aggregate.Result result = agg.get("RowId").get(0);
@@ -1629,7 +1601,7 @@ public class FlowManager
         final OntologyManager.ImportHelper helper = new OntologyManager.ImportHelper()
         {
             @Override
-            public String beforeImportObject(Map<String, Object> map) throws SQLException
+            public String beforeImportObject(Map<String, Object> map)
             {
                 String lsid = (String)map.get("lsid");
                 assert lsid != null;
