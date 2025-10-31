@@ -19,12 +19,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.security.User;
 
-/**
- * User: bbimber
- * Date: 2/23/12
- * Time: 4:42 PM
- */
-public class MicroarrayContainerListener extends ContainerManager.AbstractContainerListener
+public class MicroarrayContainerListener implements ContainerManager.ContainerListener
 {
     @Override
     public void containerDeleted(Container c, User user)
