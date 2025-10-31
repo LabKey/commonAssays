@@ -45,11 +45,7 @@
             Collection<FlowEntry> aliases = entry.getValue();
 
             Map<Long, Number> counts = FlowManager.get().getUsageCount(primary._type, primary._rowId);
-            long totalCount = 0;
-            for (Number count : counts.values())
-                totalCount += count.longValue();
-
-            Number primaryUsages = counts.get(primary._rowId);
+            Number primaryUsages = counts.get((long)primary._rowId);
     %>
     <tr>
         <td>
