@@ -140,7 +140,7 @@ public class PersistTests
             AttributeCache.KeywordEntry cacheEntry = AttributeCache.KEYWORDS.byName(c, "keyword1");
             assertEquals("keyword1", cacheEntry.getAttribute());
             assertEquals(c, cacheEntry.getContainer());
-            assertEquals(entry._rowId.intValue(), cacheEntry.getRowId());
+            assertEquals(entry._rowId, cacheEntry.getRowId());
 
             // verify cached keyword alias
             Collection<AttributeCache.KeywordEntry> cacheAliases = cacheEntry.getAliases();
