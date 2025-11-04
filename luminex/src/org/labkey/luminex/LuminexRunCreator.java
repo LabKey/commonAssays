@@ -17,6 +17,7 @@ package org.labkey.luminex;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.audit.TransactionAuditProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.ObjectProperty;
@@ -53,14 +54,14 @@ public class LuminexRunCreator extends DefaultAssayRunCreator<LuminexAssayProvid
     }
 
     @Override
-    public ExpExperiment saveExperimentRun(AssayRunUploadContext<LuminexAssayProvider> uploadContext, @Nullable ExpExperiment batch, @NotNull ExpRun run, boolean forceSaveBatchProps) throws ExperimentException, ValidationException
+    public ExpExperiment saveExperimentRun(AssayRunUploadContext<LuminexAssayProvider> uploadContext, @Nullable ExpExperiment batch, @NotNull ExpRun run, boolean forceSaveBatchProps, @Nullable Map<TransactionAuditProvider.TransactionDetail, Object> transactionDetails) throws ExperimentException, ValidationException
     {
         // Only allow one thread to be running a Luminex transform script and importing its results at a time
         // See issue 17424
         synchronized (LOCK_OBJECT)
         {
             LuminexRunContext context = (LuminexRunContext)uploadContext;
-            batch = super.saveExperimentRun(context, batch, run, forceSaveBatchProps);
+            batch = super.saveExperimentRun(context, batch, run, forceSaveBatchProps, transactionDetails);
             Container container = context.getContainer();
 
             // Save the analyte properties
