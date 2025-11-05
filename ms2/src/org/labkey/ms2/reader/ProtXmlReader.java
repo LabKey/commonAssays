@@ -21,25 +21,24 @@ import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
 import org.labkey.ms2.IcatProteinQuantitation;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.pipeline.sequest.SequestRun;
+import org.labkey.vfs.FileLike;
 
 import javax.xml.stream.XMLStreamException;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
 public class ProtXmlReader
 {
-    private final File _file;
+    private final FileLike _file;
     private final MS2Run _run;
 
-    public ProtXmlReader(File file, MS2Run run)
+    public ProtXmlReader(FileLike file, MS2Run run)
     {
         _file = file;
         _run = run;
     }
 
-    public ProteinGroupIterator iterator() throws FileNotFoundException, XMLStreamException
+    public ProteinGroupIterator iterator() throws IOException, XMLStreamException
     {
         return new ProteinGroupIterator();
     }
@@ -50,7 +49,7 @@ public class ProtXmlReader
         private ProteinGroup _nextProteinGroup = null;
         private final java.io.InputStream _fIn;
 
-        public ProteinGroupIterator() throws FileNotFoundException, XMLStreamException
+        public ProteinGroupIterator() throws IOException, XMLStreamException
         {
             // TPP treats .xml.gz as a native format
             _fIn = PossiblyGZIPpedFileInputStreamFactory.getStream(_file);
@@ -145,15 +144,6 @@ public class ProtXmlReader
             return 0;
         }
         return Integer.parseInt(s);
-    }
-
-    private static float parseFloatAllowingNulls(String s)
-    {
-        if (s == null)
-        {
-            return 0;
-        }
-        return Float.parseFloat(s);
     }
 
     public static class Protein implements Cloneable

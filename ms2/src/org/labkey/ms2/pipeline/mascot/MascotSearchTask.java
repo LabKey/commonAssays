@@ -34,6 +34,7 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchTaskFactory;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.MS2SearchJobSupport;
 import org.labkey.ms2.pipeline.TPPTask;
+import org.labkey.vfs.FileLike;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -77,7 +78,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
         return FT_MASCOT_DAT.newFile(dirAnalysis, baseName);
     }
 
-    public static boolean isNativeOutputFile(File file)
+    public static boolean isNativeOutputFile(FileLike file)
     {
         return FT_MASCOT_DAT.isType(file);
     }
@@ -117,7 +118,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
         }
 
         @Override
-        public PipelineJob.Task createTask(PipelineJob job)
+        public MascotSearchTask createTask(PipelineJob job)
         {
             return new MascotSearchTask(this, job);
         }
@@ -246,7 +247,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             getJob().info("Retrieving database information ("+sequenceRelease+")...");
             Map<String,String> returns = mascotClient.getDBInfo(sequenceDB, sequenceRelease);
             String status = returns.get("STATUS");
-            if (null == status || !"OK".equals(status))
+            if (!"OK".equals(status))
             {
                 getJob().error("Failed to get database from Mascot server.");
                 String exceptionMessage=returns.get("exceptionmessage");
@@ -277,8 +278,8 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             long nmascotFileTimestamp= smascotFileTimestamp == null ? -1 : Long.parseLong(smascotFileTimestamp);
 
             File dirSequenceRoot = getJobSupport().getSequenceRootDirectory();
-            File localDB = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
-            File localDBHash = MS2PipelineManager.getLocalMascotFileHash(dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
+            File localDB = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot, sequenceDB, sequenceRelease);
+            File localDBHash = MS2PipelineManager.getLocalMascotFileHash(dirSequenceRoot, sequenceDB, sequenceRelease);
             File localDBParent = localDB.getParentFile();
             FileUtil.mkdirs(localDBParent);
             long filesize=0;
@@ -338,7 +339,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             }
 
             // 2. translate Mascot result file to pep.xml format
-            File fileSequenceDatabase = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot.getPath(), sequenceDB, sequenceRelease);
+            File fileSequenceDatabase = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot, sequenceDB, sequenceRelease);
             String exePath = PipelineJobService.get().getExecutablePath("Mascot2XML", null, "tpp", ver, getJob().getLogger());
             String[] args =
             {
@@ -363,7 +364,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             // three possibilities: basename.xml, basename.pep.xml, basename.pep.xml.gz
             if (fileOutputPepXML.getName().endsWith(".gz")&&!fileWorkPepXMLRaw.getName().endsWith(".gz"))
             {
-                fileWorkPepXMLRaw = new File(fileWorkPepXMLRaw.getParent(),fileWorkPepXMLRaw.getName()+".gz");
+                fileWorkPepXMLRaw = FileUtil.appendName(fileWorkPepXMLRaw.getParentFile(), fileWorkPepXMLRaw.getName()+".gz");
             }
             if (!fileOutputPepXML.renameTo(fileWorkPepXMLRaw))
             {

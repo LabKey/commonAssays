@@ -94,7 +94,7 @@ public class SequestImportTest extends BaseWebDriverTest
     private void testFileUsageColumn()
     {
         final String[] runFiles = {"ipi.HUMAN.fasta.v2.31", "raftflow10.mzXML", "raftflow10.pep.xml"};
-        final String runName = "sampledata/raftflow10 (raftflow)";
+        final String runName = "raftflow10";
         final String runProtocol = "MS2 Import";
         final Locator.XPathLocator runLink = Locator.linkWithText(runName + " (" + runProtocol + ")");
 

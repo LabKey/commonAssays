@@ -36,6 +36,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -383,7 +384,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                                    MultiValuedMap<String, String> sampleIdToNameMap) throws Exception
     {
         // Fake file URI set on the FCSFile/FCSAnalsyis ExpData to ensure it's recognized by the FlowDataHandler.
-        URI dataFileURI = new File(externalAnalysisFile.getParent(), "attributes.flowdata.xml").toURI();
+        URI dataFileURI = FileUtil.appendName(externalAnalysisFile.getParentFile(), "attributes.flowdata.xml").toURI();
 
         // Prepare comp matrices for saving
         Map<CompensationMatrix, AttributeSet> compMatrixMap = new HashMap<>();

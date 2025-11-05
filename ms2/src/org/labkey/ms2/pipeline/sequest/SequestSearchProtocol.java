@@ -23,6 +23,7 @@ import org.labkey.api.pipeline.PipelineValidationException;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,8 +51,8 @@ public class SequestSearchProtocol extends AbstractMS2SearchProtocol<SequestPipe
 
     @Override
     public SequestPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                                PipeRoot root, List<Path> filesInput,
-                                                Path fileParameters, @Nullable Map<String, String> variableMap
+                                                PipeRoot root, List<FileLike> filesInput,
+                                                FileLike fileParameters, @Nullable Map<String, String> variableMap
     ) throws IOException
     {
         return new SequestPipelineJob(this, info, root, getName(),

@@ -40,6 +40,8 @@ import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.reader.ITraqProteinQuantitation;
 import org.labkey.ms2.reader.ProtXmlReader;
 import org.labkey.ms2.reader.ProteinGroup;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedInputStream;
@@ -66,14 +68,14 @@ public class ProteinProphetImporter
 {
     private static final Logger _log = LogManager.getLogger(ProteinProphetImporter.class);
 
-    private final File _file;
+    private final FileLike _file;
     private final String _experimentRunLSID;
     private final XarContext _context;
     private final SqlDialect _dialect = MS2Manager.getSchema().getSqlDialect();
 
     private static final int STREAM_BUFFER_SIZE = 128 * 1024;
 
-    public ProteinProphetImporter(File f, String experimentRunLSID, XarContext context)
+    public ProteinProphetImporter(FileLike f, String experimentRunLSID, XarContext context)
     {
         _file = f;
         _experimentRunLSID = experimentRunLSID;
@@ -336,7 +338,7 @@ public class ProteinProphetImporter
             throws IOException, XMLStreamException
     {
         ProteinProphetFile file = new ProteinProphetFile(parser);
-        file.setFilePath(_file.getCanonicalPath());
+        file.setFilePath(_file.toNioPathForRead().toFile().getCanonicalPath());
         file.setRun(run.getRun());
 
         Table.insert(info.getUser(), MS2Manager.getTableInfoProteinProphetFiles(), file);
@@ -355,20 +357,20 @@ public class ProteinProphetImporter
             // First, see if our usual XAR lookups can find it
             String pepXMLFileName = pepXMLFileNameOriginal + ((attempts>1)?".gz":"");
             attemptedFiles.add(pepXMLFileName);
-            pepXMLFile = _context.findFile(pepXMLFileName, _file.getParentFile());
+            pepXMLFile = _context.findFile(pepXMLFileName, _file.getParent().toNioPathForRead().toFile());
             if (pepXMLFile == null)
             {
                 // Second, try the file name in the XML in the current directory
-                pepXMLFile = FileUtil.appendName(_file.getParentFile(), new File(pepXMLFileName).getName());
+                pepXMLFile = FileUtil.appendName(_file.getParent().toNioPathForRead().toFile(), new File(pepXMLFileName).getName());
                 attemptedFiles.add(pepXMLFile.getAbsolutePath());
                 if (!NetworkDrive.exists(pepXMLFile))
                 {
                     // Third, try replacing the .pep-prot.xml on the file name with .pep.xml
                     // and looking in the same directory
-                    if (TPPTask.isProtXMLFile(_file))
+                    if (TPPTask.isProtXMLFile(_file.getParent().toNioPathForRead().toFile()))
                     {
                         String baseName = TPPTask.FT_PROT_XML.getBaseName(_file);
-                        pepXMLFile = TPPTask.getPepXMLFile(_file.getParentFile(), baseName);
+                        pepXMLFile = TPPTask.getPepXMLFile(_file.getParent().toNioPathForRead().toFile(), baseName);
                         attemptedFiles.add(pepXMLFile.getAbsolutePath());
                         if (!NetworkDrive.exists(pepXMLFile))
                         {
@@ -380,10 +382,14 @@ public class ProteinProphetImporter
                     }
                 }
             }
+            if (NetworkDrive.exists(pepXMLFile))
+            {
+                break;
+            }
         }
 
         log.info("Resolved referenced PepXML file to " + pepXMLFile.getPath());
-        MS2Run run = MS2Manager.addRun(info, log, pepXMLFile, false, _context);
+        MS2Run run = MS2Manager.addRun(info, log, FileSystemLike.wrapFile(pepXMLFile), false, _context);
         if (_experimentRunLSID != null && run.getExperimentRunLSID() == null)
         {
             run.setExperimentRunLSID(_experimentRunLSID);
@@ -514,7 +520,7 @@ public class ProteinProphetImporter
         return groupId;
     }
 
-    private String getPepXMLFileName() throws FileNotFoundException, XMLStreamException
+    private String getPepXMLFileName() throws IOException, XMLStreamException
     {
         SimpleXMLStreamReader parser = null;
         InputStream fIn = null;

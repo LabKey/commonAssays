@@ -22,6 +22,7 @@ import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.xmlbeans.GDuration;
+import org.labkey.vfs.FileLike;
 import org.systemsbiology.jrap.Scan;
 
 import javax.xml.stream.XMLStreamException;
@@ -37,13 +38,13 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
 {
     private static final Logger _log = LogManager.getLogger(SequentialMzxmlIterator.class);
 
-    private final File _file;
+    private final FileLike _file;
     private InputStream _in;
     private SimpleXMLStreamReader _parser;
     private SimpleScan _currentScan;
     private static final int STREAM_BUFFER_SIZE = 128 * 1024;
 
-    public SequentialMzxmlIterator(File file, int msLevel) throws FileNotFoundException, XMLStreamException
+    public SequentialMzxmlIterator(FileLike file, int msLevel) throws IOException, XMLStreamException
     {
         super(msLevel);
         _file = file;

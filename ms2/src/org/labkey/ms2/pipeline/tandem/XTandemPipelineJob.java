@@ -22,10 +22,10 @@ import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -56,8 +56,8 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
                               ViewBackgroundInfo info,
                               PipeRoot root,
                               String name,
-                              List<Path> filesMzXML,
-                              Path fileInputXML) throws IOException
+                              List<FileLike> filesMzXML,
+                              FileLike fileInputXML) throws IOException
     {
         super(protocol, XTandemPipelineProvider.name, info, root, name, fileInputXML, filesMzXML);
 
@@ -65,7 +65,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
         writeInputFilesToLog();
     }
 
-    public XTandemPipelineJob(XTandemPipelineJob job, File fileFraction)
+    public XTandemPipelineJob(XTandemPipelineJob job, FileLike fileFraction)
     {
         super(job, fileFraction);        
     }
@@ -77,7 +77,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
     }
 
     @Override
-    public AbstractFileAnalysisJob createSingleFileJob(File file)
+    public AbstractFileAnalysisJob createSingleFileJob(FileLike file)
     {
         return new XTandemPipelineJob(this, file);
     }

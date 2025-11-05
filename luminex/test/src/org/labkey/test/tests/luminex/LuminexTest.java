@@ -19,6 +19,7 @@ package org.labkey.test.tests.luminex;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.labkey.api.query.QueryKey;
+import org.labkey.api.util.FileUtil;
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.assay.GetProtocolCommand;
@@ -101,8 +102,8 @@ public abstract class LuminexTest extends BaseWebDriverTest
     public static final File TEST_ASSAY_MULTIPLE_STANDARDS_3 = TestFileUtils.getSampleData("luminex/plate 3_IgA-Biot (Standard1).xls");
     public static final File TEST_ASSAY_MULTIPLE_STANDARDS_3_XLSX = TestFileUtils.getSampleData("luminex/plate 3_IgA-Biot (Standard1).xls");
 
-    public static final File RTRANSFORM_SCRIPT_FILE_LABKEY = new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/labkey_luminex_transform.R");
-    public static final File RTRANSFORM_SCRIPT_FILE_LAB =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/tomaras_luminex_transform.R");
+    public static final File RTRANSFORM_SCRIPT_FILE_LABKEY = FileUtil.appendPath(TestFileUtils.getLabKeyRoot(), org.labkey.api.util.Path.parse("server/modules/commonAssays/luminex/resources/transformscripts/labkey_luminex_transform.R"));
+    public static final File RTRANSFORM_SCRIPT_FILE_LAB = FileUtil.appendPath(TestFileUtils.getLabKeyRoot(), org.labkey.api.util.Path.parse("server/modules/commonAssays/luminex/resources/transformscripts/tomaras_luminex_transform.R"));
 
     public static final String ASSAY_DATA_FILE_LOCATION_MULTIPLE_FIELD = "__primaryFile__";
 

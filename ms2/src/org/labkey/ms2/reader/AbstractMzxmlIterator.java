@@ -16,8 +16,9 @@
 
 package org.labkey.ms2.reader;
 
+import org.labkey.vfs.FileLike;
+
 import javax.xml.stream.XMLStreamException;
-import java.io.File;
 import java.io.IOException;
 
 public abstract class AbstractMzxmlIterator implements SimpleScanIterator
@@ -37,7 +38,7 @@ public abstract class AbstractMzxmlIterator implements SimpleScanIterator
         throw new UnsupportedOperationException();
     }
 
-    public static AbstractMzxmlIterator createParser(File file, int scanLevelFilter) throws IOException, XMLStreamException
+    public static AbstractMzxmlIterator createParser(FileLike file, int scanLevelFilter) throws IOException, XMLStreamException
     {
         return new SequentialMzxmlIterator(file, scanLevelFilter);
     }

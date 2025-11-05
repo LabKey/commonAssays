@@ -27,10 +27,8 @@ import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.XarContext;
 import org.labkey.api.exp.api.ExpData;
-import org.labkey.api.exp.api.ExpExperiment;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
-import org.labkey.api.exp.api.IAssayDomainType;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.gwt.client.DefaultValueType;
@@ -68,7 +66,6 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.script.FlowPipelineProvider;
 import org.labkey.flow.view.FlowQueryView;
 import org.labkey.flow.webparts.AnalysesWebPart;
-import org.springframework.validation.BindException;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.Controller;
 
@@ -214,7 +211,7 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public AssayRunCreator getRunCreator()
+    public AssayRunCreator<?> getRunCreator()
     {
         throw new UnsupportedOperationException();
     }
@@ -400,18 +397,6 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public boolean hasCustomView(IAssayDomainType domainType, boolean details)
-    {
-        return false;
-    }
-
-    @Override
-    public ModelAndView createBeginView(ViewContext context, ExpProtocol protocol)
-    {
-        return null;
-    }
-
-    @Override
     public ModelAndView createBatchesView(ViewContext context, ExpProtocol protocol)
     {
         Portal.WebPart wp = new Portal.WebPart();
@@ -424,29 +409,11 @@ public class FlowAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public ModelAndView createBatchDetailsView(ViewContext context, ExpProtocol protocol, ExpExperiment batch)
-    {
-        return null;
-    }
-
-    @Override
     public ModelAndView createRunsView(ViewContext context, ExpProtocol protocol)
     {
         RunsForm form = new RunsForm();
         form.setViewContext(context);
         return new FlowQueryView(form);
-    }
-
-    @Override
-    public ModelAndView createRunDetailsView(ViewContext context, ExpProtocol protocol, ExpRun run)
-    {
-        return null;
-    }
-
-    @Override
-    public ModelAndView createResultsView(ViewContext context, ExpProtocol protocol, BindException errors)
-    {
-        return null;
     }
 
     @Override

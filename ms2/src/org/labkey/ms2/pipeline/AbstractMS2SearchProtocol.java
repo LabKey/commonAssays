@@ -28,6 +28,7 @@ import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.massSpecDataFileType;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -70,12 +71,12 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
     @Override
     public abstract JOB createPipelineJob(ViewBackgroundInfo info,
                                           PipeRoot root,
-                                          List<Path> filesInput,
-                                          Path fileParameters,
+                                          List<FileLike> filesInput,
+                                          FileLike fileParameters,
                                           @Nullable Map<String, String> variableMap) throws IOException;
 
     @Override
-    protected void save(Path path, Map<String, String> addParams, Map<String, String> instanceParams) throws IOException
+    protected void save(FileLike path, Map<String, String> addParams, Map<String, String> instanceParams) throws IOException
     {
         if (addParams == null)
             addParams = new HashMap<>();

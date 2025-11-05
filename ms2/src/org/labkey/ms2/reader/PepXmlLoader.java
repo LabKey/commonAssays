@@ -22,11 +22,11 @@ import org.apache.logging.log4j.Logger;
 import org.labkey.api.protein.fasta.FastaProtein;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.ms2.MS2Modification;
+import org.labkey.vfs.FileLike;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,7 +41,7 @@ public class PepXmlLoader extends MS2XmlLoader
 
     private final ArrayList<RelativeQuantAnalysisSummary> _quantSummaries = new ArrayList<>();
 
-    public PepXmlLoader(File f, Logger log) throws FileNotFoundException, XMLStreamException
+    public PepXmlLoader(FileLike f, Logger log) throws IOException, XMLStreamException
     {
         init(f, log);
         readAnalysisSummaries();

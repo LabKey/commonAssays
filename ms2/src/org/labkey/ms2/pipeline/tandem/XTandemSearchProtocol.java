@@ -20,6 +20,7 @@ import org.labkey.api.data.Container;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
+import org.labkey.vfs.FileLike;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -48,8 +49,8 @@ public class XTandemSearchProtocol extends AbstractMS2SearchProtocol<XTandemPipe
 
     @Override
     public XTandemPipelineJob createPipelineJob(ViewBackgroundInfo info,
-                                                PipeRoot root, List<Path> filesInput,
-                                                Path fileParameters, @Nullable Map<String, String> variableMap
+                                                PipeRoot root, List<FileLike> filesInput,
+                                                FileLike fileParameters, @Nullable Map<String, String> variableMap
     ) throws IOException
     {
         return new XTandemPipelineJob(this, info, root, getName(),

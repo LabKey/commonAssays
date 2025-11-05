@@ -31,6 +31,7 @@ import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Importer;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
+import org.labkey.vfs.FileLike;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -42,13 +43,13 @@ import java.io.IOException;
  */
 public class MS2ImportPipelineJob extends PipelineJob
 {
-    protected final File _file;
+    protected final FileLike _file;
     private final String _description;
     private final MS2Importer.RunInfo _runInfo;
 
     @JsonCreator
     protected MS2ImportPipelineJob(
-            @JsonProperty("_file") File file,
+            @JsonProperty("_file") FileLike file,
             @JsonProperty("_description") String description,
             @JsonProperty("_runInfo") MS2Importer.RunInfo runInfo)
     {
@@ -58,7 +59,7 @@ public class MS2ImportPipelineJob extends PipelineJob
         _runInfo = runInfo;
     }
 
-    public MS2ImportPipelineJob(ViewBackgroundInfo info, File file, String description, MS2Importer.RunInfo runInfo, PipeRoot root)
+    public MS2ImportPipelineJob(ViewBackgroundInfo info, FileLike file, String description, MS2Importer.RunInfo runInfo, PipeRoot root)
     {
         super(MS2PipelineProvider.name, info, root);
         _file = file;
@@ -70,9 +71,9 @@ public class MS2ImportPipelineJob extends PipelineJob
         // Use the PipeRoot to resolve the desired location for the .log file, which may
         // not be in the same directory as the imported file if there is a supplemental pipeline
         // directory configured. See issue 27440.
-        String relativePath = getPipeRoot().relativePath(_file.getParentFile());
-        relativePath += File.separator + FT_LOG.getName(_file.getParentFile(), basename);
-        File logFile = getPipeRoot().resolvePath(relativePath);
+        String relativePath = getPipeRoot().relativePath(_file.getParent());
+        relativePath += "/" + FT_LOG.getName(_file.getParent(), basename);
+        FileLike logFile = getPipeRoot().resolvePathToFileLike(relativePath);
         setLogFile(logFile);
 
         // If there is an existing status file, make sure this job does not

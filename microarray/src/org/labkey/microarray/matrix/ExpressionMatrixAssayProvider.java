@@ -26,7 +26,6 @@ import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayDataType;
 import org.labkey.api.assay.AssayPipelineProvider;
 import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssayRunCreator;
 import org.labkey.api.assay.AssayTableMetadata;
 import org.labkey.api.assay.actions.AssayRunUploadForm;
 import org.labkey.api.assay.matrix.ColumnMappingProperty;
@@ -93,7 +92,7 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
     }
 
     @Override
-    public AssayRunCreator getRunCreator()
+    public ExpressionMatrixRunCreator getRunCreator()
     {
         return new ExpressionMatrixRunCreator(this);
     }

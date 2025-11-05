@@ -19,6 +19,7 @@ package org.labkey.ms2.reader;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
+import org.labkey.vfs.FileLike;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedInputStream;
@@ -33,7 +34,7 @@ public abstract class MS2XmlLoader extends MS2Loader
     protected SimpleXMLStreamReader _parser;
 
     @Override
-    protected void init(File f, Logger log) throws FileNotFoundException, XMLStreamException
+    protected void init(FileLike f, Logger log) throws IOException, XMLStreamException
     {
         super.init(f, log);
         _fIn = new BufferedInputStream(PossiblyGZIPpedFileInputStreamFactory.getStream(f), STREAM_BUFFER_SIZE);

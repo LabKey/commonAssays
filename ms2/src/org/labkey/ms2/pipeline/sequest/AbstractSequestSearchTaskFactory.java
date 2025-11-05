@@ -62,6 +62,11 @@ public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2S
         return "sequest";
     }
 
+    public File getSequestInstallDirAsFile()
+    {
+        return _sequestInstallDir;
+    }
+
     public String getSequestInstallDir()
     {
         return _sequestInstallDir == null ? null : _sequestInstallDir.getAbsolutePath();

@@ -22,6 +22,8 @@ import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.labkey.api.exp.XarSource;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.FileUtil;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -85,8 +87,8 @@ public class ScriptXarSource extends XarSource
 
 
     @Override
-    public Path getLogFilePath()
+    public FileLike getLogFilePath()
     {
-        return _logFile.toPath();
+        return FileSystemLike.wrapFile(_logFile);
     }
 }

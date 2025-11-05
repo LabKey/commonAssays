@@ -22,6 +22,8 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
 import org.labkey.ms2.reader.*;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
@@ -45,15 +47,15 @@ public class SpectrumImporter
 
     private Logger _log;
     private MS2Importer.MS2Progress _progress;
-    private Set _scans;
+    private Set<Integer> _scans;
     private final int _fractionId;
     private SimpleScanIterator _scanIterator;
-    private File _file = null;
+    private FileLike _file = null;
     private final boolean _shouldImportSpectra;
     private final boolean _shouldImportRetentionTime;
 
 
-    protected SpectrumImporter(String gzFileName, String dtaFileNamePrefix, File mzXmlFile, Set scans, MS2Importer.MS2Progress progress, int fractionId, Logger log, boolean shouldImportSpectra, boolean shouldImportRetentionTime)
+    protected SpectrumImporter(String gzFileName, String dtaFileNamePrefix, FileLike mzXmlFile, Set<Integer> scans, MS2Importer.MS2Progress progress, int fractionId, Logger log, boolean shouldImportSpectra, boolean shouldImportRetentionTime)
     {
         _scans = scans;
         _progress = progress;
@@ -72,7 +74,7 @@ public class SpectrumImporter
 
             if (NetworkDrive.exists(gz))
             {
-                _file = gz;
+                _file = FileSystemLike.wrapFile(gz);
                 _scanIterator = new TarIterator(gz, dtaFileNamePrefix);
             }
             else
@@ -287,7 +289,7 @@ public class SpectrumImporter
     }
 
 
-    public File getFile()
+    public FileLike getFile()
     {
         return _file;
     }

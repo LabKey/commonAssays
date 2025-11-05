@@ -339,7 +339,7 @@ public class MS2Manager
         try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
         {
             Container container = run.getContainer();
-            final FileLike pepXMLFile = FileSystemLike.wrapFile(new File(run.getPath(), run.getFileName()));
+            final FileLike pepXMLFile = FileSystemLike.wrapFile(new File(run.getPath())).resolveChild(run.getFileName());
 
             // Check if this 
             ExpData existingPepXmlData = ExperimentService.get().getExpDataByURL(pepXMLFile, container);
@@ -377,7 +377,7 @@ public class MS2Manager
             XarSource source = new AbstractFileXarSource("Wrap MS2 Run", container, user)
             {
                 @Override
-                public Path getLogFilePath()
+                public FileLike getLogFilePath()
                 {
                     throw new UnsupportedOperationException();
                 }
@@ -476,7 +476,7 @@ public class MS2Manager
         return runIds;
     }
 
-    public static ProteinProphetFile getProteinProphetFile(File f, Container c)
+    public static ProteinProphetFile getProteinProphetFile(FileLike f, Container c)
     {
         String sql = "SELECT " +
                 getTableInfoProteinProphetFiles() + ".* FROM " +
@@ -487,14 +487,15 @@ public class MS2Manager
                 getTableInfoRuns() + ".Container = ? AND " +
                 getTableInfoRuns() + ".Deleted = ?";
 
+        File file = f.toNioPathForRead().toFile();
         String path;
         try
         {
-            path = f.getCanonicalPath();
+            path = file.getCanonicalPath();
         }
         catch (IOException e)
         {
-            path = f.getAbsolutePath();
+            path = file.getAbsolutePath();
         }
 
         return new SqlSelector(getSchema(), sql, path, c, Boolean.FALSE).getObject(ProteinProphetFile.class);
@@ -558,7 +559,7 @@ public class MS2Manager
     }
 
     public static MS2Importer.RunInfo addMascotRunToQueue(ViewBackgroundInfo info,
-                                                          File file,
+                                                          FileLike file,
                                                           String description, PipeRoot root) throws IOException
     {
         MS2Importer importer = createImporter(file, info, description, null, new XarContext(description, info.getContainer(), info.getUser()));
@@ -576,7 +577,7 @@ public class MS2Manager
     }
 
     public static MS2Importer.RunInfo addRunToQueue(ViewBackgroundInfo info,
-                                                    File file,
+                                                    FileLike file,
                                                     String description, PipeRoot root) throws IOException
     {
         MS2Importer importer = createImporter(file, info, description, null, new XarContext(description, info.getContainer(), info.getUser()));
@@ -594,7 +595,7 @@ public class MS2Manager
     }
 
     public static MS2Run addRun(ViewBackgroundInfo info, Logger log,
-                             File file,
+                             FileLike file,
                              boolean restart, XarContext context) throws IOException, XMLStreamException
     {
         MS2Importer importer = createImporter(file, info, file.getName() + (context.getJobDescription() != null ? " - " + context.getJobDescription() : ""), log, context);
@@ -610,7 +611,7 @@ public class MS2Manager
     }
     
     public static MS2Run importRun(ViewBackgroundInfo info, Logger log,
-                                   File file,
+                                   FileLike file,
                                    MS2Importer.RunInfo runInfo,
                                    XarContext context) throws IOException, XMLStreamException
     {
@@ -618,11 +619,11 @@ public class MS2Manager
         return importer.upload(runInfo);
     }
 
-    private static MS2Importer createImporter(File file, ViewBackgroundInfo info, String description, Logger log, XarContext context) throws IOException
+    private static MS2Importer createImporter(FileLike file, ViewBackgroundInfo info, String description, Logger log, XarContext context) throws IOException
     {
         Container c = info.getContainer();
 
-        String fileName = file.getPath();
+        String fileName = file.toNioPathForRead().toFile().getPath();
         if (endsWithExtOrExtDotGZ(fileName,".xml") || fileName.endsWith(".pepXML"))
             return new PepXmlImporter(info.getUser(), c, description, fileName, log, context);
         else if (fileName.toLowerCase().endsWith(".dat"))
@@ -736,7 +737,7 @@ public class MS2Manager
             MS2Run run = getRun(runId.intValue());
             if (run != null)
             {
-                File file = new File(run.getPath(), run.getFileName());
+                final FileLike file = FileSystemLike.wrapFile(new File(run.getPath())).resolveChild(run.getFileName());
                 ExpData data = ExperimentService.get().getExpDataByURL(file, c);
                 if (data != null)
                 {
@@ -1135,8 +1136,8 @@ public class MS2Manager
 
     private static Pair<float[], float[]> getSpectrumFromDat(@NotNull MS2Fraction fraction, int scan) throws SpectrumException
     {
-        File f = new File(getRun(fraction.getRun()).getPath(), fraction.getFileName());
-        NetworkDrive.ensureDrive(f.getPath());
+        final FileLike f = FileSystemLike.wrapFile(new File(getRun(fraction.getRun()).getPath())).resolveChild(fraction.getFileName());
+        NetworkDrive.ensureDrive(f);
         try (MascotDatLoader loader = new MascotDatLoader(f, LOG))
         {
             return loader.loadSpectrum(scan);

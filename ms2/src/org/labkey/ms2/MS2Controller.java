@@ -166,7 +166,6 @@ import org.labkey.ms2.peptideview.MS2RunViewType;
 import org.labkey.ms2.peptideview.PeptidesView;
 import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
-import org.labkey.ms2.pipeline.ImportScanCountsUpgradeJob;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
@@ -186,6 +185,7 @@ import org.labkey.ms2.query.ProteinProphetCrosstabView;
 import org.labkey.ms2.query.SpectraCountConfiguration;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.SensitivitySummary;
+import org.labkey.vfs.FileLike;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -4553,7 +4553,7 @@ public class MS2Controller extends SpringActionController
         @Override
         public boolean handlePost(PipelinePathForm form, BindException errors) throws Exception
         {
-            for (File f : form.getValidatedFiles(getContainer()))
+            for (FileLike f : form.getValidatedFiles(getContainer()))
             {
                 if (f.isFile())
                 {
@@ -5271,49 +5271,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    @RequiresSiteAdmin
-    public class ImportMSScanCountsUpgradeAction extends FormViewAction<Object>
-    {
-        @Override
-        public void validateCommand(Object target, Errors errors)
-        {
-        }
-
-        @Override
-        public ModelAndView getView(Object o, boolean reshow, BindException errors)
-        {
-            return new JspView<>("/org/labkey/ms2/pipeline/importMSScanCounts.jsp");
-        }
-
-        @Override
-        public boolean handlePost(Object o, BindException errors) throws Exception
-        {
-            PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-            if (root == null || !root.isValid())
-            {
-                throw new NotFoundException("No pipeline root found for " + getContainer());
-            }
-
-            ViewBackgroundInfo info = getViewBackgroundInfo();
-            PipelineJob job = new ImportScanCountsUpgradeJob(info, root);
-            PipelineService.get().queueJob(job);
-
-            return true;
-        }
-
-        @Override
-        public ActionURL getSuccessURL(Object o)
-        {
-            return urlProvider(PipelineUrls.class).urlBegin(getContainer());
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            root.addChild("Load MS scan counts");
-        }
-    }
-
     public static class TestCase extends AbstractActionPermissionTest
     {
         @Override
@@ -5345,8 +5302,7 @@ public class MS2Controller extends SpringActionController
             // @RequiresSiteAdmin
             assertForRequiresSiteAdmin(user,
                 controller.new PurgeRunsAction(),
-                controller.new ShowMS2AdminAction(),
-                controller.new ImportMSScanCountsUpgradeAction()
+                controller.new ShowMS2AdminAction()
             );
         }
     }

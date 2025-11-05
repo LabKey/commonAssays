@@ -21,10 +21,10 @@ import org.labkey.api.pipeline.*;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -48,8 +48,8 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
                               ViewBackgroundInfo info,
                               PipeRoot root,
                               String name,
-                              List<Path> filesMzXML,
-                              Path fileInputXML
+                              List<FileLike> filesMzXML,
+                              FileLike fileInputXML
     ) throws IOException
     {
         super(protocol, SequestPipelineProvider.name, info, root, name, fileInputXML, filesMzXML);
@@ -58,13 +58,13 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
         writeInputFilesToLog();
     }
 
-    public SequestPipelineJob(SequestPipelineJob job, File fileFraction)
+    public SequestPipelineJob(SequestPipelineJob job, FileLike fileFraction)
     {
         super(job, fileFraction);
     }
 
     @Override
-    public AbstractFileAnalysisJob createSingleFileJob(File file)
+    public AbstractFileAnalysisJob createSingleFileJob(FileLike file)
     {
         return new SequestPipelineJob(this, file);
     }
