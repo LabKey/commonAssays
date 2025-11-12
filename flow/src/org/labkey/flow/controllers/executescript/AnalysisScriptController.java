@@ -54,6 +54,7 @@ import org.labkey.api.view.HttpPostRedirectView;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.template.PageConfig;
@@ -95,6 +96,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -370,8 +372,15 @@ public class AnalysisScriptController extends BaseFlowController
         {
             validatePipeline();
 
-            collectNewPaths(form, errors);
-            return new JspView<PipelinePathForm>("/org/labkey/flow/controllers/executescript/confirmRunsToImport.jsp", form, errors);
+            try
+            {
+                collectNewPaths(form, errors);
+                return new JspView<PipelinePathForm>("/org/labkey/flow/controllers/executescript/confirmRunsToImport.jsp", form, errors);
+            }
+            catch (InvalidPathException e)
+            {
+                throw new NotFoundException(e.getMessage());
+            }
         }
 
         protected ModelAndView uploadRuns(ImportRunsForm form, BindException errors) throws Exception
@@ -985,7 +994,7 @@ public class AnalysisScriptController extends BaseFlowController
 
             // Set the data folder if we aren't using an existing run
             if (SelectFCSFileOption.None == form.getSelectFCSFilesOption())
-                form.setKeywordDir(new String[]{getWorkspaceFolder(form).toString()});
+                form.setKeywordDir(new String[]{getPipeRoot().relativePath(getWorkspaceFolder(form))});
 
             // Select FCS file (by default we already select all fcs files in working folder)
             stepSelectFCSFiles(form, errors);
