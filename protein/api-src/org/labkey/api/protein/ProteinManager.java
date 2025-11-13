@@ -20,6 +20,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.LinkBuilder;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.view.NotFoundException;
 
 import java.io.ByteArrayOutputStream;
@@ -100,7 +101,7 @@ public class ProteinManager
             map.put("Mass", PeptideHelpers.computeMass(sequenceBytes, 0, sequenceBytes.length, PeptideHelpers.AMINO_ACID_AVERAGE_MASSES));
             map.put("OrgId", organism.getOrgId());
             map.put("Hash", hashSequence(sequence));
-            map.put("Description", description == null ? null : (description.length() > 200 ? description.substring(0, 196) + "..." : description));
+            map.put("Description", description == null ? null : (description.length() > 200 ? StringUtilsLabKey.leftSurrogatePairFriendly(description, 196) + "..." : description));
             map.put("BestName", name);
             map.put("Length", sequence.length());
             map.put("InsertDate", new Date());
