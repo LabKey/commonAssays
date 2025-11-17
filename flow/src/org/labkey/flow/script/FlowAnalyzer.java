@@ -22,8 +22,8 @@ import org.labkey.flow.FlowSettings;
 import org.labkey.flow.analysis.model.*;
 import org.labkey.flow.analysis.web.*;
 import org.labkey.flow.data.*;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.net.URI;
 import java.util.*;
 
@@ -113,7 +113,7 @@ public class FlowAnalyzer
         return comp.getCompensationMatrix();
     }
 
-    synchronized static public File getAnalysisDirectory()
+    synchronized static public FileLike getAnalysisDirectory()
     {
         return FlowSettings.getWorkingDirectory();
     }

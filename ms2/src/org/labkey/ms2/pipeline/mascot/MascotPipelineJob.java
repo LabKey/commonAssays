@@ -24,9 +24,7 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -46,7 +44,7 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
     private String _mascotUserPassword;
 
     @JsonCreator
-    protected MascotPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)
+    protected MascotPipelineJob(@JsonProperty("_dirSequenceRoot") FileLike dirSequenceRoot)
     {
         super(dirSequenceRoot);
     }
@@ -117,13 +115,13 @@ public class MascotPipelineJob extends AbstractMS2SearchPipelineJob implements M
     }
 
     @Override
-    public File getSearchNativeSpectraFile()
+    public FileLike getSearchNativeSpectraFile()
     {
         return MascotSearchTask.getNativeSpectraFile(getAnalysisDirectory(), getBaseName());
     }
 
     @Override
-    public File getSearchNativeOutputFile()
+    public FileLike getSearchNativeOutputFile()
     {
         return MascotSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName());
     }

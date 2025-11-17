@@ -16,8 +16,6 @@
 
 package org.labkey.flow.data;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpExperiment;
@@ -33,21 +31,21 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Also known as "Analysis Folder" in flow terms or "Run Group" in exp terms.
  */
 public class FlowExperiment extends FlowObject<ExpExperiment>
 {
-    static private final Logger _log = LogManager.getLogger(FlowExperiment.class);
     static public String FlowExperimentRunExperimentName = "Flow Experiment Runs";
     static public String FlowWorkspaceExperimentName = "Flow Workspace";
     static public String DEFAULT_ANALYSIS_NAME = "Analysis";
@@ -92,7 +90,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
 
     static public FlowExperiment[] getAnalyses(Container container)
     {
-        List<FlowExperiment> ret = new ArrayList();
+        List<FlowExperiment> ret = new ArrayList<>();
         for (FlowExperiment experiment : getExperiments(container))
         {
             if (experiment.isAnalysis())
@@ -101,31 +99,6 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
             }
         }
         return ret.toArray(new FlowExperiment[0]);
-    }
-
-    /**
-     * Generate an unused FlowExperiment name using "Analysis" as the starting name.
-     */
-    static public String generateUnusedName(Container container)
-    {
-        return generateUnusedName(container, DEFAULT_ANALYSIS_NAME);
-    }
-
-    static public String generateUnusedName(Container container, String baseName)
-    {
-        Set<String> namesInUse = new HashSet<>();
-        for (FlowExperiment analysis : FlowExperiment.getAnalyses(container))
-            namesInUse.add(analysis.getName().toLowerCase());
-
-        String newAnalysisName = baseName;
-        int nameIndex = 0;
-        while (namesInUse.contains(newAnalysisName.toLowerCase()))
-        {
-            nameIndex++;
-            newAnalysisName = baseName + nameIndex;
-        }
-
-        return newAnalysisName;
     }
 
     static public FlowExperiment getForName(User user, Container container, String name)
@@ -148,7 +121,7 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
 
     static public FlowExperiment[] getAnalysesAndWorkspace(Container container)
     {
-        List<FlowExperiment> ret = new ArrayList();
+        List<FlowExperiment> ret = new ArrayList<>();
         for (FlowExperiment experiment : getExperiments(container))
         {
             if (experiment.isAnalysis() || experiment.isWorkspace())
@@ -157,14 +130,6 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
             }
         }
         return ret.toArray(new FlowExperiment[0]);
-    }
-
-    static public FlowExperiment getDefaultAnalysis(Container container)
-    {
-        FlowExperiment[] experiments = getAnalyses(container);
-        if (experiments.length == 0)
-            return null;
-        return experiments[0];
     }
 
     static public String getExperimentRunExperimentLSID(Container container)
@@ -180,11 +145,6 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
     static public String getWorkspaceLSID(Container container)
     {
         return FlowObject.generateLSID(container, "Experiment", FlowWorkspaceExperimentName);
-    }
-
-    static public String getWorkspaceRunExperimentName(Container container)
-    {
-        return FlowWorkspaceExperimentName;
     }
 
     static public FlowExperiment fromURL(ActionURL url, Container actionContainer, User user)
@@ -264,12 +224,12 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return false;
     }
 
-    public List<FlowRun> findRun(File filePath, FlowProtocolStep step)
+    public List<FlowRun> findRun(FileLike filePath, FlowProtocolStep step)
     {
         List<FlowRun> ret = new ArrayList<>();
         for (FlowRun run : getRuns(step))
         {
-            if (filePath.equals(run.getExperimentRun().getFilePathRoot()))
+            if (filePath.toNioPathForRead().toFile().equals(run.getExperimentRun().getFilePathRoot()))
             {
                 ret.add(run);
             }
@@ -355,21 +315,12 @@ public class FlowExperiment extends FlowObject<ExpExperiment>
         return FlowExperiment.fromLSID(getWorkspaceLSID(container));
     }
 
-    static public FlowExperiment ensureWorkspace(User user, Container container)
-    {
-        FlowExperiment ret = getWorkspace(container);
-        if (ret != null)
-            return ret;
-        ExpExperiment exp = ExperimentService.get().createExpExperiment(container, FlowWorkspaceExperimentName);
-        exp.save(user);
-        return new FlowExperiment(exp);
-    }
-
     public FlowCompensationMatrix findCompensationMatrix(FlowRun run)
     {
         List<FlowRun> runs = new ArrayList<>();
-        runs.addAll(findRun(new File(run.getPath()), FlowProtocolStep.analysis));
-        runs.addAll(findRun(new File(run.getPath()), FlowProtocolStep.calculateCompensation));
+        FileLike file = FileSystemLike.wrapFile(new File(run.getPath()));
+        runs.addAll(findRun(file, FlowProtocolStep.analysis));
+        runs.addAll(findRun(file, FlowProtocolStep.calculateCompensation));
         for (FlowRun runComp : runs)
         {
             FlowCompensationMatrix comp = runComp.getCompensationMatrix();

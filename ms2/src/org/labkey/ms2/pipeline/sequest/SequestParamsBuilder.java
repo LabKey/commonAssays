@@ -27,14 +27,15 @@ import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.writer.PrintWriters;
 import org.labkey.ms2.MS2Module;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.pipeline.ParameterNames;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -57,24 +58,24 @@ public abstract class SequestParamsBuilder
     public static final String DUMMY_FASTA_NAME = "~~~~~~~DUMMY_FASTA_NAME_FOR_TESTING~~~~~~~~~~`````.fasta";
 
     protected Map<String, String> sequestInputParams;
-    File sequenceRoot;
+    FileLike sequenceRoot;
     char[] _validResidues = {'A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y', 'X', 'B', 'Z', 'O','[',']'};
     protected HashMap<String, String> supportedEnzymes = new HashMap<>();
     protected final AbstractSequestParams _params;
     protected final AbstractSequestParams.Variant _variant;
-    private final List<File> _databaseFiles;
+    private final List<FileLike> _databaseFiles;
 
-    public SequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot)
+    public SequestParamsBuilder(Map<String, String> sequestInputParams, FileLike sequenceRoot)
     {
         this(sequestInputParams, sequenceRoot, SequestParams.Variant.thermosequest);
     }
 
-    public SequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot, SequestParams.Variant variant)
+    public SequestParamsBuilder(Map<String, String> sequestInputParams, FileLike sequenceRoot, SequestParams.Variant variant)
     {
         this(sequestInputParams, sequenceRoot, variant, null);
     }
 
-    public SequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot, SequestParams.Variant variant, List<File> databaseFiles)
+    public SequestParamsBuilder(Map<String, String> sequestInputParams, FileLike sequenceRoot, SequestParams.Variant variant, List<FileLike> databaseFiles)
     {
         _variant = variant;
         _params = createSequestParams(variant);
@@ -149,7 +150,7 @@ public abstract class SequestParamsBuilder
 
     protected List<String> initDatabases()
     {
-        List<File> databaseFiles = _databaseFiles;
+        List<FileLike> databaseFiles = _databaseFiles;
         if (databaseFiles == null)
         {
             databaseFiles = new ArrayList<>();
@@ -171,12 +172,12 @@ public abstract class SequestParamsBuilder
         }
 
         Param database1 = _params.getFASTAParam();
-        File databaseFile = databaseFiles.get(0);
+        FileLike databaseFile = databaseFiles.get(0);
         if (!databaseFile.exists() && !DUMMY_FASTA_NAME.equals(databaseFile.getName()))
         {
             return Collections.singletonList("pipeline, database; The database does not exist(" + databaseFile + ")");
         }
-        database1.setValue(databaseFile.getAbsolutePath());
+        database1.setValue(databaseFile.toNioPathForRead().toFile().getAbsolutePath());
 
         if (databaseFiles.size() > 1)
         {
@@ -189,7 +190,7 @@ public abstract class SequestParamsBuilder
                 {
                     return Collections.singletonList("pipeline, database; The database does not exist(" + databaseFile + ")");
                 }
-                database2.setValue(databaseFile.getAbsolutePath());
+                database2.setValue(databaseFile.toNioPathForRead().toFile().getAbsolutePath());
             }
         }
         return Collections.emptyList();
@@ -217,12 +218,12 @@ public abstract class SequestParamsBuilder
                 return Collections.emptyList();
             }
         }
-        if (plusValueString == null || minusValueString == null || !plusValueString.equals(minusValueString))
+        if (plusValueString == null || !plusValueString.equals(minusValueString))
         {
             return Collections.singletonList("Sequest does not support asymmetric parent error ranges (minus=" +
                 minusValueString + " plus=" + plusValueString + ").");
         }
-        if (plusValueString.isEmpty() && minusValueString.isEmpty())
+        if (plusValueString.isEmpty())
         {
             return Collections.singletonList("No values were entered for spectrum, parent monoisotopic mass error minus/plus.");
         }
@@ -850,100 +851,6 @@ public abstract class SequestParamsBuilder
         }
         return true;
     }
-    //The Sequest2xml uses an older version of the sequest.params file(version = 1)supported sequest uses version = 2;
-    String lookUpEnzyme(String enzyme)
-    {
-        char bracket2a = '{';
-        char bracket2b = '}';
-        int offset = 0;
-        CharSequence cutSites;
-        CharSequence blockSites;
-
-        try
-        {
-            cutSites = enzyme.subSequence(enzyme.indexOf('[') + 1, enzyme.indexOf(']'));
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            cutSites = new StringBuilder();
-        }
-        if (enzyme.lastIndexOf('[') != enzyme.indexOf('['))
-        {
-            bracket2a = '[';
-            bracket2b = ']';
-            offset = enzyme.indexOf(']') + 1;
-        }
-
-        try
-        {
-            int startIndex = enzyme.indexOf(bracket2a, offset) + 1;
-            int endIndex = enzyme.indexOf(bracket2b, offset);
-            blockSites = enzyme.substring(startIndex, endIndex);
-        }
-        catch (IndexOutOfBoundsException e)
-        {
-            blockSites = new StringBuilder();
-        }
-
-        Set<String> supportedEnzymesKes = supportedEnzymes.keySet();
-        boolean matches = false;
-        for (String lookUp : supportedEnzymesKes)
-        {
-            String lookUpBlocks;
-            String lookUpCuts;
-
-            try
-            {
-                lookUpCuts = lookUp.substring(lookUp.indexOf('[') + 1, lookUp.indexOf(']'));
-            }
-            catch (IndexOutOfBoundsException e)
-            {
-                lookUpCuts = "";
-            }
-
-
-            try
-            {
-                int startIndex = lookUp.indexOf(bracket2a, offset) + 1;
-                int endIndex = lookUp.indexOf(bracket2b, offset);
-                lookUpBlocks = lookUp.substring(startIndex, endIndex);
-            }
-            catch (IndexOutOfBoundsException e)
-            {
-                lookUpBlocks = "";
-            }
-
-            if (lookUpCuts.length() == cutSites.length())
-            {
-                matches = true;
-                for (int i = 0; i < cutSites.length(); i++)
-                {
-                    if (lookUpCuts.indexOf(cutSites.charAt(i)) < 0)
-                    {
-                        matches = false;
-                    }
-                }
-                if (matches &&
-                    lookUpBlocks.length() == blockSites.length())
-                {
-                    if (blockSites.isEmpty()) break;
-                    for (int i = 0; i < blockSites.length(); i++)
-                    {
-                        if (lookUpBlocks.indexOf(blockSites.charAt(i)) < 0)
-                        {
-                            matches = false;
-                        }
-                    }
-                }
-                else
-                {
-                    matches = false;
-                }
-            }
-            if (matches) return supportedEnzymes.get(lookUp);
-        }
-        return null;
-    }
 
     //Used with JUnit
     public AbstractSequestParams getProperties()
@@ -1046,14 +953,14 @@ public abstract class SequestParamsBuilder
         protected SequestParamsBuilder spb;
         protected ParamParser ip;
         protected String dbPath;
-        protected File root;
+        protected FileLike root;
 
         @Before
         public void setUp() throws Exception
         {
             ip = PipelineJobService.get().createParamParser();
-            root = JunitUtil.getSampleData(ModuleLoader.getInstance().getModule(MS2Module.class), "xarfiles/ms2pipe/databases");
-            dbPath = root.getCanonicalPath();
+            root = FileSystemLike.wrapFile(JunitUtil.getSampleData(ModuleLoader.getInstance().getModule(MS2Module.class), "xarfiles/ms2pipe/databases"));
+            dbPath = root.toNioPathForRead().toFile().getCanonicalPath();
             spb = createParamsBuilder();
         }
 
@@ -1078,9 +985,9 @@ public abstract class SequestParamsBuilder
         public abstract SequestParamsBuilder createParamsBuilder();
     }
 
-    public void writeFile(File output) throws SequestParamsException
+    public void writeFile(FileLike output) throws SequestParamsException
     {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(output)))
+        try (BufferedWriter writer = new BufferedWriter(PrintWriters.getPrintWriter(output.openOutputStream())))
         {
             writer.write(getSequestParamsText());
         }

@@ -31,6 +31,7 @@ import org.labkey.api.pipeline.cmd.TaskPath;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.util.FileType;
 import org.labkey.api.writer.PrintWriters;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,10 +67,11 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
             {
                 TaskPath targetListTP = new TaskPath(".target.list");
                 TaskPath decoyListTP = new TaskPath(".decoy.list");
-                File targetListFile = _wd.newWorkFile(WorkDirectory.Function.output, targetListTP, job.getBaseName());
-                File decoyListFile = _wd.newWorkFile(WorkDirectory.Function.output, decoyListTP, job.getBaseName());
+                FileLike targetListFile = _wd.newWorkFile(WorkDirectory.Function.output, targetListTP, job.getBaseName());
+                FileLike decoyListFile = _wd.newWorkFile(WorkDirectory.Function.output, decoyListTP, job.getBaseName());
 
-                try (PrintWriter targetWriter = PrintWriters.getPrintWriter(targetListFile); PrintWriter decoyWriter = PrintWriters.getPrintWriter(decoyListFile))
+                    try (PrintWriter targetWriter = PrintWriters.getPrintWriter(targetListFile.openOutputStream());
+                         PrintWriter decoyWriter = PrintWriters.getPrintWriter(decoyListFile.openOutputStream()))
                 {
                     FileType targetSQTFileType = new FileType(".sqt");
                     FileType decoySQTFileType = new FileType(".decoy.sqt");
@@ -84,9 +86,9 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
                         decoyWriter.write(decoyFileName);
                         decoyWriter.write("\n");
 
-                        File inputTargetFile = new File(job.getAnalysisDirectory(), targetFileName);
+                        FileLike inputTargetFile = job.getAnalysisDirectory().resolveChild(targetFileName);
                         _wd.inputFile(inputTargetFile, false);
-                        File inputDecoyFile = new File(job.getAnalysisDirectory(), decoyFileName);
+                        FileLike inputDecoyFile = job.getAnalysisDirectory().resolveChild(decoyFileName);
                         _wd.inputFile(inputDecoyFile, false);
                         action.addInput(inputTargetFile, "SQT" + (index == 1 ? "" : Integer.toString(index)));
                         action.addInput(inputDecoyFile, "DecoySQT" + (index == 1 ? "" : Integer.toString(index)));
@@ -94,7 +96,7 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
                     }
                 }
 
-                File output = new File(_wd.getDir(), job.getBaseName() + ".pin.xml");
+                FileLike output = _wd.getDir().resolveChild(job.getBaseName() + ".pin.xml");
 
                 List<String> args = new ArrayList<>();
                 String version = getJob().getParameters().get("sqt2pin, version");
@@ -108,7 +110,7 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
                 args.add(decoyListFile.getName());
 
                 ProcessBuilder pb = new ProcessBuilder(args);
-                pb.directory(_wd.getDir());
+                pb.directory(_wd.getDir().toNioPathForRead().toFile());
 
                 job.runSubProcess(pb, _wd.getDir());
 

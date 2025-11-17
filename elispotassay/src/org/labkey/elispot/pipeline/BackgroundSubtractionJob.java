@@ -48,7 +48,6 @@ import org.labkey.elispot.RunDataRow;
 import org.labkey.elispot.plate.PlateInfo;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,7 +71,7 @@ public class BackgroundSubtractionJob extends PipelineJob
     {
         super(provider, info, root);
 
-        File logFile = FileUtil.createTempFile("backgroundSubtractionJob", ".log", root.getLogDirectory());
+        FileLike logFile = FileUtil.createTempFile("backgroundSubtractionJob", ".log", root.getLogDirectory(true));
         setLogFile(logFile);
 
         _runs = runs;

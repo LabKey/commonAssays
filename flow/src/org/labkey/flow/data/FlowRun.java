@@ -16,8 +16,6 @@
 
 package org.labkey.flow.data;
 
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.attachments.Attachment;
 import org.labkey.api.attachments.AttachmentService;
@@ -46,6 +44,8 @@ import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.labkey.vfs.FileLike;
+
 import java.io.File;
 import java.net.URI;
 import java.sql.ResultSet;
@@ -59,18 +59,10 @@ import java.util.Map;
 
 public class FlowRun extends FlowObject<ExpRun>
 {
-    private static final Logger _log = LogManager.getLogger(FlowRun.class);
-
     public static final Comparator<FlowRun> NAME_COMPARATOR = Comparator.comparing(FlowObject::getName);
 
     public static final Comparator<FlowRun> CREATED_COMPARATOR = Comparator.comparing(o -> o.getExperimentRun().getCreated());
 
-
-    static public String getRunLSIDPrefix()
-    {
-        // See ExperimentServiceImpl.getNamespacePrefix(ExpRunImpl.class)
-        return "Run";
-    }
 
     static public List<FlowRun> fromRuns(List<? extends ExpRun> runs)
     {
@@ -143,11 +135,11 @@ public class FlowRun extends FlowObject<ExpRun>
                     URI uri = well.getFCSURI();
                     // XXX: hit the file system every time?
                     if (uri != null && new File(uri.getPath()).canRead())
-                        wells.add((FlowWell) obj);
+                        wells.add(well);
                 }
                 else
                 {
-                    wells.add((FlowWell) obj);
+                    wells.add(well);
                 }
             }
         }
@@ -155,26 +147,6 @@ public class FlowRun extends FlowObject<ExpRun>
         Arrays.sort(ret);
         return ret;
     }
-
-
-    public FlowWell getFirstWell()
-    {
-        if (_allDatas != null)
-        {
-            for (FlowDataObject obj : _allDatas)
-                if (obj instanceof FlowWell)
-                    return (FlowWell)obj;
-        }
-
-        for (ExpData data : getExperimentRun().getOutputDatas(null))
-        {
-            FlowDataObject obj = FlowDataObject.fromData(data);
-            if (obj instanceof FlowWell)
-                return (FlowWell)obj;
-        }
-        return null;
-    }
-
 
     public FlowFCSFile[] getFCSFiles()
     {
@@ -398,13 +370,13 @@ public class FlowRun extends FlowObject<ExpRun>
     }
 
     @NotNull
-    static public List<FlowRun> getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot)
+    static public List<FlowRun> getRunsForPath(Container container, FlowProtocolStep step, FileLike runFilePathRoot)
     {
         return getRunsForPath(container, step, runFilePathRoot, NAME_COMPARATOR);
     }
 
     @NotNull
-    static public List<FlowRun> getRunsForPath(Container container, FlowProtocolStep step, File runFilePathRoot, Comparator<FlowRun> comparator)
+    static public List<FlowRun> getRunsForPath(Container container, FlowProtocolStep step, FileLike runFilePathRoot, Comparator<FlowRun> comparator)
     {
         List<FlowRun> ret = new ArrayList<>();
         ExpProtocol childProtocol = null;
@@ -419,7 +391,7 @@ public class FlowRun extends FlowObject<ExpRun>
         }
 
         ExperimentService.get().getExpRuns(container, null, childProtocol, run -> 
-                runFilePathRoot == null || (run.getFilePathRoot() != null && runFilePathRoot.equals(run.getFilePathRoot()))
+                runFilePathRoot == null || (run.getFilePathRoot() != null && runFilePathRoot.toNioPathForRead().toFile().equals(run.getFilePathRoot()))
             ).forEach( run -> ret.add(new FlowRun(run)));
 
         if (comparator != null)

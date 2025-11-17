@@ -19,13 +19,14 @@ package org.labkey.api.protein.annotation;
 import org.labkey.api.protein.uniprot.ParseActions;
 import org.labkey.api.protein.uniprot.ParseContext;
 import org.labkey.api.protein.uniprot.ParserTree;
+import org.labkey.vfs.FileLike;
 import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.HashSet;
@@ -312,9 +313,9 @@ public class XMLProteinHandler extends DefaultHandler
         _loader.handleThreadStateChangeRequests();
     }
 
-    public void parse(File file) throws IOException, SAXException
+    public void parse(FileLike file) throws IOException, SAXException
     {
-        getParser().parse(file.getPath());
+        getParser().parse(new InputSource(file.openInputStream()));
     }
 }
 

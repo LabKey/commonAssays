@@ -66,15 +66,15 @@ public class FlowSettings
      *
      * @return File object representing the Flow analysis working directory.
      */
-    static public File getWorkingDirectory()
+    static public FileLike getWorkingDirectory()
     {
         //Get admin provided setting if it exists
         String path = getWorkingDirectoryPath();
         if (path != null)
-            return new File(path);
+            return FileSystemLike.wrapFile(new File(path));
 
         // Otherwise default to the
-        return FileSystemLike.toFile(getTempAnalysisDirectory());
+        return getTempAnalysisDirectory();
     }
 
     static public String getWorkingDirectoryPath()

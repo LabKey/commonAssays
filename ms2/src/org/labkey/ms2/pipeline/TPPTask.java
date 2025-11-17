@@ -39,6 +39,7 @@ import org.labkey.api.util.Pair;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.util.ProtXMLFileType;
 import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -115,7 +116,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         return job.getParameters().get("pipeline tpp, version");
     }
 
-    public static File getPepXMLFile(File dirAnalysis, String baseName)
+    public static FileLike getPepXMLFile(FileLike dirAnalysis, String baseName)
     {
         return FT_PEP_XML.newFile(dirAnalysis, baseName);
     }
@@ -130,7 +131,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         return FT_PEP_XML.isType(file);
     }
 
-    public static File getProtXMLFile(File dirAnalysis, String baseName)
+    public static FileLike getProtXMLFile(FileLike dirAnalysis, String baseName)
     {
         return FT_PROT_XML.newFile(dirAnalysis, baseName);
     }
@@ -158,12 +159,12 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         /**
          * List of pepXML files to use as inputs to "xinteract".
          */
-        List<File> getInteractInputFiles();
+        List<FileLike> getInteractInputFiles();
 
         /**
          * List of mzXML files to use as inputs to "xinteract" quantitation.
          */
-        List<File> getInteractSpectraFiles();
+        List<FileLike> getInteractSpectraFiles();
 
         /**
          * True if PeptideProphet and ProteinProphet can be run on the input files.
@@ -191,7 +192,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         }
 
         @Override
-        public PipelineJob.Task createTask(PipelineJob job)
+        public TPPTask createTask(PipelineJob job)
         {
             return new TPPTask(this, job);
         }
@@ -219,7 +220,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
         {
             JobSupport support = job.getJobSupport(JobSupport.class);
             String baseName = support.getBaseName();
-            File dirAnalysis = support.getAnalysisDirectory();
+            FileLike dirAnalysis = support.getAnalysisDirectory();
 
             if (!NetworkDrive.exists(getPepXMLFile(dirAnalysis, baseName)))
                 return false;
@@ -301,33 +302,33 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             actions.add(pepXMLAction);
 
             // Set mzXML directory only if needed.
-            File dirMzXml = null;
+            FileLike dirMzXml = null;
 
             // TODO: mzXML files may be required, and input disk space requirements
             //          may be too great to copy to a temporary directory.
-            List<File> inputFiles = getJobSupport().getInteractInputFiles();
-            List<File> inputWorkFiles = new ArrayList<>(inputFiles.size());
-            for (File fileInput : inputFiles)
+            List<FileLike> inputFiles = getJobSupport().getInteractInputFiles();
+            List<FileLike> inputWorkFiles = new ArrayList<>(inputFiles.size());
+            for (FileLike fileInput : inputFiles)
             {
                 pepXMLAction.addInput(fileInput, "RawPepXML");
             }
 
-            List<File> spectraFiles = new ArrayList<>();
+            List<FileLike> spectraFiles = new ArrayList<>();
 
             boolean proteinProphetOutput = getJobSupport().isProphetEnabled();
             if (!inputFiles.isEmpty())
             {
                 try (WorkDirectory.CopyingResource ignored = _wd.ensureCopyingLock())
                 {
-                    for (File inputFile : inputFiles)
+                    for (FileLike inputFile : inputFiles)
                         inputWorkFiles.add(_wd.inputFile(inputFile, false));
 
                     // Always copy spectra files to be local, since PeptideProphet wants them as of TPP 4.6.3
-                    for (File spectraFile : getJobSupport().getInteractSpectraFiles())
+                    for (FileLike spectraFile : getJobSupport().getInteractSpectraFiles())
                     {
                         spectraFiles.add(_wd.inputFile(spectraFile, true));
                         if (dirMzXml == null)
-                            dirMzXml = spectraFile.getParentFile();
+                            dirMzXml = spectraFile.getParent();
                     }
                 }
             }
@@ -351,7 +352,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 }
             }
 
-            File fileWorkPepXML = _wd.newFile(FT_PEP_XML);
+            FileLike fileWorkPepXML = _wd.newFile(FT_PEP_XML);
 
             String ver = getTPPVersion(getJob());
             List<String> interactCmd = new ArrayList<>();
@@ -444,7 +445,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
             interactCmd.add("-N" + fileWorkPepXML.getName());
 
-            for (File fileInput : inputWorkFiles)
+            for (FileLike fileInput : inputWorkFiles)
                 interactCmd.add(_wd.getRelativePath(fileInput));
 
             ProcessBuilder builder = new ProcessBuilder(interactCmd);
@@ -488,7 +489,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 File realTppModelsFile = new File(PipelineJobService.get().getExecutablePath("tpp_models.pl", null, "tpp", ver, getJob().getLogger()));
                 if (realTppModelsFile.exists())
                 {
-                    _wd.inputFile(realTppModelsFile, true);
+                    _wd.inputFile(FileSystemLike.wrapFile(realTppModelsFile), true);
                 }
             }
             catch (FileNotFoundException ignored)
@@ -535,17 +536,17 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
             try (WorkDirectory.CopyingResource ignored = _wd.ensureCopyingLock())
             {
-                File filePepXML = _wd.outputFile(fileWorkPepXML);
+                FileLike filePepXML = _wd.outputFile(fileWorkPepXML);
 
                 // Set up the first step with the right outputs
                 pepXMLAction.addOutput(filePepXML, PEP_XML_INPUT_ROLE, false);
 
-                File fileProtXML = null;
+                FileLike fileProtXML = null;
 
                 if (proteinProphetOutput)
                 {
                     // If we ran ProteinProphet, set up a step with the right inputs and outputs
-                    File fileWorkProtXML = _wd.newFile(FT_PROT_XML);
+                    FileLike fileWorkProtXML = _wd.newFile(FT_PROT_XML);
 
                     fileProtXML = _wd.outputFile(fileWorkProtXML, FT_PROT_XML.getDefaultName(getJobSupport().getBaseName()));
 
@@ -559,7 +560,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                     // we need to deal with them so that we don't complain about unexpected files
                     for (Map.Entry<FileType, String> entry : FT_OPTIONAL_AND_IGNORABLES.entrySet())
                     {
-                        File workFile = _wd.newFile(entry.getKey());
+                        FileLike workFile = _wd.newFile(entry.getKey());
                         {
                             // Check if it exists
                             if (!NetworkDrive.exists(workFile))
@@ -570,7 +571,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                             else
                             {
                                 // If so, then grab it and mark as an output
-                                File outputFile = _wd.outputFile(workFile);
+                                FileLike outputFile = _wd.outputFile(workFile);
                                 protXMLAction.addOutput(outputFile, entry.getValue(), false);
                             }
                         }
@@ -579,7 +580,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
 
                 if (peptideQuantAction != null)
                 {
-                    for (File file : getJobSupport().getInteractSpectraFiles())
+                    for (FileLike file : getJobSupport().getInteractSpectraFiles())
                     {
                         peptideQuantAction.addInput(file, "mzXML");
                     }
@@ -599,8 +600,8 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
                 if (quantConfigFile != null)
                 {
                     // Rename from the static name quantitation.tsv to <BASE_NAME>.libra.tsv
-                    File libraOutputWork = new File(_wd.getDir(), "quantitation.tsv");
-                    File libraOutput = _wd.outputFile(libraOutputWork, FT_LIBRA_QUANTITATION.getName(_wd.getDir(), getJobSupport().getBaseName()));
+                    FileLike libraOutputWork = _wd.getDir().resolveChild("quantitation.tsv");
+                    FileLike libraOutput = _wd.outputFile(libraOutputWork, FT_LIBRA_QUANTITATION.getName(_wd.getDir(), getJobSupport().getBaseName()));
                     proteinQuantAction.addOutput(libraOutput, LIBRA_OUTPUT_ROLE, false);
                 }
             }
@@ -612,7 +613,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             _wd.discardFile(_wd.newFile(FT_INTERMEDIATE_PROT_SHTML));
 
             // We don't need the extra copy of the spectra files
-            for (File spectraFile : spectraFiles)
+            for (FileLike spectraFile : spectraFiles)
             {
                 _wd.discardFile(spectraFile);
             }
@@ -621,7 +622,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             // the raw pepXML file(s).
             if (!getJobSupport().isFractions() || inputFiles.size() > 1)
             {
-                for (File fileInput : inputFiles)
+                for (FileLike fileInput : inputFiles)
                 {
                     if (!fileInput.delete())
                         getJob().warn("Failed to delete intermediate file " + fileInput);

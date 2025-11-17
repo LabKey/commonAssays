@@ -41,8 +41,8 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewContext;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowPipelineProvider;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -90,9 +90,9 @@ public class FlowReportJob extends RReportJob
         {
             // UNDONE: be like the base RReport and write the input file before the report job runs
             @Override
-            protected File inputFile(RReport report, @NotNull ViewContext context) throws Exception
+            protected FileLike inputFile(RReport report, @NotNull ViewContext context) throws Exception
             {
-                File file = report.createInputDataFile(context);
+                FileLike file = report.createInputDataFile(context);
 
                 // debug logging
                 debug("Executed query:");
@@ -142,7 +142,7 @@ public class FlowReportJob extends RReportJob
 
                     for (Tuple3<TsvOutput, Domain, FlowTableType> tuple : tuples)
                     {
-                        saveTsvOutput(tuple.first, tuple.second, tuple.third);
+                        saveTsvOutput(tuple.first, tuple.second);
                         if (getErrors() > 0)
                             return;
                     }
@@ -184,17 +184,17 @@ public class FlowReportJob extends RReportJob
         return domain;
     }
 
-    private void saveTsvOutput(TsvOutput tsv, Domain domain, FlowTableType tableType) throws Exception
+    private void saveTsvOutput(TsvOutput tsv, Domain domain) throws Exception
     {
         info("Importing tsv file '" + tsv + "' into domain " + domain.getName());
-        for (File file : tsv.getFiles())
+        for (FileLike file : tsv.getFiles())
         {
             TabLoader loader = tsv.createTabLoader(file);
             mapTsvColumns(domain, loader);
             if (getErrors() > 0)
                 return;
 
-            save(domain, loader, tableType);
+            save(domain, loader);
             info("Imported tsv file '" + tsv + "' into domain " + domain.getName());
         }
     }
@@ -236,7 +236,7 @@ public class FlowReportJob extends RReportJob
         _report.deleteSavedResults(getContainer());
     }
 
-    private void save(Domain domain, TabLoader loader, FlowTableType tableType) throws BatchValidationException, SQLException, IOException
+    private void save(Domain domain, TabLoader loader) throws BatchValidationException, SQLException, IOException
     {
         OntologyManager.ImportHelper helper = new OntologyManager.ImportHelper()
         {

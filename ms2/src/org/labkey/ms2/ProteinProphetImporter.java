@@ -370,7 +370,7 @@ public class ProteinProphetImporter
                     if (TPPTask.isProtXMLFile(_file.getParent().toNioPathForRead().toFile()))
                     {
                         String baseName = TPPTask.FT_PROT_XML.getBaseName(_file);
-                        pepXMLFile = TPPTask.getPepXMLFile(_file.getParent().toNioPathForRead().toFile(), baseName);
+                        pepXMLFile = TPPTask.getPepXMLFile(_file.getParent(), baseName).toNioPathForRead().toFile();
                         attemptedFiles.add(pepXMLFile.getAbsolutePath());
                         if (!NetworkDrive.exists(pepXMLFile))
                         {

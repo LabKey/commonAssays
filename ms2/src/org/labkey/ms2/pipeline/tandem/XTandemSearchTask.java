@@ -25,11 +25,13 @@ import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.writer.PrintWriters;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTaskFactory;
 import org.labkey.ms2.pipeline.MS2SearchJobSupport;
 import org.labkey.ms2.pipeline.TPPTask;
+import org.labkey.vfs.FileLike;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -63,7 +65,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
         return new FileType(".xtan.xml", gzSupport);
     }
     // useful for naming an output file while honoring config preference for gzip output
-    public static File getNativeOutputFile(File dirAnalysis, String baseName,
+    public static FileLike getNativeOutputFile(FileLike dirAnalysis, String baseName,
                                            FileType.gzSupportLevel gzSupport)
     {
         return getNativeFileType(gzSupport).newFile(dirAnalysis, baseName);
@@ -95,7 +97,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
         {
             JobSupport support = (JobSupport) job;
             String baseName = support.getBaseName();
-            File dirAnalysis = support.getAnalysisDirectory();
+            FileLike dirAnalysis = support.getAnalysisDirectory();
 
             // X! Tandem native output
             if (!NetworkDrive.exists(getNativeOutputFile(dirAnalysis, baseName, FileType.gzSupportLevel.SUPPORT_GZ)))
@@ -144,13 +146,13 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             // Avoid re-running an X! Tandem search, if the .xtan.xml already exists.
             // Several labs soft-link or copy .xtan.xml files to reduce processing time.
             ProcessBuilder xTandemPB = null;
-            File fileOutputXML = getNativeFileType(support.getGZPreference()).newFile(support.getAnalysisDirectory(), baseName);
-            File fileWorkOutputXML = null;
-            File fileJobTandemXML = null;
+            FileLike fileOutputXML = getNativeFileType(support.getGZPreference()).newFile(support.getAnalysisDirectory(), baseName);
+            FileLike fileWorkOutputXML = null;
+            FileLike fileJobTandemXML = null;
             boolean searchComplete = NetworkDrive.exists(fileOutputXML);
 
-            File fileMzXML = _factory.findInputFile(getJobSupport());
-            File fileInputSpectra;
+            FileLike fileMzXML = _factory.findInputFile(getJobSupport());
+            FileLike fileInputSpectra;
             try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
             {
                 fileInputSpectra = _wd.inputFile(fileMzXML, false);
@@ -161,14 +163,14 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
             if (!searchComplete)
             {
                 fileWorkOutputXML = _wd.newFile(getNativeFileType(support.getGZPreference()));
-                File fileWorkParameters = _wd.newFile(INPUT_XML);
-                File fileWorkTaxonomy = _wd.newFile(TAXONOMY_XML);
+                FileLike fileWorkParameters = _wd.newFile(INPUT_XML);
+                FileLike fileWorkTaxonomy = _wd.newFile(TAXONOMY_XML);
 
                 // CONSIDER: If the file stays in its original location, the absolute path
                 //           is used, to ensure the loader can find it.  Better way?
                 String pathSpectra;
                 if (fileInputSpectra.equals(fileMzXML))
-                    pathSpectra = fileInputSpectra.getAbsolutePath();
+                    pathSpectra = fileInputSpectra.toNioPathForRead().toFile().getAbsolutePath();
                 else
                     pathSpectra = _wd.getRelativePath(fileInputSpectra);
 
@@ -198,7 +200,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
                 _wd.discardFile(fileWorkTaxonomy);
             }
 
-            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(), baseName, support.getGZPreference());
+            FileLike fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(), baseName, support.getGZPreference());
 
             String ver = TPPTask.getTPPVersion(getJob());
             String exePath = PipelineJobService.get().getExecutablePath("Tandem2XML", null, "tpp", ver, getJob().getLogger());
@@ -209,7 +211,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
                     _wd.getDir());
 
             // Move final outputs to analysis directory.
-            File filePepXMLRaw;
+            FileLike filePepXMLRaw;
             try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
             {
                 if (!searchComplete)
@@ -223,7 +225,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
                 RecordedAction xtandemAction = new RecordedAction(X_TANDEM_ACTION_NAME);
                 xtandemAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(xTandemPB.command(), ' '));
                 xtandemAction.addInput(fileMzXML, SPECTRA_INPUT_ROLE);
-                for (File sequenceFile : getJobSupport().getSequenceFiles())
+                for (FileLike sequenceFile : getJobSupport().getSequenceFiles())
                 {
                     xtandemAction.addInput(sequenceFile, FASTA_INPUT_ROLE);
                 }
@@ -246,7 +248,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
         }
     }
 
-    public void writeRunParameters(String pathSpectra, File fileParameters, File fileTaxonomy, File fileWorkOutputXML) throws IOException
+    public void writeRunParameters(String pathSpectra, FileLike fileParameters, FileLike fileTaxonomy, FileLike fileWorkOutputXML) throws IOException
     {
         Map<String, String> params = new HashMap<>(getJobSupport().getParameters());
         
@@ -291,23 +293,23 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
         }
     }
 
-    public void writeTaxonomy(File fileTaxonomy, String taxonName, File[] fileDatabases) throws IOException
+    public void writeTaxonomy(FileLike fileTaxonomy, String taxonName, List<FileLike> fileDatabases) throws IOException
     {
         StringBuilder taxonomyBuffer = new StringBuilder();
         taxonomyBuffer.append("<?xml version=\"1.0\"?>\n");
         taxonomyBuffer.append("<bioml label=\"x! taxon-to-file matching list\">\n");
         taxonomyBuffer.append("  <taxon label=\"").append(taxonName).append("\">\n");
-        for (File fileDatabase : fileDatabases)
+        for (FileLike fileDatabase : fileDatabases)
         {
             taxonomyBuffer.append("    <file format=\"peptide\" URL=\"");
-            taxonomyBuffer.append(fileDatabase.getAbsolutePath());
+            taxonomyBuffer.append(fileDatabase.toNioPathForRead().toFile().getAbsolutePath());
             taxonomyBuffer.append("\"/>\n");
         }
         taxonomyBuffer.append("  </taxon>\n");
         taxonomyBuffer.append("</bioml>\n");
         String taxonomyText = taxonomyBuffer.toString();
 
-        try (BufferedWriter taxonomyWriter = new BufferedWriter(new FileWriter(fileTaxonomy)))
+        try (BufferedWriter taxonomyWriter = new BufferedWriter(PrintWriters.getPrintWriter(fileTaxonomy.openOutputStream())))
         {
             String[] lines = taxonomyText.split("\n");
             for (String line : lines)

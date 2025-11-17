@@ -15,6 +15,8 @@
  */
 package org.labkey.ms2.pipeline;
 
+import org.labkey.vfs.FileLike;
+
 import java.io.File;
 
 /**
@@ -26,12 +28,12 @@ public interface MS2SearchJobSupport extends MS2PipelineJobSupport
     /**
      * Returns the native output file for the search.
      */
-    File getSearchNativeOutputFile();
+    FileLike getSearchNativeOutputFile();
 
     /**
      * Returns native spectra file converted from the standard format,
      * or null if the standard format was used.
      */
-    File getSearchNativeSpectraFile();
+    FileLike getSearchNativeSpectraFile();
 
 }

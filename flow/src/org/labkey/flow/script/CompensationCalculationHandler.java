@@ -29,9 +29,9 @@ import org.labkey.flow.persist.ObjectType;
 import org.fhcrc.cpas.exp.xml.ExperimentRunType;
 import org.fhcrc.cpas.exp.xml.ProtocolApplicationBaseType;
 import org.fhcrc.cpas.exp.xml.DataBaseType;
+import org.labkey.vfs.FileLike;
 
 import java.util.*;
-import java.io.File;
 
 public class CompensationCalculationHandler extends BaseHandler
 {
@@ -46,7 +46,7 @@ public class CompensationCalculationHandler extends BaseHandler
     }
 
     @Override
-    public void processRun(FlowRun run, ExperimentRunType runElement, File outputDirectory) throws Exception
+    public void processRun(FlowRun run, ExperimentRunType runElement, FileLike outputDirectory) throws Exception
     {
         _job.addStatus("Calculating compensation matrix for " + run.getName());
         List<FCSRef> uris = FlowAnalyzer.getFCSRefs(run);

@@ -37,8 +37,9 @@ import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
+import java.io.OutputStream;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.List;
@@ -73,7 +74,7 @@ public class AnalysisHandler extends BaseHandler
     }
 
     @Override
-    public void processRun(FlowRun run, ExperimentRunType runElement, File workingDirectory) throws Exception
+    public void processRun(FlowRun run, ExperimentRunType runElement, FileLike workingDirectory) throws Exception
     {
         FlowCompensationMatrix flowComp;
 
@@ -133,9 +134,12 @@ public class AnalysisHandler extends BaseHandler
                     FlowScript script = wells[iWell].getScript();
                     if (script.getScriptId() != _job._runAnalysisScript.getScriptId())
                     {
-                        File file = _job.decideFileName(workingDirectory, URIUtil.getFilename(srcWell.getFCSURI()), FlowDataHandler.EXT_SCRIPT);
+                        FileLike file = _job.decideFileName(workingDirectory, URIUtil.getFilename(srcWell.getFCSURI()), FlowDataHandler.EXT_SCRIPT);
                         ScriptDocument doc = script.getAnalysisScriptDocument();
-                        doc.save(file);
+                        try (OutputStream out = file.openOutputStream())
+                        {
+                            doc.save(out);
+                        }
 
                         ProtocolApplicationBaseType app = addProtocolApplication(runElement, null);
                         scriptLSID = ExperimentService.get().generateGuidLSID(getContainer(), FlowDataType.Script);
@@ -180,7 +184,7 @@ public class AnalysisHandler extends BaseHandler
 
     private class AnalyzeTask implements Runnable
     {
-        File _workingDirectory;
+        FileLike _workingDirectory;
         FlowRun _run;
         FlowWell _well;
         int _wellCount;
@@ -190,7 +194,7 @@ public class AnalysisHandler extends BaseHandler
         Analysis _groupAnalysis;
         String _scriptLSID;
 
-        AnalyzeTask(File workingDirectory, FlowRun run, ExperimentRunType runElement, FlowWell well, int wellCount, String scriptLSID, Analysis groupAnalysis, FlowCompensationMatrix flowComp, CompensationMatrix comp)
+        AnalyzeTask(FileLike workingDirectory, FlowRun run, ExperimentRunType runElement, FlowWell well, int wellCount, String scriptLSID, Analysis groupAnalysis, FlowCompensationMatrix flowComp, CompensationMatrix comp)
         {
             _workingDirectory = workingDirectory;
             _run = run;

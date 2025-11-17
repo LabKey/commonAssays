@@ -22,35 +22,34 @@ import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
 import org.labkey.api.exp.XarSource;
 import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.writer.PrintWriters;
 import org.labkey.vfs.FileLike;
-import org.labkey.vfs.FileSystemLike;
 
-import java.io.File;
-import java.io.FileWriter;
+import java.io.Writer;
 import java.nio.file.Path;
 
 public class ScriptXarSource extends XarSource
 {
     private static final Logger _log = LogManager.getLogger(ScriptXarSource.class);
-    File _root;
-    File _workingDirectory;
-    File _logFile;
+    FileLike _root;
+    FileLike _workingDirectory;
+    FileLike _logFile;
     ExperimentArchiveDocument _doc;
 
-    public ScriptXarSource(ExperimentArchiveDocument doc, File root, File workingDirectory, PipelineJob job)
+    public ScriptXarSource(ExperimentArchiveDocument doc, FileLike root, FileLike workingDirectory, PipelineJob job)
     {
         super(job);
         _root = root;
         _doc = doc;
         _workingDirectory = workingDirectory;
-        _logFile = FileUtil.appendName(_workingDirectory, "flow.xar.log");
+        _logFile = _workingDirectory.resolveChild("flow.xar.log");
 
         // For informational purposes, write out the XAR file.
         try
         {
-            File xarfile = FileUtil.appendName(_workingDirectory, "flow.xar.xml");
+            FileLike xarfile = _workingDirectory.resolveChild("flow.xar.xml");
 
-            try (FileWriter writer = new FileWriter(xarfile))
+            try (Writer writer = PrintWriters.getPrintWriter(xarfile.openOutputStream()))
             {
                 writer.write(doc.toString());
             }
@@ -70,7 +69,7 @@ public class ScriptXarSource extends XarSource
     @Override
     public Path getRootPath()
     {
-        return null != _root ? _root.toPath() : null;
+        return null != _root ? _root.toNioPathForRead() : null;
     }
 
     @Override
@@ -89,6 +88,6 @@ public class ScriptXarSource extends XarSource
     @Override
     public FileLike getLogFilePath()
     {
-        return FileSystemLike.wrapFile(_logFile);
+        return _logFile;
     }
 }

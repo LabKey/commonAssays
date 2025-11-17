@@ -22,9 +22,9 @@ import org.labkey.api.data.DbScope;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.vfs.FileLike;
 import org.xml.sax.SAXException;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 
@@ -49,7 +49,7 @@ public class XMLProteinLoader extends DefaultAnnotationLoader
         _clearExisting = clearExisting;
     }
 
-    public XMLProteinLoader(File file, ViewBackgroundInfo info, PipeRoot root, boolean clearExisting) throws IOException
+    public XMLProteinLoader(FileLike file, ViewBackgroundInfo info, PipeRoot root, boolean clearExisting) throws IOException
     {
         super(file, info, root);
         _clearExisting = clearExisting;

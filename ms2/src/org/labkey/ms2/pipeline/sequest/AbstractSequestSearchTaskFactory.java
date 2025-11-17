@@ -21,6 +21,7 @@ import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTaskFactory;
 import org.labkey.ms2.pipeline.TPPTask;
+import org.labkey.vfs.FileLike;
 import org.springframework.beans.factory.InitializingBean;
 
 import java.io.File;
@@ -48,7 +49,7 @@ public abstract class AbstractSequestSearchTaskFactory<Type extends AbstractMS2S
         AbstractMS2SearchPipelineJob support = (AbstractMS2SearchPipelineJob) job;
         String baseName = support.getBaseName();
         String baseNameJoined = support.getJoinedBaseName();
-        File dirAnalysis = support.getAnalysisDirectory();
+        FileLike dirAnalysis = support.getAnalysisDirectory();
 
         // Fraction roll-up, completely analyzed sample pepXML, or the raw pepXML exist
         return NetworkDrive.exists(TPPTask.getPepXMLFile(dirAnalysis, baseNameJoined)) ||

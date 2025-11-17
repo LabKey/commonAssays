@@ -25,8 +25,8 @@ import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.protein.fasta.FastaValidator;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -132,7 +132,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
             boolean success = true;
 
             FastaValidator validator = new FastaValidator();
-            for (File sequenceFile : getJobSupport().getSequenceFiles())
+            for (FileLike sequenceFile : getJobSupport().getSequenceFiles())
             {
                 action.addInput(sequenceFile, "FASTA");
                 
@@ -147,7 +147,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
 
             if (_factory._requireDecoyDatabase)
             {
-                for (File decoyFile : getDecoySequenceFiles(getJobSupport()))
+                for (FileLike decoyFile : getDecoySequenceFiles(getJobSupport()))
                 {
                     getJob().info("Checking decoy file: " + decoyFile);
                     success &= validateSequenceFile(validator, decoyFile);
@@ -170,9 +170,9 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
 
     }
 
-    public static List<File> getDecoySequenceFiles(MS2SearchJobSupport job)
+    public static List<FileLike> getDecoySequenceFiles(MS2SearchJobSupport job)
     {
-        List<File> result = new ArrayList<>();
+        List<FileLike> result = new ArrayList<>();
         if (job.getParameters().get(DECOY_DATABASE_PARAM_NAME) != null)
         {
             String decoyPath = job.getParameters().get(DECOY_DATABASE_PARAM_NAME);
@@ -180,7 +180,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
         }
         else
         {
-            for (File sequenceFile : job.getSequenceFiles())
+            for (FileLike sequenceFile : job.getSequenceFiles())
             {
                 String basename = FileUtil.getBaseName(sequenceFile);
                 String extension = FileUtil.getExtension(sequenceFile);
@@ -189,10 +189,10 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
                     throw new IllegalStateException("No decoy file suffixes configured!");
                 }
                 int i = 0;
-                File decoyFile = new File(sequenceFile.getParentFile(), basename + DECOY_FILE_SUFFIXES.get(i++) + (extension == null ? "" : "." + extension));
+                FileLike decoyFile = sequenceFile.getParent().resolveChild(basename + DECOY_FILE_SUFFIXES.get(i++) + (extension == null ? "" : "." + extension));
                 while (!decoyFile.exists() && i < DECOY_FILE_SUFFIXES.size())
                 {
-                    decoyFile = new File(sequenceFile.getParentFile(), basename + DECOY_FILE_SUFFIXES.get(i++) + (extension == null ? "" : "." + extension));
+                    decoyFile = sequenceFile.getParent().resolveChild(basename + DECOY_FILE_SUFFIXES.get(i++) + (extension == null ? "" : "." + extension));
                 }
                 result.add(decoyFile);
             }
@@ -200,7 +200,7 @@ public class FastaCheckTask extends PipelineJob.Task<FastaCheckTask.Factory>
         return result;
     }
 
-    private boolean validateSequenceFile(FastaValidator validator, File fastaFile)
+    private boolean validateSequenceFile(FastaValidator validator, FileLike fastaFile)
     {
         if (!fastaFile.exists())
         {

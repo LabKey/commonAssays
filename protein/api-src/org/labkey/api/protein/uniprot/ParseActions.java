@@ -16,14 +16,13 @@
 
 package org.labkey.api.protein.uniprot;
 
+import org.labkey.vfs.FileLike;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import java.io.File;
-
 public abstract class ParseActions
 {
-    protected File _file;
+    protected FileLike _file;
     protected String _comment = null;
     protected int _currentInsertId = 0;
     
@@ -37,12 +36,12 @@ public abstract class ParseActions
         _comment = c;
     }
     
-    public File getFile()
+    public FileLike getFile()
     {
         return _file;
     }
 
-    public void setFile(File file)
+    public void setFile(FileLike file)
     {
         _file = file;
     }
@@ -66,7 +65,7 @@ public abstract class ParseActions
     {
     }
 
-    public void characters(ParseContext context, char ch[], int start, int len)
+    public void characters(ParseContext context, char[] ch, int start, int len)
     {
     }
 }

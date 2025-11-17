@@ -28,14 +28,13 @@ import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 
 public abstract class DefaultAnnotationLoader extends PipelineJob
 {
-    protected File _file;
+    protected FileLike _file;
     protected String _comment = null;
     protected int currentInsertId = 0;
 
@@ -45,7 +44,7 @@ public abstract class DefaultAnnotationLoader extends PipelineJob
     // For serialization
     protected DefaultAnnotationLoader() {}
 
-    public DefaultAnnotationLoader(File file, ViewBackgroundInfo info, PipeRoot pipeRoot) throws IOException
+    public DefaultAnnotationLoader(FileLike file, ViewBackgroundInfo info, PipeRoot pipeRoot) throws IOException
     {
         super(ProteinAnnotationPipelineProvider.NAME, info, pipeRoot);
         _file = FileUtil.getAbsoluteCaseSensitiveFile(file);
@@ -105,7 +104,7 @@ public abstract class DefaultAnnotationLoader extends PipelineJob
         return _comment;
     }
 
-    public File getFile()
+    public FileLike getFile()
     {
         return _file;
     }

@@ -29,6 +29,7 @@ import org.labkey.flow.data.FlowFCSFile;
 import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowRun;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,12 +64,12 @@ public class KeywordsTask extends PipelineJob.Task<KeywordsTask.Factory>
         return new RecordedActionSet();
     }
 
-    public static List<FlowRun> importFlowRuns(PipelineJob job, FlowProtocol protocol, List<File> paths, Container targetStudyContainer) throws IOException, SQLException
+    public static List<FlowRun> importFlowRuns(PipelineJob job, FlowProtocol protocol, List<FileLike> paths, Container targetStudyContainer) throws IOException, SQLException
     {
         PipeRoot pr = PipelineService.get().findPipelineRoot(job.getContainer());
 
         KeywordsJob keywordsJob = new KeywordsJob(job.getInfo(), protocol, paths, targetStudyContainer, pr);
-        keywordsJob.setLogFile(job.getLogFilePath());
+        keywordsJob.setLogFile(job.getLogFileLike());
         keywordsJob.setLogLevel(job.getLogLevel());
         keywordsJob.setSubmitted();
 

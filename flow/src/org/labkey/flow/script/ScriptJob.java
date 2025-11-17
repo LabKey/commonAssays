@@ -48,16 +48,16 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.InputRole;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 abstract public class ScriptJob extends FlowExperimentJob
 {
@@ -200,7 +200,8 @@ abstract public class ScriptJob extends FlowExperimentJob
     {
         ExperimentArchiveDocument doc = createExperimentArchive();
         ExperimentRunType runElement = addExperimentRun(doc.getExperimentArchive(), handler.getRunName(srcRun));
-        File workingDirectory = createAnalysisDirectory(new File(srcRun.getPath()), handler._step);
+        FileLike srcRunFile = FileSystemLike.wrapFile(new File(srcRun.getPath()));
+        FileLike workingDirectory = createAnalysisDirectory(srcRunFile, handler._step);
         try
         {
             handler.processRun(srcRun, runElement, workingDirectory);
@@ -213,10 +214,10 @@ abstract public class ScriptJob extends FlowExperimentJob
         if (!hasErrors())
         {
             finishExperimentRun(doc.getExperimentArchive(), runElement);
-            importRuns(doc, new File(srcRun.getPath()), workingDirectory, handler._step);
+            importRuns(doc, srcRunFile, workingDirectory, handler._step);
         }
         
-        deleteAnalysisDirectory(workingDirectory.getParentFile());
+        deleteAnalysisDirectory(workingDirectory.getParent());
         return FlowRun.fromLSID(runElement.getAbout());
     }
 
@@ -237,19 +238,6 @@ abstract public class ScriptJob extends FlowExperimentJob
         if (_runAnalysisScript != null)
             return _runAnalysisScript.getName();
         return "Upload";
-    }
-
-    public Map<FlowProtocolStep, String[]> getProcessedRunLSIDs()
-    {
-        TreeMap<FlowProtocolStep, String[]> ret = new TreeMap<>(Comparator.comparingInt(FlowProtocolStep::getDefaultActionSequence));
-        synchronized(_processedRunLSIDs)
-        {
-            for (Map.Entry<FlowProtocolStep, List<String>> entry : _processedRunLSIDs.entrySet())
-            {
-                ret.put(entry.getKey(), entry.getValue().toArray(new String[0]));
-            }
-        }
-        return ret;
     }
 
     public ExperimentArchiveDocument createExperimentArchive()
@@ -392,7 +380,7 @@ abstract public class ScriptJob extends FlowExperimentJob
     }
 
 
-    public void importRuns(ExperimentArchiveDocument xardoc, File root, File workingDirectory, FlowProtocolStep step)
+    public void importRuns(ExperimentArchiveDocument xardoc, FileLike root, FileLike workingDirectory, FlowProtocolStep step)
     {
         if (xardoc.getExperimentArchive().getExperimentRuns().getExperimentRunArray().length > 0)
         {
@@ -420,12 +408,7 @@ abstract public class ScriptJob extends FlowExperimentJob
     {
         synchronized(_processedRunLSIDs)
         {
-            List<String> list = _processedRunLSIDs.get(step);
-            if (list == null)
-            {
-                list = new ArrayList<>();
-                _processedRunLSIDs.put(step, list);
-            }
+            List<String> list = _processedRunLSIDs.computeIfAbsent(step, k -> new ArrayList<>());
             list.addAll(lsids);
         }
     }

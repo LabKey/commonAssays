@@ -38,6 +38,8 @@ import org.labkey.api.protein.organism.OrganismGuessStrategy;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -72,13 +74,13 @@ public class FastaDbLoader extends DefaultAnnotationLoader
     // For serialization
     protected FastaDbLoader() {}
 
-    public FastaDbLoader(File file, ViewBackgroundInfo info, PipeRoot root, String hash) throws IOException
+    public FastaDbLoader(FileLike file, ViewBackgroundInfo info, PipeRoot root, String hash) throws IOException
     {
         super(file, info, root);
         _fileHash = hash;
     }
 
-    public FastaDbLoader(File file, ViewBackgroundInfo info, PipeRoot root) throws IOException
+    public FastaDbLoader(FileLike file, ViewBackgroundInfo info, PipeRoot root) throws IOException
     {
         this(file, info, root, null);
     }
@@ -159,7 +161,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         synchronized (LOCK)
         {
             FastaFile file = new FastaFile();
-            file.setFilename(_file.getPath());
+            file.setFilename(_file.toNioPathForRead().toFile().getPath());
             file.setFileChecksum(_fileHash);
             file = Table.insert(null, ProteinSchema.getTableInfoFastaFiles(), file);
             associatedFastaId = file.getFastaId();
@@ -191,7 +193,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
     {
         if (currentInsertId == 0)
         {
-            fdbu._initialInsertionStmt.setString(1, _file.getPath());
+            fdbu._initialInsertionStmt.setString(1, _file.toNioPathForRead().toFile().getPath());
             if (comment == null) setComment("");
             fdbu._initialInsertionStmt.setString(2, comment);
             fdbu._initialInsertionStmt.setString(3, defaultOrganism);
@@ -267,7 +269,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             String bestNameTmp = curSeq.getBestName();
             fdbu._addSeqStmt.setString(6, bestNameTmp);
             //todo: rethink best name
-            fdbu._addSeqStmt.setString(7, baseFileName(_file.getPath()));
+            fdbu._addSeqStmt.setString(7, baseFileName(_file.toNioPathForRead().toFile().getPath()));
             fdbu._addSeqStmt.setString(8, curSeq.getProtein().getLookup());
             if (curSeq.getGenus() == null)
             {
@@ -475,7 +477,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
 
     protected int guessAssociatedFastaId() throws SQLException
     {
-        String bfn = baseFileName(_file.getPath());
+        String bfn = baseFileName(_file.toNioPathForRead().toFile().getPath());
 
         try (ResultSet rs = new SqlSelector(ProteinSchema.getSchema(), "SELECT FastaId,FileName FROM " + ProteinSchema.getTableInfoFastaFiles()).getResultSet())
         {
@@ -698,25 +700,26 @@ public class FastaDbLoader extends DefaultAnnotationLoader
     public static synchronized int loadAnnotations(String path, String fileName, String defaultOrganism, boolean shouldGuess, Logger log, XarContext context) throws SQLException, IOException
     {
         File f = context.findFile(fileName, new File(path));
+        FileLike file = FileSystemLike.wrapFile(f);
         if (f == null)
         {
             throw new FileNotFoundException(fileName);
         }
         String convertedName = getCanonicalPath(f);
-        String hash = HashHelpers.hashFileContents(f);
+        String hash = HashHelpers.hashFileContents(file);
 
         Collection<FastaFile> files = new SqlSelector(ProteinSchema.getSchema(), "SELECT * FROM " + ProteinSchema.getTableInfoFastaFiles() + " WHERE FileChecksum = ? ORDER BY FastaId", hash).getCollection(FastaFile.class);
         FastaFile loadedFile = null;
 
-        for (FastaFile file : files)
+        for (FastaFile fastaFile : files)
         {
-            if (file.getLoaded() == null)
+            if (fastaFile.getLoaded() == null)
             {
-                ProteinManager.deleteFastaFile(file.getFastaId());
+                ProteinManager.deleteFastaFile(fastaFile.getFastaId());
             }
             else
             {
-                loadedFile = file;
+                loadedFile = fastaFile;
             }
         }
 
@@ -735,7 +738,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             return loadedFile.getFastaId();
         }
 
-        FastaDbLoader fdbl = new FastaDbLoader(f, new ViewBackgroundInfo(context.getContainer(), context.getUser(), null), null, hash);
+        FastaDbLoader fdbl = new FastaDbLoader(file, new ViewBackgroundInfo(context.getContainer(), context.getUser(), null), null, hash);
         fdbl.setComment(new java.util.Date() + " " + convertedName);
         fdbl.setDefaultOrganism(defaultOrganism);
         fdbl.setOrganismIsToGuessed(shouldGuess);

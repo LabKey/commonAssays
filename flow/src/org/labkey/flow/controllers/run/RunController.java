@@ -87,6 +87,7 @@ import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.view.ExportAnalysisForm;
 import org.labkey.flow.view.ExportAnalysisManifest;
 import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -96,7 +97,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -605,16 +605,12 @@ public class RunController extends BaseFlowController
             return _success = true;
         }
 
-        private void writeManifest(String manifestJson, File dir) throws IOException
+        private void writeManifest(String manifestJson, FileLike dir) throws IOException
         {
             if (manifestJson == null || manifestJson.isEmpty())
                 return;
 
-
-            File file = FileUtil.appendName(dir, MANIFEST_FILENAME);
-            FileOutputStream statisticsFile = new FileOutputStream(file);
-
-            try (PrintWriter pw = PrintWriters.getPrintWriter(statisticsFile))
+            try (PrintWriter pw = PrintWriters.getPrintWriter(dir.resolveChild(MANIFEST_FILENAME).openOutputStream()))
             {
                 pw.write(manifestJson);
             }
@@ -690,7 +686,7 @@ public class RunController extends BaseFlowController
 
                 case Script:
                     // after exporting the files, execute script as a pipeline job
-                    File location = new File(vf.getLocation());
+                    FileLike location = FileSystemLike.wrapFile(new File(vf.getLocation()));
                     PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
                     ViewBackgroundInfo vbi = new ViewBackgroundInfo(getContainer(), getUser(), null);
 
@@ -742,7 +738,7 @@ public class RunController extends BaseFlowController
         private final String _exportToScriptCommandLine;
         private final String _exportToScriptFormat;
         private final String _label;
-        private final File _location;
+        private final FileLike _location;
         private final Integer _timeout;
         private final boolean _deleteOnComplete;
 
@@ -753,7 +749,7 @@ public class RunController extends BaseFlowController
                 @JsonProperty("_exportToScriptCommandLine") String exportToScriptCommandLine,
                 @JsonProperty("_exportToScriptFormat") String exportToScriptFormat,
                 @JsonProperty("_label") String label,
-                @JsonProperty("_location") File location,
+                @JsonProperty("_location") FileLike location,
                 @JsonProperty("_timeout") Integer timeout,
                 @JsonProperty("_deleteOnComplete") boolean deleteOnComplete
         )
@@ -768,7 +764,7 @@ public class RunController extends BaseFlowController
             _deleteOnComplete = deleteOnComplete;
         }
         
-        public ExportToScriptJob(String guid, String exportToScriptPath, String exportToScriptCommandLine, String exportToScriptFormat, String label, File location, Integer timeout, boolean deleteOnComplete, ViewBackgroundInfo info, @NotNull PipeRoot root)
+        public ExportToScriptJob(String guid, String exportToScriptPath, String exportToScriptCommandLine, String exportToScriptFormat, String label, FileLike location, Integer timeout, boolean deleteOnComplete, ViewBackgroundInfo info, @NotNull PipeRoot root)
         {
             super(null, info, root);
             _guid = guid;
@@ -781,7 +777,7 @@ public class RunController extends BaseFlowController
             _deleteOnComplete = deleteOnComplete;
 
             // setup the log file
-            FileLike logFile = root.getLogDirectoryFileLike(true).resolveChild(FileUtil.makeFileNameWithTimestamp("export-to-script", "log"));
+            FileLike logFile = root.getLogDirectory(true).resolveChild(FileUtil.makeFileNameWithTimestamp("export-to-script", "log"));
             setLogFile(logFile);
         }
 
@@ -799,10 +795,7 @@ public class RunController extends BaseFlowController
                     urlHelper = new URLHelper(url);
                 }
             }
-            catch (Exception e)
-            {
-                urlHelper = null;
-            }
+            catch (Exception ignored) {}
             return urlHelper;
         }
 

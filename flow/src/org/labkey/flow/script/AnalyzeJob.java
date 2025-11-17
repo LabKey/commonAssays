@@ -26,6 +26,8 @@ import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.File;
 import java.util.List;
@@ -59,15 +61,16 @@ public class AnalyzeJob extends ScriptJob
 
     public void processRun(FlowRun run) throws Exception
     {
+        FileLike file = FileSystemLike.wrapFile(new File(run.getPath()));
         if (_step == FlowProtocolStep.calculateCompensation)
         {
-            if (!checkProcessPath(new File(run.getPath()), FlowProtocolStep.calculateCompensation))
+            if (!checkProcessPath(file, FlowProtocolStep.calculateCompensation))
                 return;
             executeHandler(run, getCompensationCalculationHandler());
         }
         else
         {
-            if (!checkProcessPath(new File(run.getPath()), FlowProtocolStep.analysis))
+            if (!checkProcessPath(file, FlowProtocolStep.analysis))
                 return;
             ensureCompensationMatrix(run);
             executeHandler(run, getAnalysisHandler());

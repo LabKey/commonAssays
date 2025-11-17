@@ -24,7 +24,6 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -47,7 +46,7 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
     }
 
     @JsonCreator
-    protected XTandemPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)
+    protected XTandemPipelineJob(@JsonProperty("_dirSequenceRoot") FileLike dirSequenceRoot)
     {
         super(dirSequenceRoot);
     }
@@ -95,9 +94,9 @@ public class XTandemPipelineJob extends AbstractMS2SearchPipelineJob implements 
                 "k-score".equals(paramScore));        
     }
 
-    // if fire does not exist, will append .gz if config indicates preference for gzipped outputs
+    // if file does not exist, will append .gz if config indicates preference for gzipped outputs
     @Override
-    public File getSearchNativeOutputFile()
+    public FileLike getSearchNativeOutputFile()
     {
         return XTandemSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName(), getGZPreference());
     }

@@ -68,12 +68,12 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
     private static final String MASCOT_ACTION_NAME = MS2RunType.Mascot.name();
     private static final String MASCOT2XML_ACTION_NAME = "Mascot2XML";
 
-    public static File getNativeSpectraFile(File dirAnalysis, String baseName)
+    public static FileLike getNativeSpectraFile(FileLike dirAnalysis, String baseName)
     {
         return FT_MASCOT_MGF.newFile(dirAnalysis, baseName);
     }
 
-    public static File getNativeOutputFile(File dirAnalysis, String baseName)
+    public static FileLike getNativeOutputFile(FileLike dirAnalysis, String baseName)
     {
         return FT_MASCOT_DAT.newFile(dirAnalysis, baseName);
     }
@@ -134,7 +134,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
         {
             JobSupport support = (JobSupport) job;
             String baseName = support.getBaseName();
-            File dirAnalysis = support.getAnalysisDirectory();
+            FileLike dirAnalysis = support.getAnalysisDirectory();
 
             // Mascot input (MGF) and Mascot native output
             if (!NetworkDrive.exists(getNativeSpectraFile(dirAnalysis, baseName)) ||
@@ -179,8 +179,8 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             RecordedAction mascotAction = new RecordedAction(MASCOT_ACTION_NAME);
             RecordedAction mascot2XMLAction = new RecordedAction(MASCOT2XML_ACTION_NAME);
 
-            File fileWorkMGF = _wd.newFile(FT_MASCOT_MGF);
-            File fileWorkDAT = _wd.newFile(FT_MASCOT_DAT);
+            FileLike fileWorkMGF = _wd.newFile(FT_MASCOT_MGF);
+            FileLike fileWorkDAT = _wd.newFile(FT_MASCOT_DAT);
 
             // Mascot starts with remote sequence file names, so it has to look at the
             // raw parameter, rather than using getJob().getSequenceFiles().
@@ -193,14 +193,14 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
 
             params.put("pipeline, user name", "LabKey User"); // BUGBUG: should be "pipeline, username" ?
 
-            File fileWorkInputXML = _wd.newFile("input.xml");
+            FileLike fileWorkInputXML = _wd.newFile("input.xml");
             getJobSupport().createParamParser().writeFromMap(params, fileWorkInputXML);
 
-            File fileMzXML = _factory.findInputFile(getJobSupport());
-            File fileMGF = new File(_wd.getDir(), fileWorkMGF.getName());
+            FileLike fileMzXML = _factory.findInputFile(getJobSupport());
+            FileLike fileMGF = _wd.getDir().resolveChild(fileWorkMGF.getName());
 
             // 0. pre-Mascot search: c) translate the mzXML file to mgf for Mascot using MzXML2Search
-            File fileWorkSpectra = _wd.inputFile(fileMzXML, true);
+            FileLike fileWorkSpectra = _wd.inputFile(fileMzXML, true);
             ArrayList<String> argsM2S = new ArrayList<>();
             String ver = TPPTask.getTPPVersion(getJob());
             argsM2S.add(PipelineJobService.get().getExecutablePath("MzXML2Search", null, "tpp", ver, getJob().getLogger()));
@@ -217,7 +217,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             String paramMinPeakCount = params.get("spectrum, minimum peak count");
             if (paramMinPeakCount != null)
                 argsM2S.add("-P" + paramMinPeakCount);
-            argsM2S.add(fileWorkSpectra.getAbsolutePath());
+            argsM2S.add(fileWorkSpectra.toNioPathForRead().toFile().getAbsolutePath());
 
             getJob().runSubProcess(new ProcessBuilder(argsM2S), _wd.getDir());
 
@@ -227,8 +227,8 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             MascotClientImpl mascotClient = new MascotClientImpl(getJobSupport().getMascotServer(), getJob().getLogger(),
                 getJobSupport().getMascotUserAccount(), getJobSupport().getMascotUserPassword());
             mascotClient.setProxyURL(getJobSupport().getMascotHTTPProxy());
-            int iReturn = mascotClient.search(fileWorkInputXML.getAbsolutePath(),
-                    fileMGF.getAbsolutePath(), fileWorkDAT.getAbsolutePath());
+            int iReturn = mascotClient.search(fileWorkInputXML.toNioPathForRead().toFile().getAbsolutePath(),
+                    fileMGF.toNioPathForRead().toFile().getAbsolutePath(), fileWorkDAT.toNioPathForRead().toFile().getAbsolutePath());
             if (iReturn != 0)
             {
                 throw new IOException("Error code " + iReturn + " " + mascotClient.getErrorString());
@@ -277,10 +277,10 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             long nmascotFileSize = smascotFileSize == null ? -1 : Long.parseLong(smascotFileSize);
             long nmascotFileTimestamp= smascotFileTimestamp == null ? -1 : Long.parseLong(smascotFileTimestamp);
 
-            File dirSequenceRoot = getJobSupport().getSequenceRootDirectory();
-            File localDB = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot, sequenceDB, sequenceRelease);
-            File localDBHash = MS2PipelineManager.getLocalMascotFileHash(dirSequenceRoot, sequenceDB, sequenceRelease);
-            File localDBParent = localDB.getParentFile();
+            FileLike dirSequenceRoot = getJobSupport().getSequenceRootDirectory();
+            FileLike localDB = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot, sequenceDB, sequenceRelease);
+            FileLike localDBHash = MS2PipelineManager.getLocalMascotFileHash(dirSequenceRoot, sequenceDB, sequenceRelease);
+            FileLike localDBParent = localDB.getParent();
             FileUtil.mkdirs(localDBParent);
             long filesize=0;
             long timestamp=0;
@@ -297,7 +297,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             {
                 //c. if local copy exists & cached checking hashes do not match, download new DB and cache new hashes
                 // let's get the hashes
-                Map<String,String> hashes=readLocalMascotFileHash(localDBHash.getCanonicalPath());
+                Map<String,String> hashes=readLocalMascotFileHash(localDBHash.toNioPathForRead().toFile().getCanonicalPath());
                 if (null!=hashes.get("HASH"))
                 {
                     hash=hashes.get("HASH");
@@ -328,24 +328,24 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             if (toDownloadDB)
             {
                 getJob().info("Starting download of database "+sequenceRelease+"...");
-                mascotClient.downloadDB(localDB.getCanonicalPath(),
+                mascotClient.downloadDB(localDB.toNioPathForRead().toFile().getCanonicalPath(),
                         sequenceDB, sequenceRelease, smascotFileHash, nmascotFileSize, nmascotFileTimestamp);
 
                 getJob().info("Database "+sequenceRelease+" downloaded");
                 getJob().info("Saving its checksums...");
-                saveLocalMascotFileHash(localDBHash.getCanonicalPath(),
+                saveLocalMascotFileHash(localDBHash.toNioPathForRead().toFile().getCanonicalPath(),
                         smascotFileHash, nmascotFileSize, nmascotFileTimestamp);
                 getJob().info("Checksums saved.");
             }
 
             // 2. translate Mascot result file to pep.xml format
-            File fileSequenceDatabase = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot, sequenceDB, sequenceRelease);
+            FileLike fileSequenceDatabase = MS2PipelineManager.getLocalMascotFile(dirSequenceRoot, sequenceDB, sequenceRelease);
             String exePath = PipelineJobService.get().getExecutablePath("Mascot2XML", null, "tpp", ver, getJob().getLogger());
             String[] args =
             {
                 exePath,
                 fileWorkDAT.getName(),
-                "-D" + fileSequenceDatabase.getAbsolutePath(),
+                "-D" + fileSequenceDatabase.toNioPathForRead().toFile().getAbsolutePath(),
                 "-xml",
                 "-notgz",     // don't create the tarball of fake .out and .dta
                 "-desc"
@@ -357,14 +357,14 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
             getJob().runSubProcess(new ProcessBuilder(args), _wd.getDir());
 
             PepXMLFileType pepxft = new PepXMLFileType(true); // "true" == accept .xml as valid extension for older converters
-            File fileOutputPepXML = _wd.newFile(pepxft);
-            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
+            FileLike fileOutputPepXML = _wd.newFile(pepxft);
+            FileLike fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
                     getJobSupport().getBaseName(),
                     getJobSupport().getGZPreference());
             // three possibilities: basename.xml, basename.pep.xml, basename.pep.xml.gz
             if (fileOutputPepXML.getName().endsWith(".gz")&&!fileWorkPepXMLRaw.getName().endsWith(".gz"))
             {
-                fileWorkPepXMLRaw = FileUtil.appendName(fileWorkPepXMLRaw.getParentFile(), fileWorkPepXMLRaw.getName()+".gz");
+                fileWorkPepXMLRaw = fileWorkPepXMLRaw.getParent().resolveChild(fileWorkPepXMLRaw.getName()+".gz");
             }
             if (!fileOutputPepXML.renameTo(fileWorkPepXMLRaw))
             {
@@ -377,7 +377,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                 mzxml2SearchAction.addInput(fileMzXML, SPECTRA_INPUT_ROLE);
                 mzxml2SearchAction.addOutput(fileMGF, "MGF", false);
 
-                for (File file : getJobSupport().getSequenceFiles())
+                for (FileLike file : getJobSupport().getSequenceFiles())
                 {
                     mascotAction.addInput(file, FASTA_INPUT_ROLE);
                 }
@@ -400,33 +400,27 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
         }
     }
 
-    private String getSequenceDatabase(File datFile) throws IOException
+    private String getSequenceDatabase(FileLike datFile) throws IOException
     {
         return getMascotResultEntity(datFile, "parameters", "DB");
     }
 
-    private String getDatabaseRelease(File datFile) throws IOException
+    private String getDatabaseRelease(FileLike datFile) throws IOException
     {
         return getMascotResultEntity(datFile, "header", "release");
     }
 
-    private String getMascotResultEntity(File datFile, String mimeName, String tag) throws FileNotFoundException
+    private String getMascotResultEntity(FileLike datFile, String mimeName, String tag) throws FileNotFoundException
     {
-        // return the sequence database queried against in this search
-        final File dat = new File(datFile.getAbsolutePath());
+        if (!NetworkDrive.exists(datFile))
+            throw new FileNotFoundException(datFile + " not found");
 
-        if (!NetworkDrive.exists(dat))
-            throw new FileNotFoundException(datFile.getAbsolutePath() + " not found");
-
-        InputStream datIn = null;
         boolean skipParameter = true;
         String mimeNameSubString = "; name=\""+mimeName+"\"";
         String tagEqual=tag+"=";
         String value = null;
-        try
+        try (InputStream datIn = datFile.openInputStream())
         {
-            datIn = new FileInputStream(dat);
-
             BufferedReader datReader = new BufferedReader(new InputStreamReader(datIn));
 
             String line;
@@ -455,44 +449,26 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
         {
             // fail to readLine!
         }
-        finally
-        {
-            if (datIn != null) { try { datIn.close(); } catch (IOException e) {} }
-        }
         return value;
     }
 
-    private Map<String,String> readLocalMascotFileHash(String filepath)
+    private Map<String,String> readLocalMascotFileHash(String filepath) throws IOException
     {
         final File hashFile = new File(filepath);
 
         Map<String,String> returns=new HashMap<>();
 
         if (hashFile.exists()) {
-            InputStream datIn;
-            try
+            try (InputStream datIn = new FileInputStream(hashFile))
             {
-                datIn = new FileInputStream(hashFile);
-                InputStream in = new BufferedInputStream(datIn);
-
                 Properties results=new Properties();
-                try
+                try (InputStream in = new BufferedInputStream(datIn))
                 {
                     results.load(in);
                 }
                 catch (IOException e)
                 {
                     getJob().warn("Fail to load database information " + filepath);
-                }
-                finally
-                {
-                    try
-                    {
-                        in.close();
-                    }
-                    catch (IOException e)
-                    {
-                    }
                 }
 
                 for(Map.Entry<Object,Object> entry: results.entrySet()) {
@@ -512,11 +488,10 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
     {
         Properties hashes = new Properties();
         hashes.put(KEY_HASH, hash);
-        StringBuffer sb;
-        sb=new StringBuffer();
+        StringBuilder sb=new StringBuilder();
         sb.append(filesize);
         hashes.put(KEY_FILESIZE, sb.toString());
-        sb=new StringBuffer();
+        sb=new StringBuilder();
         sb.append(timestamp);
         hashes.put(KEY_TIMESTAMP, sb.toString());
 

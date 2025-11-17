@@ -29,12 +29,16 @@ import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.GUID;
+import org.labkey.api.util.Path;
 import org.labkey.api.util.StringUtilsLabKey;
+import org.labkey.api.writer.PrintWriters;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.ParameterNames;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -81,7 +85,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
     private static final Object INDEX_LOCK = new Object();
 
     // useful for creating an output filename that honors config preference for gzipped output
-    public static File getNativeOutputFile(File dirAnalysis, String baseName,
+    public static FileLike getNativeOutputFile(FileLike dirAnalysis, String baseName,
                                            FileType.gzSupportLevel gzSupport)
     {
         return AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis,baseName,gzSupport);
@@ -118,10 +122,10 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         return (SequestPipelineJob)super.getJob();
     }
 
-    private File getIndexFileWithoutExtension() throws PipelineJobException
+    private FileLike getIndexFileWithoutExtension() throws PipelineJobException
     {
-        File fastaFile = getJob().getSequenceFiles()[0];
-        File fastaRoot = getJob().getSequenceRootDirectory();
+        FileLike fastaFile = getJob().getSequenceFiles().get(0);
+        FileLike fastaRoot = getJob().getSequenceRootDirectory();
 
         Map<String, String> params = getJob().getParameters();
         String indexFileName = params.get(INDEX_FILE_NAME_PARAMETER_NAME);
@@ -141,9 +145,9 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                     ".StaticMod-" +
                     params.get(ParameterNames.STATIC_MOD) +
                     ".FASTAModified-" +
-                    fastaFile.lastModified() +
+                    fastaFile.getLastModified() +
                     ".FASTASize-" +
-                    fastaFile.length();
+                    fastaFile.getSize();
 
             CRC32 crc = new CRC32();
             crc.update(toBytes(sb));
@@ -151,15 +155,15 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             indexFileName = fastaFile.getName() + "_" + crc.getValue();
         }
 
-        String relativeDirPath = FileUtil.relativePath(fastaFile.getParentFile().getPath(), fastaRoot.getPath());
-        File indexDir;
+        String relativeDirPath = FileUtil.relativePath(fastaFile.getParent().toNioPathForRead().toFile().getPath(), fastaRoot.toNioPathForRead().toFile().getPath());
+        FileLike indexDir;
         if (_factory.getIndexRootDir() == null)
         {
-            indexDir = new File(new File(fastaRoot, relativeDirPath), "index");
+            indexDir = fastaRoot.resolveFile(Path.parse(relativeDirPath)).resolveChild("index");
         }
         else
         {
-            indexDir = new File(new File(_factory.getIndexRootDir()), relativeDirPath);
+            indexDir = FileSystemLike.wrapFile(new File(new File(_factory.getIndexRootDir()), relativeDirPath));
         }
         try
         {
@@ -174,7 +178,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             throw new PipelineJobException("Failed to create index directory " + indexDir);
         }
 
-        return new File(indexDir, indexFileName);
+        return indexDir.resolveChild(indexFileName);
     }
 
     private static byte[] toBytes(String s)
@@ -189,27 +193,27 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         return "true".equalsIgnoreCase(indexUsage) || "1".equalsIgnoreCase(indexUsage) || "yes".equalsIgnoreCase(indexUsage);
     }
 
-    private List<File> getFASTAOrIndexFiles(List<RecordedAction> actions) throws PipelineJobException
+    private List<FileLike> getFASTAOrIndexFiles(List<RecordedAction> actions) throws PipelineJobException
     {
         if (!usesIndex())
         {
-            return Arrays.asList(getJob().getSequenceFiles());
+            return getJob().getSequenceFiles();
         }
 
-        File indexFileBase = getIndexFileWithoutExtension();
-        File indexFile = new File(indexFileBase.getParentFile(), indexFileBase.getName() + INDEX_FILE_TYPE.getDefaultSuffix());
+        FileLike indexFileBase = getIndexFileWithoutExtension();
+        FileLike indexFile = indexFileBase.getParent().resolveChild(indexFileBase.getName() + INDEX_FILE_TYPE.getDefaultSuffix());
 
         synchronized (INDEX_LOCK)
         {
             if (!indexFile.exists())
             {
-                assert getJob().getSequenceFiles().length == 1 : "Only one FASTA is supported when using indices";
+                assert getJob().getSequenceFiles().size() == 1 : "Only one FASTA is supported when using indices";
 
                 getJob().setStatus("CREATING FASTA INDEX");
-                getJob().info("Creating a FASTA index for " + getJob().getSequenceFiles()[0] + " as " + indexFileBase);
+                getJob().info("Creating a FASTA index for " + getJob().getSequenceFiles().get(0) + " as " + indexFileBase);
 
                 // Create a makedb.params to control the index creation
-                File fileWorkParams = _wd.newFile(MAKE_DB_PARAMS);
+                FileLike fileWorkParams = _wd.newFile(MAKE_DB_PARAMS);
                 SequestParamsBuilder builder = new ThermoSequestParamsBuilder(getJob().getParameters(), getJob().getSequenceRootDirectory(), SequestParams.Variant.makedb, null);
                 builder.initXmlValues();
                 builder.writeFile(fileWorkParams);
@@ -219,15 +223,15 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 File makeDBExecutable = FileUtil.appendName(_factory.getSequestInstallDirAsFile(), "makedb");
                 args.add(makeDBExecutable.getAbsolutePath());
                 args.add("-O" + indexFileBase);
-                args.add("-P" + fileWorkParams.getAbsolutePath());
+                args.add("-P" + fileWorkParams.toNioPathForRead().toFile().getAbsolutePath());
                 ProcessBuilder pb = new ProcessBuilder(args);
 
                 // In order to find sort.exe, use the Sequest directory as the working directory
                 File dir = makeDBExecutable.getParentFile();
-                getJob().runSubProcess(pb, dir);
+                getJob().runSubProcess(pb, FileSystemLike.wrapFile(dir));
 
                 RecordedAction action = new RecordedAction(MAKEDB_ACTION_NAME);
-                action.addInput(getJob().getSequenceFiles()[0], "FASTA");
+                action.addInput(getJob().getSequenceFiles().get(0), "FASTA");
                 action.addInput(fileWorkParams, "MakeDB Params");
                 action.addOutput(indexFile, "FASTA Index", false);
                 action.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(args, " "));
@@ -264,26 +268,26 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             params.put("search, useremail", params.get(PipelineJob.PIPELINE_USERNAME_PARAM));
             params.put("search, username", "CPAS User");
 
-            List<File> sequenceFiles = getFASTAOrIndexFiles(actions);
+            List<FileLike> sequenceFiles = getFASTAOrIndexFiles(actions);
 
             // Don't let the total path name get too long. The actual name doesn't matter much, but we need
             // to avoid collisions so we can't just truncate the path after n characters
             boolean useGUIDFilename = getJob().getBaseName().length() > 20;
             String dtaDirName = useGUIDFilename ? GUID.makeGUID() : getJob().getBaseName();
-            File dirOutputDta = new File(_wd.getDir(), dtaDirName);
-            File fileMzXML = _factory.findInputFile(getJob());
+            FileLike dirOutputDta = _wd.getDir().resolveChild(dtaDirName);
+            FileLike fileMzXML = _factory.findInputFile(getJob());
             String tppVersion = TPPTask.getTPPVersion(getJob());
 
             // out2xml will need the mzXML file in the parent directory of the DTA directory in order to look up
             // retention times, so make a copy in the right place
-            File localMzXML = _wd.inputFile(fileMzXML, true);
+            FileLike localMzXML = _wd.inputFile(fileMzXML, true);
 
             // Translate the mzXML file to dta using MzXML2Search
             convertToDTA(params, dirOutputDta, localMzXML, tppVersion, actions);
-            File dtaListFile = writeDtaList(dirOutputDta);
+            FileLike dtaListFile = writeDtaList(dirOutputDta);
 
             // Write out sequest.params file
-            File fileWorkParams = _wd.newFile(SEQUEST_PARAMS);
+            FileLike fileWorkParams = _wd.newFile(SEQUEST_PARAMS);
 
             SequestParamsBuilder builder = new ThermoSequestParamsBuilder(params, getJob().getSequenceRootDirectory(), SequestParams.Variant.thermosequest, sequenceFiles);
             builder.initXmlValues();
@@ -291,19 +295,19 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
             // Have a copy in both the work directory to retain with the results, and in the dta subdirectory for
             // Sequest to use
-            FileUtils.copyFileToDirectory(fileWorkParams, dirOutputDta);
+            FileUtil.copyFile(fileWorkParams, dirOutputDta.resolveChild(fileWorkParams.getName()));
 
             // Perform Sequest search
             List<String> sequestArgs = new ArrayList<>();
             File sequestExecutable = FileUtil.appendName(_factory.getSequestInstallDirAsFile(), "sequest");
             sequestArgs.add(sequestExecutable.getAbsolutePath());
             sequestArgs.addAll(_factory.getSequestOptions());
-            sequestArgs.add("-R" + dtaListFile.getAbsolutePath());
-            sequestArgs.add("-F" + dirOutputDta.getAbsolutePath());
+            sequestArgs.add("-R" + dtaListFile.toNioPathForRead().toFile().getAbsolutePath());
+            sequestArgs.add("-F" + dirOutputDta.toNioPathForRead().toFile().getAbsolutePath());
             // Trailing argument that makes Sequest not barf
             sequestArgs.add("x");
             ProcessBuilder sequestPB = new ProcessBuilder(sequestArgs);
-            File sequestLogFileWork = SEQUEST_LOG_FILE_TYPE.getFile(_wd.getDir(), getJob().getBaseName());
+            FileLike sequestLogFileWork = SEQUEST_LOG_FILE_TYPE.getFile(_wd.getDir(), getJob().getBaseName());
             _wd.newFile(sequestLogFileWork.getName());
             boolean copySequestLogFile = true;
             try
@@ -312,7 +316,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
                 // out2xml assumes that the mzXML file base name will match the DTA directory name, so rename the file
                 // temporarily
-                File guidMzXMLFile = FileUtil.appendName(localMzXML.getParentFile(), AbstractMS2SearchProtocol.FT_MZXML.getDefaultName(dtaDirName));
+                FileLike guidMzXMLFile = localMzXML.getParent().resolveChild(AbstractMS2SearchProtocol.FT_MZXML.getDefaultName(dtaDirName));
                 if (useGUIDFilename)
                 {
                     localMzXML.renameTo(guidMzXMLFile);
@@ -339,12 +343,12 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                     guidMzXMLFile.renameTo(localMzXML);
                 }
 
-                File pepXmlFile = TPPTask.getPepXMLFile(_wd.getDir(), getJob().getBaseName());
+                FileLike pepXmlFile = TPPTask.getPepXMLFile(_wd.getDir(), getJob().getBaseName());
                 if (!pepXmlFile.exists())
                 {
                     // If we used an alternative name to keep the path from getting too long, rename the resulting pepXML
                     // to match our standard convention
-                    File altPepXmlFile = TPPTask.getPepXMLFile(_wd.getDir(), dtaDirName);
+                    FileLike altPepXmlFile = TPPTask.getPepXMLFile(_wd.getDir(), dtaDirName);
                     if (altPepXmlFile.exists())
                     {
                         altPepXmlFile.renameTo(pepXmlFile);
@@ -356,9 +360,9 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
                 FileUtil.deleteDir(dirOutputDta);
                 if (dirOutputDta.exists())
-                    throw new IOException("Failed to delete DTA directory " + dirOutputDta.getAbsolutePath());
+                    throw new IOException("Failed to delete DTA directory " + dirOutputDta);
 
-                File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
+                FileLike fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(),
                         getJob().getBaseName(),
                         getJob().getGZPreference());
 
@@ -369,8 +373,8 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 {
                     assert sequenceFiles.size() == 1;
                     // We want the pepXML file to point at the FASTA file, not at the indexed copy
-                    String indexPath = sequenceFiles.get(0).getAbsolutePath();
-                    String fastaPath = getJob().getSequenceFiles()[0].getAbsolutePath();
+                    String indexPath = sequenceFiles.get(0).toNioPathForRead().toFile().getAbsolutePath();
+                    String fastaPath = getJob().getSequenceFiles().get(0).toNioPathForRead().toFile().getAbsolutePath();
                     replacements.put(indexPath, fastaPath);
                     getJob().info("Replacing index path (" + indexPath + ") with FASTA path (" + fastaPath + ")");
                 }
@@ -403,12 +407,12 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                     RecordedAction sequestAction = new RecordedAction(SEQUEST_ACTION_NAME);
                     sequestAction.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(sequestArgs, " "));
                     // Copy to a name that's unique to this file and won't conflict between searches in the same directory
-                    File jobSpecificSequestParamsFile = SEQUEST_PARAMS_FILE_TYPE.getFile(fileWorkParams.getParentFile(), getJob().getBaseName());
-                    FileUtils.moveFile(fileWorkParams, jobSpecificSequestParamsFile);
+                    FileLike jobSpecificSequestParamsFile = SEQUEST_PARAMS_FILE_TYPE.getFile(fileWorkParams.getParent(), getJob().getBaseName());
+                    fileWorkParams.move(jobSpecificSequestParamsFile);
                     sequestAction.addOutput(_wd.outputFile(jobSpecificSequestParamsFile), "SequestParams", true);
                     sequestAction.addOutput(_wd.outputFile(fileWorkPepXMLRaw), "RawPepXML", true);
                     sequestAction.addOutput(_wd.outputFile(sequestLogFileWork), "SequestLog", false);
-                    for (File file : sequenceFiles)
+                    for (FileLike file : sequenceFiles)
                     {
                         sequestAction.addInput(file, FASTA_INPUT_ROLE);
                     }
@@ -439,11 +443,11 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
      * Rewrite the pepXML file so that it points to the FASTA file instead of the index file because the TPP and
      * the MS2 loading code don't know how to parse the index files.
      */
-    private void rewritePepXML(File fileWorkPepXMLRaw, File pepXmlFile, Map<String, String> substitutions) throws PipelineJobException
+    private void rewritePepXML(FileLike fileWorkPepXMLRaw, FileLike pepXmlFile, Map<String, String> substitutions) throws PipelineJobException, IOException
     {
-        try (InputStream fIn = new FileInputStream(pepXmlFile);
+        try (InputStream fIn = pepXmlFile.openInputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(fIn));
-             OutputStream fOut = new FileOutputStream(fileWorkPepXMLRaw);
+             OutputStream fOut = fileWorkPepXMLRaw.openOutputStream();
              BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(fOut)))
         {
             String line;
@@ -469,7 +473,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         }
     }
 
-    private void convertToDTA(Map<String, String> params, File dirOutputDta, File fileMzXML, String tppVersion, List<RecordedAction> actions)
+    private void convertToDTA(Map<String, String> params, FileLike dirOutputDta, FileLike fileMzXML, String tppVersion, List<RecordedAction> actions)
             throws IOException, PipelineJobException
     {
         if (!FileUtil.mkdir(dirOutputDta))
@@ -481,7 +485,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         Mzxml2SearchParams mzXml2SearchParams = new Mzxml2SearchParams();
         Collection<String> inputXmlParams = convertParams(mzXml2SearchParams.getParams(), params);
         mzXML2SearchArgs.addAll(inputXmlParams);
-        mzXML2SearchArgs.add(fileMzXML.getAbsolutePath());
+        mzXML2SearchArgs.add(fileMzXML.toNioPathForRead().toFile().getAbsolutePath());
 
         RecordedAction action = new RecordedAction(MZXML2SEARCH_ACTION_NAME);
         action.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(mzXML2SearchArgs, " "));
@@ -493,14 +497,14 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         getJob().runSubProcess(new ProcessBuilder(mzXML2SearchArgs), _wd.getDir());
     }
 
-    private File writeDtaList(File dirOutputDta) throws IOException
+    private FileLike writeDtaList(FileLike dirOutputDta) throws IOException
     {
-        File[] dtaFiles = dirOutputDta.listFiles((dir, name) -> name.toLowerCase().endsWith(".dta"));
-        File result = new File(dirOutputDta, "DtaFiles.txt");
-        try (OutputStream out = new FileOutputStream(result);
-             PrintWriter writer = new PrintWriter(out))
+        List<FileLike> dtaFiles = dirOutputDta.getChildren(f -> f.getName().toLowerCase().endsWith(".dta"));
+        FileLike result = dirOutputDta.resolveChild("DtaFiles.txt");
+        try (OutputStream out = result.openOutputStream();
+             PrintWriter writer = PrintWriters.getPrintWriter(out))
         {
-            for (File dtaFile : dtaFiles)
+            for (FileLike dtaFile : dtaFiles)
             {
                 writer.println(dtaFile.getName());
             }

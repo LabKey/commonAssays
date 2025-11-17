@@ -28,6 +28,7 @@ import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,7 +43,7 @@ public class KeywordsJob extends ScriptJob
 {
     private static final Logger _log = LogManager.getLogger(KeywordsJob.class);
 
-    private final List<File> _paths;
+    private final List<FileLike> _paths;
     private final Container _targetStudy;
 
     @JsonCreator
@@ -50,7 +51,7 @@ public class KeywordsJob extends ScriptJob
             @JsonProperty("_pendingRunLSIDs") List<String> pendingRunLSIDs,
             @JsonProperty("_processedRunLSIDs") Map<FlowProtocolStep, List<String>> processedRunLSIDs,
             @JsonProperty("_runAnalysisScript") FlowScript runAnalysisScript,
-            @JsonProperty("_paths") List<File> paths,
+            @JsonProperty("_paths") List<FileLike> paths,
             @JsonProperty("_targetStudy") Container targetStudy
     )
     {
@@ -59,7 +60,7 @@ public class KeywordsJob extends ScriptJob
         _targetStudy = targetStudy;
     }
 
-    public KeywordsJob(ViewBackgroundInfo info, FlowProtocol protocol, List<File> paths, Container targetStudy, PipeRoot root) throws IOException
+    public KeywordsJob(ViewBackgroundInfo info, FlowProtocol protocol, List<FileLike> paths, Container targetStudy, PipeRoot root) throws IOException
     {
         super(info, FlowExperiment.getExperimentRunExperimentName(info.getContainer()), FlowExperiment.getExperimentRunExperimentLSID(info.getContainer()), protocol, null, FlowProtocolStep.keywords, root);
 
@@ -77,7 +78,7 @@ public class KeywordsJob extends ScriptJob
     {
         List<FlowRun> runs = new ArrayList<>();
 
-        for (File path : _paths)
+        for (FileLike path : _paths)
         {
             if (checkInterrupted())
                 return runs;

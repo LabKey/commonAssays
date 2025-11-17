@@ -35,8 +35,8 @@ import org.labkey.ms2.pipeline.sequest.SequestParam;
 import org.labkey.ms2.pipeline.sequest.SequestParams;
 import org.labkey.ms2.pipeline.sequest.SequestParamsBuilder;
 import org.labkey.ms2.pipeline.sequest.SequestParamsException;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,7 +72,7 @@ public class Comet2014ParamsBuilder extends SequestParamsBuilder
         COMET_ENZYME_MAP = Collections.unmodifiableMap(m);
     }
 
-    public Comet2014ParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot)
+    public Comet2014ParamsBuilder(Map<String, String> sequestInputParams, FileLike sequenceRoot)
     {
         super(sequestInputParams, sequenceRoot, SequestParams.Variant.comet);
     }
@@ -614,7 +614,7 @@ public class Comet2014ParamsBuilder extends SequestParamsBuilder
 
     public static class LimitedParseTestCase extends Assert
     {
-        private final File _root = new File("fakeroot");
+        private final FileLike _root = null;
 
         @Test
         public void testGenerateFile() throws SequestParamsException

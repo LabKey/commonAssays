@@ -35,9 +35,8 @@ import org.labkey.flow.flowdata.xml.FlowdataDocument;
 import org.labkey.flow.flowdata.xml.Graph;
 import org.labkey.flow.flowdata.xml.Keyword;
 import org.labkey.flow.flowdata.xml.Statistic;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.URI;
@@ -95,8 +94,7 @@ public class AttributeSet implements Serializable
                 {
                     Set<String> aliases = new LinkedHashSet<>();
                     _keywordAliases.put(name, aliases);
-                    for (String alias : keyword.getAliases().getAliasArray())
-                        aliases.add(alias);
+                    Collections.addAll(aliases, keyword.getAliases().getAliasArray());
                 }
             }
         }
@@ -381,12 +379,13 @@ public class AttributeSet implements Serializable
         return Collections.unmodifiableCollection(aliases);
     }
 
-    public void save(File file, DataBaseType dbt) throws Exception
+    public void save(FileLike file, DataBaseType dbt) throws Exception
     {
         dbt.setDataFileUrl(file.toURI().toString());
-        OutputStream os = new FileOutputStream(file);
-        save(os);
-        os.close();
+        try (OutputStream os = file.openOutputStream())
+        {
+            save(os);
+        }
     }
 
     public void save(OutputStream os) throws Exception

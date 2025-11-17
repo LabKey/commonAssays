@@ -17,12 +17,13 @@ package org.labkey.api.protein.fasta;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.reader.FastaLoader;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 
 public class ProteinFastaLoader extends FastaLoader<FastaProtein> implements Iterable<FastaProtein>
 {
-    public ProteinFastaLoader(File fastaFile)
+    public ProteinFastaLoader(FileLike fastaFile)
     {
         super(fastaFile, FastaProtein::new);
     }
