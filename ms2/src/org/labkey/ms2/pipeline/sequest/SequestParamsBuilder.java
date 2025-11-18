@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.pipeline.ParamParser;
 import org.labkey.api.pipeline.PipelineJobService;
+import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.writer.PrintWriters;
@@ -953,14 +954,27 @@ public abstract class SequestParamsBuilder
         protected SequestParamsBuilder spb;
         protected ParamParser ip;
         protected String dbPath;
-        protected FileLike root;
+        public static final FileLike ROOT;
+
+        static
+        {
+            FileLike root;
+            try
+            {
+                root = FileSystemLike.wrapFile(JunitUtil.getSampleData(ModuleLoader.getInstance().getModule(MS2Module.class), "xarfiles/ms2pipe/databases"));
+            }
+            catch (IOException e)
+            {
+                root = null;
+            }
+            ROOT = root;
+        }
 
         @Before
         public void setUp() throws Exception
         {
             ip = PipelineJobService.get().createParamParser();
-            root = FileSystemLike.wrapFile(JunitUtil.getSampleData(ModuleLoader.getInstance().getModule(MS2Module.class), "xarfiles/ms2pipe/databases"));
-            dbPath = root.toNioPathForRead().toFile().getCanonicalPath();
+            dbPath = FileUtil.getAbsoluteCaseSensitiveFile(ROOT.toNioPathForRead().toFile()).getAbsolutePath();
             spb = createParamsBuilder();
         }
 

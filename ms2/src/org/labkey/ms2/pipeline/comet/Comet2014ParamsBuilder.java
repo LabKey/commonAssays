@@ -614,8 +614,6 @@ public class Comet2014ParamsBuilder extends SequestParamsBuilder
 
     public static class LimitedParseTestCase extends Assert
     {
-        private final FileLike _root = null;
-
         @Test
         public void testGenerateFile() throws SequestParamsException
         {
@@ -625,7 +623,7 @@ public class Comet2014ParamsBuilder extends SequestParamsBuilder
             paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);
             paramMap.put("comet, digest_mass_range", "400.0 5943.0");
             paramMap.put("spectrum, parent monoisotopic mass error units", "mmu");
-            Comet2014ParamsBuilder spb = new Comet2014ParamsBuilder(paramMap, _root);
+            Comet2014ParamsBuilder spb = new Comet2014ParamsBuilder(paramMap, AbstractSequestTestCase.ROOT);
             spb.initXmlValues();
             String text = spb.getSequestParamsText();
             assertTrue(text.contains("database_name ="));
@@ -649,7 +647,7 @@ public class Comet2014ParamsBuilder extends SequestParamsBuilder
             paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);
             paramMap.put("comet, decoy_search", "1");
             paramMap.put("comet, decoy_prefix", "NEW_PREFIX_");
-            Comet2014ParamsBuilder spb = new Comet2014ParamsBuilder(paramMap, _root);
+            Comet2014ParamsBuilder spb = new Comet2014ParamsBuilder(paramMap, AbstractSequestTestCase.ROOT);
             spb.initXmlValues();
             String text = spb.getSequestParamsText();
             assertTrue(text.contains("decoy_search = 1"));
@@ -659,14 +657,14 @@ public class Comet2014ParamsBuilder extends SequestParamsBuilder
         @Test
         public void testEnzymes() throws SequestParamsException
         {
-            Comet2014ParamsBuilder spb = new Comet2014ParamsBuilder(Collections.singletonMap(ParameterNames.ENZYME, "[KR]|{P}"), _root);
+            Comet2014ParamsBuilder spb = new Comet2014ParamsBuilder(Collections.singletonMap(ParameterNames.ENZYME, "[KR]|{P}"), AbstractSequestTestCase.ROOT);
             spb.initEnzymeInfo();
             String text = spb.getSequestParamsText();
             assertTrue(text.contains("search_enzyme_number = 1"));
             assertTrue(text.contains("sample_enzyme_number = 1"));
             assertTrue(text.contains("1.  Trypsin"));
 
-            spb = new Comet2014ParamsBuilder(Collections.singletonMap(ParameterNames.ENZYME, "[KR]|[X]"), _root);
+            spb = new Comet2014ParamsBuilder(Collections.singletonMap(ParameterNames.ENZYME, "[KR]|[X]"), AbstractSequestTestCase.ROOT);
             spb.initEnzymeInfo();
             text = spb.getSequestParamsText();
             assertTrue(text.contains("search_enzyme_number = 2"));
@@ -680,7 +678,7 @@ public class Comet2014ParamsBuilder extends SequestParamsBuilder
         @Override
         public SequestParamsBuilder createParamsBuilder()
         {
-            return new Comet2014ParamsBuilder(ip.getInputParameters(), root);
+            return new Comet2014ParamsBuilder(ip.getInputParameters(), ROOT);
         }
 
         @Test
