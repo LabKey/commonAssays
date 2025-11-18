@@ -605,7 +605,7 @@ public class uniprot extends ParseActions
             else
             {
                 String tmp = curSeq.getDescription();
-                if (tmp.length() >= 200) tmp = tmp.substring(0, 190) + "...";
+                if (tmp.length() >= 200) tmp = StringUtilsLabKey.leftSurrogatePairFriendly(tmp, 190) + "...";
                 _addSeq.setString(3, tmp);
             }
             if (curSeq.getSourceChangeDate() == null)
@@ -657,7 +657,7 @@ public class uniprot extends ParseActions
             else
             {
                 String tmp = curSeq.getBestName();
-                if (tmp.length() >= 50) tmp = tmp.substring(0, 45) + "...";
+                if (tmp.length() >= 50) tmp = StringUtilsLabKey.leftSurrogatePairFriendly(tmp, 45) + "...";
                 _addSeq.setString(11, tmp);
             }
             if (curSeq.getBestGeneName() == null)
@@ -667,7 +667,7 @@ public class uniprot extends ParseActions
             else
             {
                 String tmp = curSeq.getBestGeneName();
-                if (tmp.length() >= 50) tmp = tmp.substring(0, 45) + "...";
+                if (tmp.length() >= 50) tmp = StringUtilsLabKey.leftSurrogatePairFriendly(tmp, 45) + "...";
                 _addSeq.setString(12, tmp);
             }
             // Timestamp at index 13 is set once for the whole prepared statement
@@ -709,7 +709,7 @@ public class uniprot extends ParseActions
         {
             transactionCount++;
             String curIdentVal = curIdent.getIdentifier();
-            if (curIdentVal.length() > 50) curIdentVal = curIdentVal.substring(0, 45) + "...";
+            if (curIdentVal.length() > 50) curIdentVal = StringUtilsLabKey.leftSurrogatePairFriendly(curIdentVal, 45) + "...";
             _addIdent.setString(1, curIdentVal);
             _addIdent.setString(2, curIdent.getIdentType());
             UniprotSequence curSeq = curIdent.getSequence();

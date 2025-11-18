@@ -37,6 +37,7 @@ import org.labkey.api.protein.organism.GuessOrgBySharedIdents;
 import org.labkey.api.protein.organism.OrganismGuessStrategy;
 import org.labkey.api.util.HashHelpers;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.view.ViewBackgroundInfo;
 
 import java.io.File;
@@ -259,7 +260,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
             }
             else
             {
-                if (desc.length() >= 200) desc = desc.substring(0, 195) + "...";
+                if (desc.length() >= 200) desc = StringUtilsLabKey.leftSurrogatePairFriendly(desc, 195) + "...";
                 fdbu._addSeqStmt.setString(3, desc);
             }
             fdbu._addSeqStmt.setDouble(4, curSeq.getProtein().getMass());

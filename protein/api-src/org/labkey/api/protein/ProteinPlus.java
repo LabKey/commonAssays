@@ -18,6 +18,7 @@ package org.labkey.api.protein;
 
 import org.labkey.api.protein.fasta.FastaProtein;
 import org.labkey.api.util.HashHelpers;
+import org.labkey.api.util.StringUtilsLabKey;
 
 public class ProteinPlus
 {
@@ -111,7 +112,7 @@ public class ProteinPlus
         {
             result = getProtein().getHeader();
         }
-        if (result.length() > 500) result = result.substring(0, 499);
+        if (result.length() > 500) result = StringUtilsLabKey.leftSurrogatePairFriendly(result, 499);
         return result;
     }
 }
