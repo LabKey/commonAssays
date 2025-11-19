@@ -402,8 +402,8 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             boolean existingSinglePointControl = existingSinglePointControls.contains(singlePointControl);
 
             propertyName = getSinglePointControlCheckboxNameAndId(singlePointControl);
-            // If we have an existing singlePointControl as a baseline from the run we're replacing, use its value
-            defVal = existingSinglePointControl ? "true" : defaultWellRoleValues.get(propertyName);
+            // Issue 54242: If we are in the reRun case, use the existing singlePointControl value as baseline
+            defVal = reRun != null ? (existingSinglePointControl ? "true" : "false") : defaultWellRoleValues.get(propertyName);
             value = setInitialSinglePointControlInput(errorReshow, propertyName, defVal) ? "true" : "";
             view.getDataRegion().addHiddenFormField(propertyName, value);
         }
