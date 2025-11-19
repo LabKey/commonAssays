@@ -27,6 +27,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import org.labkey.api.util.StringUtilsLabKey;
 
 /**
  * this class implements a regular expression-based recognition of identifiers parsed from the fasta files.
@@ -178,7 +179,7 @@ public class IdPattern
             {
                 v = v.trim();
                 if (v.length() > 50)
-                    v = v.substring(0, 50);
+                    v = StringUtilsLabKey.leftSurrogatePairFriendly(v, 50);
                 if (!v.isEmpty())
                     vals.add(v);
             }

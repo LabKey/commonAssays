@@ -21,6 +21,7 @@ import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlOptions;
 import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
+import org.labkey.api.util.StringUtilsLabKey;
 import org.xml.sax.SAXParseException;
 
 import java.io.StringReader;
@@ -94,7 +95,7 @@ public class ScriptParser
                     message = StringUtils.replace(message, "@" + ScriptDocument.type.getContentModel().getName().getNamespaceURI(), "");
                     String location = xmlError.getCursorLocation().xmlText();
                     if (location.length() > 100)
-                        location = location.substring(0, 100);
+                        location = StringUtilsLabKey.leftSurrogatePairFriendly(location, 100);
                     addError(new Error("Schema Validation Error: " + message + "\nLocation of invalid XML: " + location));
                 }
             }
