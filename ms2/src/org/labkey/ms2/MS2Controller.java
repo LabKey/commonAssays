@@ -1454,7 +1454,7 @@ public class MS2Controller extends SpringActionController
 
             targetURL.addParameters(params);
 
-            // Track all of the unique sequences
+            // Track all the unique sequences
             Set<String> sequences = new HashSet<>();
             List<Protein> proteins = new TableSelector(tableInfo, null, new Sort("BestName")).getArrayList(Protein.class);
             Pair<ActionURL, List<Protein>> actionWithProteins = new Pair<>(targetURL, proteins);
@@ -4826,7 +4826,7 @@ public class MS2Controller extends SpringActionController
             {
                 throw new NotFoundException("Could not find parameters file for run '" + run.getFileName() + "'.");
             }
-            PageFlowUtil.streamFile(response, paramsFile, false);
+            PageFlowUtil.streamFile(response, paramsFile.toPath(), false);
         }
     }
 
