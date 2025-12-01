@@ -19,8 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.labkey.api.reader.FastaLoader;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
-
 public class ProteinFastaLoader extends FastaLoader<FastaProtein> implements Iterable<FastaProtein>
 {
     public ProteinFastaLoader(FileLike fastaFile)
