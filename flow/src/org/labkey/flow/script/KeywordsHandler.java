@@ -43,6 +43,7 @@ import org.labkey.flow.data.SampleKey;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.FlowDataHandler;
 import org.labkey.flow.persist.InputRole;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -53,28 +54,6 @@ import java.util.regex.Pattern;
 public class KeywordsHandler extends BaseHandler
 {
     Pattern _fcsFilePattern;
-
-    protected boolean shouldUploadKeyword(String name)
-    {
-        if (true)
-            return true;
-        if (name.startsWith("$"))
-        {
-            return name.equals("$FIL") || name.equals("$DATE") || name.equals("$TOT") || name.startsWith("$P") && name.endsWith("V");
-        }
-        if (name.endsWith("DISPLAY"))
-        {
-            return false;
-        }
-        if (name.equals("SPILL") ||
-                name.equals("WINDOW EXTENSION") ||
-                name.equals("APPLY COMPENSATION") ||
-                name.equals("CREATOR") ||
-                name.equals("FSC ASF") ||
-                name.equals("THRESHOLD"))
-            return false;
-        return true;
-    }
 
     public KeywordsHandler(ScriptJob job)
     {
@@ -119,12 +98,12 @@ public class KeywordsHandler extends BaseHandler
         _job.error(msg, t);
     }
 
-    protected FlowRun addRun(File directory, List<FCSKeywordData> data) throws Exception
+    protected FlowRun addRun(FileLike directory, List<FCSKeywordData> data) throws Exception
     {
         ExperimentArchiveDocument xarDoc = _job.createExperimentArchive();
         ExperimentArchiveType xar = xarDoc.getExperimentArchive();
         String runName;
-        File runDirectory = _job.createAnalysisDirectory(directory, FlowProtocolStep.keywords);
+        FileLike runDirectory = _job.createAnalysisDirectory(directory, FlowProtocolStep.keywords);
 
         runName = directory.getName();
 
@@ -187,20 +166,20 @@ public class KeywordsHandler extends BaseHandler
         }
         _job.finishExperimentRun(xar, run);
         _job.importRuns(xarDoc, directory, runDirectory, FlowProtocolStep.keywords);
-        _job.deleteAnalysisDirectory(runDirectory.getParentFile());
+        _job.deleteAnalysisDirectory(runDirectory.getParent());
 
         return FlowRun.fromLSID(run.getAbout());
     }
 
-    protected FlowRun importRun(File directory, Container targetStudy) throws Exception
+    protected FlowRun importRun(FileLike directory, Container targetStudy) throws Exception
     {
         addStatus("Reading keywords from directory " + directory);
-        File[] files = directory.listFiles();
-        List<FCSKeywordData> lstFileData = new ArrayList();
+        List<FileLike> files = directory.getChildren();
+        List<FCSKeywordData> lstFileData = new ArrayList<>();
 
-        for (int i = 0; i < files.length; i ++)
+        for (FileLike fileLike : files)
         {
-            File file = files[i];
+            File file = fileLike.toNioPathForRead().toFile();
             if (!isFCSFile(file))
                 continue;
 
@@ -237,12 +216,12 @@ public class KeywordsHandler extends BaseHandler
     }
 
     @Override
-    public void processRun(FlowRun srcRun, ExperimentRunType runElement, File workingDirectory)
+    public void processRun(FlowRun srcRun, ExperimentRunType runElement, FileLike workingDirectory)
     {
         throw new UnsupportedOperationException();
     }
 
-    public FlowRun run(File directory, Container targetStudy) throws Exception
+    public FlowRun run(FileLike directory, Container targetStudy) throws Exception
     {
         return importRun(directory, targetStudy);
     }

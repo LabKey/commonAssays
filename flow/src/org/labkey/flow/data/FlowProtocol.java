@@ -82,6 +82,7 @@ import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.KeywordsJob;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.File;
 import java.sql.ResultSet;
@@ -1003,7 +1004,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             // import some FCS files
             ViewBackgroundInfo info = new ViewBackgroundInfo(c, user, null);
             File dir = JunitUtil.getSampleData(null, "flow/flowjoquery/microFCS");
-            KeywordsJob job = new KeywordsJob(info, protocol, List.of(dir), null, root);
+            KeywordsJob job = new KeywordsJob(info, protocol, List.of(FileSystemLike.wrapFile(dir)), null, root);
             List<FlowRun> runs = job.go();
             assertNotNull(runs);
             assertEquals(1, runs.size());

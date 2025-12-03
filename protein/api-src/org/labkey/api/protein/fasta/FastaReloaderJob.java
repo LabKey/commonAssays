@@ -25,6 +25,7 @@ import org.labkey.api.settings.AppProps;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +74,7 @@ public class FastaReloaderJob extends PipelineJob
                     String filename = fasta.getFilename();
                     info("Processing FASTA " + filename);
 
-                    FastaDbLoader fdbl = new FastaDbLoader(new File(filename), getInfo(), getPipeRoot());
+                    FastaDbLoader fdbl = new FastaDbLoader(FileSystemLike.wrapFile(new File(filename)), getInfo(), getPipeRoot());
                     fdbl.setComment(new java.util.Date() + " " + filename);
                     fdbl.setDefaultOrganism(FastaDbLoader.UNKNOWN_ORGANISM);
                     fdbl.setOrganismIsToGuessed(true);

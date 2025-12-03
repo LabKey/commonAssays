@@ -394,12 +394,12 @@ public class AnalysisScriptController extends BaseFlowController
             }
 
             validatePipeline();
-            List<File> files;
+            List<FileLike> files;
             PipeRoot pr = PipelineService.get().findPipelineRoot(getContainer());
             if (form.isCurrent())
-                files = Collections.singletonList(pr.resolvePath(form.getPath()));
+                files = Collections.singletonList(pr.resolvePathToFileLike(form.getPath()));
             else
-                files = form.getValidatedFiles(form.getContainer()).stream().map(FileLike::toNioPathForRead).map(Path::toFile).toList();
+                files = form.getValidatedFiles(form.getContainer());
 
             // validate target study
             Container targetStudy = getTargetStudy(form.getTargetStudy(), errors);
@@ -736,7 +736,7 @@ public class AnalysisScriptController extends BaseFlowController
         // - absolute (run path)
         // - a file-browser path (relative to pipe root but starts with '/')
         // - a file-browser path (relative to pipe root and doesn't start with '/')
-        private File getDir(String path, Errors errors)
+        private FileLike getDir(String path, Errors errors)
         {
             PipeRoot root = getPipeRoot();
             File dir = new File(path);
@@ -758,11 +758,11 @@ public class AnalysisScriptController extends BaseFlowController
                 errors.reject(ERROR_MSG, "The path specified must be a directory containing FCS files.");
                 return null;
             }
-            return dir;
+            return FileSystemLike.wrapFile(dir);
         }
 
         // Get the directory to use as the file path root of the flow analysis run.
-        private File getRunPathRoot(List<File> keywordDirs, SampleIdMap<FlowFCSFile> resolvedFCSFiles)
+        private FileLike getRunPathRoot(List<FileLike> keywordDirs, SampleIdMap<FlowFCSFile> resolvedFCSFiles)
         {
             if (keywordDirs != null && !keywordDirs.isEmpty())
             {
@@ -782,7 +782,7 @@ public class AnalysisScriptController extends BaseFlowController
                         FlowRun flowRun = fcsFile.getRun();
                         ExpRun expRun = flowRun != null ? flowRun.getExperimentRun() : null;
                         if (expRun != null)
-                            return expRun.getFilePathRoot();
+                            return expRun.getFilePathFileLike();
                     }
                 }
             }
@@ -792,7 +792,7 @@ public class AnalysisScriptController extends BaseFlowController
 
         // Get the path to either the previously imported keyword run or
         // to the selected pipeline browser directory under the pipeline root.
-        private List<File> getKeywordDirs(ImportAnalysisForm form, Errors errors)
+        private List<FileLike> getKeywordDirs(ImportAnalysisForm form, Errors errors)
         {
             String path = null;
             if (form.getKeywordDir() != null && form.getKeywordDir().length > 0)
@@ -803,7 +803,7 @@ public class AnalysisScriptController extends BaseFlowController
 
             if (path != null)
             {
-                File keywordDir = getDir(path, errors);
+                FileLike keywordDir = getDir(path, errors);
                 if (errors.hasErrors())
                     return null;
 
@@ -1115,7 +1115,7 @@ public class AnalysisScriptController extends BaseFlowController
             else if (fcsFilesOption == SelectFCSFileOption.Browse)
             {
                 WorkspaceData workspaceData = form.getWorkspace();
-                List<File> keywordDirs = getKeywordDirs(form, errors);
+                List<FileLike> keywordDirs = getKeywordDirs(form, errors);
                 if (keywordDirs == null || keywordDirs.isEmpty())
                     errors.reject(ERROR_MSG, "No directory selected");
 
@@ -1125,7 +1125,7 @@ public class AnalysisScriptController extends BaseFlowController
                 if (errors.hasErrors())
                     return;
 
-                File keywordDir = keywordDirs.get(0);
+                FileLike keywordDir = keywordDirs.get(0);
 
                 // Translate selected keyword directory into a existing keyword run if possible.
                 FlowRun existingKeywordRun = null;
@@ -1160,7 +1160,7 @@ public class AnalysisScriptController extends BaseFlowController
                     Map<String, SelectedSamples.ResolvedSample> rows = new HashMap<>();
                     for (ISampleInfo sampleInfo : sampleInfos)
                     {
-                        File sampleFile = FileUtil.appendName(keywordDir, sampleInfo.getLabel());
+                        FileLike sampleFile = keywordDir.resolveChild(sampleInfo.getLabel());
                         boolean exists = sampleFile.exists();
                         if (exists)
                             found = true;
@@ -1316,7 +1316,7 @@ public class AnalysisScriptController extends BaseFlowController
 
         private void stepChooseAnalysis(ImportAnalysisForm form, BindException errors)
         {
-            List<File> keywordDirs = getKeywordDirs(form, errors);
+            List<FileLike> keywordDirs = getKeywordDirs(form, errors);
             if (errors.hasErrors())
                 return;
 
@@ -1358,8 +1358,8 @@ public class AnalysisScriptController extends BaseFlowController
 
                 if (keywordDirs != null)
                 {
-                    for (File keywordDir : keywordDirs)
-                        if (experiment.hasRun(keywordDir, null))
+                    for (FileLike keywordDir : keywordDirs)
+                        if (experiment.hasRun(keywordDir.toNioPathForRead().toFile(), null))
                         {
                             errors.reject(ERROR_MSG, "The '" + experiment.getName() + "' analysis folder already contains the FCS files from '" + keywordDir + "'.");
                             return;
@@ -1388,7 +1388,7 @@ public class AnalysisScriptController extends BaseFlowController
 
         private void stepConfirm(ImportAnalysisForm form, BindException errors) throws Exception
         {
-            List<File> keywordDirs = getKeywordDirs(form, errors);
+            List<FileLike> keywordDirs = getKeywordDirs(form, errors);
             if (errors.hasErrors())
                 return;
 
@@ -1421,7 +1421,7 @@ public class AnalysisScriptController extends BaseFlowController
                 throw new IllegalArgumentException("Wrong container");
 
             WorkspaceData workspaceData = form.getWorkspace();
-            File pipelineFile = null;
+            FileLike pipelineFile = null;
             ViewBackgroundInfo info = getViewBackgroundInfo();
             if (getPipeRoot() == null)
             {
@@ -1431,11 +1431,11 @@ public class AnalysisScriptController extends BaseFlowController
             else
             {
                 if (workspaceData.getPath() != null)
-                    pipelineFile = getPipeRoot().resolvePath(workspaceData.getPath());
+                    pipelineFile = getPipeRoot().resolvePathToFileLike(workspaceData.getPath());
             }
 
             // Choose a run path root for the imported analysis based upon the input FCS files.
-            File runFilePathRoot = getRunPathRoot(keywordDirs, selectedFCSFiles);
+            FileLike runFilePathRoot = getRunPathRoot(keywordDirs, selectedFCSFiles);
 
             AnalysisEngine analysisEngine = getAnalysisEngine(form);
             if (errors.hasErrors())
@@ -1465,9 +1465,9 @@ public class AnalysisScriptController extends BaseFlowController
             else if (AnalysisEngine.Archive == analysisEngine)
             {
                 assert (workspaceData.getWorkspaceObject() instanceof ExternalAnalysis);
-                File originalFile = pipelineFile;
+                FileLike originalFile = pipelineFile;
                 if (workspaceData.getOriginalPath() != null)
-                    originalFile = root.resolvePath(workspaceData.getOriginalPath());
+                    originalFile = root.resolvePathToFileLike(workspaceData.getOriginalPath());
                 job = new ImportResultsJob(info, getPipeRoot(), experiment,
                         AnalysisEngine.Archive, pipelineFile, originalFile,
                         runFilePathRoot,

@@ -31,7 +31,6 @@ import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -53,25 +52,25 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     }
 
     // useful for constructing a filename for creation, will append .gz if indicated
-    public static File getPepXMLConvertFile(File dirAnalysis, String baseName, FileType.gzSupportLevel gzSupport)
+    public static FileLike getPepXMLConvertFile(FileLike dirAnalysis, String baseName, FileType.gzSupportLevel gzSupport)
     {
         FileType ft = new FileType(getRawPepXMLSuffix(),
                 gzSupport);
         String name = ft.getName(dirAnalysis,baseName);
-        return new File(dirAnalysis, name);
+        return dirAnalysis.resolveChild(name);
     }
 
     // useful for locating an existing file that may or may not be .gz
-    public static File getPepXMLConvertFile(File dirAnalysis, String baseName)
+    public static FileLike getPepXMLConvertFile(FileLike dirAnalysis, String baseName)
     {
-        return getPepXMLConvertFile(dirAnalysis,baseName, FileType.gzSupportLevel.SUPPORT_GZ);
+        return getPepXMLConvertFile(dirAnalysis, baseName, FileType.gzSupportLevel.SUPPORT_GZ);
     }
 
-    protected final File _dirSequenceRoot;
+    protected final FileLike _dirSequenceRoot;
     protected boolean _fractions;
 
     @JsonCreator
-    protected AbstractMS2SearchPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)
+    protected AbstractMS2SearchPipelineJob(@JsonProperty("_dirSequenceRoot") FileLike dirSequenceRoot)
     {
         super();
         _dirSequenceRoot = dirSequenceRoot;
@@ -117,29 +116,29 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
 
     protected void writeInputFilesToLog()
     {
-        for (File file : getInputFiles())
+        for (FileLike file : getInputFiles())
         {
             info(file.getName());
         }
     }
 
     @Override
-    public File findInputFile(String name)
+    public FileLike findInputFile(String name)
     {
-        for (File fileInput : getInputFiles())
+        for (FileLike fileInput : getInputFiles())
         {
             if (name.equals(fileInput.getName()))
                 return fileInput;
         }
 
         // Check if there's an analysis-specific copy of the file
-        File analysisFile = FileUtil.appendName(getAnalysisDirectory(), name);
+        FileLike analysisFile = getAnalysisDirectory().resolveChild(name);
         if (NetworkDrive.exists(analysisFile))
         {
             return analysisFile;
         }
         // If not, check if there's a shared copy of the file in the data directory
-        File dataFile = FileUtil.appendName(getDataDirectory(), name);
+        FileLike dataFile = getDataDirectory().resolveChild(name);
         if (NetworkDrive.exists(dataFile))
         {
             return dataFile;
@@ -149,7 +148,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     }
 
     @Override
-    public File findOutputFile(String name)
+    public FileLike findOutputFile(String name)
     {
         // Look through all the tasks in this pipeline
         for (TaskId taskId : getTaskPipeline().getTaskProgression())
@@ -165,13 +164,13 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                     // mzXML should be in the same directory as the mzXML and RAW files.
                     if (fileType.isType(name))
                     {
-                        return FileUtil.appendName(getDataDirectory(), name);
+                        return getDataDirectory().resolveChild(name);
                     }
                 }
             }
         }
         
-        return FileUtil.appendName(getAnalysisDirectory(), name);
+        return getAnalysisDirectory().resolveChild(name);
     }
 
     /**
@@ -195,10 +194,10 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     }
 
     @Override
-    public List<File> getInteractInputFiles()
+    public List<FileLike> getInteractInputFiles()
     {
-        List<File> files = new ArrayList<>();
-        for (File fileSpectra : getInputFiles())
+        List<FileLike> files = new ArrayList<>();
+        for (FileLike fileSpectra : getInputFiles())
         {
             files.add(getPepXMLConvertFile(getAnalysisDirectory(),
                     FileUtil.getBaseName(fileSpectra),
@@ -208,7 +207,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     }
 
     @Override
-    public List<File> getInteractSpectraFiles()
+    public List<FileLike> getInteractSpectraFiles()
     {
         // Default to looking for just mzXML files
         List<FileType> types = Collections.singletonList(AbstractMS2SearchProtocol.FT_MZXML);
@@ -225,13 +224,13 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
             }
         }
 
-        ArrayList<File> files = new ArrayList<>();
-        for (File fileSpectra : getInputFiles())
+        List<FileLike> files = new ArrayList<>();
+        for (FileLike fileSpectra : getInputFiles())
         {
             // Look at the different types in priority order
             for (FileType type : types)
             {
-                File f = type.newFile(getDataDirectory(), FileUtil.getBaseName(fileSpectra));
+                FileLike f = type.newFile(getDataDirectory(), FileUtil.getBaseName(fileSpectra));
                 if (NetworkDrive.exists(f))
                 {
                     files.add(f);
@@ -244,21 +243,21 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
     }
 
     @Override
-    public File getSearchNativeSpectraFile()
+    public FileLike getSearchNativeSpectraFile()
     {
         return null;    // No spectra conversion by default.
     }
 
     @Override
-    public File getSequenceRootDirectory()
+    public FileLike getSequenceRootDirectory()
     {
         return _dirSequenceRoot;
     }
 
     @Override
-    public File[] getSequenceFiles()
+    public List<FileLike> getSequenceFiles()
     {
-        ArrayList<File> arrFiles = new ArrayList<>();
+        List<FileLike> arrFiles = new ArrayList<>();
 
         String paramDatabase = getParameters().get("pipeline, database");
         if (paramDatabase != null)
@@ -268,7 +267,7 @@ public abstract class AbstractMS2SearchPipelineJob extends AbstractFileAnalysisJ
                 arrFiles.add(MS2PipelineManager.getSequenceDBFile(_dirSequenceRoot, path));
         }
 
-        return arrFiles.toArray(new File[0]);
+        return arrFiles;
     }
 
     @Override

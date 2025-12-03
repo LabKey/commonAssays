@@ -33,7 +33,6 @@ import org.labkey.api.exp.api.ExpRunAttachmentParent;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.security.User;
-import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Tuple3;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.writer.FileSystemFile;
@@ -48,11 +47,11 @@ import org.labkey.flow.persist.AnalysisSerializer;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.InputRole;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -68,16 +67,16 @@ import static java.util.stream.Collectors.toList;
  */
 public class ImportResultsJob extends AbstractExternalAnalysisJob
 {
-    private File _analysisPathRoot = null;
+    private FileLike _analysisPathRoot = null;
     private String _analysisRunName = null;
 
     @JsonCreator
     protected ImportResultsJob(
             @JsonProperty("_analysisEngine") AnalysisEngine analysisEngine,
             @JsonProperty("_experiment") FlowExperiment experiment,
-            @JsonProperty("_originalImportedFile") File originalImportedFile,
-            @JsonProperty("_runFilePathRoot") File runFilePathRoot,
-            @JsonProperty("_keywordDirs") List<File> keywordDirs,
+            @JsonProperty("_originalImportedFile") FileLike originalImportedFile,
+            @JsonProperty("_runFilePathRoot") FileLike runFilePathRoot,
+            @JsonProperty("_keywordDirs") List<FileLike> keywordDirs,
             @JsonProperty("_targetStudy") Container targetStudy,
             @JsonProperty("_failOnError") boolean failOnError)
     {
@@ -88,10 +87,10 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                             PipeRoot root,
                             FlowExperiment experiment,
                             AnalysisEngine analysisEngine,
-                            File analysisPathRoot,
-                            File originalImportedFile,
-                            File runFilePathRoot,
-                            List<File> keywordDirs,
+                            FileLike analysisPathRoot,
+                            FileLike originalImportedFile,
+                            FileLike runFilePathRoot,
+                            List<FileLike> keywordDirs,
                             SampleIdMap<FlowFCSFile> selectedFCSFiles,
                             String analysisRunName,
                             Container targetStudy,
@@ -181,7 +180,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             }
             else if (getRunFilePathRoot() != null)
             {
-                file = FileUtil.appendName(getRunFilePathRoot(), sampleLabel);
+                file = getRunFilePathRoot().resolveChild(sampleLabel).toNioPathForRead().toFile();
                 uri = file.toURI();
             }
 
@@ -212,7 +211,7 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
             // UNDONE: comp matrix
         }
 
-        File statisticsFile = FileUtil.appendName(_analysisPathRoot, AnalysisSerializer.STATISTICS_FILENAME);
+        FileLike statisticsFile = _analysisPathRoot.resolveChild(AnalysisSerializer.STATISTICS_FILENAME);
 
         FlowRun run = saveAnalysis(getUser(), getContainer(), getExperiment(),
                 _analysisRunName, statisticsFile, getOriginalImportedFile(),
@@ -229,16 +228,16 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
         );
 
         // Add attachments to the run
-        File attachmentsDir = FileUtil.appendName(_analysisPathRoot, "attachments");
+        FileLike attachmentsDir = _analysisPathRoot.resolveChild("attachments");
         if (attachmentsDir.isDirectory())
         {
             AttachmentService svc = AttachmentService.get();
-            File[] files = attachmentsDir.listFiles(File::isFile);
-            if (files != null && files.length > 0)
+            List<FileLike> files = attachmentsDir.getChildren(FileLike::isFile);
+            if (!files.isEmpty())
             {
                 AttachmentParent parent = new ExpRunAttachmentParent(run.getExperimentRun());
-                info("Attaching files to run: " + Arrays.stream(files).map(File::getName).collect(joining(", ")));
-                svc.addAttachments(parent, Arrays.stream(files).map(FileAttachmentFile::new).collect(toList()), getUser());
+                info("Attaching files to run: " + files.stream().map(FileLike::getName).collect(joining(", ")));
+                svc.addAttachments(parent, files.stream().map(FileAttachmentFile::new).collect(toList()), getUser());
             }
         }
 
@@ -250,8 +249,8 @@ public class ImportResultsJob extends AbstractExternalAnalysisJob
                                                  ExpRun externalAnalysisRun,
                                                  User user, Container container,
                                                  String analysisName,
-                                                 File externalAnalysisFile,
-                                                 File originalImportedFile)
+                                                 FileLike externalAnalysisFile,
+                                                 FileLike originalImportedFile)
     {
         addStatus("Saving External Analysis " + originalImportedFile.getName());
         ExpData data = svc.createData(container, new DataType("Flow-ExternalAnalysis"));

@@ -16,10 +16,11 @@
 package org.labkey.ms2.pipeline.sequest;
 
 import org.junit.Test;
+import org.labkey.api.util.FileUtil;
 import org.labkey.ms2.pipeline.ParameterNames;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,12 +34,12 @@ import java.util.StringTokenizer;
  */
 public class ThermoSequestParamsBuilder extends SequestParamsBuilder
 {
-    public ThermoSequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot)
+    public ThermoSequestParamsBuilder(Map<String, String> sequestInputParams, FileLike sequenceRoot)
     {
         super(sequestInputParams, sequenceRoot);
     }
 
-    public ThermoSequestParamsBuilder(Map<String, String> sequestInputParams, File sequenceRoot, SequestParams.Variant variant, List<File> databaseFiles)
+    public ThermoSequestParamsBuilder(Map<String, String> sequestInputParams, FileLike sequenceRoot, SequestParams.Variant variant, List<FileLike> databaseFiles)
     {
         super(sequestInputParams, sequenceRoot, variant, databaseFiles);
     }
@@ -231,11 +232,11 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
         @Override
         public SequestParamsBuilder createParamsBuilder()
         {
-            return new ThermoSequestParamsBuilder(ip.getInputParameters(), root);
+            return new ThermoSequestParamsBuilder(ip.getInputParameters(), ROOT);
         }
 
         @Test
-        public void testInitDatabasesNormal() throws IOException
+        public void testInitDatabasesNormal()
         {
             String value = "Bovine_mini1.fasta";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -246,7 +247,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             List<String> parserError = spb.initDatabases();
             if (!parserError.isEmpty()) fail(parserError);
             Param sp = spb.getProperties().getFASTAParam();
-            assertEquals(new File(dbPath + File.separator + value).getCanonicalPath(), new File(sp.getValue()).getCanonicalPath());
+            assertEquals(FileUtil.getAbsoluteCaseSensitiveFile(new File(dbPath + File.separator + value)).getAbsolutePath(), FileUtil.getAbsoluteCaseSensitiveFile(new File(sp.getValue())).getAbsolutePath());
         }
 
         @Test
@@ -1543,7 +1544,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             paramMap.put(ParameterNames.SEQUENCE_DB, DUMMY_FASTA_NAME);
             // Value from UW version - make sure it doesn't get piped through
             paramMap.put("sequest, digest_mass_range", "400.0 5900.0");
-            ThermoSequestParamsBuilder spb = new ThermoSequestParamsBuilder(paramMap, new File("fakeroot"));
+            ThermoSequestParamsBuilder spb = new ThermoSequestParamsBuilder(paramMap, AbstractSequestTestCase.ROOT);
             spb.initXmlValues();
             String text = spb.getSequestParamsText();
             assertTrue(text.contains("database_name ="));

@@ -58,10 +58,9 @@ import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -79,19 +78,19 @@ import java.util.Map;
  */
 public class WorkspaceJob extends AbstractExternalAnalysisJob
 {
-    private final File _workspaceFile;
+    private final FileLike _workspaceFile;
     private final String _workspaceName;
 
     @JsonCreator
     protected WorkspaceJob(
             @JsonProperty("_analysisEngine") AnalysisEngine analysisEngine,
             @JsonProperty("_experiment") FlowExperiment experiment,
-            @JsonProperty("_originalImportedFile") File originalImportedFile,
-            @JsonProperty("_runFilePathRoot") File runFilePathRoot,
-            @JsonProperty("_keywordDirs") List<File> keywordDirs,
+            @JsonProperty("_originalImportedFile") FileLike originalImportedFile,
+            @JsonProperty("_runFilePathRoot") FileLike runFilePathRoot,
+            @JsonProperty("_keywordDirs") List<FileLike> keywordDirs,
             @JsonProperty("_targetStudy") Container targetStudy,
             @JsonProperty("_failOnError") boolean failOnError,
-            @JsonProperty("_workspaceFile") File workspaceFile,
+            @JsonProperty("_workspaceFile") FileLike workspaceFile,
             @JsonProperty("_workspaceName") String workspaceName)
     {
         super(analysisEngine, experiment, originalImportedFile, runFilePathRoot, keywordDirs, targetStudy, failOnError);
@@ -103,9 +102,9 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                         PipeRoot root,
                         FlowExperiment experiment,
                         WorkspaceData workspaceData,
-                        File originalImportedFile,
-                        File runFilePathRoot,
-                        List<File> keywordDirs,
+                        FileLike originalImportedFile,
+                        FileLike runFilePathRoot,
+                        List<FileLike> keywordDirs,
                         SampleIdMap<FlowFCSFile> selectedFCSFiles,
                         //List<String> importGroupNames,
                         Container targetStudy,
@@ -119,17 +118,17 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
         {
             String[] parts = workspaceData.getPath().split(File.pathSeparator);
             if (parts.length > 0)
-                name = parts[parts.length];
+                name = parts[parts.length - 1];
         }
         if (name == null)
             name = "workspace";
         _workspaceName = name;
         _workspaceFile = FileUtil.createTempFile(_workspaceName, null, FlowSettings.getWorkingDirectory());
 
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(_workspaceFile));
-        oos.writeObject(workspaceData.getWorkspaceObject());
-        oos.flush();
-        oos.close();
+        try (ObjectOutputStream oos = new ObjectOutputStream(_workspaceFile.openOutputStream()))
+        {
+            oos.writeObject(workspaceData.getWorkspaceObject());
+        }
     }
 
     @Override
@@ -148,7 +147,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
     @Override
     protected FlowRun createExperimentRun() throws Exception
     {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(_workspaceFile)))
+        try (ObjectInputStream ois = new ObjectInputStream(_workspaceFile.openInputStream()))
         {
             Workspace workspace = (Workspace)ois.readObject();
 
@@ -163,8 +162,8 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
 
     private FlowRun createExperimentRun(User user, Container container,
                                         Workspace workspace, FlowExperiment experiment,
-                                        String workspaceName, File workspaceFile, File originalImportedFile,
-                                        File runFilePathRoot, SampleIdMap<FlowFCSFile> resolvedFCSFiles,
+                                        String workspaceName, FileLike workspaceFile, FileLike originalImportedFile,
+                                        FileLike runFilePathRoot, SampleIdMap<FlowFCSFile> resolvedFCSFiles,
                                         boolean failOnError) throws Exception
     {
         SampleIdMap<AttributeSet> keywordsMap = new SampleIdMap<>();
@@ -256,7 +255,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
 
     private boolean extractAnalysis(Container container,
                                     Workspace workspace,
-                                    File runFilePathRoot,
+                                    FileLike runFilePathRoot,
                                     SampleIdMap<FlowFCSFile> selectedFCSFiles,
                                     //List<String> importGroupNames,
                                     boolean failOnError,
@@ -306,7 +305,7 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
             }
             else if (runFilePathRoot != null)
             {
-                file = FileUtil.appendName(runFilePathRoot, sample.getLabel());
+                file = runFilePathRoot.resolveChild(sample.getLabel()).toNioPathForRead().toFile();
                 uri = file.toURI();
             }
             // Don't set FCSFile uri unless the file actually exists on disk.
@@ -400,8 +399,8 @@ public class WorkspaceJob extends AbstractExternalAnalysisJob
                                                  ExpRun externalAnalysisRun,
                                                  User user, Container container,
                                                  String analysisName,
-                                                 File externalAnalysisFile,
-                                                 File originalImportedFile)
+                                                 FileLike externalAnalysisFile,
+                                                 FileLike originalImportedFile)
     {
         addStatus("Saving Workspace Analysis " + originalImportedFile.getName());
         ExpData workspaceData = svc.createData(container, FlowDataType.Workspace);

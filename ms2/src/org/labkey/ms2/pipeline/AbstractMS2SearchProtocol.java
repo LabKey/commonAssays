@@ -30,9 +30,7 @@ import org.labkey.api.util.massSpecDataFileType;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,7 +61,7 @@ abstract public class AbstractMS2SearchProtocol<JOB extends AbstractMS2SearchPip
         return LEGACY_JOINED_BASENAME;
     }
 
-    public File getDirSeqRoot()
+    public FileLike getDirSeqRoot()
     {
         return MS2PipelineManager.getSequenceDatabaseRoot(_container, true);
     }

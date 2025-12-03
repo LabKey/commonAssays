@@ -30,8 +30,8 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTaskFactory;
 import org.labkey.ms2.pipeline.TPPTask;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,7 +61,7 @@ public class XTandemToXMLTask extends AbstractMS2SearchTask<XTandemToXMLTask.Fac
         {
             FileAnalysisJobSupport support = (FileAnalysisJobSupport) job;
             String baseName = support.getBaseName();
-            File dirAnalysis = support.getAnalysisDirectory();
+            FileLike dirAnalysis = support.getAnalysisDirectory();
 
             // The raw pepXML exists
             return NetworkDrive.exists(AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis, baseName));
@@ -99,12 +99,12 @@ public class XTandemToXMLTask extends AbstractMS2SearchTask<XTandemToXMLTask.Fac
             FileAnalysisJobSupport support = getJobSupport();
             String baseName = support.getBaseName();
 
-            File fileOutputXML = XTandemSearchTask.getNativeOutputFile(support.getAnalysisDirectory(), baseName, FileType.gzSupportLevel.SUPPORT_GZ);
+            FileLike fileOutputXML = XTandemSearchTask.getNativeOutputFile(support.getAnalysisDirectory(), baseName, FileType.gzSupportLevel.SUPPORT_GZ);
             if (!fileOutputXML.isFile())
                 fileOutputXML = XTandemSearchTask.getNativeOutputFile(support.getDataDirectory(), baseName, FileType.gzSupportLevel.SUPPORT_GZ);
-            File fileWorkOutputXML = _wd.inputFile(fileOutputXML, false);
+            FileLike fileWorkOutputXML = _wd.inputFile(fileOutputXML, false);
 
-            File fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(), baseName, support.getGZPreference());
+            FileLike fileWorkPepXMLRaw = AbstractMS2SearchPipelineJob.getPepXMLConvertFile(_wd.getDir(), baseName, support.getGZPreference());
 
             String ver = TPPTask.getTPPVersion(getJob());
             String exePath = PipelineJobService.get().getExecutablePath("Tandem2XML", null, "tpp", ver, getJob().getLogger());
@@ -115,7 +115,7 @@ public class XTandemToXMLTask extends AbstractMS2SearchTask<XTandemToXMLTask.Fac
                     _wd.getDir());
 
             // Move final outputs to analysis directory.
-            File filePepXMLRaw;
+            FileLike filePepXMLRaw;
             try (WorkDirectory.CopyingResource ignored = _wd.ensureCopyingLock())
             {
                 filePepXMLRaw = _wd.outputFile(fileWorkPepXMLRaw);

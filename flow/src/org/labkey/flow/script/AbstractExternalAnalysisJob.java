@@ -36,7 +36,6 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
-import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -67,8 +66,8 @@ import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.util.KeywordUtil;
 import org.labkey.flow.util.SampleUtil;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -89,10 +88,10 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
 {
     private final AnalysisEngine _analysisEngine;
     private final FlowExperiment _experiment;
-    private final File _originalImportedFile;
-    private final File _runFilePathRoot;
+    private final FileLike _originalImportedFile;
+    private final FileLike _runFilePathRoot;
     // Directories of FCS files to be imported.
-    private final List<File> _keywordDirs;
+    private final List<FileLike> _keywordDirs;
     // Map workspace sample ID -> FlowFCSFile (or FlowFCSFile.UNMAPPED if we aren't resolving previously imported FCS files)
     private SampleIdMap<FlowFCSFile> _selectedFCSFiles;
     private List<FlowFCSFile> _newFlowWells;
@@ -107,9 +106,9 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
     protected AbstractExternalAnalysisJob(
             @JsonProperty("_analysisEngine") AnalysisEngine analysisEngine,
             @JsonProperty("_experiment") FlowExperiment experiment,
-            @JsonProperty("_originalImportedFile") File originalImportedFile,
-            @JsonProperty("_runFilePathRoot") File runFilePathRoot,
-            @JsonProperty("_keywordDirs") List<File> keywordDirs,
+            @JsonProperty("_originalImportedFile") FileLike originalImportedFile,
+            @JsonProperty("_runFilePathRoot") FileLike runFilePathRoot,
+            @JsonProperty("_keywordDirs") List<FileLike> keywordDirs,
             @JsonProperty("_targetStudy") Container targetStudy,
             @JsonProperty("_failOnError") boolean failOnError)
     {
@@ -127,9 +126,9 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
             PipeRoot root,
             FlowExperiment experiment,
             AnalysisEngine analysisEngine,
-            File originalImportedFile,
-            File runFilePathRoot,
-            List<File> keywordDirs,
+            FileLike originalImportedFile,
+            FileLike runFilePathRoot,
+            List<FileLike> keywordDirs,
             SampleIdMap<FlowFCSFile> selectedFCSFiles,
             //List<String> importGroupNames,
             Container targetStudy,
@@ -173,17 +172,17 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
 //        return _importGroupNames;
 //    }
 
-    public File getRunFilePathRoot()
+    public FileLike getRunFilePathRoot()
     {
         return _runFilePathRoot;
     }
 
-    public List<File> getKeywordDirectories()
+    public List<FileLike> getKeywordDirectories()
     {
         return _keywordDirs;
     }
 
-    protected File getOriginalImportedFile()
+    protected FileLike getOriginalImportedFile()
     {
         return _originalImportedFile;
     }
@@ -364,15 +363,15 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
     protected abstract FlowRun createExperimentRun() throws Exception;
 
     protected abstract ExpData createExternalAnalysisData(ExperimentService svc,
-                                                 ExpRun externalAnalysisRun,
-                                                 User user, Container container,
-                                                 String analysisName,
-                                                 File externalAnalysisFile,
-                                                 File originalImportedFile);
+                                                          ExpRun externalAnalysisRun,
+                                                          User user, Container container,
+                                                          String analysisName,
+                                                          FileLike externalAnalysisFile,
+                                                          FileLike originalImportedFile);
 
     protected FlowRun saveAnalysis(User user, Container container, FlowExperiment experiment,
-                                   String analysisName, File externalAnalysisFile, File originalImportedFile,
-                                   File runFilePathRoot,
+                                   String analysisName, FileLike externalAnalysisFile, FileLike originalImportedFile,
+                                   FileLike runFilePathRoot,
                                    SampleIdMap<FlowFCSFile> selectedFCSFiles,
                                    SampleIdMap<AttributeSet> keywordsMap,
                                    SampleIdMap<CompensationMatrix> sampleCompMatrixMap,
@@ -384,7 +383,7 @@ public abstract class AbstractExternalAnalysisJob extends FlowExperimentJob
                                    MultiValuedMap<String, String> sampleIdToNameMap) throws Exception
     {
         // Fake file URI set on the FCSFile/FCSAnalsyis ExpData to ensure it's recognized by the FlowDataHandler.
-        URI dataFileURI = FileUtil.appendName(externalAnalysisFile.getParentFile(), "attributes.flowdata.xml").toURI();
+        URI dataFileURI = externalAnalysisFile.getParent().resolveChild("attributes.flowdata.xml").toURI();
 
         // Prepare comp matrices for saving
         Map<CompensationMatrix, AttributeSet> compMatrixMap = new HashMap<>();

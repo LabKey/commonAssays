@@ -26,6 +26,7 @@ import org.labkey.api.pipeline.file.AbstractFileAnalysisProtocol;
 import org.labkey.api.security.User;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.api.util.Path;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.util.massSpecDataFileType;
 import org.labkey.ms2.reader.MS2Loader;
@@ -181,19 +182,19 @@ public class PepXmlImporter extends PeptideImporter
             // First, check two directories up from the MS2 results. This is where searches done through the CPAS
             // pipeline will be
             File pepXmlDir = new File(_path);
-            File mzXMLFile = null;
+            FileLike mzXMLFile = null;
             massSpecDataFileType FT_MZXML = new massSpecDataFileType();
             if (pepXmlDir.getParentFile() != null && pepXmlDir.getParentFile().getParentFile() != null)
             {
-                mzXMLFile = FT_MZXML.getFile(pepXmlDir.getParentFile().getParentFile(), newFilename);
+                mzXMLFile = FT_MZXML.getFile(FileSystemLike.wrapFile(pepXmlDir.getParentFile().getParentFile()), newFilename);
             }
 
             if (!NetworkDrive.exists(mzXMLFile))
             {
                 // If not there, look in the same directory as the MS2 results
-                mzXMLFile = FT_MZXML.getFile(pepXmlDir, newFilename);
+                mzXMLFile = FT_MZXML.getFile(FileSystemLike.wrapFile(pepXmlDir), newFilename);
             }
-            fraction.setSpectrumPath(mzXMLFile.getAbsolutePath());
+            fraction.setSpectrumPath(mzXMLFile.toNioPathForRead().toFile().getAbsolutePath());
         }
         if (! NetworkDrive.exists(new File(_path + "/" + _gzFileName)) && baseName != null)
         {
@@ -226,6 +227,7 @@ public class PepXmlImporter extends PeptideImporter
     protected void processSpectrumFile(PepXmlFraction fraction, Set<Integer> scans, MS2Progress progress, boolean shouldLoadSpectra, boolean shouldLoadRetentionTimes)
     {
         File mzXmlFile = getMzXMLFile(fraction);
+        FileLike mzXmlFileLike = null;
         if ((_run.getType().equalsIgnoreCase(MS2RunType.Mascot.name())||_run.getType().equalsIgnoreCase(MS2RunType.Sequest.name()))   // TODO: Move this check (perhaps all the code) into the appropriate run classes
                 && null == mzXmlFile)
         {
@@ -235,13 +237,13 @@ public class PepXmlImporter extends PeptideImporter
             String baseName = _gzFileName;
             baseName = baseName.replaceAll("\\.pep\\.tgz$", "");
             massSpecDataFileType FT_MZXML = new massSpecDataFileType();
-            File path = new File(_path,"");
-            File engineProtocolMzXMLFile = FT_MZXML.getFile(path, baseName);
+            File path = new File(_path);
+            FileLike engineProtocolMzXMLFile = FT_MZXML.getFile(FileSystemLike.wrapFile(path), baseName);
             String mzXmlFileName = engineProtocolMzXMLFile.getName();
-            File engineProtocolDir = engineProtocolMzXMLFile.getParentFile();
-            File engineDir = engineProtocolDir.getParentFile();
-            File mzXMLFile = new File(engineDir.getParent(), mzXmlFileName);
-            mzXmlFile = mzXMLFile.getAbsoluteFile();
+            FileLike engineProtocolDir = engineProtocolMzXMLFile.getParent();
+            FileLike engineDir = engineProtocolDir.getParent();
+            FileLike mzXMLFile = engineDir.getParent().resolveFile(Path.parse(mzXmlFileName));
+            mzXmlFileLike = mzXMLFile;
         }
         String gzFileName = _path + "/" + _gzFileName;
         File gzFile = _context.findFile(gzFileName);
@@ -258,7 +260,7 @@ public class PepXmlImporter extends PeptideImporter
             }
         }
 
-        SpectrumImporter sl = new SpectrumImporter(gzFileName, "", FileSystemLike.wrapFile(mzXmlFile), scans, progress, _fractionId, _log, shouldLoadSpectra, shouldLoadRetentionTimes);
+        SpectrumImporter sl = new SpectrumImporter(gzFileName, "", mzXmlFileLike, scans, progress, _fractionId, _log, shouldLoadSpectra, shouldLoadRetentionTimes);
         sl.upload();
         updateFractionSpectrumFileName(sl.getFile() == null ? null : sl.getFile().toNioPathForRead().toFile());
     }

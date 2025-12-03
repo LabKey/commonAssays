@@ -26,15 +26,17 @@ import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.fasta.FastaDbLoader;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
-import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Path;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.ms2.reader.AbstractQuantAnalysisResult;
 import org.labkey.ms2.reader.MS2Loader;
 import org.labkey.ms2.reader.PeptideProphetHandler;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -133,32 +135,34 @@ public abstract class PeptideImporter extends MS2Importer
         // Handle PEAKS FASTA references
         for (String dbName : fraction.getDatabaseParameterValues())
         {
-            File database = null;
+            FileLike database = null;
 
             // First look in the FASTA directory, with and without a .fasta extension
-            File databaseRoot = MS2PipelineManager.getSequenceDatabaseRoot(_container, true);
+            FileLike databaseRoot = MS2PipelineManager.getSequenceDatabaseRoot(_container, true);
             if (NetworkDrive.exists(databaseRoot))
             {
-                database = FileUtil.appendName(databaseRoot, dbName);
+                database = databaseRoot.resolveFile(Path.parse(dbName));
                 if (!NetworkDrive.exists(database))
                 {
-                    database = FileUtil.appendName(databaseRoot, dbName + ".fasta");
+                    database = databaseRoot.resolveFile(Path.parse(dbName + ".fasta"));
                 }
             }
 
+            File dbPath = new File(_path);
+
             // Also try relative to the file being imported, with and without a .fasta extension
-            if (!NetworkDrive.exists(database))
+            if (!NetworkDrive.exists(database) && dbPath.exists())
             {
-                database = FileUtil.appendName(new File(_path), dbName);
+                database = FileSystemLike.wrapFile(dbPath).resolveFile(Path.parse(dbName));
             }
-            if (!NetworkDrive.exists(database))
+            if (!NetworkDrive.exists(database) && dbPath.exists())
             {
-                database = FileUtil.appendName(new File(_path), dbName + ".fasta");
+                database = FileSystemLike.wrapFile(dbPath).resolveFile(Path.parse(dbName + ".fasta"));
             }
 
             if (NetworkDrive.exists(database))
             {
-                dbPaths.add(database.getAbsolutePath());
+                dbPaths.add(database.toNioPathForRead().toFile().getAbsolutePath());
             }
             else
             {

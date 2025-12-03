@@ -24,6 +24,7 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.module.Module;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.ms2.MS2Controller;
+import org.labkey.vfs.FileSystemLike;
 
 import java.io.File;
 
@@ -65,7 +66,7 @@ public class ProteinProphetPipelineProvider extends PipelineProvider
                 File parent = f.getParentFile();
                 String basename = fileType.getBaseName(f);
                 
-                return !fileExists(AbstractMS2SearchProtocol.FT_SEARCH_XAR.newFile(parent, basename));
+                return !fileExists(AbstractMS2SearchProtocol.FT_SEARCH_XAR.newFile(FileSystemLike.wrapFile(parent), basename));
             }
 
             return false;

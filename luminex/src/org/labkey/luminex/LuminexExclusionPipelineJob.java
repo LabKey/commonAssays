@@ -44,7 +44,7 @@ public class LuminexExclusionPipelineJob extends PipelineJob
     {
         super(LuminexAssayProvider.NAME, info, root);
 
-        setLogFile(root.getLogDirectoryFileLike(true).resolveChild(FileUtil.makeFileNameWithTimestamp("luminex_exclusion", "log")));
+        setLogFile(root.getLogDirectory(true).resolveChild(FileUtil.makeFileNameWithTimestamp("luminex_exclusion", "log")));
 
         _form = form;
         _exclusionType = LuminexManager.ExclusionType.valueOf(form.getTableName());

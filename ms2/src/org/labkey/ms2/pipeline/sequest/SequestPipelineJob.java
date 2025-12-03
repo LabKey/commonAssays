@@ -23,7 +23,6 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -39,7 +38,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
     public static final TaskId TASK_ID = new TaskId(SequestPipelineJob.class);
 
     @JsonCreator
-    protected SequestPipelineJob(@JsonProperty("_dirSequenceRoot") File dirSequenceRoot)
+    protected SequestPipelineJob(@JsonProperty("_dirSequenceRoot") FileLike dirSequenceRoot)
     {
         super(dirSequenceRoot);
     }
@@ -82,7 +81,7 @@ public class SequestPipelineJob extends AbstractMS2SearchPipelineJob
     }
 
     @Override
-    public File getSearchNativeOutputFile()
+    public FileLike getSearchNativeOutputFile()
     {
         return SequestSearchTask.getNativeOutputFile(getAnalysisDirectory(), getBaseName(), getGZPreference());
     }

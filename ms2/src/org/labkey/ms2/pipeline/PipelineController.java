@@ -230,7 +230,7 @@ public class PipelineController extends SpringActionController
         @Override
         public ModelAndView getView(SequenceDBRootForm form, boolean reshow, BindException errors)
         {
-            File fileRoot = MS2PipelineManager.getSequenceDatabaseRoot(getContainer(), false);
+            FileLike fileRoot = MS2PipelineManager.getSequenceDatabaseRoot(getContainer(), false);
             final String localPathRoot;
 
             if (fileRoot == null)

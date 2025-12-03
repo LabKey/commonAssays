@@ -19,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.CachedResultSet;
 import org.labkey.api.data.CachedResultSets;
 import org.labkey.api.data.ColumnInfo;
@@ -54,11 +53,11 @@ import org.labkey.flow.data.ICSMetadata;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
+import org.labkey.vfs.FileLike;
 import org.springframework.beans.PropertyValue;
 import org.springframework.beans.PropertyValues;
 
 import javax.script.ScriptEngine;
-import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -578,7 +577,7 @@ public abstract class FilterFlowReport extends FlowReport
         }
 
         @Override
-        protected String getScriptProlog(ScriptEngine engine, ViewContext context, File inputFile, Map<String, Object> inputParameters, boolean isRStudio)
+        protected String getScriptProlog(ScriptEngine engine, ViewContext context, FileLike inputFile, Map<String, Object> inputParameters, boolean isRStudio)
         {
             String labkeyProlog = super.getScriptProlog(engine, context, inputFile, inputParameters, isRStudio);
 
@@ -602,14 +601,6 @@ public abstract class FilterFlowReport extends FlowReport
             reportProlog.append(")\n");
             _report.addScriptProlog(context, reportProlog);
             return reportProlog.toString();
-        }
-
-        @Override
-        public File getReportDir(@NotNull String executingContainerId)
-        {
-            // Issue 12625: Create unique directory for the background report job
-            boolean isPipeline = _report.saveToDomain();
-            return super.getReportDir(executingContainerId, isPipeline);
         }
     }
 

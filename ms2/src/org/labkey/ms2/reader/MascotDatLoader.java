@@ -22,12 +22,14 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Pair;
+import org.labkey.api.util.Path;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.ms2.MS2Modification;
 import org.labkey.ms2.MS2RunType;
 import org.labkey.ms2.SpectrumException;
 import org.labkey.ms2.pipeline.MS2PipelineManager;
 import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedReader;
@@ -351,8 +353,8 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                 String dbFileName = _currentLine.substring(DB_PREFIX.length()).trim();
                 try
                 {
-                    File databaseFile = getDatabaseFile(container, dbFileName, null);
-                    fraction.setDatabaseLocalPaths(Arrays.asList(databaseFile.getAbsolutePath()));
+                    FileLike databaseFile = getDatabaseFile(container, dbFileName, null);
+                    fraction.setDatabaseLocalPaths(Arrays.asList(databaseFile.toNioPathForRead().toFile().getAbsolutePath()));
                 }
                 catch (FileNotFoundException e)
                 {
@@ -791,8 +793,8 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
             if (matcher.matches())
             {
                 String s = matcher.group(1);
-                File databaseFile = getDatabaseFile(container, null, s.trim());
-                fraction.getDatabaseLocalPaths().add(databaseFile.getAbsolutePath());
+                FileLike databaseFile = getDatabaseFile(container, null, s.trim());
+                fraction.getDatabaseLocalPaths().add(databaseFile.toNioPathForRead().toFile().getAbsolutePath());
             }
             readLine();
         }
@@ -817,14 +819,14 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
         return eof() || _currentLine.matches(_boundaryMarker);
     }
 
-    public File getDatabaseFile(Container container, String dbName, String fastaFileName) throws FileNotFoundException
+    public FileLike getDatabaseFile(Container container, String dbName, String fastaFileName) throws FileNotFoundException
     {
         // Try looking for the "DB" value under the FASTA root
-        File dbRoot = MS2PipelineManager.getSequenceDatabaseRoot(container, true);
+        FileLike dbRoot = MS2PipelineManager.getSequenceDatabaseRoot(container, true);
         if (dbName != null)
         {
             // Mascot FASTA files may have been downloaded from the server into a ./mascot/X subdirectory, so seek it out
-            File file = findFile(dbRoot, dbName, 3);
+            FileLike file = findFile(dbRoot, dbName, 3);
             if (file != null)
             {
                 return file;
@@ -834,7 +836,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
         if (fastaFileName != null)
         {
             // Try using the full path and see if it resolves
-            File file = new File(fastaFileName);
+            FileLike file = FileSystemLike.wrapFile(new File(fastaFileName));
             if (file.isFile())
             {
                 return file;
@@ -857,7 +859,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
 
     @Nullable
     /** Look for the file up to maxDepth child directories under the current directory */
-    private File findFile(File parent, String name, int maxDepth)
+    private FileLike findFile(FileLike parent, String name, int maxDepth)
     {
         // Stop looking, we've exceeded our maximum recursive depth
         if (maxDepth == 0)
@@ -865,21 +867,18 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
             return null;
         }
 
-        File f = FileUtil.appendName(parent, name);
+        FileLike f = parent.resolveFile(Path.parse(name));
         if (f.isFile())
         {
             return f;
         }
-        File[] children = parent.listFiles(File::isDirectory);
-        if (children != null)
+        List<FileLike> children = parent.getChildren(FileLike::isDirectory);
+        for (FileLike child : children)
         {
-            for (File child : children)
+            f = findFile(child, name, maxDepth - 1);
+            if (f != null)
             {
-                f = findFile(child, name, maxDepth - 1);
-                if (f != null)
-                {
-                    return f;
-                }
+                return f;
             }
         }
         return null;
@@ -1069,7 +1068,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     public class PeptideIterator implements Iterator<DatPeptide>
     {
         private DatPeptide _peptide = null;
-        private PeptideFraction _fraction;
+        private final PeptideFraction _fraction;
 
         public PeptideIterator(PeptideFraction fraction)
         {

@@ -23,12 +23,10 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineDirectory;
 import org.labkey.api.pipeline.TaskPipeline;
 import org.labkey.api.security.permissions.InsertPermission;
-import org.labkey.api.util.FileUtil;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.ViewContext;
 
 import java.io.File;
-import java.nio.file.Path;
 
 /**
  * Common base class for pipeline providers that map to MS2 searches (XTandem, Mascot, etc)
@@ -85,14 +83,6 @@ abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends Abst
     public boolean isSearch()
     {
         return true;
-    }
-
-    @Override
-    public void initSystemDirectory(Path rootDir, Path systemDir)
-    {
-        AbstractMS2SearchProtocolFactory factory = getProtocolFactory();
-        if (factory != null && !FileUtil.hasCloudScheme(rootDir) && !FileUtil.hasCloudScheme(systemDir))
-            factory.initSystemDirectory(rootDir.toFile(), systemDir.toFile());
     }
 
     @Override

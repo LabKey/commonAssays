@@ -16,8 +16,9 @@
 package org.labkey.ms2.pipeline;
 
 import org.labkey.api.pipeline.file.FileAnalysisJobSupport;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
+import java.util.List;
 
 /**
  * <code>MS2PipelineJobSupport</code> Interface for providing MS2 search support to
@@ -28,12 +29,12 @@ public interface MS2PipelineJobSupport extends FileAnalysisJobSupport
     /**
      * Returns the root sequence file directory.
      */
-    File getSequenceRootDirectory();
+    FileLike getSequenceRootDirectory();
     
     /**
      * Returns a list of FASTA files to be searched.
      */
-    File[] getSequenceFiles();
+    List<FileLike> getSequenceFiles();
 
     /**
      * Returns true if the job should perform a combined analysis of

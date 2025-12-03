@@ -121,6 +121,8 @@ import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
+import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
@@ -215,7 +217,7 @@ public class ProteinController extends SpringActionController
                 throw new RedirectException(url + "&" + filter.toQueryString("ProteinSearchResults"));
             }
 
-            if (getViewContext().getRequest().getParameter("ProteinSearchResults.GroupProbability~gte") != null)
+            if (request.getParameter("ProteinSearchResults.GroupProbability~gte") != null)
             {
                 try
                 {
@@ -232,10 +234,10 @@ public class ProteinController extends SpringActionController
                 catch (NumberFormatException ignored) {}
             }
 
-            WebPartView searchFormView = null;
+            WebPartView<?> searchFormView = null;
             for (ProteinService.FormViewProvider<ProteinSearchForm> provider : ProteinService.get().getProteinSearchFormViewProviders())
             {
-                WebPartView formView = provider.createView(getViewContext(), form);
+                WebPartView<?> formView = provider.createView(getViewContext(), form);
                 if (formView != null)
                 {
                     searchFormView = formView;
@@ -626,7 +628,7 @@ public class ProteinController extends SpringActionController
         }
 
         @Override
-        public ActionURL getSuccessURL(UploadAnnotationsForm uploadAnnotationsForm)
+        public ActionURL getSuccessURL(UploadAnnotationsForm uploadAnnotationsFoKeyWTaskrm)
         {
             return getBeginURL(getContainer());
         }
@@ -1171,7 +1173,14 @@ public class ProteinController extends SpringActionController
                 errors.addError(new LabKeyError("Please enter a file path."));
                 return false;
             }
+            // This action is restricted to site admins so we trust the path they provided. However, we should
+            // get pickier.
             File file = FileUtil.getAbsoluteCaseSensitiveFile(new File(fname));
+            if (!file.isFile())
+            {
+                throw new NotFoundException("File not found.");
+            }
+            FileLike fileLike = FileSystemLike.wrapFile(file);
 
             try
             {
@@ -1180,11 +1189,11 @@ public class ProteinController extends SpringActionController
                 //TODO: this style of dealing with different file types must be repaired.
                 if ("uniprot".equalsIgnoreCase(form.getFileType()))
                 {
-                    loader = new XMLProteinLoader(file, getViewBackgroundInfo(), null, form.isClearExisting());
+                    loader = new XMLProteinLoader(fileLike, getViewBackgroundInfo(), null, form.isClearExisting());
                 }
                 else if ("fasta".equalsIgnoreCase(form.getFileType()))
                 {
-                    FastaDbLoader fdbl = new FastaDbLoader(file, getViewBackgroundInfo(), null);
+                    FastaDbLoader fdbl = new FastaDbLoader(fileLike, getViewBackgroundInfo(), null);
                     fdbl.setDefaultOrganism(form.getDefaultOrganism());
                     fdbl.setOrganismIsToGuessed(form.getShouldGuess() != null);
                     loader = fdbl;

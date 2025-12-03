@@ -207,12 +207,12 @@ public class NabAssayController extends SpringActionController
         }
     }
 
-    protected DilutionAssayProvider getProvider(ExpRun run)
+    protected DilutionAssayProvider<?> getProvider(ExpRun run)
     {
         AssayProvider provider = AssayService.get().getProvider(run.getProtocol());
-        if (!(provider instanceof DilutionAssayProvider))
+        if (!(provider instanceof DilutionAssayProvider<?> dap))
             throw new NotFoundException("Run " + run.getRowId() + " is not a NAb run.");
-        return (DilutionAssayProvider) provider;
+        return dap;
     }
 
     protected DilutionDataHandler getDataHandler(ExpRun run)
@@ -240,7 +240,7 @@ public class NabAssayController extends SpringActionController
             {
                 throw new NotFoundException("Data file for run " + run.getName() + " was not found.  Deleted from the file system?");
             }
-            PageFlowUtil.streamFile(getViewContext().getResponse(), file.toNioPathForRead().toFile(), true);
+            PageFlowUtil.streamFile(getViewContext().getResponse(), file, true);
             return null;
         }
 
@@ -461,7 +461,7 @@ public class NabAssayController extends SpringActionController
         }
 
         @Override
-        public boolean handlePost(DeleteRunForm form, BindException errors) throws Exception
+        public boolean handlePost(DeleteRunForm form, BindException errors)
         {
             _run.delete(getUser());
             return true;

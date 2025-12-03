@@ -22,6 +22,7 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.GUID;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.util.Path;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.flow.FlowSettings;
@@ -30,6 +31,7 @@ import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.persist.InputRole;
+import org.labkey.vfs.FileLike;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,7 +48,7 @@ import java.util.Map;
 public abstract class FlowExperimentJob extends FlowJob
 {
     protected static Logger _log = getJobLogger(ScriptJob.class);
-    protected File _containerFolder;
+    protected FileLike _containerFolder;
     FlowProtocolStep _step;
     String _experimentLSID;
     String _experimentName;
@@ -68,10 +70,7 @@ public abstract class FlowExperimentJob extends FlowJob
 
     private void initStatus() throws IOException
     {
-        String guid = GUID.makeGUID();
-        File logFile = FileUtil.appendName(_containerFolder, guid + ".flow.log");
-        logFile.createNewFile();
-        setLogFile(logFile);
+        setLogFile(_containerFolder.resolveChild(GUID.makeGUID() + ".flow.log"));
     }
 
     @Override
@@ -94,7 +93,7 @@ public abstract class FlowExperimentJob extends FlowJob
         return experiment.urlShow();
     }
 
-    public List<FlowRun> findRuns(File path, FlowProtocolStep step)
+    public List<FlowRun> findRuns(FileLike path, FlowProtocolStep step)
     {
         FlowExperiment experiment = getExperiment();
         if (experiment == null)
@@ -123,7 +122,7 @@ public abstract class FlowExperimentJob extends FlowJob
         }
     }
 
-    protected boolean checkProcessPath(File path, FlowProtocolStep step)
+    protected boolean checkProcessPath(FileLike path, FlowProtocolStep step)
     {
         List<FlowRun> existing = findRuns(path, step);
         if (!existing.isEmpty())
@@ -135,45 +134,45 @@ public abstract class FlowExperimentJob extends FlowJob
         return true;
     }
 
-    protected File getWorkingFolder(Container container) throws IOException
+    protected FileLike getWorkingFolder(Container container) throws IOException
     {
-        File dirRoot = FlowAnalyzer.getAnalysisDirectory();
-        File dirFolder = FileUtil.appendName(dirRoot, "Folder" + container.getRowId());
+        FileLike dirRoot = FlowAnalyzer.getAnalysisDirectory();
+        FileLike dirFolder = dirRoot.resolveChild("Folder" + container.getRowId());
         if (!dirFolder.exists())
         {
             if (!FileUtil.mkdirs(dirFolder))
-                throw new IOException("Failed to create flow wokring directory: " + dirFolder.getAbsolutePath());
+                throw new IOException("Failed to create flow working directory: " + dirFolder);
         }
         return dirFolder;
     }
 
-    public File createAnalysisDirectory(File runDirectory, FlowProtocolStep step) throws Exception
+    public FileLike createAnalysisDirectory(FileLike runDirectory, FlowProtocolStep step) throws IOException
     {
         return createAnalysisDirectory(runDirectory.getName(), step);
     }
 
-    public File createAnalysisDirectory(String dirName, FlowProtocolStep step) throws Exception
+    public FileLike createAnalysisDirectory(String dirName, FlowProtocolStep step) throws IOException
     {
-        File dirFolder = getWorkingFolder(getContainer());
-        File dirRun = FileUtil.appendName(dirFolder, dirName);
+        FileLike dirFolder = getWorkingFolder(getContainer());
+        FileLike dirRun = dirFolder.resolveFile(Path.parse(dirName));
         if (!dirRun.exists())
         {
             if (!FileUtil.mkdirs(dirRun))
-                throw new IOException("Could not create analysis directory: " + dirRun.getAbsolutePath());
+                throw new IOException("Could not create analysis directory: " + dirRun);
         }
         for (int i = 1; ; i ++)
         {
-            File dirData = FileUtil.appendName(dirRun, step.getLabel() + i);
+            FileLike dirData = dirRun.resolveChild(step.getLabel() + i);
             if (!dirData.exists())
             {
                 if (!FileUtil.mkdirs(dirData))
-                    throw new IOException("Could not create analysis directory: " + dirData.getAbsolutePath());
+                    throw new IOException("Could not create analysis directory: " + dirData);
                 return dirData;
             }
         }
     }
 
-    public void deleteAnalysisDirectory(File directory)
+    public void deleteAnalysisDirectory(FileLike directory)
     {
         if (!FlowSettings.isDeleteFiles())
             return;
@@ -181,7 +180,7 @@ public abstract class FlowExperimentJob extends FlowJob
             return;
         try
         {
-            File dirCompare = FlowAnalyzer.getAnalysisDirectory();
+            FileLike dirCompare = FlowAnalyzer.getAnalysisDirectory();
             if (!directory.toString().startsWith(dirCompare.toString()))
             {
                 return;
@@ -194,14 +193,14 @@ public abstract class FlowExperimentJob extends FlowJob
         }
     }
 
-    synchronized public File decideFileName(File directory, String name, String extension)
+    synchronized public FileLike decideFileName(FileLike directory, String name, String extension)
     {
-        File fileTry = FileUtil.appendName(directory, name + "." + extension);
+        FileLike fileTry = directory.resolveChild(name + "." + extension);
         if (!fileTry.exists())
             return fileTry;
         for (int i = 1; ; i++)
         {
-            fileTry = FileUtil.appendName(directory, name + i + "." + extension);
+            fileTry = directory.resolveChild(name + i + "." + extension);
             if (!fileTry.exists())
                 return fileTry;
         }

@@ -22,8 +22,8 @@ import org.labkey.api.pipeline.PipelineJobService;
 import org.labkey.api.pipeline.TaskFactory;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.NetworkDrive;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -93,16 +93,16 @@ abstract public class AbstractMS2SearchTaskFactory<FactoryType extends AbstractM
         return "SEARCH";
     }
 
-    public File findInputFile(MS2SearchJobSupport support) throws PipelineJobException
+    public FileLike findInputFile(MS2SearchJobSupport support) throws PipelineJobException
     {
-        File analysisDirectory = support.getAnalysisDirectory();
-        File dataDirectory = support.getDataDirectory();
+        FileLike analysisDirectory = support.getAnalysisDirectory();
+        FileLike dataDirectory = support.getDataDirectory();
         String baseName = support.getBaseName();
         for (FileType fileType : getInputTypes())
         {
             // Check if there's a version of the file in the analysis directory first. This ensures we grab the
             // analysis-specific version of the spectra file, if it exists
-            File f = fileType.newFile(analysisDirectory, baseName);
+            FileLike f = fileType.newFile(analysisDirectory, baseName);
             if (NetworkDrive.exists(f))
             {
                 return f;

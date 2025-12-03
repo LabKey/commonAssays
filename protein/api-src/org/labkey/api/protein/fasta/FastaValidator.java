@@ -16,8 +16,8 @@
 package org.labkey.api.protein.fasta;
 
 import org.apache.commons.collections4.trie.PatriciaTrie;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class FastaValidator
     }
 
     /** Determine if FASTA file has any duplicate protein names **/
-    public List<String> validate(File fastaFile)
+    public List<String> validate(FileLike fastaFile)
     {
         List<String> errors = new ArrayList<>();
         Format lineFormat = DecimalFormat.getIntegerInstance();

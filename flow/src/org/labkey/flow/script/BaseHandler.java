@@ -23,8 +23,8 @@ import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.data.*;
 import org.labkey.flow.persist.AttributeSet;
 import org.labkey.flow.persist.InputRole;
+import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.util.List;
 
 abstract public class BaseHandler
@@ -110,7 +110,7 @@ abstract public class BaseHandler
         return true;
     }
 
-    abstract public void processRun(FlowRun srcRun, ExperimentRunType runElement, File workingDirectory) throws Exception;
+    abstract public void processRun(FlowRun srcRun, ExperimentRunType runElement, FileLike workingDirectory) throws Exception;
 
     protected void addDataLSID(InputOutputRefsType refs, String lsid, InputRole role)
     {
