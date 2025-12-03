@@ -738,7 +738,7 @@ public class uniprot extends ParseActions
         executeUpdate("create index iIdenttype on " + _iTableName + "(IdentType)", conn);
         executeUpdate("create index iSpeciesGenusHash on " + _iTableName + "(Species, Genus, Hash)", conn);
 
-        executeUpdate(_dialect.getAnalyzeCommandForTable(_iTableName), conn, "Analyzing " + _iTableName);
+        executeUpdate(_dialect.getAnalyzeCommandForTable(_iTableName).getSQL(), conn, "Analyzing " + _iTableName);
 
         // Insert ident types
         executeUpdate(_insertIdentTypesCommand, conn, "InsertIdentTypes");
@@ -857,7 +857,7 @@ public class uniprot extends ParseActions
         executeUpdate("create index aAnnotType on " + _aTableName + "(AnnotType)", conn);
         executeUpdate("create index aHashGenusSpecies on " + _aTableName + "(Hash, Genus, Species)", conn);
 
-        executeUpdate(_dialect.getAnalyzeCommandForTable(_aTableName), conn, "Analyzing " + _aTableName);
+        executeUpdate(_dialect.getAnalyzeCommandForTable(_aTableName).getSQL(), conn, "Analyzing " + _aTableName);
 
         // Insert ident types
         executeUpdate(_insertAnnotTypesCommand, conn, "InsertAnnotTypes");
