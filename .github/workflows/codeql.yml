@@ -46,7 +46,7 @@ jobs:
         - language: actions
           build-mode: none
         - language: java-kotlin
-          build-mode: autobuild # This mode only analyzes Java. Set this to 'autobuild' or 'manual' to analyze Kotlin too.
+          build-mode: manual # This mode only analyzes Java. Set this to 'autobuild' or 'manual' to analyze Kotlin too.
         - language: javascript-typescript
           build-mode: none
         # CodeQL supports the following values keywords for 'language': 'actions', 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'rust', 'swift'
@@ -95,6 +95,12 @@ jobs:
           'your code, for example:'
         echo '  make bootstrap'
         echo '  make release'
+        git clone https://github.com/LabKey/server
+        cd server/modules
+        git clone https://github.com/LabKey/platform
+        git clone https://github.com/LabKey/commonAssays
+        cd ../..
+        ./gradlew deployApp
         exit 1
 
     - name: Perform CodeQL Analysis
