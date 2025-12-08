@@ -117,4 +117,4 @@ jobs:
       with:
         category: "/language:${{matrix.language}}"
         ref: ${{ github.repository_owner }} # since we are running this command in the root dir and that root is cloned via LabKey/server
-        #sha: ${{ github.sha }}
+        sha: ${{ github.sha }}
