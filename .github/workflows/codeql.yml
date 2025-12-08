@@ -58,8 +58,23 @@ jobs:
         # If you are analyzing a compiled language, you can modify the 'build-mode' for that language to customize how
         # your codebase is analyzed, see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/codeql-code-scanning-for-compiled-languages
     steps:
-    - name: Checkout repository
+    - name: Checkout LabKey/server
       uses: actions/checkout@v4
+      with:
+        repository: LabKey/server
+
+    - name: Checkout LabKey/platform
+      uses: actions/checkout@v4
+      with:
+        repository: LabKey/platform
+        path: server/modules/platform
+
+    - name: Checkout LabKey/commonAssays
+      uses: actions/checkout@v4
+      with:
+        repository: LabKey/commonAssays
+        path: server/modules/commonAssays
+
 
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
@@ -95,11 +110,6 @@ jobs:
           'your code, for example:'
         echo '  make bootstrap'
         echo '  make release'
-        git clone https://github.com/LabKey/server
-        cd server/modules
-        git clone https://github.com/LabKey/platform
-        git clone https://github.com/LabKey/commonAssays
-        cd ../..
         ./gradlew deployApp
         exit 1
 
