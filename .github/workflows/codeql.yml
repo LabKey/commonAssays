@@ -74,7 +74,7 @@ jobs:
       with:
         repository: LabKey/commonAssays
         path: server/modules/commonAssays
-
+        ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
