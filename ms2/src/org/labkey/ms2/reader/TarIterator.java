@@ -165,6 +165,14 @@ public class TarIterator implements SimpleScanIterator
         }
     }
 
+    @Override
+    protected void finalize() throws Throwable
+    {
+        super.finalize();
+
+        assert null == _is && null == _gzInputStream && null == _tis;
+    }
+
 
     private static byte[] realloc(int size, byte[] buf)
     {
