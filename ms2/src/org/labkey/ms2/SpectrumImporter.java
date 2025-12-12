@@ -16,17 +16,18 @@
 
 package org.labkey.ms2;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
-import org.labkey.ms2.reader.*;
+import org.labkey.ms2.reader.AbstractMzxmlIterator;
+import org.labkey.ms2.reader.SimpleScan;
+import org.labkey.ms2.reader.SimpleScanIterator;
+import org.labkey.ms2.reader.TarIterator;
 import org.labkey.vfs.FileLike;
-import org.labkey.vfs.FileSystemLike;
 
 import javax.xml.stream.XMLStreamException;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -55,7 +56,7 @@ public class SpectrumImporter
     private final boolean _shouldImportRetentionTime;
 
 
-    protected SpectrumImporter(String gzFileName, String dtaFileNamePrefix, FileLike mzXmlFile, Set<Integer> scans, MS2Importer.MS2Progress progress, int fractionId, Logger log, boolean shouldImportSpectra, boolean shouldImportRetentionTime)
+    protected SpectrumImporter(FileLike gzFile, String dtaFileNamePrefix, FileLike mzXmlFile, Set<Integer> scans, MS2Importer.MS2Progress progress, int fractionId, Logger log, boolean shouldImportSpectra, boolean shouldImportRetentionTime)
     {
         _scans = scans;
         _progress = progress;
@@ -70,22 +71,20 @@ public class SpectrumImporter
         try
         {
             // Try to access the gz file first... if that fails, try to open the mzXML file
-            File gz = new File(gzFileName);
-
-            if (NetworkDrive.exists(gz))
+            if (NetworkDrive.exists(gzFile))
             {
-                _file = FileSystemLike.wrapFile(gz);
-                _scanIterator = new TarIterator(gz, dtaFileNamePrefix);
+                _file = gzFile;
+                _scanIterator = new TarIterator(gzFile, dtaFileNamePrefix);
             }
             else
             {
                 if (null == mzXmlFile)
-                    _log.warn("Spectra were not imported: " + gzFileName + " could not be opened and no mzXML file name was specified.");
+                    _log.warn("Spectra were not imported: " + gzFile + " could not be opened and no mzXML file name was specified.");
                 else
                 {
                     _file = mzXmlFile;
                     // prefer ProteoWizard's RAMPAdapter interface
-                    // (with JNI bindings via SWIG) as it's actively 
+                    // (with JNI bindings via SWIG) as it's actively
                     // maintained, handles mzML and mzXML, and gzipped
                     // files natively
                     _scanIterator = AbstractMzxmlIterator.createParser(_file, 2);
@@ -99,7 +98,7 @@ public class SpectrumImporter
         catch (XMLStreamException x)
         {
             throw new RuntimeException(x);
-        }        
+        }
     }
 
     protected void upload()

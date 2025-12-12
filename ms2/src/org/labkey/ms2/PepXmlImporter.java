@@ -226,8 +226,7 @@ public class PepXmlImporter extends PeptideImporter
 
     protected void processSpectrumFile(PepXmlFraction fraction, Set<Integer> scans, MS2Progress progress, boolean shouldLoadSpectra, boolean shouldLoadRetentionTimes)
     {
-        File mzXmlFile = getMzXMLFile(fraction);
-        FileLike mzXmlFileLike = null;
+        FileLike mzXmlFile = FileSystemLike.wrapFile(getMzXMLFile(fraction));
         if ((_run.getType().equalsIgnoreCase(MS2RunType.Mascot.name())||_run.getType().equalsIgnoreCase(MS2RunType.Sequest.name()))   // TODO: Move this check (perhaps all the code) into the appropriate run classes
                 && null == mzXmlFile)
         {
@@ -242,25 +241,19 @@ public class PepXmlImporter extends PeptideImporter
             String mzXmlFileName = engineProtocolMzXMLFile.getName();
             FileLike engineProtocolDir = engineProtocolMzXMLFile.getParent();
             FileLike engineDir = engineProtocolDir.getParent();
-            FileLike mzXMLFile = engineDir.getParent().resolveFile(Path.parse(mzXmlFileName));
-            mzXmlFileLike = mzXMLFile;
+            mzXmlFile = engineDir.getParent().resolveFile(Path.parse(mzXmlFileName));
         }
-        String gzFileName = _path + "/" + _gzFileName;
-        File gzFile = _context.findFile(gzFileName);
-        if (gzFile != null)
-        {
-            gzFileName = gzFile.toString();
-        }
+        FileLike gzFile = FileSystemLike.wrapFile(_context.findFile(_path)).resolveChild(_gzFileName);
         //sequest spectra are imported from the tgz but are deleted after they are imported.
-        if(_run.getType().equalsIgnoreCase("sequest") && mzXmlFile != null)   // TODO: Move this check (perhaps all the code) into the appropriate run classes
+        if(_run.getType().equalsIgnoreCase(MS2RunType.Sequest.name()) && mzXmlFile != null)   // TODO: Move this check (perhaps all the code) into the appropriate run classes
         {
             if (NetworkDrive.exists(mzXmlFile))
             {
-                gzFileName = "";
+                gzFile = null;
             }
         }
 
-        SpectrumImporter sl = new SpectrumImporter(gzFileName, "", mzXmlFileLike, scans, progress, _fractionId, _log, shouldLoadSpectra, shouldLoadRetentionTimes);
+        SpectrumImporter sl = new SpectrumImporter(gzFile, "", mzXmlFile, scans, progress, _fractionId, _log, shouldLoadSpectra, shouldLoadRetentionTimes);
         sl.upload();
         updateFractionSpectrumFileName(sl.getFile() == null ? null : sl.getFile().toNioPathForRead().toFile());
     }
