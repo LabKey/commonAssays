@@ -17,15 +17,14 @@ package org.labkey.ms2.reader;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.labkey.api.arrays.FloatArray;
 import org.labkey.ms2.FloatParser;
 import org.labkey.ms2.MS2Importer;
+import org.labkey.vfs.FileLike;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
@@ -53,13 +52,13 @@ public class TarIterator implements SimpleScanIterator
     private byte[] _spectrumData = new byte[BUFFER_SIZE];
 
 
-    public TarIterator(File gzFile, String dtaFileNamePrefix) throws java.io.IOException
+    public TarIterator(FileLike gzFile, String dtaFileNamePrefix) throws java.io.IOException
     {
         boolean success = false;
         try
         {
             _dtaFileNamePrefix = dtaFileNamePrefix;
-            _is = new BufferedInputStream(new FileInputStream(gzFile), STREAM_BUFFER_SIZE);
+            _is = new BufferedInputStream(gzFile.openInputStream(), STREAM_BUFFER_SIZE);
             _gzInputStream = new GZIPInputStream(_is);
             _tis = new TarArchiveInputStream(_gzInputStream);
             success = true;
