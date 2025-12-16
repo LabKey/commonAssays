@@ -1518,7 +1518,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         ExpSampleType st = null;
         if (_protocol != null)
         {
-            st = _protocol.getSampleType(getUser());
+            st = _protocol.getSampleType();
         }
         var colMaterialInput = ret.addMaterialInputColumn("Sample", new SamplesSchema(getUser(), getContainer()), ExpMaterialRunInput.DEFAULT_ROLE, st);
         if (st == null)
