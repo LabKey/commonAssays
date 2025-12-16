@@ -37,7 +37,7 @@
 <%
     ProtocolForm form = (ProtocolForm) __form;
     FlowProtocol protocol = form.getProtocol();
-    ExpSampleType st = protocol.getSampleType(getUser());
+    ExpSampleType st = protocol.getSampleType();
 
     ExperimentUrls expUrls = urlProvider(ExperimentUrls.class);
 

@@ -68,7 +68,7 @@
 
     Collection<String> sampleTypeProperties = new ArrayList<>();
     FlowProtocol protocol = FlowProtocol.ensureForContainer(getUser(), getContainer());
-    ExpSampleType sampleType = protocol.getSampleType(getUser());
+    ExpSampleType sampleType = protocol.getSampleType();
     if (sampleType != null)
     {
         for (DomainProperty dp : sampleType.getDomain().getProperties())

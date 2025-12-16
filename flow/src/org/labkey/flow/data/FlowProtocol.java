@@ -255,6 +255,10 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
     /**
      * Returns the sample type in scope
      */
+    public ExpSampleType getSampleType(User user)
+    {
+        return SampleTypeService.get().getSampleType(getContainer(), SAMPLETYPE_NAME, true);
+    }
     public ExpSampleType getSampleType()
     {
         return SampleTypeService.get().getSampleType(getContainer(), SAMPLETYPE_NAME, true);
