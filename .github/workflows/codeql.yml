@@ -116,5 +116,5 @@ jobs:
       uses: github/codeql-action/analyze@v4
       with:
         category: "/language:${{matrix.language}}"
-        ref: ${{ github.ref }} # since we are running this command in the root dir and that root is cloned via LabKey/server
-        sha: ${{ github.sha }}
+        ref: ${{ github.event.pull_request.head.ref || github.ref }} # since we are running this command in the root dir and that root is cloned via LabKey/server
+        sha: ${{ github.event.pull_request.head.sha || github.sha }}
