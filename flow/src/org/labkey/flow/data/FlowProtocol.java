@@ -257,7 +257,11 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
      */
     public ExpSampleType getSampleType(User user)
     {
-        return SampleTypeService.get().getSampleType(getContainer(), user, SAMPLETYPE_NAME);
+        return SampleTypeService.get().getSampleType(getContainer(), SAMPLETYPE_NAME, true);
+    }
+    public ExpSampleType getSampleType()
+    {
+        return SampleTypeService.get().getSampleType(getContainer(), SAMPLETYPE_NAME, true);
     }
 
     /**
@@ -305,14 +309,14 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return ret;
     }
 
-    public String getSampleTypeLSID(User user)
+    public String getSampleTypeLSID()
     {
         String propValue = (String) getProperty(ExperimentProperty.SampleTypeLSID.getPropertyDescriptor());
         if (propValue != null)
             return propValue;
 
         // get lsid for sample type with name "Samples"
-        ExpSampleType sampleType = getSampleType(user);
+        ExpSampleType sampleType = getSampleType();
         if (sampleType != null)
             return sampleType.getLSID();
 
@@ -328,7 +332,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         }
         String value = StringUtils.join(strings.iterator(), "&");
         setProperty(user, FlowProperty.SampleTypeJoin.getPropertyDescriptor(), value);
-        setProperty(user, ExperimentProperty.SampleTypeLSID.getPropertyDescriptor(), getSampleTypeLSID(user));
+        setProperty(user, ExperimentProperty.SampleTypeLSID.getPropertyDescriptor(), getSampleTypeLSID());
         FlowManager.get().flowObjectModified();
     }
 
@@ -352,7 +356,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public Map<SampleKey, ExpMaterial> getSampleMap(User user)
     {
-        ExpSampleType st = getSampleType(user);
+        ExpSampleType st = getSampleType();
         if (st == null)
             return Collections.emptyMap();
         Set<String> propertyNames = getSampleTypeJoinFields().keySet();
@@ -433,7 +437,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         Map<SampleKey, ExpMaterial> sampleMap = getSampleMap(user);
         _log.debug("sampleMap=" + sampleMap.size());
 
-        ExpSampleType st = getSampleType(user);
+        ExpSampleType st = getSampleType();
         _log.debug("sampleType=" + (st == null ? "<none>" : st.getName()) + ", lsid=" + (st == null ? "<none>" : st.getLSID()));
 
         FlowSchema schema = new FlowSchema(user, getContainer());
@@ -604,7 +608,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 "__FCSFiles.Sample = M.RowId\n" +
                 "ORDER BY M.Name, __FCSFiles.RowId";
 
-        ExpSampleType sampleType = getSampleType(user);
+        ExpSampleType sampleType = getSampleType();
         ContainerFilter cf = getContainerFilter(sampleType, user);
         UserSchema userSchema = QueryService.get().getUserSchema(user, getContainer(), SamplesSchema.SCHEMA_NAME);
         TableInfo sampleTable = userSchema.getTable(SAMPLETYPE_NAME, cf);
@@ -1017,8 +1021,8 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             assertEquals(0, fcsFiles[1].getSamples().size());
 
             // create sample type
-            assertNull(protocol.getSampleType(user));
-            String sampleTypeLSID = protocol.getSampleTypeLSID(user);
+            assertNull(protocol.getSampleType());
+            String sampleTypeLSID = protocol.getSampleTypeLSID();
             assertNull(sampleTypeLSID);
 
             List<GWTPropertyDescriptor> props = List.of(
@@ -1029,9 +1033,9 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             );
             ExpSampleType st = SampleTypeService.get().createSampleType(c, user, SAMPLETYPE_NAME, null,
                     props, List.of(), -1,-1,-1,-1,null);
-            assertNotNull(protocol.getSampleType(user));
+            assertNotNull(protocol.getSampleType());
 
-            sampleTypeLSID = protocol.getSampleTypeLSID(user);
+            sampleTypeLSID = protocol.getSampleTypeLSID();
             assertNotNull(sampleTypeLSID);
 
             // add join fields

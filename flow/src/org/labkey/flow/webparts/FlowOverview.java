@@ -190,7 +190,7 @@ public class FlowOverview extends Overview
         Step ret = new Step("Assign additional meanings to keywords", status);
         if (protocol != null)
         {
-            ExpSampleType st = protocol.getSampleType(getUser());
+            ExpSampleType st = protocol.getSampleType();
             if (st != null)
             {
                 HtmlStringBuilder sb = HtmlStringBuilder.of();

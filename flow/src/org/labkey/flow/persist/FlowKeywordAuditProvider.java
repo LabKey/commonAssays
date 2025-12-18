@@ -100,16 +100,6 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
     }
 
     @Override
-    public Map<FieldKey, String> legacyNameMap()
-    {
-        Map<FieldKey, String> legacyNames = super.legacyNameMap();
-        legacyNames.put(FieldKey.fromParts("key1"), COLUMN_NAME_DIRECTORY);
-        legacyNames.put(FieldKey.fromParts("key2"), COLUMN_NAME_FILE);
-        legacyNames.put(FieldKey.fromParts("key3"), COLUMN_NAME_KEYWORD_NAME);
-        return legacyNames;
-    }
-
-    @Override
     public <K extends AuditTypeEvent> Class<K> getEventClass()
     {
         return (Class<K>)FlowKeywordAuditEvent.class;

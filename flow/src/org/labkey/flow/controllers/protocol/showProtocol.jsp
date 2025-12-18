@@ -27,7 +27,7 @@
 <%
     ProtocolForm form = (ProtocolForm) __form;
     FlowProtocol protocol = form.getProtocol();
-    ExpSampleType sampleType = protocol.getSampleType(getUser());
+    ExpSampleType sampleType = protocol.getSampleType();
 %>
 <p>
     The Flow Protocol describes sample information and metadata about the experiment.

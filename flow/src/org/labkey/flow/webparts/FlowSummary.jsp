@@ -76,7 +76,7 @@
     //int _flaggedCount = FlowManager.get().getFlaggedCount(c);
 
     FlowProtocol _protocol = FlowProtocol.getForContainer(c);
-    ExpSampleType _sampleType = _protocol != null ? _protocol.getSampleType(getUser()) : null;
+    ExpSampleType _sampleType = _protocol != null ? _protocol.getSampleType() : null;
     List<? extends ExpMaterial> _sampleTypeSamples = _sampleType == null ? null : _protocol.getSamples(_sampleType, user);
     ActionURL _sampleTypeDetailsUrl = _sampleType != null ? _protocol.getSampleTypeDetailsURL(_sampleType, getContainer()) : null;
 
