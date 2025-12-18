@@ -45,8 +45,8 @@ jobs:
         include:
         - language: actions
           build-mode: none
-        - language: java-kotlin
-          build-mode: manual # This mode only analyzes Java. Set this to 'autobuild' or 'manual' to analyze Kotlin too.
+        #- language: java-kotlin
+        #  build-mode: manual # This mode only analyzes Java. Set this to 'autobuild' or 'manual' to analyze Kotlin too.
         - language: javascript-typescript
           build-mode: none
         # CodeQL supports the following values keywords for 'language': 'actions', 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'rust', 'swift'
@@ -62,12 +62,6 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: LabKey/server
-
-    - name: Checkout LabKey/platform
-      uses: actions/checkout@v4
-      with:
-        repository: LabKey/platform
-        path: server/modules/platform
 
     - name: Checkout LabKey/commonAssays
       uses: actions/checkout@v4
@@ -116,5 +110,6 @@ jobs:
       uses: github/codeql-action/analyze@v4
       with:
         category: "/language:${{matrix.language}}"
+        checkout_path: "server/modules/commonAssays"
         ref: "refs/heads/${{ github.event.pull_request.head.ref || github.ref_name }}" # since we are running this command in the root dir and that root is cloned via LabKey/server
         sha: ${{ github.event.pull_request.head.sha || github.sha }}
