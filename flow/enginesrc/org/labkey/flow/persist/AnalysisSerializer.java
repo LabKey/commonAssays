@@ -581,7 +581,6 @@ public class AnalysisSerializer
         try (Reader reader = Readers.getReader(statFile))
         {
             TabLoader loader = new TabLoader(reader, true);
-            loader.setUnescapeBackslashes(false);
             loader.setInferTypes(false);
 
             // Determine if the stat file is long-skinny or short-wide
@@ -707,7 +706,6 @@ public class AnalysisSerializer
         try (Reader reader = Readers.getReader(statFile))
         {
             TabLoader loader = new TabLoader(reader, true);
-            loader.setUnescapeBackslashes(false);
             loader.setInferTypes(false);
 
             // mapping from prefixed keyword to actual keyword
@@ -777,7 +775,6 @@ public class AnalysisSerializer
         try (Reader reader = Readers.getReader(graphsFile))
         {
             TabLoader loader = new TabLoader(reader, true);
-            loader.setUnescapeBackslashes(false);
             loader.setInferTypes(false);
 
             boolean foundIdColumn = false;
@@ -880,7 +877,6 @@ public class AnalysisSerializer
         try (Reader reader = Readers.getReader(compensationFile))
         {
             TabLoader loader = new TabLoader(reader, true);
-            loader.setUnescapeBackslashes(false);
             loader.setInferTypes(false);
 
             // Determine if the stat file is long-skinny or short-wide
