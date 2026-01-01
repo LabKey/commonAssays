@@ -56,7 +56,7 @@ public class NabModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 25.000;
+        return 26.000;
     }
 
     @Override

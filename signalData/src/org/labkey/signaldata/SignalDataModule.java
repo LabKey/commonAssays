@@ -73,7 +73,7 @@ public class SignalDataModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 25.001;
+        return 26.000;
     }
 
     @Override
