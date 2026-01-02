@@ -70,7 +70,7 @@ public class ProteinModule extends DefaultModule
     @Override
     public @Nullable Double getSchemaVersion()
     {
-        return 25.003;
+        return 26.000;
     }
 
     @Override
