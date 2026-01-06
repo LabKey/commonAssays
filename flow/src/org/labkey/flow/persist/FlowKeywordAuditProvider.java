@@ -76,7 +76,7 @@ public class FlowKeywordAuditProvider extends AbstractAuditTypeProvider implemen
         url.setStrictContainerContextEval(true);
         table.setDetailsURL(url);
         table.getMutableColumn(COLUMN_NAME_FILE).setURL(url);
-        table.getMutableColumn(COLUMN_NAME_FILE).setURLTargetWindow("_blank");
+        table.getMutableColumn(COLUMN_NAME_FILE).setURLTarget("_blank");
 
         return table;
     }
