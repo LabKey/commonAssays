@@ -89,6 +89,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertNotNull;
 import static org.labkey.api.exp.api.ExperimentService.asInteger;
@@ -232,12 +233,15 @@ public class FlowManager
                 .append(" WHERE Container = ?").add(containerId)
                 .append(" AND lower(Name) = lower(?)").add(attr);
 
-        return new SqlSelector(getSchema(), sql).mapStream().map(map -> {
-            String name = (String)map.get("Name");
-            Integer rowId = (Integer)map.get("RowId");
-            Integer aliasId = (Integer)map.get("Id");
-            return new FlowEntry(type, rowId, containerId, name, aliasId);
-        }).sorted().collect(Collectors.toList());
+        try (Stream<Map<String, Object>> mapStream = new SqlSelector(getSchema(), sql).mapStream())
+        {
+            return mapStream.map(map -> {
+                String name = (String) map.get("Name");
+                Integer rowId = (Integer) map.get("RowId");
+                Integer aliasId = (Integer) map.get("Id");
+                return new FlowEntry(type, rowId, containerId, name, aliasId);
+            }).sorted().collect(Collectors.toList());
+        }
     }
 
 
@@ -1673,41 +1677,42 @@ public class FlowManager
         {
             List<Map<String, Object>> propMaps = new ArrayList<>(1000);
 
-            SqlSelector ss = new SqlSelector(getSchema(), sqlSelectDateTime);
-            ss.mapStream().forEach(row -> {
-
-                // parse the date
-                String dateStr = (String) row.get("datetime");
-                if (dateStr == null)
-                {
-                    _log.info("Skipping update for row; no datetime keywords for row: " + row);
-                    return;
-                }
-
-                long date = DateUtil.parseDateTime(dateStr);
-                Date d = new Date(date);
-
-                // get the existing property if any
-                Date currentDate = (Date) row.get("currentvalue");
-                if (currentDate != null)
-                {
-                    if (!d.equals(currentDate))
+            try (Stream<Map<String, Object>> s = new SqlSelector(getSchema(), sqlSelectDateTime).mapStream())
+            {
+                s.forEach(row -> {
+                    // parse the date
+                    String dateStr = (String) row.get("datetime");
+                    if (dateStr == null)
                     {
-                        _log.warn("Current date value '" + currentDate + "' does not match parsed date '" + d + "' for row: " + row);
+                        _log.info("Skipping update for row; no datetime keywords for row: " + row);
+                        return;
+                    }
+
+                    long date = DateUtil.parseDateTime(dateStr);
+                    Date d = new Date(date);
+
+                    // get the existing property if any
+                    Date currentDate = (Date) row.get("currentvalue");
+                    if (currentDate != null)
+                    {
+                        if (!d.equals(currentDate))
+                        {
+                            _log.warn("Current date value '" + currentDate + "' does not match parsed date '" + d + "' for row: " + row);
+                        }
+                        else
+                        {
+                            _log.debug("Skipping update for row; current date value matches the parsed date '" + d + "' for row: " + row);
+                        }
                     }
                     else
                     {
-                        _log.debug("Skipping update for row; current date value matches the parsed date '" + d + "' for row: " + row);
+                        Map<String, Object> propMap = new HashMap<>();
+                        propMap.put("lsid", row.get("lsid"));
+                        propMap.put(fileDatePd.getPropertyURI(), d);
+                        propMaps.add(propMap);
                     }
-                }
-                else
-                {
-                    Map<String, Object> propMap = new HashMap<>();
-                    propMap.put("lsid", row.get("lsid"));
-                    propMap.put(fileDatePd.getPropertyURI(), d);
-                    propMaps.add(propMap);
-                }
-            });
+                });
+            }
 
             OntologyManager.insertTabDelimited(c, user, null, helper, descriptors, MapDataIterator.of(propMaps).getDataIterator(new DataIteratorContext()), true, null);
 
