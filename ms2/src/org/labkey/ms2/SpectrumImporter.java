@@ -46,9 +46,9 @@ public class SpectrumImporter
     private static final Logger _systemLog = LogManager.getLogger(SpectrumImporter.class);
     private static final int SQL_BATCH_SIZE = 100;
 
-    private Logger _log;
-    private MS2Importer.MS2Progress _progress;
-    private Set<Integer> _scans;
+    private final Logger _log;
+    private final MS2Importer.MS2Progress _progress;
+    private final Set<Integer> _scans;
     private final int _fractionId;
     private SimpleScanIterator _scanIterator;
     private FileLike _file = null;
@@ -262,10 +262,7 @@ public class SpectrumImporter
                 _systemLog.error(e);
             }
 
-            if (null != conn)
-            {
-                schema.getScope().releaseConnection(conn);
-            }
+            schema.getScope().releaseConnection(conn);
         }
     }
 
@@ -277,16 +274,6 @@ public class SpectrumImporter
 
         _scanIterator = null;
     }
-
-
-    @Override
-    protected void finalize() throws Throwable
-    {
-        super.finalize();
-
-        assert null == _scanIterator;
-    }
-
 
     public FileLike getFile()
     {

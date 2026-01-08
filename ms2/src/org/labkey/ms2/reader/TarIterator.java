@@ -42,7 +42,7 @@ public class TarIterator implements SimpleScanIterator
     private static final Logger _log = LogManager.getLogger(TarIterator.class);
     private static final int STREAM_BUFFER_SIZE = 128 * 1024;
 
-    private String _dtaFileNamePrefix;
+    private final String _dtaFileNamePrefix;
     private InputStream _is;
     private GZIPInputStream _gzInputStream;
     private TarArchiveInputStream _tis;
@@ -164,15 +164,6 @@ public class TarIterator implements SimpleScanIterator
             _is = null;
         }
     }
-
-    @Override
-    protected void finalize() throws Throwable
-    {
-        super.finalize();
-
-        assert null == _is && null == _gzInputStream && null == _tis;
-    }
-
 
     private static byte[] realloc(int size, byte[] buf)
     {
