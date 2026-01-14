@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.StringUtils;
 import org.labkey.api.data.CachedResultSet;
-import org.labkey.api.data.CachedResultSets;
+import org.labkey.api.data.CachedResultSetBuilder;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
@@ -267,7 +267,7 @@ public abstract class FilterFlowReport extends FlowReport
         else
         {
             // rs is a CachedResultSet, so its metadata is cached. No need to cache it again
-            ret = CachedResultSets.create(rs.getMetaData(), rows, true);
+            ret = CachedResultSetBuilder.create(rows).setMetaData(rs.getMetaData()).build();
             rs.close();
         }
 

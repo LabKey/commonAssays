@@ -27,7 +27,7 @@ import org.labkey.api.data.AbstractForeignKey;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.BaseColumnInfo;
 import org.labkey.api.data.ButtonBar;
-import org.labkey.api.data.CachedResultSets;
+import org.labkey.api.data.CachedResultSetBuilder;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegion;
@@ -62,7 +62,6 @@ import org.springframework.validation.Errors;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -191,7 +190,7 @@ public class SamplesConfirmGridView extends GridView
         maps.addAll(matchedList);
 
         // Initialize the ResultSet and DataRegion
-        ResultSet rs = CachedResultSets.create(maps);
+        ResultSet rs = CachedResultSetBuilder.create(maps).build();
         Results results = new ResultsImpl(rs, (Map<FieldKey,ColumnInfo>)(Map)columns);
         setResults(results);
 

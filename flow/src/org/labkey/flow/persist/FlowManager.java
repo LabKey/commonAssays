@@ -228,9 +228,9 @@ public class FlowManager
     {
         //_log.info("getAttributeEntryCaseInsensitive(" + containerId + ", " + type + ", " + attr + ")");
         SQLFragment sql = new SQLFragment("SELECT Name, RowId, Id FROM ")
-                .append(attributeTable(type))
-                .append(" WHERE Container = ?").add(containerId)
-                .append(" AND lower(Name) = lower(?)").add(attr);
+            .append(attributeTable(type))
+            .append(" WHERE Container = ?").add(containerId)
+            .append(" AND lower(Name) = lower(?)").add(attr);
 
         return new SqlSelector(getSchema(), sql).mapStream().map(map -> {
             String name = (String)map.get("Name");
@@ -1674,7 +1674,7 @@ public class FlowManager
             List<Map<String, Object>> propMaps = new ArrayList<>(1000);
 
             SqlSelector ss = new SqlSelector(getSchema(), sqlSelectDateTime);
-            ss.mapStream().forEach(row -> {
+            ss.forEachMap(row -> {
 
                 // parse the date
                 String dateStr = (String) row.get("datetime");
