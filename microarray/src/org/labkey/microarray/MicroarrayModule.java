@@ -69,6 +69,12 @@ public class MicroarrayModule extends SpringModule
     }
 
     @Override
+    public boolean isAvailableOnlyWhenActive()
+    {
+        return true;
+    }
+
+    @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
