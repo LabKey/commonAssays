@@ -69,9 +69,9 @@ public class MicroarrayModule extends SpringModule
     }
 
     @Override
-    public boolean isAvailableOnlyWhenActive()
+    public boolean isAvailable(Container container)
     {
-        return true;
+        return container.getActiveModules().contains(this);
     }
 
     @Override
