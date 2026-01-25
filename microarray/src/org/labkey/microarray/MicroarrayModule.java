@@ -69,6 +69,12 @@ public class MicroarrayModule extends SpringModule
     }
 
     @Override
+    public boolean isAvailable(Container container)
+    {
+        return container.getActiveModules().contains(this);
+    }
+
+    @Override
     @NotNull
     protected Collection<WebPartFactory> createWebPartFactories()
     {
