@@ -256,7 +256,10 @@ public class MascotTest extends AbstractMS2SearchEngineTest
                 "15.100",           // Ion
                 "29.770",           // Identity
                 "24.030",           // Homology
+                "1.470",           // Expect
                 "8%",               // Ion%
+                "1272.4289",        // CalcMH+"
+                " ",                // PepProphet
                 "-0.8489",          // dMass
                 "K.VEHLDKDLFR.R",   // Peptide
                 "1",                // SeqHits
