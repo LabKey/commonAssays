@@ -133,7 +133,12 @@ public class ProteinModule extends DefaultModule
         }
 
         ProteinService.get().registerProteinSearchView(new ProteinSearchViewProvider());
-        DatabaseMigrationService.get().registerSchemaHandler(new DefaultMigrationSchemaHandler(ProteinSchema.getSchema())
+    }
+
+    @Override
+    public void registerMigrationHandlers(@NotNull DatabaseMigrationService service)
+    {
+        service.registerSchemaHandler(new DefaultMigrationSchemaHandler(ProteinSchema.getSchema())
         {
             @Override
             public void beforeSchema()
