@@ -236,7 +236,7 @@ public class FlowQueryView extends QueryView
     {
         // The Analysis "folder" table needs to use the getDeleteProtocolURL, the FCSRuns and FCSAnalysis 'views' need the getDeleteSelectedExpRunsURL
         if (useExpRunsURL)
-            setDeleteURL(ExperimentUrls.get().getDeleteSelectedExpRunsURL(getContainer(), getReturnUrl()).toContainerRelativeURL());
+            setDeleteURL(ExperimentUrls.get().getDeleteSelectedExpRunsURL(getContainer(), getReturnUrl()).toRelativeURL());
         return super.createDeleteButton(showConfirmation);
     }
 
@@ -273,7 +273,7 @@ public class FlowQueryView extends QueryView
 
         super.populateButtonBar(view, bar);
 
-        // NOTE: Only add "Link to Study" to FCSAnlayses wells. This isn't a reliable way to check if the wells are FCSAnalysis wells.
+        // NOTE: Only add "Link to Study" to FCSAnalyses wells. This isn't a reliable way to check if the wells are FCSAnalysis wells.
         StudyPublishService aps = StudyPublishService.get();
         String queryName = getSettings().getQueryName();
         if (null != aps && queryName.equals(FlowTableType.FCSAnalyses.toString()))
@@ -393,11 +393,11 @@ public class FlowQueryView extends QueryView
         List<NavTree> children = new ArrayList<>();
         if (getContainer().getFolderType() instanceof FlowFolderType)
         {
-            children.add(0, new NavTree("Flow Dashboard", PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer())));
+            children.addFirst(new NavTree("Flow Dashboard", PageFlowUtil.urlProvider(ProjectUrls.class).getStartURL(getContainer())));
         }
         else
         {
-            children.add(0, new NavTree(FlowModule.getShortProductName(), new ActionURL(FlowController.BeginAction.class, getContainer())));
+            children.addFirst(new NavTree(FlowModule.getShortProductName(), new ActionURL(FlowController.BeginAction.class, getContainer())));
         }
         if (run != null)
         {
