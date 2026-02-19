@@ -97,7 +97,7 @@ public class SamplesConfirmGridView extends GridView
     public SamplesConfirmGridView(User user, Container container, Collection<String> keywords, List<? extends ISampleInfo> samples, boolean resolving, Map<String, SelectedSamples.ResolvedSample> rows, Errors errors)
     {
         super(new SamplesConfirmDataRegion(), errors);
-        boolean hasGroupInfo = samples.get(0) instanceof Workspace.SampleInfo;
+        boolean hasGroupInfo = samples.getFirst() instanceof Workspace.SampleInfo;
 
         // Create the list of columns
         keywords = KeywordUtil.filterHidden(keywords);
@@ -190,7 +190,7 @@ public class SamplesConfirmGridView extends GridView
         maps.addAll(matchedList);
 
         // Initialize the ResultSet and DataRegion
-        ResultSet rs = CachedResultSetBuilder.create(maps).build();
+        ResultSet rs = CachedResultSetBuilder.create(maps, columns.values()).build();
         Results results = new ResultsImpl(rs, (Map<FieldKey,ColumnInfo>)(Map)columns);
         setResults(results);
 
