@@ -267,7 +267,7 @@ public abstract class FilterFlowReport extends FlowReport
         else
         {
             // rs is a CachedResultSet, so its metadata is cached. No need to cache it again
-            ret = CachedResultSetBuilder.create(rows).setMetaData(rs.getMetaData()).build();
+            ret = CachedResultSetBuilder.create(rows, rs.getMetaData()).build();
             rs.close();
         }
 
