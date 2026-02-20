@@ -24,6 +24,7 @@ import org.apache.xerces.xni.NamespaceContext;
 import org.apache.xerces.xni.QName;
 import org.apache.xerces.xni.XMLLocator;
 import org.apache.xerces.xni.XNIException;
+import org.labkey.api.util.XmlBeansUtil;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -41,7 +42,6 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -135,7 +135,7 @@ public class WorkspaceParser
         WorkspaceRecognizer recognizer = new WorkspaceRecognizer();
         try
         {
-            SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+            SAXParser parser = XmlBeansUtil.SAX_PARSER_FACTORY.newSAXParser();
 
             parser.parse(file, recognizer);
         }
@@ -371,7 +371,6 @@ public class WorkspaceParser
     static class FJParseFilter implements LSParserFilter
     {
         SymbolTable fSymbolTable = new SymbolTable();
-        Set<String> rejected = new HashSet<>();
 
         @Override
         public short startElement(Element element)
@@ -385,7 +384,6 @@ public class WorkspaceParser
             else if (nsURI != null && (GATINGML_1_5_NAMESPACES.contains(nsURI) || FJ_GATINGML_1_5_NAMEPSACE_FIXUP.containsKey(nsURI) || GATINGML_2_0_NAMESPACES.contains(nsURI)))
                 filter = FILTER_ACCEPT;
 
-//            if (filter != FILTER_ACCEPT && rejected.add(element.getNodeName())) System.err.println((filter == FILTER_SKIP ? "SKIPPED:  " : "REJECTED: ") + element.getNodeName());
             return filter;
         }
 
@@ -457,7 +455,7 @@ public class WorkspaceParser
         {
             super(st);
             fSymbolTable = st;
-            fSkippedElemStack = new Stack();
+            fSkippedElemStack = new Stack<>();
             fDOMFilter = new FJParseFilter();
             try
             {

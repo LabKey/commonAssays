@@ -15,7 +15,6 @@
  */
 package org.labkey.ms2.reader;
 
-import org.labkey.ms2.reader.SimpleXMLEventRewriter;
 import org.labkey.api.reader.SimpleXMLStreamReader;
 
 import org.apache.logging.log4j.Logger;
