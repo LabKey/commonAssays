@@ -390,7 +390,7 @@ public class AnalysisScriptController extends BaseFlowController
                 ActionURL url = form.getReturnActionURL();
                 if (url == null)
                     url = new ActionURL(BeginAction.class, getContainer());
-                return HttpView.redirect(url, false);
+                return HttpView.redirect(url);
             }
 
             validatePipeline();
