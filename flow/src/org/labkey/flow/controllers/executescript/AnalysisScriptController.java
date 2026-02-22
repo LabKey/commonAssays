@@ -46,7 +46,6 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.URIUtil;
-import org.labkey.api.util.URLHelper;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.BadRequestException;
@@ -442,7 +441,7 @@ public class AnalysisScriptController extends BaseFlowController
     public static class ShowUploadRunsAction extends SimpleRedirectAction<Object>
     {
         @Override
-        public URLHelper getRedirectURL(Object o)
+        public ActionURL getRedirectURL(Object o)
         {
             return urlProvider(PipelineUrls.class).urlBrowse(getContainer(), null);
         }
