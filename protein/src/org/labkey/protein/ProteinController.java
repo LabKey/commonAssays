@@ -214,7 +214,7 @@ public class ProteinController extends SpringActionController
                 ActionURL url = getViewContext().cloneActionURL();
                 url.deleteParameter("minimumProbability");
                 url.deleteParameter("maximumErrorRate");
-                throw new RedirectException(url + "&" + filter.toQueryString("ProteinSearchResults"));
+                throw new RedirectException(new ActionURL(url + "&" + filter.toQueryString("ProteinSearchResults")));
             }
 
             if (request.getParameter("ProteinSearchResults.GroupProbability~gte") != null)
