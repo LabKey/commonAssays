@@ -347,7 +347,7 @@ public class PeptideManager
                                 {
                                     if (values[i] != null)
                                     {
-                                        values[i] = ConvertUtils.convert(values[i].toString(), column.getJavaClass());
+                                        values[i] = column.convert(values[i]);
                                     }
                                 }
                             }
