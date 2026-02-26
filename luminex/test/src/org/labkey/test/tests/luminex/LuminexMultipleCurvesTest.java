@@ -49,7 +49,7 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
         LuminexMultipleCurvesTest init = getCurrentTest();
 
         // add the R transform script to the assay, fuzz testing so we test with and without the transform script
-        boolean shouldAddTransformScript = TestDataGenerator.randomBoolean();
+        boolean shouldAddTransformScript = TestDataGenerator.randomBoolean("whether to add transform script in assay design");
         if (shouldAddTransformScript)
         {
             init.goToTestAssayHome();
