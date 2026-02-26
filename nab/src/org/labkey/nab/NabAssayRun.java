@@ -133,7 +133,7 @@ public abstract class NabAssayRun extends DilutionAssayRun
                     captions.add(shortCaption);
 
                     Map<PropertyDescriptor, Object> sampleProperties = samplePropertiesMap.get(getSampleKey(summary));
-                    String sampleKeyWithVirus = getSampleKeyForResultPoperties(summary, virusTable);
+                    String sampleKeyWithVirus = getSampleKeyForResultProperties(summary, virusTable);
                     DilutionResultProperties props = allProperties.get(sampleKeyWithVirus);
                     sampleResults.add(new SampleResult(_provider, outputObject, summary, key, sampleProperties, props));
                 }
