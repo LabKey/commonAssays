@@ -106,7 +106,7 @@ describe('utils', () => {
     });
 
     test('getResultsViewURL', () => {
-        const baseHref = '/assay/assayResults.view?rowId=1&Data.Run%2FRowId~eq=2';
+        const baseHref = '/assay-assayResults.view?rowId=1&Data.Run%2FRowId~eq=2';
 
         let plotOptions = {plateName: undefined, spot: undefined, showAllSamples: true, samples: ['a'], showAllControls: true, controls: ['b']} as PlotOptions;
         expect(getResultsViewURL(1, 2, plotOptions)).toBe(baseHref);

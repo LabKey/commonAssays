@@ -22,7 +22,7 @@ describe('PlotButtonBar', () => {
         expect(buttons[0]).toHaveProperty('target', '_blank');
         expect(buttons[0]).toHaveProperty(
             'href',
-            'http://localhost/assay/assayResults.view?rowId=1&Data.Run%2FRowId~eq=1'
+            'http://localhost/assay-assayResults.view?rowId=1&Data.Run%2FRowId~eq=1'
         );
     });
 });
