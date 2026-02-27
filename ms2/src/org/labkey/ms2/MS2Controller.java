@@ -72,8 +72,6 @@ import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.pipeline.PipeRoot;
-import org.labkey.api.pipeline.PipelineJob;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
@@ -150,7 +148,6 @@ import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.VBox;
-import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewContext;
 import org.labkey.api.view.WebPartView;
 import org.labkey.api.view.template.PageConfig;
@@ -400,7 +397,7 @@ public class MS2Controller extends SpringActionController
 
                     if (params != null && !params.trim().isEmpty())
                     {
-                        throw new RedirectException(currentURL + "&" + params);
+                        throw new RedirectException(new ActionURL(currentURL + "&" + params));
                     }
                 }
             }

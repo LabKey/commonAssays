@@ -367,7 +367,7 @@ public class FlowController extends BaseFlowController
         {
             FlowPreference.update(getRequest());
             URLHelper url = new URLHelper(getRequest().getContextPath() + "/_.gif");
-            return HttpView.redirect(url, false);
+            return HttpView.redirect(url);
         }
 
         @Override
