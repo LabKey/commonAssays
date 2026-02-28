@@ -17,11 +17,13 @@
 package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.VersionNumber;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
@@ -44,6 +46,8 @@ import java.util.Set;
 
 abstract public class FlowJoWorkspace extends Workspace
 {
+    public static final Logger LOG = LogHelper.getLogger(FlowJoWorkspace.class, "FlowJo workspace parsing");
+
     static Map<String, StatisticSpec.STAT> STATS = new HashMap<>();
     static
     {

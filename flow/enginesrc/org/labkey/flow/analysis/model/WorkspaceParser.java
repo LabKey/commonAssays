@@ -15,7 +15,6 @@
  */
 package org.labkey.flow.analysis.model;
 
-import org.apache.logging.log4j.LogManager;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.util.SymbolTable;
@@ -135,13 +134,14 @@ public class WorkspaceParser
         WorkspaceRecognizer recognizer = new WorkspaceRecognizer();
         try
         {
-            SAXParser parser = XmlBeansUtil.SAX_PARSER_FACTORY.newSAXParser();
+            SAXParser parser = XmlBeansUtil.SAX_PARSER_FACTORY_ALLOWING_DOCTYPE.newSAXParser();
 
             parser.parse(file, recognizer);
         }
         catch (Exception e)
         {
             // suppress
+            FlowJoWorkspace.LOG.debug("Unexpected error", e);
         }
         return recognizer.isWorkspace();
     }
@@ -514,7 +514,7 @@ public class WorkspaceParser
             }
             catch (RuntimeException x)
             {
-                LogManager.getLogger(FlowJoWorkspace.class).error("Unexpected error", x);
+                FlowJoWorkspace.LOG.error("Unexpected error", x);
                 throw x;
             }
         }
