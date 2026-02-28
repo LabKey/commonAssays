@@ -16,12 +16,8 @@
 package org.labkey.ms2.reader;
 
 import net.systemsbiology.regisWeb.pepXML.XpressratioSummaryDocument;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.LogManager;
 import org.apache.xmlbeans.XmlException;
-import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
 import org.labkey.api.reader.SimpleXMLStreamReader;
-import org.labkey.ms2.reader.SimpleXMLEventRewriter;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -30,8 +26,6 @@ import javax.xml.stream.XMLStreamException;
  */
 public class XPressAnalysisSummary extends RelativeQuantAnalysisSummary
 {
-    private static final Logger _log = LogManager.getLogger(XPressAnalysisSummary.class);
-
     public static final String analysisType = "xpress";
 
     private String _sameScanRange;

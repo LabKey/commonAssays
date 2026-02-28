@@ -15,7 +15,6 @@
  */
 package org.labkey.flow.analysis.model;
 
-import org.apache.logging.log4j.LogManager;
 import org.apache.xerces.impl.Constants;
 import org.apache.xerces.parsers.DOMParser;
 import org.apache.xerces.util.SymbolTable;
@@ -24,6 +23,7 @@ import org.apache.xerces.xni.NamespaceContext;
 import org.apache.xerces.xni.QName;
 import org.apache.xerces.xni.XMLLocator;
 import org.apache.xerces.xni.XNIException;
+import org.labkey.api.util.XmlBeansUtil;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -41,7 +41,6 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -135,13 +134,14 @@ public class WorkspaceParser
         WorkspaceRecognizer recognizer = new WorkspaceRecognizer();
         try
         {
-            SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+            SAXParser parser = XmlBeansUtil.SAX_PARSER_FACTORY_ALLOWING_DOCTYPE.newSAXParser();
 
             parser.parse(file, recognizer);
         }
         catch (Exception e)
         {
             // suppress
+            FlowJoWorkspace.LOG.debug("Unexpected error", e);
         }
         return recognizer.isWorkspace();
     }
@@ -371,7 +371,6 @@ public class WorkspaceParser
     static class FJParseFilter implements LSParserFilter
     {
         SymbolTable fSymbolTable = new SymbolTable();
-        Set<String> rejected = new HashSet<>();
 
         @Override
         public short startElement(Element element)
@@ -385,7 +384,6 @@ public class WorkspaceParser
             else if (nsURI != null && (GATINGML_1_5_NAMESPACES.contains(nsURI) || FJ_GATINGML_1_5_NAMEPSACE_FIXUP.containsKey(nsURI) || GATINGML_2_0_NAMESPACES.contains(nsURI)))
                 filter = FILTER_ACCEPT;
 
-//            if (filter != FILTER_ACCEPT && rejected.add(element.getNodeName())) System.err.println((filter == FILTER_SKIP ? "SKIPPED:  " : "REJECTED: ") + element.getNodeName());
             return filter;
         }
 
@@ -457,7 +455,7 @@ public class WorkspaceParser
         {
             super(st);
             fSymbolTable = st;
-            fSkippedElemStack = new Stack();
+            fSkippedElemStack = new Stack<>();
             fDOMFilter = new FJParseFilter();
             try
             {
@@ -516,7 +514,7 @@ public class WorkspaceParser
             }
             catch (RuntimeException x)
             {
-                LogManager.getLogger(FlowJoWorkspace.class).error("Unexpected error", x);
+                FlowJoWorkspace.LOG.error("Unexpected error", x);
                 throw x;
             }
         }
