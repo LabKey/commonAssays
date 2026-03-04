@@ -16,6 +16,7 @@
 package org.labkey.test.tests.luminex;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.test.BaseWebDriverTest;
@@ -24,8 +25,10 @@ import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.components.assay.AssayConstants;
+import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.LoggedParam;
+import org.labkey.test.util.TestDataGenerator;
 import org.openqa.selenium.WebElement;
 
 import java.net.URL;
@@ -40,6 +43,22 @@ import static org.junit.Assert.assertTrue;
 @BaseWebDriverTest.ClassTimeout(minutes = 9)
 public final class LuminexMultipleCurvesTest extends LuminexTest
 {
+    @BeforeClass
+    public static void updateAssayDefinition()
+    {
+        LuminexMultipleCurvesTest init = getCurrentTest();
+
+        // add the R transform script to the assay, fuzz testing so we test with and without the transform script
+        boolean shouldAddTransformScript = TestDataGenerator.randomBoolean("whether to add transform script in assay design");
+        if (shouldAddTransformScript)
+        {
+            init.goToTestAssayHome();
+            ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
+            assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_NOOP);
+            assayDesigner.clickFinish();
+        }
+    }
+
     /**
      * Test our ability to upload multiple files and set multiple standards
      *
@@ -69,6 +88,9 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
         int runId = Integer.parseInt(WebTestHelper.parseUrlQuery(new URL(runLink.getAttribute("href"))).get("runId"));
         clickAndWait(runLink);
 
+        // GitHub Issue #875: verify that all data rows from the multiple file case are imported to assay run results
+        waitForElement(Locator.css(".labkey-pagination").containing("1 - 100 of 370"));
+
         //edit view to show Analyte Standard
         _customizeViewsHelper.openCustomizeViewPanel();
         _customizeViewsHelper.addColumn("Analyte/Standard");
@@ -83,7 +105,7 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
         assertTrue("BioPlex curve fit for ENV6 (97) in plate 1, 2, or 3",
                 isTextPresent("FI = 0.465914 + (1.5417E+006 - 0.465914) / ((1 + (Conc / 122.733)^-0.173373))^7.64039") ||
                         isTextPresent("FI = 0.582906 + (167.081 - 0.582906) / ((1 + (Conc / 0.531813)^-5.30023))^0.1"));
-        assertTrue("BioPlex FitProb for ENV6 (97) in plate 1, 2, or 3", isTextPresent("0.9667") || isTextPresent("0.4790"));
+        assertTrue("BioPlex FitProb for ENV6 (97) in plate 1, 2, or 3", isTextPresent("0.9667") || isTextPresent("0.4790") || isTextPresent("0.479"));
         assertTrue("BioPlex ResVar for ENV6 (97) in plate 1, 2, 3", isTextPresent("0.1895") || isTextPresent("0.8266"));
 
         assertAnalytesHaveCorrectStandards(TEST_ASSAY_LUM, runId, analytesAndStandardsConfig);
