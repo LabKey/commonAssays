@@ -1,7 +1,6 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
@@ -13,6 +12,7 @@ import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.UpgradeCode;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.data.statistics.MathStat;
 import org.labkey.api.data.statistics.StatsService;
 import org.labkey.api.dataiterator.DataIteratorContext;
@@ -27,6 +27,7 @@ import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
 import org.labkey.api.util.GUID;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.luminex.model.LuminexDataRow;
 import org.labkey.luminex.query.LuminexDataTable;
 import org.labkey.luminex.query.LuminexProtocolSchema;
@@ -38,7 +39,7 @@ import java.util.Map;
 
 public class LuminexUpgradeCode implements UpgradeCode
 {
-    private static final Logger _log = LogManager.getLogger(LuminexUpgradeCode.class);
+    private static final Logger LOG = LogHelper.getLogger(LuminexUpgradeCode.class, "Luminex upgrade code");
 
     /**
      * GitHub Issue #875: Upgrade code to check for Luminex assay runs that have both summary and raw data but are missing summary rows.
@@ -54,26 +55,28 @@ public class LuminexUpgradeCode implements UpgradeCode
         {
             // For any Luminex dataids (input files) that have both summary and raw data rows,
             // find Luminex raw data rows (summary = false) that don't have a corresponding summary data row (summary = true)
-            SQLFragment missingSummaryRowsSql = new SQLFragment("""
-                SELECT DISTINCT d.runid, dr_false.dataid, dr_false.analyteid, dr_false.type
-                FROM luminex.datarow dr_false
-                LEFT JOIN exp.data d ON d.rowid = dr_false.dataid
-                WHERE d.created > '2025-02-17' -- NOTE: GitHub Issue 875 only applies to runs imported after this date
-                  AND dr_false.summary = false
-                  AND EXISTS (SELECT 1 FROM luminex.datarow WHERE dataid = dr_false.dataid AND summary = true)
-                  AND EXISTS (SELECT 1 FROM luminex.datarow WHERE dataid = dr_false.dataid AND summary = false)
-                  AND NOT EXISTS (SELECT 1 FROM luminex.datarow dr_true
-                    WHERE dr_true.summary = true
-                      AND dr_true.dataid = dr_false.dataid
-                      AND dr_true.analyteid = dr_false.analyteid
-                      AND dr_true.type = dr_false.type
-                )
-            """);
+            // NOTE: the d.created date filter is because the GitHub Issue 875 only applies to runs imported after this date
+            SqlDialect dialect = LuminexProtocolSchema.getSchema().getSqlDialect();
+            SQLFragment missingSummaryRowsSql = new SQLFragment("""                                                                                                                                                                     
+              SELECT DISTINCT d.runid, dr_false.dataid, dr_false.analyteid, dr_false.type
+              FROM luminex.datarow dr_false                                                                                                                                                                                           
+              LEFT JOIN exp.data d ON d.rowid = dr_false.dataid
+              WHERE d.created > '2025-02-17'                                                                                                                                                                                          
+                AND dr_false.summary = """).append(dialect.getBooleanFALSE()).append("\n").append("""
+                AND EXISTS (SELECT 1 FROM luminex.datarow WHERE dataid = dr_false.dataid AND summary = """).append(dialect.getBooleanTRUE()).append(")\n").append("""                                                                                                                                                                                                         
+                AND EXISTS (SELECT 1 FROM luminex.datarow WHERE dataid = dr_false.dataid AND summary = """).append(dialect.getBooleanFALSE()).append(")\n").append("""                                                                                                                                                                                                         
+                AND NOT EXISTS (SELECT 1 FROM luminex.datarow dr_true
+                  WHERE dr_true.summary = """).append(dialect.getBooleanTRUE()).append("\n").append("""
+                    AND dr_true.dataid = dr_false.dataid                                                                                                                                                                              
+                    AND dr_true.analyteid = dr_false.analyteid
+                    AND dr_true.type = dr_false.type                                                                                                                                                                                  
+              )
+          """);
 
-            int missingSummaryRowCount = new SqlSelector(scope, new SQLFragment("SELECT COUNT(*) FROM (").append(missingSummaryRowsSql).append(")")).getObject(Integer.class);
+            int missingSummaryRowCount = new SqlSelector(scope, new SQLFragment("SELECT COUNT(*) FROM (").append(missingSummaryRowsSql).append(") as subq")).getObject(Integer.class);
             if (missingSummaryRowCount == 0)
             {
-                _log.info("No missing summary rows found for Luminex assay data.");
+                LOG.info("No missing summary rows found for Luminex assay data.");
                 return;
             }
 
@@ -86,16 +89,16 @@ public class LuminexUpgradeCode implements UpgradeCode
                 ExpRun expRun = ExperimentService.get().getExpRun(runid);
                 if (expRun == null)
                 {
-                    _log.warn("Could not find run for runid: " + runid + ", skipping missing summary row check for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type);
+                    LOG.warn("Could not find run for runid: " + runid + ", skipping missing summary row check for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type);
                     return;
                 }
 
-                _log.info("Missing summary row for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type + " in run: " + expRun.getName() + " (" + expRun.getRowId() + ")");
+                LOG.info("Missing summary row for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type + " in run: " + expRun.getName() + " (" + expRun.getRowId() + ")");
 
                 // currently only inserting summary rows for Background (type = B) data rows
                 if (!"B".equals(type))
                 {
-                    _log.warn("...not inserting missing summary row for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type + " because type is not 'B' (Background)");
+                    LOG.warn("...not inserting missing summary row for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type + " because type is not 'B' (Background)");
                     return;
                 }
 
@@ -109,7 +112,7 @@ public class LuminexUpgradeCode implements UpgradeCode
                 filter.addCondition(FieldKey.fromParts("Type"), type);
 
                 // keep track of the set of wells for the given dataId/analyteId/type/standard combinations
-                record WellGroupKey(long dataId, int analyteId, String type, Object standard) {}
+                record WellGroupKey(long dataId, int analyteId, String type, String standard) {}
                 Map<WellGroupKey, List<LuminexDataRow>> rowsByWellGroup = new HashMap<>();
                 for (Map<String, Object> databaseMap : new TableSelector(tableInfo, filter, null).getMapCollection())
                 {
@@ -120,7 +123,7 @@ public class LuminexUpgradeCode implements UpgradeCode
                             existingRow.getData(),
                             existingRow.getAnalyte(),
                             existingRow.getType(),
-                            existingRow._getExtraProperties().get("Standard")
+                            (String) existingRow._getExtraProperties().get("Standard")
                     );
                     rowsByWellGroup.computeIfAbsent(groupKey, k -> new ArrayList<>()).add(existingRow);
                 }
@@ -172,12 +175,18 @@ public class LuminexUpgradeCode implements UpgradeCode
 
                     // Calculate FI and FI-BKGD values for the new summary row based on the existing raw data rows with the same dataId, analyteId, type, and standard.
                     // similar to LuminexDataHandler ensureSummaryStats()
-                    MathStat statsFi = service.getStats(ArrayUtils.toPrimitive(fis.toArray(new Double[0])));
-                    newRow.setFi(Math.abs(statsFi.getMean()));
-                    newRow.setFiString(newRow.getFi().toString());
-                    MathStat statsFiBkgd = service.getStats(ArrayUtils.toPrimitive(fiBkgds.toArray(new Double[0])));
-                    newRow.setFiBackground(Math.abs(statsFiBkgd.getMean()));
-                    newRow.setFiBackgroundString(newRow.getFiBackground().toString());
+                    if (!fis.isEmpty())
+                    {
+                        MathStat statsFi = service.getStats(ArrayUtils.toPrimitive(fis.toArray(new Double[0])));
+                        newRow.setFi(Math.abs(statsFi.getMean()));
+                        newRow.setFiString(newRow.getFi().toString());
+                    }
+                    if (!fiBkgds.isEmpty())
+                    {
+                        MathStat statsFiBkgd = service.getStats(ArrayUtils.toPrimitive(fiBkgds.toArray(new Double[0])));
+                        newRow.setFiBackground(Math.abs(statsFiBkgd.getMean()));
+                        newRow.setFiBackgroundString(newRow.getFiBackground().toString());
+                    }
 
                     // Calculate well to be a comma-separated list of wells from the existing raw data rows
                     newRow.setWell(String.join(",", wells));
@@ -192,16 +201,17 @@ public class LuminexUpgradeCode implements UpgradeCode
                     Map<String, Object> row = new CaseInsensitiveHashMap<>(newRow._getExtraProperties());
                     ObjectFactory<LuminexDataRow> f = ObjectFactory.Registry.getFactory(LuminexDataRow.class);
                     row.putAll(f.toMap(newRow, null));
+                    row.put("summary", true); // make sure the extra properties value from the raw row didn't override the summary setting
                     try
                     {
-                        OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, MapDataIterator.of(List.of(row)).getDataIterator(new DataIteratorContext()), true, _log, null);
+                        OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, MapDataIterator.of(List.of(row)).getDataIterator(new DataIteratorContext()), true, LOG, null);
                         String comment = "Inserted missing summary row for Luminex runId: " + runid + ", dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type + ", standard: " + groupKey.standard;
                         ExperimentService.get().auditRunEvent(user, protocol, expRun, null, "LuminexUpgradeCode.checkForMissingSummaryRows: " + comment, null);
-                        _log.info("..." + comment);
+                        LOG.info("..." + comment);
                     }
                     catch (BatchValidationException e)
                     {
-                        _log.warn("...failed to insert missing summary row for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type + ", standard: " + groupKey.standard, e);
+                        LOG.warn("...failed to insert missing summary row for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type + ", standard: " + groupKey.standard, e);
                     }
                 }
             });

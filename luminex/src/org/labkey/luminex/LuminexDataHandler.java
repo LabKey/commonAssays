@@ -620,7 +620,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         return existingAnalytes;
     }
 
-    public static class DataRowKey
+    private static class DataRowKey
     {
         private final long _dataId;
         private final int _analyteId;
