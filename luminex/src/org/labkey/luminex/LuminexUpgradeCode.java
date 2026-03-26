@@ -58,7 +58,8 @@ public class LuminexUpgradeCode implements UpgradeCode
                 SELECT DISTINCT d.runid, dr_false.dataid, dr_false.analyteid, dr_false.type
                 FROM luminex.datarow dr_false
                 LEFT JOIN exp.data d ON d.rowid = dr_false.dataid
-                WHERE dr_false.summary = false
+                WHERE d.created > '2025-02-17' -- NOTE: GitHub Issue 875 only applies to runs imported after this date
+                  AND dr_false.summary = false
                   AND EXISTS (SELECT 1 FROM luminex.datarow WHERE dataid = dr_false.dataid AND summary = true)
                   AND EXISTS (SELECT 1 FROM luminex.datarow WHERE dataid = dr_false.dataid AND summary = false)
                   AND NOT EXISTS (SELECT 1 FROM luminex.datarow dr_true
