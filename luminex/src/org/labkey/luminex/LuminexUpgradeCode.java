@@ -41,8 +41,8 @@ public class LuminexUpgradeCode implements UpgradeCode
     private static final Logger _log = LogManager.getLogger(LuminexUpgradeCode.class);
 
     /**
-     * NOTE: this upgrade code is not called from a SQL upgrade script. It is meant to be ran manually from the admin console SQL Scripts page.
      * GitHub Issue #875: Upgrade code to check for Luminex assay runs that have both summary and raw data but are missing summary rows.
+     * NOTE: this upgrade code is not called from a SQL upgrade script. It is meant to be run manually from the admin console SQL Scripts page.
      */
     public static void checkForMissingSummaryRows(ModuleContext ctx)
     {
@@ -98,90 +98,110 @@ public class LuminexUpgradeCode implements UpgradeCode
                     return;
                 }
 
-                // Query for existing raw data rows with the same dataId, analyteId, and type, and use those rows to calculate summary stats and well information for the new summary row that we will insert into the database
+                // Query for existing raw data rows with the same dataId, analyteId, and type
+                StatsService service = StatsService.get();
                 User user = ctx.getUpgradeUser();
                 ExpProtocol protocol = expRun.getProtocol();
                 LuminexDataTable tableInfo = ((LuminexProtocolSchema)AssayService.get().getProvider(protocol).createProtocolSchema(user, expRun.getContainer(), protocol, null)).createDataTable(null, false);
                 SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("Data"), dataId);
                 filter.addCondition(FieldKey.fromParts("Analyte"), analyteId);
                 filter.addCondition(FieldKey.fromParts("Type"), type);
-                Map<LuminexDataHandler.DataRowKey, LuminexDataRow> existingRows = new HashMap<>();
-                List<Double> fis = new ArrayList<>();
-                List<Double> fiBkgds = new ArrayList<>();
-                List<String> wells = new ArrayList<>();
-                LuminexDataRow newRow = new LuminexDataRow();
-                newRow.setSummary(true);
+
+                // keep track of the set of wells for the given dataId/analyteId/type/standard combinations
+                record WellGroupKey(long dataId, int analyteId, String type, Object standard) {}
+                Map<WellGroupKey, List<LuminexDataRow>> rowsByWellGroup = new HashMap<>();
                 for (Map<String, Object> databaseMap : new TableSelector(tableInfo, filter, null).getMapCollection())
                 {
                     LuminexDataRow existingRow = BeanObjectFactory.Registry.getFactory(LuminexDataRow.class).fromMap(databaseMap);
                     existingRow._setExtraProperties(new CaseInsensitiveHashMap<>(databaseMap));
-                    existingRows.put(new LuminexDataHandler.DataRowKey(existingRow), existingRow);
 
-                    // keep track of well, FI, and FI Bkgd values from existing raw data rows to use in calculating summary stats for the new summary row
-                    wells.add(existingRow.getWell());
-                    if (existingRow.getFi() != null)
-                        fis.add(existingRow.getFi());
-                    if (existingRow.getFiBackground() != null)
-                        fiBkgds.add(existingRow.getFiBackground());
-
-                    // clone the following properties from the existing row to the newRow:
-                    //      dataid, analyteid, type, container, protocolid, description, wellrole, extraSpecimenInfo,
-                    //      specimenID, participantID, visitID, date, dilution, tittration, singlepointcontrol
-                    // note: don't clone rowid, beadcount, summary, lsid
-                    newRow.setData(existingRow.getData());
-                    newRow.setAnalyte(existingRow.getAnalyte());
-                    newRow.setType(existingRow.getType());
-                    newRow.setWellRole(existingRow.getWellRole());
-                    newRow.setContainer(existingRow.getContainer());
-                    newRow.setProtocol(existingRow.getProtocol());
-                    newRow.setDescription(existingRow.getDescription());
-                    newRow.setSpecimenID(existingRow.getSpecimenID());
-                    newRow.setParticipantID(existingRow.getParticipantID());
-                    newRow.setVisitID(existingRow.getVisitID());
-                    newRow.setDate(existingRow.getDate());
-                    newRow.setExtraSpecimenInfo(existingRow.getExtraSpecimenInfo());
-                    newRow.setDilution(existingRow.getDilution());
-                    newRow.setTitration(existingRow.getTitration());
-                    newRow.setSinglePointControl(existingRow.getSinglePointControl());
-
-                    // we can clone stdev and cv from existing raw rows because LuminexDataHandler ensureSummaryStats() calculates them
-                    newRow.setStdDev(existingRow.getStdDev());
-                    newRow.setCv(existingRow.getCv());
+                    WellGroupKey groupKey = new WellGroupKey(
+                            existingRow.getData(),
+                            existingRow.getAnalyte(),
+                            existingRow.getType(),
+                            existingRow._getExtraProperties().get("Standard")
+                    );
+                    rowsByWellGroup.computeIfAbsent(groupKey, k -> new ArrayList<>()).add(existingRow);
                 }
 
-                // Calculate FI and FI-BKGD values for the new summary row based on the existing raw data rows with the same dataId, analyteId, and type.
-                // similar to LuminexDataHandler ensureSummaryStats()
-                StatsService service = StatsService.get();
-                MathStat statsFi = service.getStats(ArrayUtils.toPrimitive(fis.toArray(new Double[0])));
-                newRow.setFi(Math.abs(statsFi.getMean()));
-                newRow.setFiString(newRow.getFi().toString());
-                MathStat statsFiBkgd = service.getStats(ArrayUtils.toPrimitive(fiBkgds.toArray(new Double[0])));
-                newRow.setFiBackground(Math.abs(statsFiBkgd.getMean()));
-                newRow.setFiBackgroundString(newRow.getFiBackground().toString());
-
-                // Calculate well to be a comma-separated list of wells from the existing raw data rows
-                newRow.setWell(String.join(",", wells));
-
-                // Generate an LSID for the new summary row
-                Lsid.LsidBuilder builder = new Lsid.LsidBuilder(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX,"");
-                newRow.setLsid(builder.setObjectId(GUID.makeGUID()).toString());
-
-                // Insert the new summary row into the database.
-                // similar to LuminexDataHandler saveDataRows()
-                LuminexImportHelper helper = new LuminexImportHelper();
-                Map<String, Object> row = new CaseInsensitiveHashMap<>();
-                ObjectFactory<LuminexDataRow> f = ObjectFactory.Registry.getFactory(LuminexDataRow.class);
-                row.putAll(f.toMap(newRow, null));
-                try
+                // calculate summary stats and well information for the new summary rows that we will insert into the database
+                for (Map.Entry<WellGroupKey, List<LuminexDataRow>> wellGroupEntry : rowsByWellGroup.entrySet())
                 {
-                    OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, MapDataIterator.of(List.of(row)).getDataIterator(new DataIteratorContext()), true, _log, null);
-                    String comment = "Inserted missing summary row for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type;
-                    ExperimentService.get().auditRunEvent(user, protocol, expRun, null, "LuminexUpgradeCode.checkForMissingSummaryRows: " + comment, null);
-                    _log.info("..." + comment);
-                }
-                catch (BatchValidationException e)
-                {
-                    _log.warn("...failed to insert missing summary row for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type, e);
+                    WellGroupKey groupKey = wellGroupEntry.getKey();
+                    LuminexDataRow newRow = new LuminexDataRow();
+                    newRow.setSummary(true);
+                    newRow.setData(groupKey.dataId);
+                    newRow.setAnalyte(groupKey.analyteId);
+                    newRow.setType(groupKey.type);
+
+                    List<Double> fis = new ArrayList<>();
+                    List<Double> fiBkgds = new ArrayList<>();
+                    List<String> wells = new ArrayList<>();
+                    for (LuminexDataRow existingRow : wellGroupEntry.getValue())
+                    {
+                        // keep track of well, FI, and FI Bkgd values from existing raw data rows to use in calculating summary stats for the new summary row
+                        wells.add(existingRow.getWell());
+                        if (existingRow.getFi() != null)
+                            fis.add(existingRow.getFi());
+                        if (existingRow.getFiBackground() != null)
+                            fiBkgds.add(existingRow.getFiBackground());
+
+                        // clone the following properties from the existing row to the newRow:
+                        //      extraProperties, container, protocolid, description, wellrole, extraSpecimenInfo,
+                        //      specimenID, participantID, visitID, date, dilution, tittration, singlepointcontrol
+                        // note: don't clone rowid, beadcount, lsid
+                        newRow._setExtraProperties(existingRow._getExtraProperties());
+                        newRow.setWellRole(existingRow.getWellRole());
+                        newRow.setContainer(existingRow.getContainer());
+                        newRow.setProtocol(existingRow.getProtocol());
+                        newRow.setDescription(existingRow.getDescription());
+                        newRow.setSpecimenID(existingRow.getSpecimenID());
+                        newRow.setParticipantID(existingRow.getParticipantID());
+                        newRow.setVisitID(existingRow.getVisitID());
+                        newRow.setDate(existingRow.getDate());
+                        newRow.setExtraSpecimenInfo(existingRow.getExtraSpecimenInfo());
+                        newRow.setDilution(existingRow.getDilution());
+                        newRow.setTitration(existingRow.getTitration());
+                        newRow.setSinglePointControl(existingRow.getSinglePointControl());
+
+                        // we can clone stdev and cv from existing raw rows because LuminexDataHandler ensureSummaryStats() calculates them
+                        newRow.setStdDev(existingRow.getStdDev());
+                        newRow.setCv(existingRow.getCv());
+                    }
+
+                    // Calculate FI and FI-BKGD values for the new summary row based on the existing raw data rows with the same dataId, analyteId, type, and standard.
+                    // similar to LuminexDataHandler ensureSummaryStats()
+                    MathStat statsFi = service.getStats(ArrayUtils.toPrimitive(fis.toArray(new Double[0])));
+                    newRow.setFi(Math.abs(statsFi.getMean()));
+                    newRow.setFiString(newRow.getFi().toString());
+                    MathStat statsFiBkgd = service.getStats(ArrayUtils.toPrimitive(fiBkgds.toArray(new Double[0])));
+                    newRow.setFiBackground(Math.abs(statsFiBkgd.getMean()));
+                    newRow.setFiBackgroundString(newRow.getFiBackground().toString());
+
+                    // Calculate well to be a comma-separated list of wells from the existing raw data rows
+                    newRow.setWell(String.join(",", wells));
+
+                    // Generate an LSID for the new summary row
+                    Lsid.LsidBuilder builder = new Lsid.LsidBuilder(LuminexAssayProvider.LUMINEX_DATA_ROW_LSID_PREFIX,"");
+                    newRow.setLsid(builder.setObjectId(GUID.makeGUID()).toString());
+
+                    // Insert the new summary row into the database.
+                    // similar to LuminexDataHandler saveDataRows()
+                    LuminexImportHelper helper = new LuminexImportHelper();
+                    Map<String, Object> row = new CaseInsensitiveHashMap<>(newRow._getExtraProperties());
+                    ObjectFactory<LuminexDataRow> f = ObjectFactory.Registry.getFactory(LuminexDataRow.class);
+                    row.putAll(f.toMap(newRow, null));
+                    try
+                    {
+                        OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, MapDataIterator.of(List.of(row)).getDataIterator(new DataIteratorContext()), true, _log, null);
+                        String comment = "Inserted missing summary row for Luminex runId: " + runid + ", dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type + ", standard: " + groupKey.standard;
+                        ExperimentService.get().auditRunEvent(user, protocol, expRun, null, "LuminexUpgradeCode.checkForMissingSummaryRows: " + comment, null);
+                        _log.info("..." + comment);
+                    }
+                    catch (BatchValidationException e)
+                    {
+                        _log.warn("...failed to insert missing summary row for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type + ", standard: " + groupKey.standard, e);
+                    }
                 }
             });
 
