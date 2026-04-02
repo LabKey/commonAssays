@@ -653,7 +653,6 @@ ms2/src/org/labkey/ms2/pipeline/AbstractMS2SearchTaskFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/ConfigureSequenceDB.jsp -text
 ms2/src/org/labkey/ms2/pipeline/FastaCheckTask.java -text
 ms2/src/org/labkey/ms2/pipeline/FastaCheckTaskFactorySettings.java -text
-ms2/src/org/labkey/ms2/pipeline/ImportScanCountsUpgradeJob.java -text
 ms2/src/org/labkey/ms2/pipeline/LibraProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2ImportPipelineJob.java -text
 ms2/src/org/labkey/ms2/pipeline/MS2PipelineForm.java -text
@@ -681,7 +680,6 @@ ms2/src/org/labkey/ms2/pipeline/comet/CometSearchProtocolFactory.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/CometSearchTask.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/LegacyCometRun.java -text
 ms2/src/org/labkey/ms2/pipeline/comet/setCometDefaults.jsp -text
-ms2/src/org/labkey/ms2/pipeline/importMSScanCounts.jsp -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotCPipelineProvider.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotClientImpl.java -text
 ms2/src/org/labkey/ms2/pipeline/mascot/MascotConfig.java -text
