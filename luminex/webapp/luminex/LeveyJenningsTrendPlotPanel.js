@@ -154,13 +154,9 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         });
         this.items.push(this.trendTabPanel);
 
-        this.fbar = [
-            {xtype: 'label', text: 'The default plot is showing the most recent ' + this.defaultRowSize + ' data points.'},
-        ];
+        this.fbar = [];
 
         LABKEY.LeveyJenningsTrendPlotPanel.superclass.initComponent.call(this);
-
-        this.fbar.hide();
     },
 
     // function called by the JSP when the graph params are selected and the "Apply" button is clicked
@@ -193,8 +189,20 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
         }
 
         this.plotDataLoadComplete = true;
-        this.fbar.setVisible(!hasReportFilter && this.trendDataStore.getTotalCount() >= this.defaultRowSize);
+
+        if (!hasReportFilter && this.trendDataStore.getTotalCount() >= this.defaultRowSize) {
+            this.fbar.add({xtype: 'label', text: 'The default plot is showing the most recent ' + this.defaultRowSize + ' data points.'});
+        }
+        if (this.getMinDateModuleProp()) {
+            this.fbar.add({xtype: 'label', text: 'Filtering for acquisition date  greater than or equal to ' + this.getMinDateModuleProp() + '.'});
+        }
+        this.fbar.doLayout();
+
         this.updateTrendPlot();
+    },
+
+    getMinDateModuleProp: function() {
+        return LABKEY.getModuleContext("luminex")?.leveyJenningsMinDate;
     },
 
     setTrendPlotLoading: function() {
