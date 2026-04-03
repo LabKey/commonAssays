@@ -190,11 +190,12 @@ LABKEY.LeveyJenningsTrendPlotPanel = Ext.extend(Ext.FormPanel, {
 
         this.plotDataLoadComplete = true;
 
+        this.fbar.removeAll();
         if (!hasReportFilter && this.trendDataStore.getTotalCount() >= this.defaultRowSize) {
             this.fbar.add({xtype: 'label', text: 'The default plot is showing the most recent ' + this.defaultRowSize + ' data points.'});
         }
         if (this.getMinDateModuleProp()) {
-            this.fbar.add({xtype: 'label', text: 'Filtering for acquisition date  greater than or equal to ' + this.getMinDateModuleProp() + '.'});
+            this.fbar.add({xtype: 'label', text: 'Filtering for acquisition date greater than or equal to ' + this.getMinDateModuleProp() + '.'});
         }
         this.fbar.doLayout();
 
