@@ -28,6 +28,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.module.ModuleProperty;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 
@@ -84,6 +85,12 @@ public class LuminexModule extends DefaultModule
         PropertyService.get().registerDomainKind(new LuminexDataDomainKind());
 
         AssayFlagHandler.registerHandler(AssayService.get().getProvider(LuminexAssayProvider.NAME), new AssayDefaultFlagHandler());
+
+        ModuleProperty leveyJenningsMinDateProp = new ModuleProperty(this, "leveyJenningsMinDate");
+        leveyJenningsMinDateProp.setLabel("Levey-Jennings Report Min Date Filter");
+        leveyJenningsMinDateProp.setDescription("If provided, the minimum acquisition date to use as a filter for the Luminex Levey-Jennings report data");
+        leveyJenningsMinDateProp.setInputType(ModuleProperty.InputType.text);
+        addModuleProperty(leveyJenningsMinDateProp);
     }
 
     @Override
