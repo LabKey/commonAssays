@@ -23,10 +23,12 @@ import org.labkey.api.assay.AssayFlagHandler;
 import org.labkey.api.assay.AssayQCFlagColumn;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.PropertyService;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
+import org.labkey.api.module.ModuleProperty;
 import org.labkey.api.view.WebPartFactory;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 
@@ -83,6 +85,12 @@ public class LuminexModule extends DefaultModule
         PropertyService.get().registerDomainKind(new LuminexDataDomainKind());
 
         AssayFlagHandler.registerHandler(AssayService.get().getProvider(LuminexAssayProvider.NAME), new AssayDefaultFlagHandler());
+
+        ModuleProperty leveyJenningsMinDateProp = new ModuleProperty(this, "leveyJenningsMinDate");
+        leveyJenningsMinDateProp.setLabel("Levey-Jennings Report Min Date Filter");
+        leveyJenningsMinDateProp.setDescription("If provided, the minimum acquisition date to use as a filter for the Luminex Levey-Jennings report data");
+        leveyJenningsMinDateProp.setInputType(ModuleProperty.InputType.text);
+        addModuleProperty(leveyJenningsMinDateProp);
     }
 
     @Override
@@ -102,5 +110,11 @@ public class LuminexModule extends DefaultModule
             LuminexRunAsyncContext.TestCase.class,
             LuminexSaveExclusionsForm.TestCase.class
         );
+    }
+
+    @Override
+    public @Nullable UpgradeCode getUpgradeCode()
+    {
+        return new LuminexUpgradeCode();
     }
 }

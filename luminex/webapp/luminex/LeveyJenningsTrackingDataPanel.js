@@ -104,6 +104,11 @@ LABKEY.LeveyJenningsTrackingDataPanel = Ext.extend(Ext.Component, {
             filters.push(LABKEY.Filter.create('Titration/IncludeInQcReport', true));
         }
 
+        var minDateProp = LABKEY.getModuleContext("luminex")?.leveyJenningsMinDate;
+        if (minDateProp) {
+            filters.push(LABKEY.Filter.create('Analyte/Data/AcquisitionDate', minDateProp, LABKEY.Filter.Types.GTE));
+        }
+
         var buttonBarItems = [
             LABKEY.QueryWebPart.standardButtons.views,
             LABKEY.QueryWebPart.standardButtons.exportRows,
