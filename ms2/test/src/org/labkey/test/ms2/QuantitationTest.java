@@ -25,6 +25,7 @@ import org.labkey.test.categories.Daily;
 import org.labkey.test.categories.MS2;
 import org.labkey.test.categories.XTandem;
 import org.labkey.test.components.ui.lineage.LineageGraph;
+import org.labkey.test.pipeline.ExperimentGraph;
 import org.labkey.test.util.PipelineAnalysisHelper;
 
 import java.io.File;
@@ -92,7 +93,7 @@ public class QuantitationTest extends AbstractXTandemTest
         assertElementPresent(Locator.linkWithText("libra Protein Quantitation"));
 
         clickAndWait(Locator.linkWithText("Lineage for " + SAMPLE_BASE_NAME + ".libra.tsv"));
-        beginAt(Locator.imageMapLinkByTitle("graphmap", "libra Peptide Quantitation").findElement(getDriver()).getAttribute("href"));
+        new ExperimentGraph(this).clickLink("libra Peptide Quantitation");
         // Check to see that arguments to xinteract are showing
         assertTextPresent("-LLibraConfig1.xml-2");
     }
