@@ -20,6 +20,7 @@ import org.labkey.test.Locator;
 import org.labkey.test.TestTimeoutException;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.components.ui.lineage.LineageGraph;
+import org.labkey.test.pipeline.ExperimentGraph;
 import org.labkey.test.util.PipelineAnalysisHelper;
 import org.openqa.selenium.NoSuchElementException;
 
@@ -168,11 +169,10 @@ public abstract class AbstractMS2SearchEngineTest extends MS2TestBase
         popLocation();
 
         log("Verify experiment view");
-        clickAndWait(Locator.imageMapLinkByTitle("graphmap", "bov_sample/" + SAMPLE_BASE_NAME + " (test2) (CAexample_mini.mzXML)"));
+        new ExperimentGraph(this).clickLink("bov_sample/" + SAMPLE_BASE_NAME + " (test2) (CAexample_mini.mzXML)");
 
         log("Verify experiment run view.");
-        String dataHref = Locator.imageMapLinkByTitle("graphmap", "Data: CAexample_mini.mzXML").findElement(getDriver()).getAttribute("href");
-        beginAt(dataHref); // Clicking this is unreliable. Possibly because the image is so large. Just navigate.
+        new ExperimentGraph(this).clickInputLink("CAexample_mini.mzXML");
         assertTextPresent(
                 "bov_sample/" + SAMPLE_BASE_NAME,
                 "Data CAexample_mini.mzXML");
