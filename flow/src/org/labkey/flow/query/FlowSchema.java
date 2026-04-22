@@ -480,7 +480,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
                 {
                     var ss = StudyService.get();
                     Study study = null == ss ? null : ss.getStudy(c);
-                    var urlProvider = PageFlowUtil.urlProvider(ProjectUrls.class);
+                    var urlProvider = PageFlowUtil.urlProviderOptional(ProjectUrls.class);
                     if (study != null && urlProvider != null)
                     {
                         LinkBuilder.simpleLink(HtmlString.unsafe(PageFlowUtil.filter(study.getLabel()).replaceAll(" ", "&nbsp;")), urlProvider.getBeginURL(c)).appendTo(out);
