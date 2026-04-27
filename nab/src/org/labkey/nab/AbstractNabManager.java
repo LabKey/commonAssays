@@ -32,7 +32,7 @@ public class AbstractNabManager extends DilutionManager
     {
         NabPlateLayoutHandler nabHandler = new NabPlateLayoutHandler();
         Plate plate;
-        List<Plate> plates = PlateService.get().getPlates(container);
+        List<? extends Plate> plates = PlateService.get().getPlates(container);
         if (plates.isEmpty())
         {
             PlateType plateType = PlateService.get().getPlateType(8, 12);
@@ -44,7 +44,7 @@ public class AbstractNabManager extends DilutionManager
             PlateService.get().save(container, user, plate);
         }
         else
-            plate = plates.get(0);
+            plate = plates.getFirst();
         return plate;
     }
 }
