@@ -264,12 +264,7 @@ public class FCSAnalyzer
             try
             {
                 Subset subset = getSubset(subsetMap, group, statisticSpecification.getSubset());
-                Map<String, MathStat> statsMap = subsetStatsMap.get(statisticSpecification.getSubset());
-                if (statsMap == null)
-                {
-                    statsMap = new HashMap<>();
-                    subsetStatsMap.put(statisticSpecification.getSubset(), statsMap);
-                }
+                Map<String, MathStat> statsMap = subsetStatsMap.computeIfAbsent(statisticSpecification.getSubset(), _ -> new HashMap<>());
                 result.value = StatisticSpec.calculate(subset, statisticSpecification, statsMap);
             }
             catch (Throwable t)
@@ -398,7 +393,7 @@ public class FCSAnalyzer
                 boolean found = false;
                 if (population.getGates() != null && population.getGates().size() == 1)
                 {
-                    Gate gate = population.getGates().get(0);
+                    Gate gate = population.getGates().getFirst();
                     SubsetExpression expr = expressionFromGate(gate);
                     if (expr != null)
                     {

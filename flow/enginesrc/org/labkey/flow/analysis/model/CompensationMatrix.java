@@ -18,7 +18,6 @@ package org.labkey.flow.analysis.model;
 
 import Jama.Matrix;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.xerces.impl.Constants;
 import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.util.DateUtil;

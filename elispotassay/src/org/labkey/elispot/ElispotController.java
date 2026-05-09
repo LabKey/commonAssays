@@ -225,7 +225,7 @@ public class ElispotController extends SpringActionController
             {
                 Position position = template.getPosition(row, col);
 
-                Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data.get(0).getLSID(), position);
+                Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(data.getFirst().getLSID(), position);
                 for (RunDataRow dataRow : ElispotManager.get().getRunDataRows(dataRowLsid.toString(), run.getContainer()))
                 {
                     WellInfo wellInfo = new WellInfo(dataRow, position);

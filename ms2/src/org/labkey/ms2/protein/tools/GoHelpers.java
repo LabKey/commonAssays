@@ -117,18 +117,12 @@ public class GoHelpers
         {
             kind = GoTypes.ALL;
         }
-        switch (kind)
+        return switch (kind)
         {
-            case CELL_LOCATION:
-                return "AnnotTypeId=" + getgTypeC();
-            case FUNCTION:
-                return "AnnotTypeId=" + getgTypeF();
-            case PROCESS:
-                return "AnnotTypeId=" + getgTypeP();
-            case ALL:
-                return "AnnotTypeId IN (" + getgTypeC() + "," + getgTypeF() + "," + getgTypeC() + ")";
-        }
-
-        return null;
+            case CELL_LOCATION -> "AnnotTypeId=" + getgTypeC();
+            case FUNCTION -> "AnnotTypeId=" + getgTypeF();
+            case PROCESS -> "AnnotTypeId=" + getgTypeP();
+            case ALL -> "AnnotTypeId IN (" + getgTypeC() + "," + getgTypeF() + "," + getgTypeC() + ")";
+        };
     }
 }

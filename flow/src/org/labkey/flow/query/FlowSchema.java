@@ -18,8 +18,8 @@ package org.labkey.flow.query;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.AssayProvider;
@@ -360,7 +360,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
     }
 
     @Override
-    public @NotNull QueryView createView(ViewContext context, QuerySettings settings, BindException errors)
+    public @NotNull QueryView createView(ViewContext context, @NotNull QuerySettings settings, BindException errors)
     {
         return new FlowQueryView(new FlowSchema(context, this), (FlowQuerySettings) settings, errors);
     }
@@ -1418,7 +1418,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         }
 
         @Override
-        public Iterator<FieldKey> iterator()
+        public @NotNull Iterator<FieldKey> iterator()
         {
             List<FieldKey> ret = QueryService.get().getDefaultVisibleColumns(_table.getColumns());
             TableInfo lookup = _colKeyword.getFk().getLookupTableInfo();
@@ -1450,7 +1450,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         }
 
         @Override
-        public Iterator<FieldKey> iterator()
+        public @NotNull Iterator<FieldKey> iterator()
         {
             Collection<FieldKey> ret = new LinkedHashSet<>();
             ret.addAll(QueryService.get().getDefaultVisibleColumns(_table.getColumns()));
@@ -1750,7 +1750,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         {
             List<String> parts = fieldKey.getParts();
             int insertAt = 0;
-            if (parts.get(0).equals(FCSFILE_FIELDKEY.getName()))
+            if (parts.getFirst().equals(FCSFILE_FIELDKEY.getName()))
                 insertAt = 1;
             parts.add(insertAt, ORIGINAL_FCSFILE_FIELDKEY.getName());
             return FieldKey.fromParts(parts);
@@ -2090,7 +2090,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         for (FilterInfo f : ics.getBackgroundFilter())
         {
             Object value = f.getValue();
-            if (value instanceof String strValue && f.getField().getParts().get(0).equalsIgnoreCase("Statistic"))
+            if (value instanceof String strValue && f.getField().getParts().getFirst().equalsIgnoreCase("Statistic"))
                 value = Double.parseDouble(strValue);
             filter.addCondition(bgMap.get(f.getField()), value, f.getOp());
         }

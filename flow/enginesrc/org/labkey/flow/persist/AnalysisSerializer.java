@@ -1686,7 +1686,7 @@ public class AnalysisSerializer
 
             List<AttributeSet> attrsList = results.getByName("119043.fcs");
             assertEquals("Expected only one attribute set for 119043.fcs", 1, attrsList.size());
-            AttributeSet attrs = attrsList.get(0);
+            AttributeSet attrs = attrsList.getFirst();
             assertEquals("Expected 117 statistics for 119043.fcs", 117, attrs.getStatisticNames().size());
             assertEquals("Expected 12 statistics for 119043.fcs", 13, attrs.getGraphNames().size());
         }

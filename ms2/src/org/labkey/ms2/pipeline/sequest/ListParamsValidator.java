@@ -47,7 +47,7 @@ public class ListParamsValidator implements IParamsValidator
         String value = spp.getValue();
         if (value == null || value.isEmpty())
         {
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value is not set.\n";
+            parserError = spp.getInputXmlLabels().getFirst() + ", " + "this value is not set.\n";
             return parserError;
         }
         boolean isValid = true;
@@ -64,7 +64,7 @@ public class ListParamsValidator implements IParamsValidator
             }
 
         }
-        if(!isValid) parserError = spp.getInputXmlLabels().get(0) + ", " + "this value ("
+        if(!isValid) parserError = spp.getInputXmlLabels().getFirst() + ", " + "this value ("
                 + value + ") is not in the valid list.\n";
         return parserError;
     }
@@ -119,11 +119,11 @@ public class ListParamsValidator implements IParamsValidator
         {
             _property.setValue("");
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", " + "this value is not set.\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", " + "this value is not set.\n", parserError);
 
             _property.setValue(null);
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", " + "this value is not set.\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", " + "this value is not set.\n", parserError);
         }
 
         @Test
@@ -131,11 +131,11 @@ public class ListParamsValidator implements IParamsValidator
         {
             _property.setValue("foo");
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", " + "this value (foo) is not in the valid list.\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", " + "this value (foo) is not in the valid list.\n", parserError);
 
             _property.setValue("9");
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", " + "this value (9) is not in the valid list.\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", " + "this value (9) is not in the valid list.\n", parserError);
         }
     }
 

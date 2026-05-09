@@ -126,7 +126,7 @@ public class ProtSprotOrgMap
                     {
                         ps.executeBatch();
                         ps.clearBatch();
-                        _log.debug("SprotOrgMap: " + orgLineCount + " lines loaded");
+                        _log.debug("SprotOrgMap: {} lines loaded", orgLineCount);
                     }
                 }
 
@@ -137,7 +137,7 @@ public class ProtSprotOrgMap
                 throw UnexpectedException.wrap(e, "Problem loading ProtSprotOrgMap on line " + (orgLineCount + 1));
             }
 
-            _log.info("Finished reloading ProtSprotOrgMap in " + (System.currentTimeMillis() - start)/1000.0 + " seconds");
+            _log.info("Finished reloading ProtSprotOrgMap in {} seconds", (System.currentTimeMillis() - start) / 1000.0);
         }
     }
 

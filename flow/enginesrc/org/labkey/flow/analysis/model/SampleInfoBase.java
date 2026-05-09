@@ -53,7 +53,7 @@ public abstract class SampleInfoBase implements ISampleInfo, Serializable
     }
 
     @Override
-    public String getSampleId()
+    public @NotNull String getSampleId()
     {
         return _sampleId;
     }

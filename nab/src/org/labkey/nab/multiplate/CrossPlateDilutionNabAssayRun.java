@@ -45,7 +45,7 @@ public class CrossPlateDilutionNabAssayRun extends NabAssayRun
         super(provider, run, user, cutoffs, renderCurveFitType);
         _plates = plates;
 
-        int sampleCount = plates.get(0).getWellGroupCount(WellGroup.Type.SPECIMEN);
+        int sampleCount = plates.getFirst().getWellGroupCount(WellGroup.Type.SPECIMEN);
         _dilutionSummaries = new DilutionSummary[sampleCount];
         Map<String, List<WellGroup>> sampleGroups = new LinkedHashMap<>();
         for (Plate plate : plates)

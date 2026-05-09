@@ -108,7 +108,7 @@ public abstract class AbstractMatrixRunCreator <ProviderType extends AbstractAss
      * @return The set id only if it needs to be saved back to the "set" property; otherwise null.
      */
     //TODO: may not need this
-    public abstract Integer ensureSet(@NotNull AssayRunUploadContext<ProviderType> context, @Nullable File runPath, @NotNull String idNameOrFilePath) throws ValidationException, ExperimentException;
+    public abstract Integer ensureSet(@NotNull AssayRunUploadContext<ProviderType> context, @Nullable File runPath, @NotNull String idNameOrFilePath) throws ValidationException;
 
     private Map.Entry<DomainProperty, String> findSetProperty(Map<DomainProperty, String> runProps)
     {

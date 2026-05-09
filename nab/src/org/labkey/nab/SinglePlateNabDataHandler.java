@@ -95,7 +95,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     protected DilutionAssayRun createDilutionAssayRun(DilutionAssayProvider<?> provider, ExpRun run, List<Plate> plates, User user,
                                                       List<Integer> sortedCutoffs, StatsService.CurveFitType fit)
     {
-        return new SinglePlateNabAssayRun(provider, run, plates.get(0), user, sortedCutoffs, fit);
+        return new SinglePlateNabAssayRun(provider, run, plates.getFirst(), user, sortedCutoffs, fit);
     }
 
     @Override
@@ -214,12 +214,12 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
                     List<double[][]> plates = parseList(dataFile, rows, "Well", resultColumnHeader, 1, expectedRows, expectedCols, errors);
                     if (!errors.isEmpty())
                     {
-                        LOG.warn("Unable to parse list style data from file (retrying using grid method) : " + errors.get(0).getMessage());
+                        LOG.warn("Unable to parse list style data from file (retrying using grid method) : {}", errors.getFirst().getMessage());
                     }
 
                     if (plates != null && !plates.isEmpty())
                     {
-                        return plates.get(0);
+                        return plates.getFirst();
                     }
                 }
             }
@@ -288,7 +288,7 @@ public class SinglePlateNabDataHandler extends NabDataHandler implements Transfo
     {
         if (groups.size() != 1)
             throw new IllegalStateException("Expected exactly 1 well group per material for single-plate NAb runs.  Found " + groups.size());
-        WellGroup group = groups.get(0);
+        WellGroup group = groups.getFirst();
         Map<PropertyDescriptor,Object> sampleProperties = sampleInput.getPropertyValues();
         for (DomainProperty property : properties.values())
             group.setProperty(property.getName(), sampleProperties.get(property.getPropertyDescriptor()));

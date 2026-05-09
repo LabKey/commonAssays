@@ -25,7 +25,7 @@ public class CharactersParseActions extends ParseActions
     protected String _accumulated;
 
     @Override
-    public void characters(ParseContext context, char ch[], int start, int len)
+    public void characters(ParseContext context, char[] ch, int start, int len)
     {
         if (context.isIgnorable())
         {

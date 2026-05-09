@@ -122,11 +122,11 @@ public class CustomAnnotationSetManager
                 }
             }
             assert false : "More than one matching set was found but none were in the current container";
-            return matches.get(0);
+            return matches.getFirst();
         }
         if (matches.size() == 1)
         {
-            return matches.get(0);
+            return matches.getFirst();
         }
         return null;
     }

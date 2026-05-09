@@ -183,7 +183,7 @@ public abstract class MS2Run implements Serializable
         MS2RunType runType = MS2RunType.lookupType(type, version);
         if (runType == null)
         {
-            _log.error("Unrecognized run type: " + type);
+            _log.error("Unrecognized run type: {}", type);
             return null;
         }
 

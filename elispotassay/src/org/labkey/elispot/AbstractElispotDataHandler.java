@@ -107,7 +107,7 @@ public abstract class AbstractElispotDataHandler extends AbstractExperimentDataH
 
                 int rowPos = ConvertHelper.convert(row.get(WELL_ROW_PROPERTY), Integer.class);
                 int colPos = ConvertHelper.convert(row.get(WELL_COLUMN_PROPERTY), Integer.class);
-                String dataRowLsid = ElispotDataHandler.getDataRowLsid(runData.get(0).getLSID(), rowPos, colPos).toString();
+                String dataRowLsid = ElispotDataHandler.getDataRowLsid(runData.getFirst().getLSID(), rowPos, colPos).toString();
 
                 Map<String, Object> runDataFields = new HashMap<>();
                 runDataFields.put("ObjectUri", dataRowLsid);

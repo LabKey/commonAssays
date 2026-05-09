@@ -79,7 +79,7 @@ public class SpectrumImporter
             else
             {
                 if (null == mzXmlFile)
-                    _log.warn("Spectra were not imported: " + gzFile + " could not be opened and no mzXML file name was specified.");
+                    _log.warn("Spectra were not imported: {} could not be opened and no mzXML file name was specified.", gzFile);
                 else
                 {
                     _file = mzXmlFile;
@@ -93,7 +93,7 @@ public class SpectrumImporter
         }
         catch (IOException x)
         {
-            _log.warn("Spectra were not imported: " + x);  // Note: x.getMessage() has just the file name
+            _log.warn("Spectra were not imported: {}", String.valueOf(x));  // Note: x.getMessage() has just the file name
         }
         catch (XMLStreamException x)
         {
@@ -204,7 +204,7 @@ public class SpectrumImporter
 
             if (!_scans.isEmpty())
             {
-                _log.warn("Could not find spectra for " + _scans.size() + " scans.");
+                _log.warn("Could not find spectra for {} scans.", _scans.size());
             }
         }
         catch (IOException | SQLException e)

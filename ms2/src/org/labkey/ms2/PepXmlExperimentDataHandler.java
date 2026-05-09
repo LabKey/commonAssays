@@ -65,7 +65,7 @@ public class PepXmlExperimentDataHandler extends AbstractExperimentDataHandler
         File dataFile = FileSystemLike.toFile(dataFileLike);
         if (!shouldImport(data, context))
         {
-            log.info("Skipping import of file " + dataFile);
+            log.info("Skipping import of file {}", dataFile);
             return;
         }
 

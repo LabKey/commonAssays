@@ -77,7 +77,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -338,7 +337,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
             // add the titration if there is a default value and it was selected as a standard
             else if (defVal != null)
             {
-                if (defVal.toLowerCase().equals("true"))
+                if (defVal.equalsIgnoreCase("true"))
                     standardTitrations.add(titrationEntry.getValue());
             }
             // otherwise add the titration if the well role is of type standard
@@ -434,7 +433,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 {
                     String titrationCellName = PageFlowUtil.filter(getTitrationColumnCellNameAndId(titrationEntry.getValue().getName()));
                     // DOM ids and JS function names can't have spaces
-                    String groupName = PageConfig.makeIdFromName(getColumns().get(0).getFormFieldName(ctx));
+                    String groupName = PageConfig.makeIdFromName(getColumns().getFirst().getFormFieldName(ctx));
                     String id = groupName + "CheckBox";
 
                     TD(
@@ -460,17 +459,17 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 public void writeCopyableJavaScript(RenderContext ctx, Writer out) throws IOException
                 {
                     // DOM ids and JS function names can't have spaces
-                    String groupName = PageConfig.makeIdFromName(getColumns().get(0).getFormFieldName(ctx));
+                    String groupName = PageConfig.makeIdFromName(getColumns().getFirst().getFormFieldName(ctx));
                     out.write("function " + groupName + "Updated() {\n");
                     out.write("  if (document.getElementById('" + groupName + "CheckBox') != null && document.getElementById('" + groupName + "CheckBox').checked) {\n");
-                    out.write("    var v = document.getElementsByName('" + getColumns().get(0).getFormFieldName(ctx) + "')[0].checked;\n");
+                    out.write("    var v = document.getElementsByName('" + getColumns().getFirst().getFormFieldName(ctx) + "')[0].checked;\n");
                     for (int i = 1; i < getColumns().size(); i++)
                     {
                         out.write("    document.getElementsByName('" + getColumns().get(i).getFormFieldName(ctx) + "')[0].checked = v;\n");
                     }
                     out.write("  }\n");
                     out.write("}\n");
-                    out.write("var e = document.getElementsByName('" + getColumns().get(0).getFormFieldName(ctx) + "')[0];\n");
+                    out.write("var e = document.getElementsByName('" + getColumns().getFirst().getFormFieldName(ctx) + "')[0];\n");
                     out.write("e['onchange']=" + groupName + "Updated;\n");
                     out.write("e['onkeyup']=" + groupName + "Updated;\n");
                     out.write("\n");
@@ -664,7 +663,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     {
         // return true if 1. errorReshow and previously checked, 2. has a default value that was checked, or 3. titration type matches
         return (errorReshow && getViewContext().getRequest().getParameter(propName).equals("true"))
-                || (!errorReshow && defVal != null && defVal.toLowerCase().equals("true"))
+                || (!errorReshow && defVal != null && defVal.equalsIgnoreCase("true"))
                 || (!errorReshow && defVal == null && typeMatch);
     }
 
@@ -672,7 +671,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     {
         // return true if 1. errorReshow and previously checked, 2. has a default value that was checked
         return (errorReshow && getViewContext().getRequest().getParameter(propName).equals("true"))
-                || (!errorReshow && defVal != null && defVal.toLowerCase().equals("true"));
+                || (!errorReshow && defVal != null && defVal.equalsIgnoreCase("true"));
     }
 
     private String[] getAnalyteNames(LuminexRunUploadForm form) throws ExperimentException
@@ -719,7 +718,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
     protected class LuminexRunStepHandler extends RunStepHandler
     {
         @Override
-        public boolean executeStep(LuminexRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public boolean executeStep(LuminexRunUploadForm form, BindException errors) throws ServletException
         {
             try
             {
@@ -739,7 +738,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
 
         @Override
-        public ModelAndView getNextStep(LuminexRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public ModelAndView getNextStep(LuminexRunUploadForm form, BindException errors) throws ExperimentException
         {
             if (form.isResetDefaultValues() || errors.hasErrors())
                 return getRunPropertiesView(form, !form.isResetDefaultValues(), false, errors);
@@ -775,7 +774,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
 
         @Override
-        public boolean executeStep(LuminexRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public boolean executeStep(LuminexRunUploadForm form, BindException errors)
         {
             try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
             {
@@ -880,7 +879,7 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
         }
 
         @Override
-        public ModelAndView getNextStep(LuminexRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public ModelAndView getNextStep(LuminexRunUploadForm form, BindException errors) throws ExperimentException
         {
             if (form.isResetDefaultValues() || errors.hasErrors())
                 return getAnalytesView(form.getAnalyteNames(), form, true, errors);

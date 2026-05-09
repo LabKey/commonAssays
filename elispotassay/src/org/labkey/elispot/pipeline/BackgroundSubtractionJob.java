@@ -122,7 +122,7 @@ public class BackgroundSubtractionJob extends PipelineJob
 
                     if (plate != null)
                     {
-                        String dataLsid = data.get(0).getLSID();
+                        String dataLsid = data.getFirst().getLSID();
                         Map<String, Object> propMap = new HashMap<>();
                         Domain antigenDomain = AbstractAssayProvider.getDomainByPrefix(run.getProtocol(), ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP, false);
 
@@ -132,7 +132,7 @@ public class BackgroundSubtractionJob extends PipelineJob
                         // populate the property maps with cells per well and antigen name information (to simulate data upload)
                         for (WellGroup group : plate.getWellGroups(WellGroup.Type.ANTIGEN))
                         {
-                            Position groupPos = group.getPositions().get(0);
+                            Position groupPos = group.getPositions().getFirst();
                             Lsid dataRowLsid = ElispotDataHandler.getDataRowLsid(dataLsid, groupPos);
                             RunDataRow runDataRow = ElispotManager.get().getRunDataRow(dataRowLsid.toString(), run.getContainer());
                             if (null != runDataRow && null != cellWellProp && null != antigenNameProp)
@@ -185,7 +185,7 @@ public class BackgroundSubtractionJob extends PipelineJob
 
         if (reader != null)
         {
-            FileLike dataFile = data.get(0).getFileLike();
+            FileLike dataFile = data.getFirst().getFileLike();
 
             if (dataFile.exists())
             {

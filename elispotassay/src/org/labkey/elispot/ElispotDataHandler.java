@@ -59,7 +59,6 @@ import org.labkey.elispot.plate.FluorescentPlateInfo;
 import org.labkey.elispot.plate.PlateInfo;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -272,7 +271,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             if (data.size() != 1)
                 throw new ExperimentException("Elispot should only upload a single file per run.");
 
-            String dataLsid = data.get(0).getLSID();
+            String dataLsid = data.getFirst().getLSID();
 
             // for each antigen well group, we want to flatten that information to the well level
             for (WellGroup group : plate.getWellGroups(WellGroup.Type.ANTIGEN))
@@ -332,7 +331,7 @@ public class ElispotDataHandler extends AbstractElispotDataHandler implements Tr
             if (data.size() != 1)
                 throw new ExperimentException("Elispot should only upload a single file per run.");
 
-            String dataLsid = data.get(0).getLSID();
+            String dataLsid = data.getFirst().getLSID();
 
             // calculate antigen statistics on a per sample basis
             Map<String, ExpMaterial> materialMap = new HashMap<>();

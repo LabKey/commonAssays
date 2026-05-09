@@ -322,7 +322,7 @@ public class SinglePlateNabAssayRun extends NabAssayRun
         List<? extends ExpData> outputDatas = _run.getOutputDatas(null);
         if (!outputDatas.isEmpty())
         {
-            Lsid virusLsid = DilutionDataHandler.createVirusWellGroupLsid(outputDatas.get(0), virusWellGroupName);
+            Lsid virusLsid = DilutionDataHandler.createVirusWellGroupLsid(outputDatas.getFirst(), virusWellGroupName);
             AssayProtocolSchema schema = _provider.createProtocolSchema(getUser(), _run.getContainer(), _protocol, null);
             TableInfo virusTable = schema.createTable(DilutionManager.VIRUS_TABLE_NAME, null);
             if (null != virusTable)
@@ -331,7 +331,7 @@ public class SinglePlateNabAssayRun extends NabAssayRun
                 SimpleFilter filter = new SimpleFilter(FieldKey.fromString("VirusLsid"), virusLsid.toString());
                 List<String> results = new TableSelector(columnInfo, filter, null).getArrayList(String.class);
                 if (!results.isEmpty())
-                    return results.get(0);
+                    return results.getFirst();
             }
         }
         return null;

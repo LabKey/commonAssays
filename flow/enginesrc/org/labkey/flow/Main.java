@@ -162,15 +162,11 @@ public class Main
         for (Workspace.SampleInfo sample : workspace.getSamplesComplete())
         {
             Analysis analysis = workspace.getSampleAnalysis(sample);
-            List<Workspace.SampleInfo> samples = analysisToSamples.get(analysis);
-            if (samples == null)
-                analysisToSamples.put(analysis, samples = new ArrayList<>());
+            List<Workspace.SampleInfo> samples = analysisToSamples.computeIfAbsent(analysis, _ -> new ArrayList<>());
 
             samples.add(sample);
 
-            List<Workspace.SampleInfo> dups = sampleLabels.get(sample.getLabel());
-            if (dups == null)
-                sampleLabels.put(sample.getLabel(), dups = new ArrayList<>());
+            List<Workspace.SampleInfo> dups = sampleLabels.computeIfAbsent(sample.getLabel(), _ -> new ArrayList<>());
             dups.add(sample);
         }
 
@@ -225,7 +221,7 @@ public class Main
             {
                 Analysis analysis = entry.getKey();
                 List<Workspace.SampleInfo> samples = entry.getValue();
-                String header = String.format("  %s: ", samples.get(0));
+                String header = String.format("  %s: ", samples.getFirst());
                 String indent = StringUtils.repeat(" ", header.length());
                 System.out.print(header);
                 printWrapped(System.out, indent, samples);

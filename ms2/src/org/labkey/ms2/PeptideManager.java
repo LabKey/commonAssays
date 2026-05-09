@@ -1,7 +1,6 @@
 package org.labkey.ms2;
 
 import org.apache.commons.beanutils.ConversionException;
-import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
@@ -94,7 +93,7 @@ public class PeptideManager
         // 1) verify that no search-engine-specific scores are used in the filter OR
         // 2) ignore filters that don't apply to a particular run, and provide a warning OR
         // 3) allowing picking one filter per run type
-        return getPeptideFilter(currentUrl, mask, user, runs.get(0));
+        return getPeptideFilter(currentUrl, mask, user, runs.getFirst());
     }
 
     public static SimpleFilter getPeptideFilter(ActionURL currentUrl, int mask, User user, MS2Run... runs)
@@ -218,7 +217,7 @@ public class PeptideManager
         List<Protein> proteins = new SqlSelector(ProteinSchema.getSchema(), sql).getArrayList(Protein.class);
 
         if (proteins.isEmpty())
-            LOG.warn("getProteinsContainingPeptide: Could not find peptide " + peptide + " in FASTA files " + Arrays.asList(fastaIds));
+            LOG.warn("getProteinsContainingPeptide: Could not find peptide {} in FASTA files {}", peptide, Arrays.asList(fastaIds));
 
         return proteins;
     }

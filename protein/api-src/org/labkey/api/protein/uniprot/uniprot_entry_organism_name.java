@@ -68,18 +68,18 @@ public class uniprot_entry_organism_name extends CharactersParseActions
         if (_curType.equalsIgnoreCase("scientific") || _curType.equalsIgnoreCase("full"))
         {
             String together = _accumulated.trim();
-            String separate[] = together.split(" ");
+            String[] separate = together.split(" ");
             if (separate.length < 2)
             {
-                _log.warn("Found organism with this name: '" + together + "'");
+                _log.warn("Found organism with this name: '{}'", together);
             }
             if (separate.length >= 1)
             {
-                organism.setGenus(separate[0].replaceAll("'", ""));
+                organism.setGenus(separate[0].replace("'", ""));
             }
             if (separate.length >= 2)
             {
-                organism.setSpecies(separate[1].replaceAll("'", ""));
+                organism.setSpecies(separate[1].replace("'", ""));
             }
             if ((_curType.equalsIgnoreCase("full") || separate.length > 2))
             {

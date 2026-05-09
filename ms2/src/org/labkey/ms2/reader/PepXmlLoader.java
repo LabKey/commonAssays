@@ -381,7 +381,7 @@ public class PepXmlLoader extends MS2XmlLoader
                         _log.error("Error: Unknown N-Terminal Modifications.  Counts per residue:");
                         for (char residue : _unknownNTerminalModifications.keySet())
                         {
-                            _log.error("\t" + residue + ": " + _unknownNTerminalModifications.get(residue));
+                            _log.error("\t{}: {}", residue, _unknownNTerminalModifications.get(residue));
                         }
                     }
                     if (!_unknownNonNTerminalModifications.isEmpty())
@@ -389,7 +389,7 @@ public class PepXmlLoader extends MS2XmlLoader
                         _log.error("Error: Unknown non-N-Terminal Modifications:");
                         for (char residue : _unknownNonNTerminalModifications.keySet())
                         {
-                            _log.error("\t" + residue + ": " + _unknownNonNTerminalModifications.get(residue));
+                            _log.error("\t{}: {}", residue, _unknownNonNTerminalModifications.get(residue));
                         }
                     }
                 }
@@ -654,8 +654,7 @@ public class PepXmlLoader extends MS2XmlLoader
 //System.err.println("No mod for " + String.valueOf(aa) + ", " + modifiedMass);
                                 //record the unknown modification, but don't print out anything yet
                                 _unknownModArray[position] = true;
-                                _log.debug("Unknown modification at scan " + getScan() + ": " + aa +
-                                           " " + modifiedMass);
+                                _log.debug("Unknown modification at scan {}: {} {}", getScan(), aa, modifiedMass);
                             }
                             else if (mod.getVariable())
                                 modChars[position] =  mod.getSymbol().charAt(0);

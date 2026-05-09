@@ -149,7 +149,7 @@ public class DeltaScanColumn extends AbstractPeptideDisplayColumn
 
             if (allLegalValues(b0, b1, r2, sigma))
             {
-                _log.debug("b0=" + b0 + " b1=" + b1 + " r2=" + r2 + " sigma=" + sigma);
+                _log.debug("b0={} b1={} r2={} sigma={}", b0, b1, r2, sigma);
 
                 map.put("HydroB0", b0);
                 map.put("HydroB1", b1);

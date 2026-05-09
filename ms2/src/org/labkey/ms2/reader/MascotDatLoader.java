@@ -20,7 +20,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
-import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.Path;
 import org.labkey.api.util.StringUtilsLabKey;
@@ -34,7 +33,6 @@ import org.labkey.vfs.FileSystemLike;
 import javax.xml.stream.XMLStreamException;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -194,7 +192,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     }
 
     private String _boundaryMarker = null;
-    private BufferedReader _reader;
+    private final BufferedReader _reader;
     private String _currentLine = null;
     private Section _currentSection = null;
     private Integer _currentQueryNum = null;
@@ -263,7 +261,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                 }
                 catch (IllegalArgumentException e) // Don't fail on sections we don't know about
                 {
-                    _log.warn("Unknown section found in dat file: " + matcher.group(SECTION_NAME_GROUP_NUM));
+                    _log.warn("Unknown section found in dat file: {}", matcher.group(SECTION_NAME_GROUP_NUM));
                     _currentSection = Section.UNKNOWN_SECTION;
                     return true;
                 }
@@ -361,7 +359,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                     // Do nothing.  If we can't find the file from the fastafile value in the header section, it will throw an exception.
                     // Note that this assumes the header comes after the parameters section, which seems to be the case (despite what the names
                     // might suggest).
-                    _log.warn("Could not find FASTA file: " + dbFileName);
+                    _log.warn("Could not find FASTA file: {}", dbFileName);
                 }
             }
             else if (_currentLine.startsWith(ENZYME_PREFIX) || _currentLine.startsWith(ENZYME_PREFIX_LC))
@@ -402,7 +400,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                     boolean isCTerm = residues.contains("C-term");
                     if (isNTerm && isCTerm)
                     {
-                        _log.error("Both c and n term modification detected. Skipping delta " + deltaNum + " in masses.");
+                        _log.error("Both c and n term modification detected. Skipping delta {} in masses.", deltaNum);
                     }
                     else if ((((residues.length() == 7 || residues.length() == 14) && isProteinTerm)) ||
                              (residues.length() == 6 && isNTerm))
@@ -461,11 +459,11 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                             fraction.addModification(mod);
                         }
                     }
-                    else if (massName.toLowerCase().equals("c_term"))
+                    else if (massName.equalsIgnoreCase("c_term"))
                     {
                         _masses.put("c", Float.parseFloat(matcher.group(KV_VALUE_GROUP_NUM)));
                     }
-                    else if (massName.toLowerCase().equals("n_term"))
+                    else if (massName.equalsIgnoreCase("n_term"))
                     {
                         _masses.put("n", Float.parseFloat(matcher.group(KV_VALUE_GROUP_NUM)));
                     }
@@ -480,7 +478,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
     private void addVariableModifiedMass(PeptideFraction fraction, String aminoAcid, Float massDelta)
     {
         if (!_masses.containsKey(aminoAcid))
-            _log.error("Trying to store a variable AA modification for '" + aminoAcid + "' without any prior info for this AA.");
+            _log.error("Trying to store a variable AA modification for '{}' without any prior info for this AA.", aminoAcid);
         else
         {
             MS2Modification mod = new MS2Modification();
@@ -707,7 +705,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
         }
         if (peptide.getScan() == null && title != null)
         {
-            _log.debug("Scan for peptide " + peptide.getTrimmedPeptide() + " in query " + _currentQueryNum + " not found.  Parsing from title.");
+            _log.debug("Scan for peptide {} in query {} not found.  Parsing from title.", peptide.getTrimmedPeptide(), _currentQueryNum);
             findScanFromTitle(title, peptide);
         }
 
@@ -928,7 +926,7 @@ public class MascotDatLoader extends MS2Loader implements AutoCloseable
                     {
                         //record the unknown modification, but don't print out anything yet
                         _unknownModArray[i-1] = true;
-                        _log.debug("Unknown modification at scan " + getScan() + ": " + aminoAcid);
+                        _log.debug("Unknown modification at scan {}: {}", getScan(), aminoAcid);
                     }
                     else if (mod.getVariable())
                     {

@@ -81,11 +81,11 @@ public class EditWellForm extends ViewForm
             {
                 if (ff_comment == null)
                 {
-                    ff_comment = wells.get(0).getComment();
+                    ff_comment = wells.getFirst().getComment();
                 }
                 if (ff_name == null)
                 {
-                    ff_name = wells.get(0).getName();
+                    ff_name = wells.getFirst().getName();
                 }
             }
         }
@@ -95,7 +95,7 @@ public class EditWellForm extends ViewForm
     {
         if (ff_keywordName == null)
         {
-            Map.Entry<String, String>[] entries = wells.get(0).getKeywords().entrySet().toArray(new Map.Entry[0]);
+            Map.Entry<String, String>[] entries = wells.getFirst().getKeywords().entrySet().toArray(new Map.Entry[0]);
             ff_keywordName = new String[entries.length];
             ff_keywordValue = new String[entries.length];
             ff_keywordError = new String[entries.length];

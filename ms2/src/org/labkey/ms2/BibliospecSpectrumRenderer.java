@@ -273,7 +273,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
 
                 if (spectraCount > 0)
                 {
-                    LOG.warn("Unable to find " + spectraCount + " when building Bibliospec library for run");
+                    LOG.warn("Unable to find {} when building Bibliospec library for run", spectraCount);
                 }
 
                 // Create the indices on the end after all the inserts are done

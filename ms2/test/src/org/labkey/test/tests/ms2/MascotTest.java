@@ -111,7 +111,7 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         if (TestCredentials.hasCredentials(SEARCH_TYPE))
         {
             MASCOT_HOST = TestCredentials.getServer(SEARCH_TYPE).getHost();
-            MASCOT_USER_LOGIN = TestCredentials.getServer(SEARCH_TYPE).getLogins().get(0);
+            MASCOT_USER_LOGIN = TestCredentials.getServer(SEARCH_TYPE).getLogins().getFirst();
             MASCOT_PROXY = (String)TestCredentials.getServer(SEARCH_TYPE).getExtraValues().get("proxy");
         }
 

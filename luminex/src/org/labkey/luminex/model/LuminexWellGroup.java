@@ -69,12 +69,7 @@ public class LuminexWellGroup implements WellGroup
                 continue;
 
             LuminexReplicate replicate = new LuminexReplicate(well);
-            List<LuminexWell> wells = allReplicates.get(replicate);
-            if (wells == null)
-            {
-                wells = new ArrayList<>();
-                allReplicates.put(replicate, wells);
-            }
+            List<LuminexWell> wells = allReplicates.computeIfAbsent(replicate, _ -> new ArrayList<>());
             wells.add(well);
         }
 
@@ -205,7 +200,7 @@ public class LuminexWellGroup implements WellGroup
     @Override
     public String getName()
     {
-        return _wells.get(0)._dataRow.getDescription();
+        return _wells.getFirst()._dataRow.getDescription();
     }
 
     @Override
@@ -235,7 +230,7 @@ public class LuminexWellGroup implements WellGroup
     @Override
     public Container getContainer()
     {
-        return _wells.get(0)._dataRow.getContainer();
+        return _wells.getFirst()._dataRow.getContainer();
     }
 
     @Override

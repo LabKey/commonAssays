@@ -166,7 +166,7 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
             {
                 if (entry.getValue().size() != 1)
                     continue;
-                List<String> subsets = sampleSubsetMap.get(entry.getValue().get(0));
+                List<String> subsets = sampleSubsetMap.get(entry.getValue().getFirst());
                 valueSampleMap.put(entry.getKey(), subsets);
             }
             if (!valueSampleMap.isEmpty())

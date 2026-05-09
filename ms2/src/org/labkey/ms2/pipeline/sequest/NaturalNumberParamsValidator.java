@@ -41,7 +41,7 @@ public class NaturalNumberParamsValidator implements IParamsValidator
         String value = spp.getValue();
         if (value == null || value.isEmpty())
         {
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a natural number(" + value + ").\n";
+            parserError = spp.getInputXmlLabels().getFirst() + ", " + "this value must be a natural number(" + value + ").\n";
             return parserError;
         }
         StringTokenizer st = new StringTokenizer(value, ",");
@@ -54,11 +54,11 @@ public class NaturalNumberParamsValidator implements IParamsValidator
             }
             catch (NumberFormatException e)
             {
-                parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a natural number(" + token + ").\n";
+                parserError = spp.getInputXmlLabels().getFirst() + ", " + "this value must be a natural number(" + token + ").\n";
                 return parserError;
             }
             if (i < 1)
-                parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a natural number(" + token + ").\n";
+                parserError = spp.getInputXmlLabels().getFirst() + ", " + "this value must be a natural number(" + token + ").\n";
         }
         return parserError;
     }
@@ -106,11 +106,11 @@ public class NaturalNumberParamsValidator implements IParamsValidator
         {
             _property.setValue("");
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a natural number().\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a natural number().\n", parserError);
 
             _property.setValue(null);
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a natural number(null).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a natural number(null).\n", parserError);
         }
 
         @Test
@@ -119,17 +119,17 @@ public class NaturalNumberParamsValidator implements IParamsValidator
             String value = "-1";
             _property.setValue(value);
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a natural number(" + value + ").\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a natural number(" + value + ").\n", parserError);
 
             value = "0";
             _property.setValue(value);
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a natural number(" + value + ").\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a natural number(" + value + ").\n", parserError);
 
             value = "-1.4";
             _property.setValue(value);
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a natural number(" + value + ").\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a natural number(" + value + ").\n", parserError);
         }
 
         @Test
@@ -137,11 +137,11 @@ public class NaturalNumberParamsValidator implements IParamsValidator
         {
             _property.setValue("foo");
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a natural number(foo).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a natural number(foo).\n", parserError);
 
             _property.setValue("1.2");
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a natural number(1.2).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a natural number(1.2).\n", parserError);
         }
     }
 }

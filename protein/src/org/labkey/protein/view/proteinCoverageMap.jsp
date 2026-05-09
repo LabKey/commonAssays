@@ -205,7 +205,7 @@
                 legendValues.set(10, min);
 
                 int closestToMeanIndex = 0;
-                var minDiff = iValues.get(0);
+                var minDiff = iValues.getFirst();
 
                 // calculate closest to mean index of peptidesForSequenceMapDisplay for sequence graph coloring
                 for (int i = 0; i < peptidesForSequenceMapDisplay.size(); i++)
@@ -250,7 +250,7 @@
                     peptideCharacteristic.setForegroundColor(ColorGradient.getContrastingForegroundColor(peptideColor));
                 }
 
-                peptidesForSequenceMapDisplay.get(peptidesForSequenceMapDisplay.size() - 1).setColor("#" + Integer.toHexString(one.getRGB()).substring(2));
+                peptidesForSequenceMapDisplay.getLast().setColor("#" + Integer.toHexString(one.getRGB()).substring(2));
 
                 // assign red colors from median to first -> lighter to darker
                 one = new Color(187, 78, 78);

@@ -515,7 +515,7 @@ public class ViabilityAssaySchema extends AssayProtocolSchema
             reRunDisplayCol.setNoWrap(true);
 
             List<DisplayColumn> cols = super.getDisplayColumns();
-            cols.add(0, reRunDisplayCol);
+            cols.addFirst(reRunDisplayCol);
             return cols;
         }
     }

@@ -80,7 +80,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
                     }
                 }
                 else
-                    LOG.warn("No well location and plate name for row : " + row);
+                    LOG.warn("No well location and plate name for row : {}", row);
             }
         }
         catch (IOException e)
@@ -140,7 +140,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
     }
 
     @Override
-    public Map<Integer, Plate> getAnalyteToPlate(String plateName) throws ExperimentException
+    public Map<Integer, Plate> getAnalyteToPlate(String plateName)
     {
         Map<Integer, Plate> analyteToPlate = new IntHashMap<>();
         for (Map.Entry<Integer, double[][]> entry : _plateMap.get(plateName).getDataMap().entrySet())
@@ -152,7 +152,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
     }
 
     @Override
-    public Map<String, Double> getStandardConcentrations(String plateName, int analyteNum) throws ExperimentException
+    public Map<String, Double> getStandardConcentrations(String plateName, int analyteNum)
     {
         return _plateMap.get(plateName).getStdConcentrations(analyteNum);
     }
@@ -190,10 +190,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
 
         public Map<String, Double> getStdConcentrations(int analyteNum)
         {
-            if (_stdConcentrations.containsKey(analyteNum))
-                return _stdConcentrations.get(analyteNum);
-            else
-                return Collections.emptyMap();
+            return _stdConcentrations.getOrDefault(analyteNum, Collections.emptyMap());
         }
 
         public Map<Integer, double[][]> getDataMap()
@@ -224,7 +221,7 @@ public class HighThroughputImportHelper extends AbstractElisaImportHelper
         {
             if (position != null && spot != null && signal != null)
             {
-                double[][] data = _dataMap.computeIfAbsent(spot, s -> new double[_plateTemplate.getRows()][_plateTemplate.getColumns()]);
+                double[][] data = _dataMap.computeIfAbsent(spot, _ -> new double[_plateTemplate.getRows()][_plateTemplate.getColumns()]);
 
                 if (position.getRow() >= _plateTemplate.getRows() || position.getColumn()-1 >= _plateTemplate.getColumns())
                 {

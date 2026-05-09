@@ -29,7 +29,6 @@ import java.awt.geom.Rectangle2D;
 
 import org.labkey.flow.analysis.model.Polygon;
 import java.awt.*;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -119,7 +118,7 @@ public class DensityPlot extends ContourPlot
         xValues.sort(Double::compareTo);
 
         // now draw the segments
-        double x = xValues.get(0);
+        double x = xValues.getFirst();
         double y = m*x + b;
         int prevX = (int)getDomainAxis().valueToJava2D(x, dataArea, RectangleEdge.BOTTOM);
         int prevY = (int)getRangeAxis().valueToJava2D(y, dataArea, RectangleEdge.LEFT);

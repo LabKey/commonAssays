@@ -41,7 +41,7 @@ public class SignalDataUpgradeCode implements UpgradeCode
                         DomainProperty dataFile = domain.getPropertyByName("DataFile");
                         if (dataFile != null && dataFile.isRequired())
                         {
-                            LOG.info(String.format("Updating Signal Data assay in folder '%s'", c.getPath()));
+                            LOG.info("Updating Signal Data assay in folder '{}'", c.getPath());
                             dataFile.setRequired(false);
                             domain.save(User.getAdminServiceUser());
                         }

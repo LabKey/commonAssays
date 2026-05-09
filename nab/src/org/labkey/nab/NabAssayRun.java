@@ -77,9 +77,9 @@ public abstract class NabAssayRun extends DilutionAssayRun
 
             List<? extends ExpData> outputDatas = _run.getOutputDatas(null); //handler.getDataType());
             ExpData outputObject = null;
-            if (outputDatas.size() == 1 && outputDatas.get(0).getDataType() == dataType)
+            if (outputDatas.size() == 1 && outputDatas.getFirst().getDataType() == dataType)
             {
-                outputObject = outputDatas.get(0);
+                outputObject = outputDatas.getFirst();
             }
             else if (outputDatas.size() > 1)
             {

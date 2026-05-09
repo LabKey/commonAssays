@@ -161,7 +161,7 @@ public class MS2Peptide
         _aa = aaList.toArray(new String[_aaCount]);
 
         // Compute mass of each amino acid (including modifications)
-        double aaMass[] = new double[_aaCount];
+        double[] aaMass = new double[_aaCount];
 
         for (int i = 0; i < _aaCount; i++)
         {
@@ -175,7 +175,7 @@ public class MS2Peptide
                 if (null != massDiff)
                     aaMass[i] += massDiff;
                 else
-                    _log.error("Unknown modification: " + aa);
+                    _log.error("Unknown modification: {}", aa);
             }
         }
 
@@ -198,8 +198,8 @@ public class MS2Peptide
         _y.put(massType, y);
 
         // Compute b+ and y+ ions
-        double bTotal[] = new double[_ionCount];
-        double yTotal[] = new double[_ionCount];
+        double[] bTotal = new double[_ionCount];
+        double[] yTotal = new double[_ionCount];
 
         for (int i = 0; i < _ionCount; i++)
         {

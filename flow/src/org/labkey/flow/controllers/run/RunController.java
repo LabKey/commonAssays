@@ -521,7 +521,7 @@ public class RunController extends BaseFlowController
                 String zipName = "ExportedRuns";
                 if (_runs.size() == 1)
                 {
-                    FlowRun run = _runs.get(0);
+                    FlowRun run = _runs.getFirst();
                     zipName = getBaseName(run.getName());
                 }
 

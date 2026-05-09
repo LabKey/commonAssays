@@ -36,7 +36,7 @@ public class PositiveDoubleParamsValidator implements IParamsValidator
         String value = spp.getValue();
         if (value == null)
         {
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a positive number(" + value + ").\n";
+            parserError = spp.getInputXmlLabels().getFirst() + ", " + "this value must be a positive number(" + value + ").\n";
             return parserError;
         }
         try
@@ -45,11 +45,11 @@ public class PositiveDoubleParamsValidator implements IParamsValidator
         }
         catch (NumberFormatException e)
         {
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a positive number(" + value + ").\n";
+            parserError = spp.getInputXmlLabels().getFirst() + ", " + "this value must be a positive number(" + value + ").\n";
             return parserError;
         }
         if (d < 0)
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a positive number(" + value + ").\n";
+            parserError = spp.getInputXmlLabels().getFirst() + ", " + "this value must be a positive number(" + value + ").\n";
         return parserError;
     }
 
@@ -103,11 +103,11 @@ public class PositiveDoubleParamsValidator implements IParamsValidator
         {
             _property.setValue("");
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a positive number().\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a positive number().\n", parserError);
 
             _property.setValue(null);
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a positive number(null).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a positive number(null).\n", parserError);
         }
 
         @Test
@@ -115,11 +115,11 @@ public class PositiveDoubleParamsValidator implements IParamsValidator
         {
             _property.setValue("-4");
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a positive number(-4).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a positive number(-4).\n", parserError);
 
             _property.setValue("-4.7");
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a positive number(-4.7).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a positive number(-4.7).\n", parserError);
         }
 
         @Test
@@ -127,11 +127,11 @@ public class PositiveDoubleParamsValidator implements IParamsValidator
         {
             _property.setValue("foo");
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a positive number(foo).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a positive number(foo).\n", parserError);
 
             _property.setValue("1. 2");
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a positive number(1. 2).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a positive number(1. 2).\n", parserError);
         }
     }
 }

@@ -236,7 +236,7 @@ public class ViabilityAssayRunUploadForm extends AssayRunUploadForm<ViabilityAss
                 List<ExpData> inputs = reRun.getDataOutputs();
                 if (!inputs.isEmpty())
                 {
-                    FileLike dataFile = inputs.get(0).getFileLike();
+                    FileLike dataFile = inputs.getFirst().getFileLike();
                     if (null != dataFile && dataFile.exists())
                     {
                         AssayFileWriter writer = new AssayFileWriter();

@@ -111,8 +111,8 @@ public abstract class Gate implements Serializable
         if (gates.size() == 1)
         {
             PopulationName name = PopulationName.fromString(element.getAttribute("name"));
-            gates.get(0).setName(name);
-            return gates.get(0);
+            gates.getFirst().setName(name);
+            return gates.getFirst();
         }
         return null;
     }

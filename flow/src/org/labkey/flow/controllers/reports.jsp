@@ -53,9 +53,7 @@
         ReportDescriptor d = r.getDescriptor();
         String type = d.getReportType();
 
-        List<FlowReport> rs = reportsByType.get(type);
-        if (rs == null)
-            reportsByType.put(type, rs = new ArrayList<>(reports.size()));
+        List<FlowReport> rs = reportsByType.computeIfAbsent(type, _ -> new ArrayList<>(reports.size()));
 
         rs.add(r);
     }
@@ -74,7 +72,7 @@ table.reports td {
             continue;
 
         %>
-        <tr><td colspan='3' style='height:2.0em;vertical-align:bottom;padding-left:0px'><b><%=h(rs.get(0).getTypeDescription())%></b></td></tr>
+        <tr><td colspan='3' style='height:2.0em;vertical-align:bottom;padding-left:0px'><b><%=h(rs.getFirst().getTypeDescription())%></b></td></tr>
         <%
 
         for (FlowReport r : rs)

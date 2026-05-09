@@ -36,7 +36,6 @@ import org.labkey.flow.persist.FlowManager;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -202,12 +201,6 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
         return getRun();
     }
 
-    @Override
-    public String getOwnerObjectLSID()
-    {
-        return getLSID();
-    }
-
     static public String generateDataLSID(Container container, FlowDataType type)
     {
         return ExperimentService.get().generateGuidLSID(container, type);
@@ -242,7 +235,7 @@ abstract public class FlowDataObject extends FlowObject<ExpData>
     {
         if (objs.size() < 2)
             return true;
-        String lsidCompare = objs.get(0).getExperimentLSID();
+        String lsidCompare = objs.getFirst().getExperimentLSID();
         for (int i = 1; i < objs.size(); i ++)
         {
             if (!Objects.equals(lsidCompare, objs.get(i).getExperimentLSID()))

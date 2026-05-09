@@ -148,7 +148,7 @@ public class MicroarrayManager
             row.put("Container", container);
 
             List<Map<String, Object>> results = featureSetUpdateService.insertRows(user, container, Collections.singletonList(row), errors, null, null);
-            return asInteger(results.get(0).get("RowId"));
+            return asInteger(results.getFirst().get("RowId"));
         }
 
         return null;
@@ -206,7 +206,7 @@ public class MicroarrayManager
         List<Integer> rowIds = featureAnnotationSelector.getArrayList(Integer.class);
         // TODO: Order results by container depth
         if (!rowIds.isEmpty())
-            return rowIds.get(0);
+            return rowIds.getFirst();
 
         return null;
     }
@@ -228,7 +228,7 @@ public class MicroarrayManager
         List<Integer> rowIds = featureAnnotationSelector.getArrayList(Integer.class);
         // TODO: Order results by container depth
         if (!rowIds.isEmpty())
-            return rowIds.get(0);
+            return rowIds.getFirst();
 
         return null;
     }
@@ -253,7 +253,7 @@ public class MicroarrayManager
             Integer resolvedId = MicroarrayManager.get().getFeatureAnnotationSet(c, user, id);
             if (resolvedId != null)
             {
-                logger.info("Resolved featureSet by id: " + resolvedId);
+                logger.info("Resolved featureSet by id: {}", resolvedId);
                 return resolvedId;
             }
         }
@@ -266,7 +266,7 @@ public class MicroarrayManager
         Integer id = MicroarrayManager.get().getFeatureAnnotationSet(c, user, featureSet);
         if (id != null)
         {
-            logger.info("Resolved featureSet by name: " + featureSet + " -> " + id);
+            logger.info("Resolved featureSet by name: {} -> {}", featureSet, id);
             return id;
         }
 
@@ -280,7 +280,7 @@ public class MicroarrayManager
         Integer existingSet = getFeatureAnnotationSet(c, user, baseName);
         if (existingSet != null)
         {
-            logger.info("Found existing feature annotation set by name: " + baseName);
+            logger.info("Found existing feature annotation set by name: {}", baseName);
             return existingSet;
         }
 
@@ -306,7 +306,7 @@ public class MicroarrayManager
                     throw new ExperimentException("Expression matrix file '" + featureSet + "' has no rows");
 
                 tx.commit();
-                logger.info("Created new feature annotation set '" + baseName + "' in current container");
+                logger.info("Created new feature annotation set '{}' in current container", baseName);
                 return newSetId;
             }
 
@@ -334,7 +334,7 @@ public class MicroarrayManager
                 File file = root.resolvePath(runPath + File.separator + featureSet);
                 if (file != null && file.canRead())
                 {
-                    logger.info("Resolved featureSet as file relative to runDir: " + root.relativePath(file));
+                    logger.info("Resolved featureSet as file relative to runDir: {}", root.relativePath(file));
                     return file;
                 }
             }
@@ -344,7 +344,7 @@ public class MicroarrayManager
         File file = root.resolvePath(featureSet);
         if (file != null && file.canRead())
         {
-            logger.info("Resolved featureSet as file relative to pipeline root: " + root.relativePath(file));
+            logger.info("Resolved featureSet as file relative to pipeline root: {}", root.relativePath(file));
             return file;
         }
 

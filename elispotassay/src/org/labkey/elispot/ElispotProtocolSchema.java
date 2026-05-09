@@ -16,8 +16,8 @@
 
 package org.labkey.elispot;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.ButtonBar;
 import org.labkey.api.data.Container;
@@ -162,7 +162,7 @@ public class ElispotProtocolSchema extends AssayProtocolSchema
     }
 
     @Override
-    public QueryView createView(ViewContext context, QuerySettings settings, BindException errors)
+    public @NotNull QueryView createView(ViewContext context, QuerySettings settings, BindException errors)
     {
         String name = settings.getQueryName();
         if (null != name && name.equalsIgnoreCase(ANTIGEN_STATS_TABLE_NAME))

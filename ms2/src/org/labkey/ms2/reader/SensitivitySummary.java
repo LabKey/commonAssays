@@ -15,6 +15,8 @@
  */
 package org.labkey.ms2.reader;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -141,7 +143,7 @@ public class SensitivitySummary
         }
 
         @Override
-        public int compareTo(Object o)
+        public int compareTo(@NotNull Object o)
         {
             ProbabilityInfo p = (ProbabilityInfo)o;
             return Float.compare(_probability, p._probability);

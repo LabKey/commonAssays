@@ -34,7 +34,6 @@ import org.labkey.ms2.MS2Run;
 import org.labkey.vfs.FileLike;
 
 import javax.xml.stream.XMLStreamException;
-import java.io.File;
 import java.io.IOException;
 
 /**

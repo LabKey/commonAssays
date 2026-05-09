@@ -35,7 +35,7 @@ public class NonNegativeIntegerParamsValidator implements IParamsValidator
         String value = spp.getValue();
         if (value == null)
         {
-            return spp.getInputXmlLabels().get(0) + ", " + "this value must be a non-negative integer(" + value + ").\n";
+            return spp.getInputXmlLabels().getFirst() + ", " + "this value must be a non-negative integer(" + value + ").\n";
         }
         try
         {
@@ -43,10 +43,10 @@ public class NonNegativeIntegerParamsValidator implements IParamsValidator
         }
         catch (NumberFormatException e)
         {
-            return spp.getInputXmlLabels().get(0) + ", " + "this value must be a non-negative integer(" + value + ").\n";
+            return spp.getInputXmlLabels().getFirst() + ", " + "this value must be a non-negative integer(" + value + ").\n";
         }
         if (i < 0)
-            return spp.getInputXmlLabels().get(0) + ", " + "this value must be a non-negative integer(" + value + ").\n";
+            return spp.getInputXmlLabels().getFirst() + ", " + "this value must be a non-negative integer(" + value + ").\n";
         return "";
     }
 
@@ -91,11 +91,11 @@ public class NonNegativeIntegerParamsValidator implements IParamsValidator
         {
             _property.setValue("");
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a non-negative integer().\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a non-negative integer().\n", parserError);
 
             _property.setValue(null);
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(null).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a non-negative integer(null).\n", parserError);
         }
 
         @Test
@@ -104,12 +104,12 @@ public class NonNegativeIntegerParamsValidator implements IParamsValidator
             String value = "-4";
             _property.setValue(value);
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(" + value + ").\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a non-negative integer(" + value + ").\n", parserError);
 
             value = "-4.7";
             _property.setValue(value);
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(" + value + ").\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a non-negative integer(" + value + ").\n", parserError);
 
         }
 
@@ -118,11 +118,11 @@ public class NonNegativeIntegerParamsValidator implements IParamsValidator
         {
             _property.setValue("foo");
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(foo).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a non-negative integer(foo).\n", parserError);
 
             _property.setValue("1. 2");
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(1. 2).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a non-negative integer(1. 2).\n", parserError);
         }
     }
 }

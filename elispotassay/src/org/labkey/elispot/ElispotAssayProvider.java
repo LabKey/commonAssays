@@ -21,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.PropertyStorageSpec;
-import org.labkey.api.exp.Lsid;
 import org.labkey.api.exp.ObjectProperty;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.exp.api.ExpData;
@@ -321,12 +320,7 @@ public class ElispotAssayProvider extends AbstractPlateBasedAssayProvider implem
     protected Map<String, Set<String>> getRequiredDomainProperties()
     {
         Map<String, Set<String>> domainMap = super.getRequiredDomainProperties();
-        Set<String> runProperties = domainMap.get(ExpProtocol.ASSAY_DOMAIN_RUN);
-        if (runProperties == null)
-        {
-            runProperties = new HashSet<>();
-            domainMap.put(ExpProtocol.ASSAY_DOMAIN_RUN, runProperties);
-        }
+        Set<String> runProperties = domainMap.computeIfAbsent(ExpProtocol.ASSAY_DOMAIN_RUN, _ -> new HashSet<>());
         runProperties.add(BACKGROUND_WELL_PROPERTY_NAME);
         runProperties.add(READER_PROPERTY_NAME);
 

@@ -145,7 +145,7 @@ public class uniprot extends ParseActions
         //c.commit();
 
         long totalTime = System.currentTimeMillis() - _startTime;
-        _log.info("Finished uniprot upload in " + totalTime + " milliseconds");
+        _log.info("Finished uniprot upload in {} milliseconds", totalTime);
     }
     
     // All Database Stuff Follows
@@ -439,13 +439,13 @@ public class uniprot extends ParseActions
         try
         {
             int identsProcessed = insertIdentifiers(context, conn);
-            _log.debug("Inserted " + identsProcessed + " identifiers into temp table");
+            _log.debug("Inserted {} identifiers into temp table", identsProcessed);
             handleThreadStateChangeRequests();
 
             try
             {
                 int annotsProcessed = insertAnnotations(context, conn);
-                _log.debug("Inserted " + annotsProcessed + " annotations into temp table");
+                _log.debug("Inserted {} annotations into temp table", annotsProcessed);
 
                 identsAdded = mergeIdentifiers(context, conn);
                 annotsAdded = mergeAnnotations(context, conn);
@@ -468,11 +468,7 @@ public class uniprot extends ParseActions
 
         conn.setAutoCommit(true);
         handleThreadStateChangeRequests();
-        _log.info("Batch complete. Added: " +
-                orgsAdded + " organisms; " +
-                seqsAdded + " sequences; " +
-                identsAdded + " identifiers; " +
-                annotsAdded + " annotations");
+        _log.info("Batch complete. Added: {} organisms; {} sequences; {} identifiers; {} annotations", orgsAdded, seqsAdded, identsAdded, annotsAdded);
         _getCurrentInsertStats.setInt(1, getCurrentInsertId());
 
         int priorseqs;
@@ -512,13 +508,7 @@ public class uniprot extends ParseActions
         _updateInsertion.executeUpdate();
         //conn.commit();
 
-        _log.info(
-                "Added: " +
-                        orgsAdded + " organisms; " +
-                        seqsAdded + " sequences; " +
-                        identsAdded + " identifiers; " +
-                        annotsAdded + " annotations"
-        );
+        _log.info("Added: {} organisms; {} sequences; {} identifiers; {} annotations", orgsAdded, seqsAdded, identsAdded, annotsAdded);
     }
 
     public int insertOrganisms(ParseContext context, Connection conn) throws SQLException
@@ -527,7 +517,7 @@ public class uniprot extends ParseActions
         _addOrg.setTimestamp(6, new Timestamp(new Date().getTime()));
 
         //Add current mouthful of Organisms
-        _log.debug((new java.util.Date()) + " Processing organisms");
+        _log.debug("{} Processing organisms", new Date());
 
         // All organism records.  Each one is a HashMap
         for (UniprotOrganism curOrg : context.getOrganisms())
@@ -592,7 +582,7 @@ public class uniprot extends ParseActions
         _addSeq.setTimestamp(13, new Timestamp(new Date().getTime()));
 
         //Process current mouthful of sequences
-        _log.debug(new java.util.Date() + " Processing sequences");
+        _log.debug("{} Processing sequences", new Date());
         for (UniprotSequence curSeq : context.getSequences())
         {
             transactionCount++;
@@ -703,7 +693,7 @@ public class uniprot extends ParseActions
         int transactionCount = 0;
 
         // Process current mouthful of identifiers
-        _log.debug(new java.util.Date() + " Processing identifiers");
+        _log.debug("{} Processing identifiers", new Date());
         _addIdent.setTimestamp(6, new java.sql.Timestamp(new java.util.Date().getTime()));
         for (UniprotIdentifier curIdent : context.getIdentifiers())
         {
@@ -733,7 +723,7 @@ public class uniprot extends ParseActions
         conn.commit();
         _addIdent.clearBatch();
 
-        _log.debug("Starting to create indices on " + _iTableName);
+        _log.debug("Starting to create indices on {}", _iTableName);
         executeUpdate("create index iIdentifier on " + _iTableName + "(Identifier)", conn);
         executeUpdate("create index iIdenttype on " + _iTableName + "(IdentType)", conn);
         executeUpdate("create index iSpeciesGenusHash on " + _iTableName + "(Species, Genus, Hash)", conn);
@@ -753,7 +743,7 @@ public class uniprot extends ParseActions
         {
             // Clear these after the annotations that reference them have already been deleted
             int identifiersDeleted = executeUpdate(_clearExistingIdentifiersCommand, conn, "DeleteExistingIdents");
-            _log.debug("Deleted " + identifiersDeleted + " existing identifiers");
+            _log.debug("Deleted {} existing identifiers", identifiersDeleted);
         }
 
         int result = executeUpdate(_insertIntoIdentsCommand, conn, "InsertIntoIdents");
@@ -767,7 +757,7 @@ public class uniprot extends ParseActions
         long startTime = System.currentTimeMillis();
         int result = executeUpdate(sql, conn);
         long totalTime = System.currentTimeMillis() - startTime;
-        _log.debug(description + " took " + totalTime + " milliseconds");
+        _log.debug("{} took {} milliseconds", description, totalTime);
         return result;
     }
 
@@ -795,7 +785,7 @@ public class uniprot extends ParseActions
 
         _addAnnot.setTimestamp(10, new java.sql.Timestamp(new java.util.Date().getTime()));
         transactionCount++;
-        _log.debug(new java.util.Date() + " Processing annotations");
+        _log.debug("{} Processing annotations", new Date());
         for (UniprotAnnotation curAnnot : context.getAnnotations())
         {
             String annotVal = curAnnot.getAnnotVal();
@@ -852,7 +842,7 @@ public class uniprot extends ParseActions
         handleThreadStateChangeRequests();
         _addAnnot.clearBatch();
 
-        _log.debug("Starting to create indices on " + _aTableName);
+        _log.debug("Starting to create indices on {}", _aTableName);
         executeUpdate("create index aAnnot_val on " + _aTableName + "(Annot_Val)", conn);
         executeUpdate("create index aAnnotType on " + _aTableName + "(AnnotType)", conn);
         executeUpdate("create index aHashGenusSpecies on " + _aTableName + "(Hash, Genus, Species)", conn);
@@ -867,7 +857,7 @@ public class uniprot extends ParseActions
         if (context.isClearExisting())
         {
             int annotationsDeleted = executeUpdate(_clearExistingAnnotationsCommand, conn, "DeleteExistingAnnots");
-            _log.debug("Deleted " + annotationsDeleted + " existing annotations.");
+            _log.debug("Deleted {} existing annotations.", annotationsDeleted);
         }
 
         return context.getAnnotations().size();

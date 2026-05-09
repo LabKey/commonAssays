@@ -17,7 +17,6 @@ package org.labkey.nab.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayDomainKind;
-import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.PropertyStorageSpec;

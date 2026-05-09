@@ -164,12 +164,12 @@ public abstract class MS2Importer
                     }
                     else
                     {
-                        _log.info("Restarting import from " + _fileName);
+                        _log.info("Restarting import from {}", _fileName);
                     }
                 }
                 else
                 {
-                    _log.info("Starting import from " + _fileName);
+                    _log.info("Starting import from {}", _fileName);
                     _runId = createRun();
                 }
             }
@@ -188,7 +188,7 @@ public abstract class MS2Importer
         // Skip if run was already fully imported
         if (info.isAlreadyImported() && run != null && run.getStatusId() == MS2Importer.STATUS_SUCCESS)
         {
-            _log.info(_fileName + " has already been imported so it does not need to be imported again");
+            _log.info("{} has already been imported so it does not need to be imported again", _fileName);
             return run;
         }
 
@@ -318,9 +318,9 @@ public abstract class MS2Importer
         // Old Comet runs won't have an mzXmlFile
         if (null != file && isMzXmlFile(file))
         {
-            _log.info("Starting to parse " + file + " to get scan counts");
+            _log.info("Starting to parse {} to get scan counts", file);
             int totalScans = loadScanCounts(file, fraction);
-            _log.info("Finished parsing to get scan counts. Total: " + totalScans + ", MS1: " + fraction.getMS1ScanCount() + ", MS2: " + fraction.getMS2ScanCount() + ", MS3: " + fraction.getMS3ScanCount() + ", MS4:" + fraction.getMS4ScanCount());
+            _log.info("Finished parsing to get scan counts. Total: {}, MS1: {}, MS2: {}, MS3: {}, MS4:{}", totalScans, fraction.getMS1ScanCount(), fraction.getMS2ScanCount(), fraction.getMS3ScanCount(), fraction.getMS4ScanCount());
 
             fraction.setMzXmlURL(FileUtil.resolveFile(FileUtil.getAbsoluteCaseSensitiveFile(file.toNioPathForRead().toFile())).toPath().toUri().toString());
 
@@ -597,28 +597,28 @@ public abstract class MS2Importer
             for (int fastaId : run.getFastaIds())
             {
                 int rowCount = executor.execute(_updateSeqIdSql, fraction.getFraction(), fastaId);
-                _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on exact protein name match for FASTA id " + fastaId);
+                _log.info("Set SeqId values for {} peptides{} based on exact protein name match for FASTA id {}", rowCount, fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount), fastaId);
             }
 
             for (int fastaId : run.getFastaIds())
             {
                 assert 3 == StringUtils.countMatches(_updateSwissProtSeqIdSql,"?");
                 int rowCount = executor.execute(_updateSwissProtSeqIdSql, fastaId, fastaId, fraction.getFraction());
-                _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on protein identifier match from SwissProt database for FASTA id " + fastaId);
+                _log.info("Set SeqId values for {} peptides{} based on protein identifier match from SwissProt database for FASTA id {}", rowCount, fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount), fastaId);
             }
 
             for (int fastaId : run.getFastaIds())
             {
                 assert 3 == StringUtils.countMatches(_updateSeqIdEndOfLookupStringSql, "?");
                 int rowCount = executor.execute(_updateSeqIdEndOfLookupStringSql, fraction.getFraction(), fastaId, fraction.getFraction());
-                _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on trailing FASTA header line for FASTA id " + fastaId);
+                _log.info("Set SeqId values for {} peptides{} based on trailing FASTA header line for FASTA id {}", rowCount, fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount), fastaId);
             }
 
             for (int fastaId : run.getFastaIds())
             {
                 assert 2 == StringUtils.countMatches(_updateSpPrefixSeqIdSql, "?");
                 int rowCount = executor.execute(_updateSpPrefixSeqIdSql, fraction.getFraction(), fastaId);
-                _log.info("Set SeqId values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)) + " based on 'sp|' prefix name match for FASTA id " + fastaId);
+                _log.info("Set SeqId values for {} peptides{} based on 'sp|' prefix name match for FASTA id {}", rowCount, fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount), fastaId);
             }
 
             // Disabled because this is a very slow query, and seldom adds enough new matches to be worth the hours it takes
@@ -641,7 +641,7 @@ public abstract class MS2Importer
             SQLFragment sqlf = new SQLFragment(_updateSequencePositionSql);
             sqlf.set(sqlf.getParams().size()-1,fraction.getFraction());
             int rowCount = executor.execute(sqlf);
-            _log.info("Set SequencePosition values for " + rowCount + " peptides" + (fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount)));
+            _log.info("Set SequencePosition values for {} peptides{}", rowCount, fractionCount == 1 ? "" : (" for fraction " + ++i + " of " + fractionCount));
         }
     }
 
@@ -856,7 +856,7 @@ public abstract class MS2Importer
 
             if (null != percent)
             {
-                _log.info("Importing MS/MS results is " + percent + "% complete");
+                _log.info("Importing MS/MS results is {}% complete", percent);
                 updateRunStatus("Importing is " + percent + "% complete");
             }
         }

@@ -1464,7 +1464,7 @@ public class MS2Controller extends SpringActionController
             if (sequences.size() == 1)
             {
                 ActionURL proteinUrl = targetURL.clone();
-                proteinUrl.addParameter(PeptideFilteringFormElements.targetSeqIds, proteins.get(0).getSeqId());
+                proteinUrl.addParameter(PeptideFilteringFormElements.targetSeqIds, proteins.getFirst().getSeqId());
                 throw new RedirectException(proteinUrl);
             }
 

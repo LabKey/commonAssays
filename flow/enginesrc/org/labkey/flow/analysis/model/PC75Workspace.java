@@ -103,7 +103,7 @@ public class PC75Workspace extends PCWorkspace
 
         if (axes.size() == 1)
         {
-            return new IntervalGate(axes.get(0), lstMin.get(0), lstMax.get(0));
+            return new IntervalGate(axes.getFirst(), lstMin.getFirst(), lstMax.getFirst());
         }
         else if (axes.size() == 2)
         {
@@ -137,7 +137,7 @@ public class PC75Workspace extends PCWorkspace
             return null;
         }
 
-        Element elChild = elChildren.get(0);
+        Element elChild = elChildren.getFirst();
         boolean invert = inverted(elChild);
 
         Gate gate = readGate(elGate);

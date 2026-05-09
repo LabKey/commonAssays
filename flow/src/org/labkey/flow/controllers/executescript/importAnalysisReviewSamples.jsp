@@ -102,7 +102,7 @@
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
     var samples = <%=new JSONArray(samples)%>;
     var groups = <%=new JSONObject(groups)%>;
-    var importedGroup = <%=q(!form.getImportGroupNames().isEmpty() ? form.getImportGroupNameList().get(0) : "All Samples")%>;
+    var importedGroup = <%=q(!form.getImportGroupNames().isEmpty() ? form.getImportGroupNameList().getFirst() : "All Samples")%>;
 </script>
 
 <%

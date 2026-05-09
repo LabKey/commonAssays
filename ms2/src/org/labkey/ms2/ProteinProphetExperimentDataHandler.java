@@ -51,7 +51,7 @@ public class ProteinProphetExperimentDataHandler extends AbstractExperimentDataH
     {
         if (context.getJob() != null && "false".equalsIgnoreCase(context.getJob().getParameters().get(IMPORT_PROPHET_RESULTS)))
         {
-            log.info("Skipping import of file " + dataFile);
+            log.info("Skipping import of file {}", dataFile);
             return;
         }
 

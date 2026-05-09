@@ -89,12 +89,10 @@ public class ChooseRunsView extends FlowQueryView
     @Override
     protected ActionURL urlFor(QueryAction action)
     {
-        switch (action)
+        return switch (action)
         {
-            case exportRowsExcel:
-            case exportRowsTsv:
-                return null;
-        }
-        return super.urlFor(action);
+            case exportRowsExcel, exportRowsTsv -> null;
+            default -> super.urlFor(action);
+        };
     }
 }

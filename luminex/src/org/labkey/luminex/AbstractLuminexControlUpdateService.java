@@ -118,7 +118,7 @@ public abstract class AbstractLuminexControlUpdateService<Type extends AbstractL
 
         Object[] keys = new Object[2];
 
-        boolean analyteFirst = _rawTable.getPkColumnNames().get(0).equalsIgnoreCase("AnalyteId");
+        boolean analyteFirst = _rawTable.getPkColumnNames().getFirst().equalsIgnoreCase("AnalyteId");
         keys[0] = analyteFirst ? oldKey.getKey() : oldKey.getValue();
         keys[1] = analyteFirst ? oldKey.getValue() : oldKey.getKey();
 

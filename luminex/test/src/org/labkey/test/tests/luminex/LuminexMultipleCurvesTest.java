@@ -315,20 +315,12 @@ public final class LuminexMultipleCurvesTest extends LuminexTest
 
     private Locator getWellRoleCheckboxLoc(String description, WellRole role)
     {
-        Locator loc = null;
-        switch(role)
+        return switch (role)
         {
-            case STANDARD:
-                loc = Locator.checkboxByName("_titrationRole_standard_"+ description);
-                break;
-            case QC_CONTROL:
-                loc = Locator.checkboxByName("_titrationRole_qccontrol_"+ description);
-                break;
-            case OTHER_CONTROL:
-                loc = Locator.checkboxByName("_titrationRole_othercontrol_"+description);
-                break;
-        }
-        return loc;
+            case STANDARD -> Locator.checkboxByName("_titrationRole_standard_" + description);
+            case QC_CONTROL -> Locator.checkboxByName("_titrationRole_qccontrol_" + description);
+            case OTHER_CONTROL -> Locator.checkboxByName("_titrationRole_othercontrol_" + description);
+        };
     }
 
     private Set<Locator> getAllWellRoleLocForDesc(String description)

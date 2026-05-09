@@ -94,7 +94,7 @@ public class PlotTests extends Assert
             throw new RuntimeException("Found duplicate samples for '" + fcsFile.getName() + "'");
         if (samples.isEmpty())
             throw new RuntimeException("No sample found for '" + fcsFile.getName() + "'");
-        Workspace.SampleInfo sample = samples.get(0);
+        Workspace.SampleInfo sample = samples.getFirst();
         Analysis analysis = workspace.getSampleAnalysis(sample);
         CompensationMatrix comp = sample.getCompensationMatrix();
 

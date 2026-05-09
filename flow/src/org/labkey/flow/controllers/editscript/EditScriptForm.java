@@ -118,7 +118,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
         {
             analysisDocument = flowObject.getAnalysisScriptDocument();
         }
-        catch (Exception e)
+        catch (Exception _)
         {
 
         }
@@ -198,10 +198,10 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
         }
         try
         {
-            List matrices = FlowCompensationMatrix.getCompensationMatrices(getContainer());
+            List<FlowCompensationMatrix> matrices = FlowCompensationMatrix.getCompensationMatrices(getContainer());
             if (matrices.isEmpty())
                 return null;
-            _comp = (FlowCompensationMatrix) matrices.get(0);
+            _comp = matrices.getFirst();
         }
         catch (Throwable t)
         {
@@ -268,7 +268,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
                 }
                 catch(FileNotFoundException e)
                 {
-                    _log.warn("Error opening file " + wells[i].getFCSURI(), e);
+                    _log.warn("Error opening file {}", wells[i].getFCSURI(), e);
                 }
             }
             catch(Exception e)

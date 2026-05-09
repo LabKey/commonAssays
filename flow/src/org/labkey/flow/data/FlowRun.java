@@ -174,12 +174,12 @@ public class FlowRun extends FlowObject<ExpRun>
         List<? extends ExpData> outputs = getExperimentRun().getOutputDatas(FlowDataType.CompensationMatrix);
         if (!outputs.isEmpty())
         {
-            return new FlowCompensationMatrix(outputs.get(0));
+            return new FlowCompensationMatrix(outputs.getFirst());
         }
         List<? extends ExpData> datas = getExperimentRun().getInputDatas(InputRole.CompensationMatrix.toString(), ExpProtocol.ApplicationType.ExperimentRun);
         if (datas.isEmpty())
             return null;
-        return new FlowCompensationMatrix(datas.get(0));
+        return new FlowCompensationMatrix(datas.getFirst());
     }
     
     public long getRunId()
@@ -237,7 +237,7 @@ public class FlowRun extends FlowObject<ExpRun>
         List<? extends ExpData> datas = getExperimentRun().getInputDatas(InputRole.AnalysisScript.toString(), ExpProtocol.ApplicationType.ExperimentRun);
         if (datas.isEmpty())
             return 0;
-        return datas.get(0).getRowId();
+        return datas.getFirst().getRowId();
     }
 
     public FlowScript getScript()
@@ -245,7 +245,7 @@ public class FlowRun extends FlowObject<ExpRun>
         List<? extends ExpData> datas = getExperimentRun().getInputDatas(InputRole.AnalysisScript.toString(), ExpProtocol.ApplicationType.ExperimentRun);
         if (datas.isEmpty())
             return null;
-        return (FlowScript) FlowDataObject.fromData(datas.get(0));
+        return (FlowScript) FlowDataObject.fromData(datas.getFirst());
     }
 
     public String getPath()
@@ -280,7 +280,7 @@ public class FlowRun extends FlowObject<ExpRun>
         List<? extends ExpData> datas = getExperimentRun().getInputDatas(InputRole.Workspace.toString(), ExpProtocol.ApplicationType.ExperimentRun);
         if (datas.isEmpty())
             return null;
-        return (FlowWorkspace) FlowDataObject.fromData(datas.get(0));
+        return (FlowWorkspace) FlowDataObject.fromData(datas.getFirst());
     }
 
     public ActionURL getDownloadWorkspaceURL()
@@ -318,12 +318,6 @@ public class FlowRun extends FlowObject<ExpRun>
     }
 
     @Override
-    public String getLabel()
-    {
-        return getName();
-    }
-
-    @Override
     public FlowObject getParent()
     {
         return getExperiment();
@@ -335,7 +329,7 @@ public class FlowRun extends FlowObject<ExpRun>
         if (experiments.isEmpty())
             return null;
 
-        return new FlowExperiment(experiments.get(0));
+        return new FlowExperiment(experiments.getFirst());
     }
 
     static public List<FlowRun> getRunsForContainer(Container container, FlowProtocolStep step)

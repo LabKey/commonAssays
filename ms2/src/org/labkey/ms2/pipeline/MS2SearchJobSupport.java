@@ -17,8 +17,6 @@ package org.labkey.ms2.pipeline;
 
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
-
 /**
  * Interface for support required from the PipelineJob to run a search task,
  * beyond the base PipelineJob methods.

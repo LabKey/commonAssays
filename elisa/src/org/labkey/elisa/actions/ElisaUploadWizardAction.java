@@ -48,7 +48,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.ServletException;
-import java.sql.SQLException;
+
 import java.util.Collections;
 import java.util.Map;
 
@@ -93,7 +93,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
             }
 
             @Override
-            public boolean executeStep(ElisaRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+            public boolean executeStep(ElisaRunUploadForm form, BindException errors) throws ServletException, ExperimentException
             {
                 form.setSampleProperties(_postedSampleProperties);
                 for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
@@ -227,7 +227,7 @@ public class ElisaUploadWizardAction extends PlateBasedUploadWizardAction<ElisaR
         }
 
         @Override
-        public boolean executeStep(ElisaRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public boolean executeStep(ElisaRunUploadForm form, BindException errors)
         {
             try
             {

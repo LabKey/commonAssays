@@ -62,7 +62,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
         wrapAllColumns(true);
 
         assert getRealTable().getPkColumnNames().size() == 1;
-        var analytesColumn = wrapColumn("Analytes", getRealTable().getColumn(getRealTable().getPkColumnNames().get(0)));
+        var analytesColumn = wrapColumn("Analytes", getRealTable().getColumn(getRealTable().getPkColumnNames().getFirst()));
         analytesColumn.setKeyField(false);
         analytesColumn.setUserEditable(true);
         analytesColumn.setReadOnly(false);
@@ -147,7 +147,7 @@ public abstract class AbstractExclusionTable extends AbstractLuminexTable
 
         protected Integer getPKValue(Map<String, Object> rowMap)
         {
-            return convertToInteger(rowMap.get(getQueryTable().getPkColumnNames().get(0)));
+            return convertToInteger(rowMap.get(getQueryTable().getPkColumnNames().getFirst()));
         }
 
         @Override

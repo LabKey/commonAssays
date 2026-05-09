@@ -72,25 +72,25 @@ public class ViabilitySpecimenChangeListener implements SpecimenChangeListener
             ExpProtocol protocol = ExperimentService.get().getExpProtocol(protocolId);
             if (protocol == null)
             {
-                logger.warn("No assay protocol found for id '" + protocolId + "'");
+                logger.warn("No assay protocol found for id '{}'", protocolId);
                 continue;
             }
 
             AssayProvider provider = AssayService.get().getProvider(protocol);
             if (provider == null)
             {
-                logger.warn("No assay provider found for protocol '" + protocol.getName() + "");
+                logger.warn("No assay provider found for protocol '{}", protocol.getName());
                 continue;
             }
 
             if (!(provider instanceof ViabilityAssayProvider))
             {
-                logger.warn("Expected viability assay provider for assay '" + provider.getName() + "'");
+                logger.warn("Expected viability assay provider for assay '{}'", provider.getName());
                 continue;
             }
 
             Container protocolContainer = protocol.getContainer();
-            logger.info("Updating specimens aggregates for viability assay '" + provider.getName() + "', container='" + protocolContainer + "'");
+            logger.info("Updating specimens aggregates for viability assay '{}', container='{}'", provider.getName(), protocolContainer);
             ViabilityManager.updateSpecimenAggregates(user, protocolContainer, provider, protocol, null);
         }
     }

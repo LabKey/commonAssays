@@ -16,8 +16,8 @@
 package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.flow.analysis.web.SubsetExpression;
 import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.flow.persist.AttributeSet;
@@ -193,7 +193,7 @@ public abstract class Workspace extends BaseWorkspace<Workspace.SampleInfo> impl
                 }
 
                 @Override
-                public void write(byte[] bytes, int off, int l)
+                public void write(byte @NotNull [] bytes, int off, int l)
                 {
                     len[0] += l;
                 }
@@ -595,7 +595,7 @@ public abstract class Workspace extends BaseWorkspace<Workspace.SampleInfo> impl
             }
             if (_compensationMatrices.size() == 1)
             {
-                return _compensationMatrices.get(0);
+                return _compensationMatrices.getFirst();
             }
             if (_compensationMatrices.size() < id)
             {

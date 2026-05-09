@@ -218,7 +218,7 @@ public class CompareProteinProphetTableInfo extends SequencesTableInfo<MS2Schema
         ColumnInfo result = super.resolveColumn(name);
         if (result == null && "Run".equalsIgnoreCase(name) && !_runs.isEmpty())
         {
-            result = getColumn("Run" + _runs.get(0).getRun());
+            result = getColumn("Run" + _runs.getFirst().getRun());
         }
         return result;
     }

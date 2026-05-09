@@ -76,7 +76,7 @@ public class FlowAnalyzer
             group = new Analysis();
         }
         CompensationMatrix matrix = comp == null ? null : comp.getCompensationMatrix();
-        return FCSAnalyzer.get().generateGraphs(getFCSUri(well), matrix, group, Collections.singletonList(graph)).get(0);
+        return FCSAnalyzer.get().generateGraphs(getFCSUri(well), matrix, group, Collections.singletonList(graph)).getFirst();
     }
 
     static public Map<String, String> getParameters(FlowWell well) throws Exception

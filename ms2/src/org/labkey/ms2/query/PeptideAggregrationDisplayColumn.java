@@ -136,12 +136,11 @@ public abstract class PeptideAggregrationDisplayColumn extends SimpleDisplayColu
         if (!_loggedError)
         {
             _loggedError = true;
-            LOG.warn("For column '" + getName() + "', " + message);
+            LOG.warn("For column '{}', {}", getName(), message);
         }
     }
 
-    protected abstract Object calculateValue(RenderContext ctx, List<String> peptides)
-            throws SQLException;
+    protected abstract Object calculateValue(RenderContext ctx, List<String> peptides);
 
     @Override
     public void addQueryColumns(Set<ColumnInfo> set)

@@ -83,7 +83,7 @@ public class Q3AnalysisSummary extends RelativeQuantAnalysisSummary
         }
         catch (NumberFormatException e)
         {
-            _log.warn("Error parsing mass tolerance " + massTol + "; using default");
+            _log.warn("Error parsing mass tolerance {}; using default", massTol);
         }
         return DEFAULT_MASSTOL;
     }

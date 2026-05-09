@@ -158,7 +158,7 @@ public class WellController extends BaseFlowController
 
     protected String[] getKeywordIntersection(List<FlowWell> wells, boolean filterHiddenKeywords)
     {
-        Set<String> intersection = new HashSet<>(wells.get(0).getKeywords().keySet());
+        Set<String> intersection = new HashSet<>(wells.getFirst().getKeywords().keySet());
 
         for (FlowWell well : wells)
         {
@@ -351,7 +351,7 @@ public class WellController extends BaseFlowController
             {
                 return new ActionURL(form.editWellReturnUrl);
             }
-            return form.getWells().get(0).urlFor(ShowWellAction.class);
+            return form.getWells().getFirst().urlFor(ShowWellAction.class);
         }
 
         @Override
@@ -366,7 +366,7 @@ public class WellController extends BaseFlowController
             }
             FlowWell well = null;
             if (_wells != null && !_wells.isEmpty())
-                well = _wells.get(0);
+                well = _wells.getFirst();
             String label =  null != well ? "Edit " + well.getLabel() : "Well not found";
             addFlowNavTrail(getPageConfig(), root, well, label);
         }

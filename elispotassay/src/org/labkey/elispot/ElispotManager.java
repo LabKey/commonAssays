@@ -116,7 +116,7 @@ public class ElispotManager
     {
         List<RunDataRow> runDataRows = new TableSelector(getTableInfoElispotRunData(), filter, null).getArrayList(RunDataRow.class);
         if (!runDataRows.isEmpty())
-            return runDataRows.get(0);
+            return runDataRows.getFirst();
         return null;
     }
 

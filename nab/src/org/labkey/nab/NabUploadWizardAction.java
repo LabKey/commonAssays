@@ -37,7 +37,7 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
 
 import jakarta.servlet.ServletException;
-import java.sql.SQLException;
+
 import java.util.Map;
 
 @RequiresPermission(InsertPermission.class)
@@ -116,7 +116,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
         }
 
         @Override
-        public boolean executeStep(NabRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public boolean executeStep(NabRunUploadForm form, BindException errors) throws ServletException, ExperimentException
         {
             execute(form, errors, _postedVirusProperties);
             execute(form, errors, _postedSampleProperties);

@@ -109,7 +109,7 @@
     }
     if (!steps.isEmpty() && !steps.contains(step))
     {
-        step = steps.get(0);
+        step = steps.getFirst();
     }
 %>
 <form>

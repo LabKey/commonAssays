@@ -125,7 +125,7 @@ public class SamplesConfirmGridView extends GridView
             }
             else
             {
-                LOG.warn("Ignoring duplicate columns for FieldKey '" + fieldKey + "', got: '" + col.getName() + "' and '" + columns.get(fieldKey).getName() + "'");
+                LOG.warn("Ignoring duplicate columns for FieldKey '{}', got: '{}' and '{}'", fieldKey, col.getName(), columns.get(fieldKey).getName());
             }
         }
         // these are "fake" columns (set fake aliases)

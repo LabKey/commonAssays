@@ -116,7 +116,7 @@ public class HistPlot extends XYPlot
 
         if (_gates.size() == 1)
         {
-            Range gate = _gates.get(0);
+            Range gate = _gates.getFirst();
             int min = (int) getDomainAxis().valueToJava2D(gate.getLowerBound(), dataArea, getDomainAxisEdge());
             int max = (int) getDomainAxis().valueToJava2D(gate.getUpperBound(), dataArea, getDomainAxisEdge());
             g2.drawLine(min, (int) dataArea.getMinY(), min + 1, (int) dataArea.getMaxY());

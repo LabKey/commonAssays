@@ -150,8 +150,8 @@ public class MacWorkspace extends FlowJoWorkspace
     protected Gate readBoolean(SubsetSpec parentSubset, String name, Element elBooleanGate)
     {
         String specification = elBooleanGate.getAttribute("specification");
-        Element elGatePaths = getElementsByTagName(elBooleanGate, "GatePaths").get(0);
-        Element elStringArray = getElementsByTagName(elGatePaths, "StringArray").get(0);
+        Element elGatePaths = getElementsByTagName(elBooleanGate, "GatePaths").getFirst();
+        Element elStringArray = getElementsByTagName(elGatePaths, "StringArray").getFirst();
         List<Element> nlStrings = getElementsByTagName(elStringArray, "String");
 
         int count = 0;
