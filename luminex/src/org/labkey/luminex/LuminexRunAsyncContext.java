@@ -17,6 +17,8 @@ package org.labkey.luminex;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.simple.SimpleLogger;
 import org.apache.logging.log4j.util.PropertiesUtil;
 import org.junit.Assert;
@@ -282,9 +284,9 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             }
 
             @Override
-            public void info(String message)
+            public void logMessage(String fqcn, Level level, Marker marker, Message message, Throwable throwable)
             {
-                sb.append(message);
+                sb.append(message.getFormattedMessage());
                 sb.append("\n");
             }
 
