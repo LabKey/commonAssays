@@ -461,7 +461,7 @@ public class MascotClientImpl implements SearchClient
         }
         catch (IOException e)
         {
-            getLogger().warn("Encounter exception after reading {} byte(s)", sb.length(), e);
+            getLogger().warn("Encountered exception after reading {} byte(s)", sb.length(), e);
         }
 
         return sb.toString();
