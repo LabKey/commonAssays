@@ -35,7 +35,7 @@ public class RealNumberParamsValidator implements IParamsValidator
         String value = spp.getValue();
         if (value == null)
         {
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a real number(" + value + ").\n";
+            parserError = spp.getInputXmlLabels().getFirst() + ", " + "this value must be a real number(" + value + ").\n";
             return parserError;
         }
         try
@@ -44,7 +44,7 @@ public class RealNumberParamsValidator implements IParamsValidator
         }
         catch (NumberFormatException e)
         {
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a real number(" + value + ").\n";
+            parserError = spp.getInputXmlLabels().getFirst() + ", " + "this value must be a real number(" + value + ").\n";
             return parserError;
         }
         return parserError;

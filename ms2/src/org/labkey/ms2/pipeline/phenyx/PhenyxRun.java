@@ -31,8 +31,7 @@ public class PhenyxRun extends MS2Run
     @Override
     public void adjustScores(Map<String, String> map)
     {
-        if (null == map.get("bogus"))
-            map.put("bogus", "87");  // TODO: Get rid of this
+        map.putIfAbsent("bogus", "87");  // TODO: Get rid of this
     }
 
     @Override

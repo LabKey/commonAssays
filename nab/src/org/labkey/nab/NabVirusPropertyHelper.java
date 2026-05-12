@@ -56,7 +56,7 @@ public class NabVirusPropertyHelper extends PlateSamplePropertyHelper
         {
             // because of the optimization to display a single virus in the insert view, we need to
             // pull the posted values from the request instead of using the property helper
-            String virusGroupName = (_sampleNames.size() == 1) ? _sampleNames.get(0) : null;
+            String virusGroupName = (_sampleNames.size() == 1) ? _sampleNames.getFirst() : null;
 
             Map<String, Map<DomainProperty, String>> result = new LinkedHashMap<>();
             Map<DomainProperty, String> sampleProperties = new HashMap<>();

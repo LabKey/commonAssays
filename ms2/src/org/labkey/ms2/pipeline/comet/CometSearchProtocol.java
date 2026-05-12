@@ -62,9 +62,9 @@ public class CometSearchProtocol extends AbstractMS2SearchProtocol<CometPipeline
         if(dbNames.isEmpty())
             throw new IllegalArgumentException("A sequence database must be selected.");
 
-        FileLike fileSequenceDB = getDirSeqRoot().resolveFile(Path.parse(dbNames.get(0)));
+        FileLike fileSequenceDB = getDirSeqRoot().resolveFile(Path.parse(dbNames.getFirst()));
         if (!fileSequenceDB.exists())
-            throw new IllegalArgumentException("Sequence database '" + dbNames.get(0) + "' is not found in local FASTA root.");
+            throw new IllegalArgumentException("Sequence database '" + dbNames.getFirst() + "' is not found in local FASTA root.");
 
         super.validate(root);
     }

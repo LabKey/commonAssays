@@ -248,7 +248,7 @@ public final class SAX2ScanHandler extends DefaultHandler
 
 	/** Characters. */
 	@Override
-    public void characters(char ch[], int start, int length)
+    public void characters(char[] ch, int start, int length)
     {
 		if (inPeak)
 		{
@@ -261,7 +261,7 @@ public final class SAX2ScanHandler extends DefaultHandler
 
 	/** Ignorable whitespace. */
 	@Override
-    public void ignorableWhitespace(char ch[], int start, int length)
+    public void ignorableWhitespace(char[] ch, int start, int length)
     {
 		// Do nothing
 	} // ignorableWhitespace(char[],int,int);

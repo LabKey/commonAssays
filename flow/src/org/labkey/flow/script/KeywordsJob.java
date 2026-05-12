@@ -30,7 +30,6 @@ import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowScript;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

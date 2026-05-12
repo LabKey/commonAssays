@@ -159,7 +159,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
                 List<ExperimentException> errors = new ArrayList<>();
                 List<double[][]> values = parseList(dataFile, rows, LOCATION_COLUMNN_HEADER, resultColumnHeader, 0, expectedRows, expectedCols, errors);
                 if (!errors.isEmpty())
-                    throw errors.get(0);
+                    throw errors.getFirst();
                 if (values != null && !values.isEmpty())
                     return values;
             }
@@ -179,7 +179,7 @@ public abstract class HighThroughputNabDataHandler extends NabDataHandler implem
     {
         List<WellData> wells = new ArrayList<>();
         // All well groups use the same plate template, so it's okay to just check the dilution direction of the first group:
-        boolean reverseDirection = Boolean.parseBoolean((String) groups.get(0).getProperty(SampleProperty.ReverseDilutionDirection.name()));
+        boolean reverseDirection = Boolean.parseBoolean((String) groups.getFirst().getProperty(SampleProperty.ReverseDilutionDirection.name()));
 
         Map<PropertyDescriptor,Object> sampleProperties = sampleInput.getPropertyValues();
 

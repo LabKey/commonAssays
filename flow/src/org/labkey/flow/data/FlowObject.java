@@ -17,6 +17,7 @@
 package org.labkey.flow.data;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
@@ -270,7 +271,7 @@ abstract public class FlowObject<T extends ExpObject> implements Comparable<Obje
     }
 
     @Override
-    public int compareTo(Object o)
+    public int compareTo(@NotNull Object o)
     {
         if (!(o instanceof FlowObject))
             return 0;

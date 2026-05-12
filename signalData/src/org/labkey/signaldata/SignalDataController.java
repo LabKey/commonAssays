@@ -183,7 +183,7 @@ public class SignalDataController extends SpringActionController
                                 props.put("FilePath", path);
                                 props.put("FileName", fileName);
                                 results.add(props);
-                                for (Map.Entry<String, Object> entry : rows.get(0).entrySet())
+                                for (Map.Entry<String, Object> entry : rows.getFirst().entrySet())
                                 {
                                     Object value = entry.getValue();
                                     if (null != value)

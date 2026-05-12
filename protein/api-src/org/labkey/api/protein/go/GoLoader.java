@@ -119,7 +119,7 @@ public abstract class GoLoader implements Closeable
             return null;
     }
 
-    protected abstract InputStream getInputStream() throws IOException, ServletException;
+    protected abstract InputStream getInputStream() throws IOException;
 
     public void load()
     {
@@ -266,7 +266,7 @@ public abstract class GoLoader implements Closeable
                             if (s.length() > limit)
                             {
                                 val = s.substring(0, column.getScale());
-                                _log.warn(ti + ": value in " + cols[kindex] + " column in row " + (orgLineCount + 1) + " truncated from " + s.length() + " to " + limit + " characters.");
+                                _log.warn("{}: value in {} column in row {} truncated from {} to {} characters.", ti, cols[kindex], orgLineCount + 1, s.length(), limit);
                             }
                         }
                     }

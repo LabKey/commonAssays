@@ -144,7 +144,7 @@ public class WellExclusionTable extends AbstractExclusionTable
         List<FieldKey> defaultCols = new ArrayList<>(getDefaultVisibleColumns());
         defaultCols.remove(FieldKey.fromParts("ModifiedBy"));
         defaultCols.remove(FieldKey.fromParts("Modified"));
-        defaultCols.add(0, FieldKey.fromParts("DataId", "Run"));
+        defaultCols.addFirst(FieldKey.fromParts("DataId", "Run"));
         setDefaultVisibleColumns(defaultCols);
     }
 

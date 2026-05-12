@@ -55,7 +55,7 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.servlet.ModelAndView;
 
 import jakarta.servlet.ServletException;
-import java.sql.SQLException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -327,7 +327,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         }
 
         @Override
-        public boolean executeStep(ElispotRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public boolean executeStep(ElispotRunUploadForm form, BindException errors) throws ServletException, ExperimentException
         {
             form.setSampleProperties(_postedSampleProperties);
             for (Map.Entry<String, Map<DomainProperty, String>> entry : _postedSampleProperties.entrySet())
@@ -352,7 +352,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         }
 
         @Override
-        public ModelAndView getNextStep(ElispotRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public ModelAndView getNextStep(ElispotRunUploadForm form, BindException errors) throws ExperimentException
         {
             if (form.isResetDefaultValues() || errors.hasErrors())
                 return getRunPropertiesView(form, !form.isResetDefaultValues(), false, errors);
@@ -392,7 +392,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         }
 
         @Override
-        public boolean executeStep(ElispotRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public boolean executeStep(ElispotRunUploadForm form, BindException errors) throws ServletException, ExperimentException
         {
             form.setAntigenProperties(_postedAntigenProperties);
 
@@ -413,7 +413,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         }
 
         @Override
-        public ModelAndView getNextStep(ElispotRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public ModelAndView getNextStep(ElispotRunUploadForm form, BindException errors) throws ExperimentException
         {
             String detectionMethod = form.getProvider().getSelectedDetectionMethod(form.getContainer(), form.getProtocol());
             boolean isLastStep = (detectionMethod == null || detectionMethod.equals(ElispotAssayProvider.DetectionMethodType.COLORIMETRIC.getLabel()));
@@ -459,7 +459,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         }
 
         @Override
-        public boolean executeStep(ElispotRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public boolean executeStep(ElispotRunUploadForm form, BindException errors) throws ServletException, ExperimentException
         {
             PlateSamplePropertyHelper helper = form.getProvider().getSamplePropertyHelper(form,
                     getSelectedParticipantVisitResolverType(form.getProvider(), form));
@@ -479,7 +479,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
         }
 
         @Override
-        public ModelAndView getNextStep(ElispotRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public ModelAndView getNextStep(ElispotRunUploadForm form, BindException errors) throws ExperimentException
         {
             if (form.isResetDefaultValues() || errors.hasErrors())
                 return getAnalyteView(form, true, errors);
@@ -508,7 +508,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                     throw new ExperimentException("Elispot should only upload a single file per run.");
 
                 Plate template = provider.getPlate(form.getContainer(), form.getProtocol());
-                Map<PlateInfo, Plate> plates = Collections.EMPTY_MAP;
+                Map<PlateInfo, Plate> plates = Collections.emptyMap();
                 PlateReader reader = null;
 
                 // populate property name to value map
@@ -519,7 +519,7 @@ public class ElispotUploadWizardAction extends UploadWizardAction<ElispotRunUplo
                 if (runPropMap.containsKey(ElispotAssayProvider.READER_PROPERTY_NAME))
                 {
                     reader = provider.getPlateReader(runPropMap.get(ElispotAssayProvider.READER_PROPERTY_NAME));
-                    plates = ElispotDataHandler.initializePlates(form.getProtocol(), data.get(0).getFileLike(), template, reader);
+                    plates = ElispotDataHandler.initializePlates(form.getProtocol(), data.getFirst().getFileLike(), template, reader);
                 }
 
                 boolean subtractBackground = NumberUtils.toInt(runPropMap.get(ElispotAssayProvider.BACKGROUND_WELL_PROPERTY_NAME), 0) > 0;

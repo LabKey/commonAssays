@@ -268,7 +268,7 @@ public class XMLProteinHandler extends DefaultHandler
      * Characters.
      */
     @Override
-    public void characters(char ch[], int start, int length)
+    public void characters(char[] ch, int start, int length)
     {
         _loader.handleThreadStateChangeRequests();
         if (skipMe != null) return;
@@ -285,7 +285,7 @@ public class XMLProteinHandler extends DefaultHandler
      * Ignorable whitespace.
      */
     @Override
-    public void ignorableWhitespace(char ch[], int start, int length)
+    public void ignorableWhitespace(char[] ch, int start, int length)
     {
         _loader.handleThreadStateChangeRequests();
     }
@@ -300,7 +300,7 @@ public class XMLProteinHandler extends DefaultHandler
         if (skipMe != null) return;
         if (data != null && !data.isEmpty())
         {
-            _loader.getLogger().warn("PROCESSING INSTRUCTION: target=" + target + "; data=" + data);
+            _loader.getLogger().warn("PROCESSING INSTRUCTION: target={}; data={}", target, data);
         }
     }
 

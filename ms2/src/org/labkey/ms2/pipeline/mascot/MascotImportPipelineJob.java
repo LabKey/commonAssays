@@ -68,7 +68,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
         {
             if (!dirWork.exists() && !FileUtil.mkdir(dirWork))
             {
-                getLogger().error("Failed create working folder "+dirWork+".");
+                getLogger().error("Failed create working folder {}.", dirWork);
                 return;
             }
 
@@ -78,7 +78,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
             }
             catch (IOException x)
             {
-                getLogger().error("Failed to move Mascot result file to working folder as "+workFile, x);
+                getLogger().error("Failed to move Mascot result file to working folder as {}", workFile, x);
                 return;
             }
 
@@ -89,12 +89,12 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
 
                 if (!workFile.delete())
                 {
-                    getLogger().error("Failed to delete " + workFile);
+                    getLogger().error("Failed to delete {}", workFile);
                     return;
                 }
                 else if (!dirWork.delete())
                 {
-                    getLogger().error("Failed to delete " + dirWork);
+                    getLogger().error("Failed to delete {}", dirWork);
                     return;
                 }
                 else
@@ -122,7 +122,7 @@ public class MascotImportPipelineJob extends MS2ImportPipelineJob
                 }
                 catch (IOException e)
                 {
-                    getLogger().error("Failed to delete " + workFile, e);
+                    getLogger().error("Failed to delete {}", workFile, e);
                 }
             }
         }

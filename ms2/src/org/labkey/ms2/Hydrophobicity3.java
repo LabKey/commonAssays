@@ -140,7 +140,7 @@ public class Hydrophobicity3 {
     }
 
     static {
-       Isoparams ISOPARAMS[] = {
+       Isoparams[] ISOPARAMS = {
           new Isoparams( 3.8 ,  4.0 , 0.880 ),
           new Isoparams( 4.0 ,  4.2 , 0.900 ),
           new Isoparams( 4.2 ,  4.4 , 0.920 ),
@@ -742,16 +742,17 @@ public class Hydrophobicity3 {
     }
 
     private static int eMap(char aa) {
-      switch(aa) {
-      case 'K': return 0;
-      case 'R': return 1;
-      case 'H': return 2;
-      case 'D': return 3;
-      case 'E': return 4;
-      case 'C': return 5;
-      case 'Y': return 6;
-      default: return -1;
-      }
+        return switch (aa)
+        {
+            case 'K' -> 0;
+            case 'R' -> 1;
+            case 'H' -> 2;
+            case 'D' -> 3;
+            case 'E' -> 4;
+            case 'C' -> 5;
+            case 'Y' -> 6;
+            default -> -1;
+        };
     }
 
 // ============================================================
@@ -777,7 +778,7 @@ public class Hydrophobicity3 {
        double pk1;
        double step1;
 
-       int aaCNT[] = {0,0,0,0,0,0,0};
+       int[] aaCNT = {0,0,0,0,0,0,0};
 
   // Translator's Note: this is commented out in the perl source
   // if (NOELECTRIC == 1) { return 1.0; }
@@ -826,7 +827,7 @@ public class Hydrophobicity3 {
 
 // ============================================================
 // compute R - v 2,3 algorithms
-    private static double CalcR(double pH, double PK0, double PK1, int CNTref[]){
+    private static double CalcR(double pH, double PK0, double PK1, int[] CNTref){
        double cr0 =
                                 _partial_charge( PK0,     pH    )                    // n terminus
           + CNTref[eMap('K')] * _partial_charge( AAPARAMS.get('K').PK,   pH    )  // lys
@@ -1087,7 +1088,7 @@ public class Hydrophobicity3 {
     // void  heli2Calc(char *sq, double *hisc, double *gsc)
     //
 
-       double ret[] = new double[2];
+       double[] ret = new double[2];
        String pass1;
        String sqCopy;
        String prechop;
@@ -1194,9 +1195,9 @@ public class Hydrophobicity3 {
        String Bksq;
        int i;
        Bksq = new String(new StringBuffer(sq).reverse());
-       double fhg[] = heli2Calc(sq);
+       double[] fhg = heli2Calc(sq);
        FwHiscor = fhg[HISC]; FwGscor = fhg[GSC];
-       double rhg[] = heli2Calc(Bksq);
+       double[] rhg = heli2Calc(Bksq);
        BkHiscor = rhg[HISC]; BkGscor = rhg[GSC];
        if (BkGscor>FwGscor)
           { h2FwBk = BkHiscor; }
@@ -1235,7 +1236,7 @@ public class Hydrophobicity3 {
        return 0;
     }
 
-    public static void main(String argv[]) {
+    public static void main(String[] argv) {
 //        BasicConfigurator.configure();
         String pep;
 

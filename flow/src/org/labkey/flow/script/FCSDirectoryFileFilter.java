@@ -40,12 +40,12 @@ public class FCSDirectoryFileFilter implements FileAnalysisTaskPipeline.FilePath
     {
         if (!dir.isDirectory())
         {
-            LOG.debug("FCSDirectoryFileFilter : rejecting file because it is not a directory: " + dir.getPath());
+            LOG.debug("FCSDirectoryFileFilter : rejecting file because it is not a directory: {}", dir.getPath());
             return false;
         }
 
         File[] fcsFiles = dir.listFiles((FileFilter) FCS.FCSFILTER);
-        LOG.debug("FCSDirectoryFileFilter : found " + (fcsFiles != null ? fcsFiles.length : 0) + " fcs files in : " + dir.getPath());
+        LOG.debug("FCSDirectoryFileFilter : found {} fcs files in : {}", fcsFiles != null ? fcsFiles.length : 0, dir.getPath());
         return null != fcsFiles && 0 != fcsFiles.length;
     }
 }

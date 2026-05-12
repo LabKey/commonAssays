@@ -149,9 +149,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
 
         if (!errors.isEmpty())
         {
-            logger.error("This FASTA file has " + errors.size() + " duplicate protein name" + (1 == errors.size() ? "" : "s") + ", listed below.  " +
-                    "Search engines and the Trans-Proteomic Pipeline use these names to link to specific protein sequences so the names must be unique.  " +
-                    "You should remove or otherwise disambiguate the duplicate entries from this FASTA file and re-run your search.");
+            logger.error("This FASTA file has {} duplicate protein name{}, listed below.  Search engines and the Trans-Proteomic Pipeline use these names to link to specific protein sequences so the names must be unique.  You should remove or otherwise disambiguate the duplicate entries from this FASTA file and re-run your search.", errors.size(), 1 == errors.size() ? "" : "s");
 
             String errorString = StringUtils.join(errors, "\n");
             logger.error(errorString);
@@ -313,7 +311,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         fdbu._addSeqStmt.clearBatch();
         handleThreadStateChangeRequests();
         c.setAutoCommit(true);
-        logger.debug("Sequences = " + transactionCount + ".  preProcessSequences() total elapsed time was " + (System.currentTimeMillis() - startTime)/1000 + " seconds for this mouthful.");
+        logger.debug("Sequences = {}.  preProcessSequences() total elapsed time was {} seconds for this mouthful.", transactionCount, (System.currentTimeMillis() - startTime) / 1000);
 
        guessBySharedHash(logger);
     }
@@ -326,7 +324,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         fdbu._guessOrgBySharedHashStmt.setString(2, "unknown");
 
         int rc = fdbu._guessOrgBySharedHashStmt.executeUpdate();
-        logger.debug("Updated " + rc + " Sequences in guessBySharedHash");
+        logger.debug("Updated {} Sequences in guessBySharedHash", rc);
 
     }
 
@@ -510,18 +508,14 @@ public class FastaDbLoader extends DefaultAnnotationLoader
         if (associatedFastaId <= 0) setAssociatedFastaId(guessAssociatedFastaId());
         int lookupsUpdated = insertLookups(associatedFastaId);
 
-        logger.debug("Updated " + lookupsUpdated + " lookups");
+        logger.debug("Updated {} lookups", lookupsUpdated);
         handleThreadStateChangeRequests("In Process mouthful - finished mouthful");
 
         fdbu._emptySeqsStmt.executeUpdate();
         fdbu._emptyIdentsStmt.executeUpdate();
 
         // housekeeping and bookkeeping
-        logger.info("Batch complete. Added: " +
-                orgsAdded + " organisms; " +
-                seqsAdded + " sequences; " +
-                identsAdded + " identifiers; " +
-                annotsAdded + " annotations");
+        logger.info("Batch complete. Added: {} organisms; {} sequences; {} identifiers; {} annotations", orgsAdded, seqsAdded, identsAdded, annotsAdded);
         fdbu._getCurrentInsertStatsStmt.setInt(1, currentInsertId);
 
         int priorseqs;
@@ -620,7 +614,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
                         setOrganismIsToGuessed(rs.getInt(2) == 1);
                     }
                     else
-                        logger.error("Can't find insert id " + currentInsertId + " in parse recovery.");
+                        logger.error("Can't find insert id {} in parse recovery.", currentInsertId);
                 }
 
                 skipEntries = new SqlSelector(ProteinSchema.getSchema(), "SELECT RecordsProcessed FROM " +
@@ -659,7 +653,7 @@ public class FastaDbLoader extends DefaultAnnotationLoader
                 Integer percentComplete = proteinIterator.getPercentCompleteIfChanged();
 
                 if (null != percentComplete)
-                    logger.info("Importing FASTA file sequences: " + percentComplete + "% complete");
+                    logger.info("Importing FASTA file sequences: {}% complete", percentComplete);
             }
 
             if (protCount / 3 < negCount)
@@ -732,9 +726,9 @@ public class FastaDbLoader extends DefaultAnnotationLoader
                     new SqlSelector(ProteinSchema.getSchema(), "SELECT MIN(FileName) FROM " + ProteinSchema.getTableInfoFastaLoads() + " WHERE FileChecksum = ?", hash).getObject(String.class);
 
             if (convertedName.equals(previousFileWithSameChecksum))
-                log.info("FASTA file \"" + convertedName + "\" has already been imported");
+                log.info("FASTA file \"{}\" has already been imported", convertedName);
             else
-                log.info("FASTA file \"" + convertedName + "\" not imported, but another file, '" + previousFileWithSameChecksum + "', has the same checksum");
+                log.info("FASTA file \"{}\" not imported, but another file, '{}', has the same checksum", convertedName, previousFileWithSameChecksum);
 
             return loadedFile.getFastaId();
         }

@@ -17,6 +17,8 @@ package org.labkey.luminex;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.simple.SimpleLogger;
 import org.apache.logging.log4j.util.PropertiesUtil;
 import org.junit.Assert;
@@ -85,7 +87,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
         logger.info("----- Start Analyte Properties -----");
         for(Map.Entry<String, Map<String, String>> entry : _analyteColumnPropertiesByName.entrySet())
         {
-            logger.info("\tProperties for " + entry.getKey() + ":");
+            logger.info("\tProperties for {}:", entry.getKey());
             for(Map.Entry<String, String> props : entry.getValue().entrySet())
             {
                 if(props.getValue() == null)
@@ -93,7 +95,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
                 else
                     valueText = props.getValue();
 
-                logger.info("\t\t*"+props.getKey() + ":  " + valueText);
+                logger.info("\t\t*{}:  {}", props.getKey(), valueText);
             }
 
             //Currenlty this should only have the positivity thresholds in it, but it might have more later.
@@ -104,7 +106,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
                 else
                     valueText = props.getValue();
 
-                logger.info("\t\t*"+props.getKey() + ":  " + valueText);
+                logger.info("\t\t*{}:  {}", props.getKey(), valueText);
             }
 
             Object[] titrationByAnalyteArray = _titrationsByAnalyte.get(entry.getKey()).toArray();
@@ -113,7 +115,7 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
                 logger.info("\t\tUses Titrations:");
                 for (Object aTitrationByAnalyteArray : titrationByAnalyteArray)
                 {
-                    logger.info("\t\t\t*" + aTitrationByAnalyteArray);
+                    logger.info("\t\t\t*{}", aTitrationByAnalyteArray);
                 }
             }
         }
@@ -121,15 +123,15 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
         logger.info("----- Start Well Role Properties -----");
         for(Titration titration : _titrations)
         {
-            logger.info("\tProperties for " + titration.getName());
-            logger.info("\t\t*Standard:  " + titration.isStandard());
-            logger.info("\t\t*QC Control:  " + titration.isQcControl());
-            logger.info("\t\t*Unknown:  " + titration.isUnknown());
-            logger.info("\t\t*Other Control:  " + titration.isOtherControl());
+            logger.info("\tProperties for {}", titration.getName());
+            logger.info("\t\t*Standard:  {}", titration.isStandard());
+            logger.info("\t\t*QC Control:  {}", titration.isQcControl());
+            logger.info("\t\t*Unknown:  {}", titration.isUnknown());
+            logger.info("\t\t*Other Control:  {}", titration.isOtherControl());
         }
         for (SinglePointControl singlePointControl : _singlePointControls)
         {
-            logger.info("\tProperties for " + singlePointControl.getName());
+            logger.info("\tProperties for {}", singlePointControl.getName());
             logger.info("\t\t*Single Point Control: true");
         }
         logger.info("----- Stop Well Role Properties -----");
@@ -282,9 +284,9 @@ public class LuminexRunAsyncContext extends AssayRunAsyncContext<LuminexAssayPro
             }
 
             @Override
-            public void info(String message)
+            public void logMessage(String fqcn, Level level, Marker marker, Message message, Throwable throwable)
             {
-                sb.append(message);
+                sb.append(message.getFormattedMessage());
                 sb.append("\n");
             }
 

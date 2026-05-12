@@ -89,7 +89,7 @@ public class ProteinGroupProteins
         if (_runs != null && !_runs.isEmpty())
         {
             whereClause.append(" AND ppf.Run IN (");
-            whereClause.append(_runs.get(0).getRun());
+            whereClause.append(_runs.getFirst().getRun());
             for (int i = 1; i < _runs.size(); i++)
             {
                 whereClause.append(", ");

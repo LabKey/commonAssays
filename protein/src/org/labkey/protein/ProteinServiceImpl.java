@@ -212,7 +212,7 @@ public class ProteinServiceImpl implements ProteinService
     @Override
     public WebPartView<?> getProteinCoverageView(int seqId, List<PeptideCharacteristic> peptideCharacteristics, int aaRowWidth, boolean showEntireFragmentInCoverage, @Nullable String accessionForFeatures)
     {
-        return getProteinCoverageView(seqId, peptideCharacteristics, aaRowWidth, showEntireFragmentInCoverage, accessionForFeatures, bean -> {});
+        return getProteinCoverageView(seqId, peptideCharacteristics, aaRowWidth, showEntireFragmentInCoverage, accessionForFeatures, _ -> {});
     }
 
     @Override
@@ -253,7 +253,7 @@ public class ProteinServiceImpl implements ProteinService
             }
             catch (DeadlockPreventingException e)
             {
-                LOG.warn("Timed out trying to fetch features from Uniprot for accession '" + accession + "'");
+                LOG.warn("Timed out trying to fetch features from Uniprot for accession '{}'", accession);
             }
         }
         return Collections.emptyList();
@@ -370,17 +370,17 @@ public class ProteinServiceImpl implements ProteinService
                 {
                     if (responseCode != 404)
                     {
-                        LOG.warn("HTTP GET failed to " + url + " with error code " + responseCode);
+                        LOG.warn("HTTP GET failed to {} with error code {}", url, responseCode);
                     }
                     else
                     {
-                        LOG.debug("HTTP GET failed to " + url + " with error code " + responseCode);
+                        LOG.debug("HTTP GET failed to {} with error code {}", url, responseCode);
                     }
                 }
             }
             catch (IOException | SAXException | ParserConfigurationException e)
             {
-                LOG.warn("Failed querying Uniprot for " + accession, e);
+                LOG.warn("Failed querying Uniprot for {}", accession, e);
             }
 
             result.sort(Comparator.comparingInt(ProteinFeature::getStartIndex));

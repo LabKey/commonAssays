@@ -20,7 +20,6 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
 import org.labkey.ms2.protein.Protein;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
@@ -63,7 +62,6 @@ public class QueryAACoverageColumn extends PeptideAggregrationDisplayColumn
 
     @Override
     protected Object calculateValue(RenderContext ctx, List<String> peptides)
-            throws SQLException
     {
         Protein protein = new Protein();
         protein.setSequence((String)_sequenceColumn.getValue(ctx));

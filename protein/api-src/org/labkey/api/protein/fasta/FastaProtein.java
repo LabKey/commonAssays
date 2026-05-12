@@ -231,7 +231,7 @@ public class FastaProtein
         if (fastaIdentifierString.contains(" ")) fastaIdentifierString = fastaIdentifierString.substring(0, fastaIdentifierString.indexOf(" "));
         fastaIdentifierString = fastaIdentifierString.replaceAll(":", "|");
         fastaIdentifierString = fastaIdentifierString.replace("|$", "");
-        String tokens[] = fastaIdentifierString.split(SEPARATOR_PATTERN);
+        String[] tokens = fastaIdentifierString.split(SEPARATOR_PATTERN);
 
         for (int i = 0; i < tokens.length; i++)
         {

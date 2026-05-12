@@ -245,7 +245,7 @@ public class ProteinCoverageMapBuilder
             exportHtml = pcm2.getProteinExportHtml();
 
             assertTrue("Unexpected peptide filter text", exportHtml.contains("Peptide Filter: &nbsp; (SeqId = -1) AND (Scan &lt;&gt; 100) AND (PeptideProphet &gt;= 0.9)"));
-            assertTrue("Unexpected total peptide count text", !exportHtml.contains("peptides matching sequence"));
+            assertFalse("Unexpected total peptide count text", exportHtml.contains("peptides matching sequence"));
             assertTrue("Unexpected total peptide count text", exportHtml.contains("7 Total qualifying peptides in run"));
             assertTrue("Unexpected distinct peptide count text", exportHtml.contains("4 Distinct qualifying peptides in run"));
 

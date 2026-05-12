@@ -32,7 +32,6 @@ import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.TextSearcher;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -251,11 +250,5 @@ public class LibraTest extends MS2TestBase
     protected void doCleanup(boolean afterTest) throws TestTimeoutException
     {
         _containerHelper.deleteProject(getProjectName(), afterTest);
-    }
-
-    @Override
-    public List<String> getAssociatedModules()
-    {
-        return Arrays.asList("ms2");
     }
 }

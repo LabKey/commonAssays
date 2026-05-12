@@ -544,7 +544,7 @@ public class MS2Manager
                 }
                 else
                 {
-                    LOG.debug("MS2RunType \"" + type + "\" not found");
+                    LOG.debug("MS2RunType \"{}\" not found", type);
                     return null;
                 }
             }
@@ -1056,7 +1056,7 @@ public class MS2Manager
         String url = ctx.getActionURL().getLocalURIString();
         String referrer = StringUtils.trimToEmpty(ctx.getRequest().getHeader("referer"));
         String userAgent = StringUtils.trimToEmpty(ctx.getRequest().getHeader("User-Agent"));
-        LOG.warn(error + "(url=" + url + ", referrer=" + referrer + ", browser=" + userAgent + ")");
+        LOG.warn("{}(url={}, referrer={}, browser={})", error, url, referrer, userAgent);
     }
 
 

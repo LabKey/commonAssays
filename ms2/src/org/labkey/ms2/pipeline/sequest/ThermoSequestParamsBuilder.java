@@ -261,7 +261,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
 
             List<String> parserError = spb.initDatabases();
             if (parserError.isEmpty()) fail("Expected error.");
-            assertEquals("pipeline, database; No value entered for database.", parserError.get(0));
+            assertEquals("pipeline, database; No value entered for database.", parserError.getFirst());
         }
 
         @Test
@@ -273,7 +273,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
 
             List<String> parserError = spb.initDatabases();
             if (parserError.isEmpty()) fail("Expected error.");
-            assertEquals("pipeline, database; No value entered for database.", parserError.get(0));
+            assertEquals("pipeline, database; No value entered for database.", parserError.getFirst());
         }
 
         @Test
@@ -287,8 +287,8 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
 
             List<String> parserError = spb.initDatabases();
             if (parserError.isEmpty()) fail("Expected error.");
-            assertTrue(parserError.get(0).contains("pipeline, database; The database does not exist"));
-            assertTrue(parserError.get(0).contains("garbage"));
+            assertTrue(parserError.getFirst().contains("pipeline, database; The database does not exist"));
+            assertTrue(parserError.getFirst().contains("garbage"));
 
             value = "Bovine_mini1.fasta, garbage";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -298,8 +298,8 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
 
             parserError = spb.initDatabases();
             if (parserError.isEmpty()) fail("Expected error.");
-            assertTrue(parserError.get(0).contains("pipeline, database; The database does not exist"));
-            assertTrue(parserError.get(0).contains("garbage"));
+            assertTrue(parserError.getFirst().contains("pipeline, database; The database does not exist"));
+            assertTrue(parserError.getFirst().contains("garbage"));
 
             value = "garbage, Bovine_mini1.fasta";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -309,8 +309,8 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
 
             parserError = spb.initDatabases();
             if (parserError.isEmpty()) fail("Expected error.");
-            assertTrue(parserError.get(0).contains("pipeline, database; The database does not exist"));
-            assertTrue(parserError.get(0).contains("garbage"));
+            assertTrue(parserError.getFirst().contains("pipeline, database; The database does not exist"));
+            assertTrue(parserError.getFirst().contains("garbage"));
         }
 
         @Test
@@ -360,7 +360,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             if (parserError.isEmpty()) fail("No error message.");
             String actual = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
             assertEquals("peptide_mass_tolerance", expected, actual);
-            assertEquals("Sequest does not support asymmetric parent error ranges (minus=4.0 plus=).", parserError.get(0));
+            assertEquals("Sequest does not support asymmetric parent error ranges (minus=4.0 plus=).", parserError.getFirst());
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -371,7 +371,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             if (parserError.isEmpty()) fail("No error message.");
             actual = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
             assertEquals("peptide_mass_tolerance", expected, actual);
-            assertEquals("Sequest does not support asymmetric parent error ranges (minus= plus=4.0).", parserError.get(0));
+            assertEquals("Sequest does not support asymmetric parent error ranges (minus= plus=4.0).", parserError.getFirst());
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -382,7 +382,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             if (parserError.isEmpty()) fail("No error message.");
             actual = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
             assertEquals("peptide_mass_tolerance", expected, actual);
-            assertEquals("No values were entered for spectrum, parent monoisotopic mass error minus/plus.", parserError.get(0));
+            assertEquals("No values were entered for spectrum, parent monoisotopic mass error minus/plus.", parserError.getFirst());
         }
 
         @Test
@@ -400,7 +400,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             Param sp = spb.getProperties().getParam("peptide_mass_tolerance");
             String actual = sp.getValue();
             assertEquals("parameter value changed", defaultValue, actual);
-            assertEquals("Negative values not permitted for parent monoisotopic mass error(" + expected + ").", parserError.get(0));
+            assertEquals("Negative values not permitted for parent monoisotopic mass error(" + expected + ").", parserError.getFirst());
         }
 
         @Test
@@ -418,7 +418,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             Param sp = spb.getProperties().getParam("peptide_mass_tolerance");
             String actual = sp.getValue();
             assertEquals("parameter value changed", defaultValue, actual);
-            assertEquals("Invalid value for value for  spectrum, parent monoisotopic mass error minus/plus (garbage).", parserError.get(0));
+            assertEquals("Invalid value for value for  spectrum, parent monoisotopic mass error minus/plus (garbage).", parserError.getFirst());
         }
 
 
@@ -435,7 +435,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             if (parserError.isEmpty()) fail("No error message.");
             String actual = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
             assertEquals("peptide_mass_tolerance", expected, actual);
-            assertEquals("Sequest does not support asymmetric parent error ranges (minus=null plus=5.0).", parserError.get(0));
+            assertEquals("Sequest does not support asymmetric parent error ranges (minus=null plus=5.0).", parserError.getFirst());
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -445,7 +445,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             if (parserError.isEmpty()) fail("No error message.");
             actual = spb.getProperties().getParam("peptide_mass_tolerance").getValue();
             assertEquals("peptide_mass_tolerance", expected, actual);
-            assertEquals("Sequest does not support asymmetric parent error ranges (minus=5.0 plus=null).", parserError.get(0));
+            assertEquals("Sequest does not support asymmetric parent error ranges (minus=5.0 plus=null).", parserError.getFirst());
         }
 
         @Test
@@ -504,7 +504,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             Param sp = spb.getProperties().getParam("mass_type_fragment");
             String actual = sp.getValue();
             assertEquals("mass_type_fragment", expected, actual);
-            assertEquals("mass_type_fragment", "\"spectrum, fragment mass type\" contains no value.", parserError.get(0));
+            assertEquals("mass_type_fragment", "\"spectrum, fragment mass type\" contains no value.", parserError.getFirst());
         }
 
         @Test
@@ -536,7 +536,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             Param sp = spb.getProperties().getParam("mass_type_fragment");
             String actual = sp.getValue();
             assertEquals("mass_type_fragment", expected, actual);
-            assertEquals("mass_type_fragment", "\"spectrum, fragment mass type\" contains an invalid value(garbage).", parserError.get(0));
+            assertEquals("mass_type_fragment", "\"spectrum, fragment mass type\" contains an invalid value(garbage).", parserError.getFirst());
         }
 
         @Test
@@ -614,7 +614,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             Param sp = spb.getProperties().getParam("ion_series");
             String actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
-            assertEquals("ion_series", "sequest, y neutral loss did not contain a value.", parserError.get(0));
+            assertEquals("ion_series", "sequest, y neutral loss did not contain a value.", parserError.getFirst());
 
             expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -638,7 +638,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             sp = spb.getProperties().getParam("ion_series");
             actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
-            assertEquals("ion_series", "scoring, c ions did not contain a value.", parserError.get(0));
+            assertEquals("ion_series", "scoring, c ions did not contain a value.", parserError.getFirst());
 
             expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -662,7 +662,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             sp = spb.getProperties().getParam("ion_series");
             actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
-            assertEquals("ion_series", "sequest, d ions did not contain a value.", parserError.get(0));
+            assertEquals("ion_series", "sequest, d ions did not contain a value.", parserError.getFirst());
         }
 
         @Test
@@ -729,7 +729,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             Param sp = spb.getProperties().getParam("ion_series");
             String actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
-            assertEquals("ion_series", "sequest, y neutral loss contained an invalid value(garbage).", parserError.get(0));
+            assertEquals("ion_series", "sequest, y neutral loss contained an invalid value(garbage).", parserError.getFirst());
 
             expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -753,7 +753,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             sp = spb.getProperties().getParam("ion_series");
             actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
-            assertEquals("ion_series", "scoring, c ions contained an invalid value(garbage).", parserError.get(0));
+            assertEquals("ion_series", "scoring, c ions contained an invalid value(garbage).", parserError.getFirst());
 
             expected = "0 1 1 0.0 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -777,7 +777,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             sp = spb.getProperties().getParam("ion_series");
             actual = sp.getValue();
             assertEquals("ion_series", expected, actual);
-            assertEquals("ion_series", "sequest, d ions contained an invalid value(garbage).", parserError.get(0));
+            assertEquals("ion_series", "sequest, d ions contained an invalid value(garbage).", parserError.getFirst());
         }
 
 
@@ -864,7 +864,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             Param sp = spb.getProperties().getParam("enzyme_info");
             String actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("enzyme_description", "protein, cleavage site did not contain a value.", parserError.get(0));
+            assertEquals("enzyme_description", "protein, cleavage site did not contain a value.", parserError.getFirst());
         }
 
         @Test
@@ -883,7 +883,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             Param sp = spb.getProperties().getParam("enzyme_info");
             String actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("enzyme_description", "Invalid enzyme definition:foo", parserError.get(0));
+            assertEquals("enzyme_description", "Invalid enzyme definition:foo", parserError.getFirst());
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -896,7 +896,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("[CV]|{P},[KR]|{P} is not a pipeline supported enzyme.", parserError.get(0));
+            assertEquals("[CV]|{P},[KR]|{P} is not a pipeline supported enzyme.", parserError.getFirst());
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -908,7 +908,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("{P}|[KR] is not a pipeline supported enzyme.", parserError.get(0));
+            assertEquals("{P}|[KR] is not a pipeline supported enzyme.", parserError.getFirst());
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -921,7 +921,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("[a]|[X] is not a pipeline supported enzyme.", parserError.get(0));
+            assertEquals("[a]|[X] is not a pipeline supported enzyme.", parserError.getFirst());
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -934,7 +934,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("[X]|[a] is not a pipeline supported enzyme.", parserError.get(0));
+            assertEquals("[X]|[a] is not a pipeline supported enzyme.", parserError.getFirst());
 
             parseParams("<?xml version=\"1.0\"?>" +
                 "<bioml>" +
@@ -947,7 +947,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             sp = spb.getProperties().getParam("enzyme_info");
             actual = sp.getValue();
             assertEquals("enzyme_description", expected2, actual);
-            assertEquals("Invalid enzyme definition:[X]|P", parserError.get(0));
+            assertEquals("Invalid enzyme definition:[X]|P", parserError.getFirst());
         }
 
         @Test
@@ -1048,7 +1048,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             Param sp = spb.getProperties().getParam("diff_search_options");
             String actual = sp.getValue();
             assertEquals("diff_search_options", expected1, actual);
-            assertEquals("diff_search_options", "modification mass contained an invalid residue(J).", parserError.get(0));
+            assertEquals("diff_search_options", "modification mass contained an invalid residue(J).", parserError.getFirst());
 
             expected1 = "0.000000 C 0.000000 M 0.000000 S 0.000000 T 0.000000 X 0.000000 Y";
             parseParams("<?xml version=\"1.0\"?>" +
@@ -1061,7 +1061,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
             sp = spb.getProperties().getParam("diff_search_options");
             actual = sp.getValue();
             assertEquals("diff_search_options", expected1, actual);
-            assertEquals("diff_search_options", "modification mass contained an invalid value(G@18).", parserError.get(0));
+            assertEquals("diff_search_options", "modification mass contained an invalid value(G@18).", parserError.getFirst());
 
         }
 
@@ -1311,7 +1311,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
 
             List<String> parserError = spb.initStaticMods();
             if (parserError.isEmpty()) fail("Expected error.");
-            assertEquals("modification mass contained an invalid value(" + value + ").", parserError.get(0));
+            assertEquals("modification mass contained an invalid value(" + value + ").", parserError.getFirst());
         }
 
         @Test
@@ -1389,37 +1389,37 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
                 {
                     String value = "";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a natural number(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a natural number(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == PositiveDoubleParamsValidator.class)
                 {
                     String value = "";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a positive number(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a positive number(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == BooleanParamsValidator.class)
                 {
                     String value = "";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a 1 or a 0(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a 1 or a 0(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == RealNumberParamsValidator.class)
                 {
                     String value = "";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a real number(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a real number(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == NonNegativeIntegerParamsValidator.class)
                 {
                     String value = "";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a non-negative integer(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == ListParamsValidator.class)
                 {
                     String listValue = "";
                     passThrough.setValue(listValue);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", " + "this value is not set.\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", " + "this value is not set.\n", passThrough.validate());
                 }
                 else
                 {
@@ -1442,25 +1442,25 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
                 {
                     String value = "-3";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a natural number(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a natural number(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == PositiveDoubleParamsValidator.class)
                 {
                     String value = "-3.4";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a positive number(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a positive number(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == NonNegativeIntegerParamsValidator.class)
                 {
                     String value = "-3";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a non-negative integer(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == BooleanParamsValidator.class)
                 {
                     String value = "-1";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a 1 or a 0(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a 1 or a 0(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == RealNumberParamsValidator.class)
                 {
@@ -1472,7 +1472,7 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
                 {
                     ((ListParamsValidator)passThrough.getValidator()).setList(new String[]{"a","b","c"});
                     passThrough.setValue("-1");
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", " + "this value (-1) is not in the valid list.\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", " + "this value (-1) is not in the valid list.\n", passThrough.validate());
                 }
                 else
                 {
@@ -1496,37 +1496,37 @@ public class ThermoSequestParamsBuilder extends SequestParamsBuilder
                 {
                     String value = "foo";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a natural number(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a natural number(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == PositiveDoubleParamsValidator.class)
                 {
                     String value = "bar";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a positive number(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a positive number(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == BooleanParamsValidator.class)
                 {
                     String value = "true";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a 1 or a 0(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a 1 or a 0(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == RealNumberParamsValidator.class)
                 {
                     String value = "blue";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a real number(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a real number(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == NonNegativeIntegerParamsValidator.class)
                 {
                     String value = "blue";
                     passThrough.setValue(value);
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", this value must be a non-negative integer(" + value + ").\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", this value must be a non-negative integer(" + value + ").\n", passThrough.validate());
                 }
                 else if (passThrough.getValidator().getClass() == ListParamsValidator.class)
                 {
                     ((ListParamsValidator)passThrough.getValidator()).setList(new String[]{"a","b","c"});
                     passThrough.setValue("foo");
-                    assertEquals(passThrough.getInputXmlLabels().get(0) + ", " + "this value (foo) is not in the valid list.\n", passThrough.validate());
+                    assertEquals(passThrough.getInputXmlLabels().getFirst() + ", " + "this value (foo) is not in the valid list.\n", passThrough.validate());
                 }
                 else
                 {

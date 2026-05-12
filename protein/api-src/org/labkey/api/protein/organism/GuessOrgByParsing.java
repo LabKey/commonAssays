@@ -64,7 +64,7 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
         int taxpos = header.indexOf("TAX_ID");
         if (taxpos != -1)
         {
-            String tmp[] = header.substring(taxpos).split("=");
+            String[] tmp = header.substring(taxpos).split("=");
             if (tmp.length > 1)
             {
                 String taxid = tmp[1].split("[^\\d]")[0];
@@ -130,7 +130,7 @@ public class GuessOrgByParsing extends Timer implements OrganismGuessStrategy
             phrase = phrase.replaceAll(",", " ");
             phrase = phrase.replaceAll("=", " ");
             phrase = phrase.replaceAll("'", "");
-            String words[] = phrase.toUpperCase().split("\\s+");
+            String[] words = phrase.toUpperCase().split("\\s+");
 
             if (words[0].indexOf('(') != -1) continue;
             if (words[0].equalsIgnoreCase("ORF")) continue;

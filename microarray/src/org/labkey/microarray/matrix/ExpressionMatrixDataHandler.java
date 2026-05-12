@@ -45,13 +45,11 @@ import org.labkey.microarray.MicroarrayManager;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -86,7 +84,7 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
     {
         if (!dataFile.exists())
         {
-            log.warn("Could not find file " + dataFile + " on disk for data with LSID " + data.getLSID());
+            log.warn("Could not find file {} on disk for data with LSID {}", dataFile, data.getLSID());
             return;
         }
         ExpRun expRun = data.getRun();
@@ -224,12 +222,12 @@ public class ExpressionMatrixDataHandler extends AbstractMatrixDataHandler
 
                 if (++rowCount % 1000 == 0)
                 {
-                    LOG.info("Imported " + rowCount + " rows...");
+                    LOG.info("Imported {} rows...", rowCount);
                 }
             }
 
             statement.executeBatch();
-            LOG.info("Imported " + rowCount + " rows.");
+            LOG.info("Imported {} rows.", rowCount);
         }
         catch (SQLException e)
         {

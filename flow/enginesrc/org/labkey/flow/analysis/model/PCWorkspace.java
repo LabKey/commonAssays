@@ -217,7 +217,7 @@ public class PCWorkspace extends FlowJoWorkspace
             else if ("OrNode".equals(tagName))
                 gate = new OrGate(gates);
             else if ("NotNode".equals(tagName))
-                gate = new NotGate(gates.get(0));
+                gate = new NotGate(gates.getFirst());
 
             if (gate != null)
                 ret.addGate(gate);

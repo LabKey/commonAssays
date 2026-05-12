@@ -70,7 +70,6 @@ import org.labkey.ms2.SpectrumRenderer;
 import org.labkey.ms2.protein.tools.GoHelpers;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -104,7 +103,7 @@ public abstract class AbstractMS2RunView
 
     public abstract AbstractMS2QueryView createGridView(boolean expanded, boolean forExport);
 
-    public abstract GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns) throws SQLException;
+    public abstract GridView getPeptideViewForProteinGrouping(String proteinGroupingId, String columns);
 
     public abstract void addSQLSummaries(SimpleFilter peptideFilter, List<Pair<String, String>> sqlSummaries);
 
@@ -477,7 +476,7 @@ public abstract class AbstractMS2RunView
 
             for (MS2Modification mod : mods)
             {
-                if (mod != mods.get(0))
+                if (mod != mods.getFirst())
                     header.append(';');
                 header.append(mod.getAminoAcid());
                 if (mod.getVariable())

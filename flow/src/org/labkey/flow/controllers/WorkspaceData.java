@@ -282,7 +282,7 @@ public class WorkspaceData implements Serializable
         }
 
         if (!subsetMismatches.isEmpty() && !parameterMismatches.isEmpty())
-            _log.debug("Mismatch counts while parsing workspace: " + _object.getName() + "\n" + subsetMismatches + "\n" + parameterMismatches);
+            _log.debug("Mismatch counts while parsing workspace: {}\n{}\n{}", _object.getName(), subsetMismatches, parameterMismatches);
 
         addCaseSensitiveWarnings(errors, messages, isCaseSensitive);
     }

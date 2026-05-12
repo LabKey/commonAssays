@@ -58,7 +58,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         @Override
         public Attributes<A, E> load(@NotNull String containerId, @Nullable Object argument)
         {
-            LOG.debug("Loading " + _type + " by containerId: " + containerId);
+            LOG.debug("Loading {} by containerId: {}", _type, containerId);
             Collection<FlowEntry> entries = FlowManager.get().getAttributeEntries(containerId, _type);
             ArrayList<E> list = new ArrayList<>(entries.size());
             for (FlowEntry entry : entries)
@@ -98,7 +98,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
 
                 Z existing = byName.putIfAbsent(entry.getName(), entry);
                 if (existing != null)
-                    LOG.warn("Duplicate entry '" + existing.getName() + "' (id=" + existing.getRowId() + ", aliasId=" + existing.getAliasedId() + ") and '" + entry.getName() + "' (id=" + entry.getRowId() + ", aliasId=" + entry.getAliasedId() + ")");
+                    LOG.warn("Duplicate entry '{}' (id={}, aliasId={}) and '{}' (id={}, aliasId={})", existing.getName(), existing.getRowId(), existing.getAliasedId(), entry.getName(), entry.getRowId(), entry.getAliasedId());
 
                 if (entry.getAliasedId() != null)
                     aliases.put(entry.getAliasedId(), entry.getRowId());
@@ -412,7 +412,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
 
     private void _uncacheNow(@Nullable Container c)
     {
-        LOG.debug("Uncache " + _type.name() + ": " + (c == null ? "entire world" : "container='" + c.getName() + "', id='" + c.getId() + "'"));
+        LOG.debug("Uncache {}: {}", _type.name(), c == null ? "entire world" : "container='" + c.getName() + "', id='" + c.getId() + "'");
         if (c == null)
         {
             _cache.clear();

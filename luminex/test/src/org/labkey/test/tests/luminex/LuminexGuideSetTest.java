@@ -23,7 +23,6 @@ import org.labkey.test.TestFileUtils;
 import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
-import org.labkey.test.components.assay.AssayConstants;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.params.FieldDefinition;
 import org.labkey.test.util.DataRegionTable;
@@ -40,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.labkey.test.util.PermissionsHelper.EDITOR_ROLE;
 import static org.labkey.test.util.PermissionsHelper.READER_ROLE;
@@ -257,8 +257,8 @@ public final class LuminexGuideSetTest extends LuminexTest
         // check that only 1 run is now present
         assertEquals("Initial grid row count not as expected", 1, table.getDataRowCount());
         assertEquals("Initial plot data point count not as expected", 1, Locator.findElements(getDriver(), Locator.tagWithClass("a", "point")).size());
-        assertEquals("Filtered grid row value not as expected", "NETWORK3", table.getColumnDataAsText("Titration/Run/Batch/Network").get(0));
-        assertEquals("Filtered grid row value not as expected", "PROTOCOL3", table.getColumnDataAsText("Titration/Run/Batch/CustomProtocol").get(0));
+        assertEquals("Filtered grid row value not as expected", "NETWORK3", table.getColumnDataAsText("Titration/Run/Batch/Network").getFirst());
+        assertEquals("Filtered grid row value not as expected", "PROTOCOL3", table.getColumnDataAsText("Titration/Run/Batch/CustomProtocol").getFirst());
 
         // Clear the filter and check that all rows reappear
         table.clearAllFilters();
@@ -479,7 +479,7 @@ public final class LuminexGuideSetTest extends LuminexTest
         clickAndWait(Locator.linkContainingText("view runs"));
         drt = new DataRegionTable("Runs", getDriver());
         drt.goToView("QC Flags View");
-        assertTrue(!drt.getDataAsText(1, "QC Flags").contains("EC50-4"));
+        assertFalse(drt.getDataAsText(1, "QC Flags").contains("EC50-4"));
 
         //4. For GS Analyte B, apply the non-current guide set to plate 5a
         //	- QC Flags added for EC50 and HMFI

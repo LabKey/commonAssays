@@ -38,7 +38,7 @@ public class uniprot_entry_dbReference_property extends ParseActions
             {
                 return;
             }
-            UniprotIdentifier sRefContents = surroundingRef.get(surroundingRef.size() - 1);
+            UniprotIdentifier sRefContents = surroundingRef.getLast();
             String refType = sRefContents.getIdentifier();
             if (refType == null || !refType.startsWith("GO:"))
             {

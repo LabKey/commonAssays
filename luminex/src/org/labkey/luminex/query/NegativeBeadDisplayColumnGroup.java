@@ -15,7 +15,6 @@
  */
 package org.labkey.luminex.query;
 
-import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DisplayColumn;
 import org.labkey.api.data.DisplayColumnGroup;
 import org.labkey.api.data.RenderContext;

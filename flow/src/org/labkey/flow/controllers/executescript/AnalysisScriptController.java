@@ -766,7 +766,7 @@ public class AnalysisScriptController extends BaseFlowController
             if (keywordDirs != null && !keywordDirs.isEmpty())
             {
                 // CONSIDER: Use common parent path of all keywordDir paths.  For now, just use first path.
-                return keywordDirs.get(0);
+                return keywordDirs.getFirst();
             }
 
             if (resolvedFCSFiles != null && !resolvedFCSFiles.isEmpty())
@@ -1034,7 +1034,7 @@ public class AnalysisScriptController extends BaseFlowController
             {
                 String msg = "Could not accelerate flow import, unable to resolve fcs files.";
                 errors.reject(ERROR_MSG, msg);
-                _log.debug(msg + ". DataFolder: " + dataFolder);
+                _log.debug("{}. DataFolder: {}", msg, dataFolder);
                 return false;
             }
 
@@ -1124,7 +1124,7 @@ public class AnalysisScriptController extends BaseFlowController
                 if (errors.hasErrors())
                     return;
 
-                FileLike keywordDir = keywordDirs.get(0);
+                FileLike keywordDir = keywordDirs.getFirst();
 
                 // Translate selected keyword directory into a existing keyword run if possible.
                 FlowRun existingKeywordRun = null;

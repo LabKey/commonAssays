@@ -492,19 +492,19 @@ public class FCSHeader
                 if (strValue.isEmpty())
                     strValue = null;
                 if (keywords.containsKey(strKey))
-                    LOG.warn("Duplicate key '" + strKey + "'");
+                    LOG.warn("Duplicate key '{}'", strKey);
                 keywords.put(strKey, strValue);
                 ichStart = ichEnd;
             }
         }
 
         if (dataOffset == 0)
-            try {dataOffset = Integer.parseInt(keywords.get("$BEGINDATA"));}catch(Exception x){}
+            try {dataOffset = Integer.parseInt(keywords.get("$BEGINDATA"));}catch(Exception _){}
         if (dataLast == 0)
-            try {dataLast = Integer.parseInt(keywords.get("$ENDDATA"));}catch(Exception x){}
+            try {dataLast = Integer.parseInt(keywords.get("$ENDDATA"));}catch(Exception _){}
         if (dataOffset != 0)
             is.skip(dataOffset - cbRead);
-        try {_parameterCount = Integer.parseInt(keywords.get("$PAR"));}catch(Exception x){}
+        try {_parameterCount = Integer.parseInt(keywords.get("$PAR"));}catch(Exception _){}
     }
 
 

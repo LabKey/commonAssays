@@ -36,7 +36,7 @@ public class BooleanParamsValidator implements IParamsValidator
         String value = spp.getValue();
         if (value == null)
         {
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a 1 or a 0(" + value + ").\n";
+            parserError = spp.getInputXmlLabels().getFirst() + ", " + "this value must be a 1 or a 0(" + value + ").\n";
             return parserError;
         }
         if (spp.getValue().equalsIgnoreCase("no"))
@@ -51,7 +51,7 @@ public class BooleanParamsValidator implements IParamsValidator
         }
         if (!value.equals("1") && !value.equals("0") && !value.equalsIgnoreCase("no") && !value.equalsIgnoreCase("yes"))
         {
-            parserError = spp.getInputXmlLabels().get(0) + ", " + "this value must be a 1 or a 0(" + value + ").\n";
+            parserError = spp.getInputXmlLabels().getFirst() + ", " + "this value must be a 1 or a 0(" + value + ").\n";
         }
         return parserError;
     }
@@ -114,11 +114,11 @@ public class BooleanParamsValidator implements IParamsValidator
         {
             _property.setValue("");
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a 1 or a 0().\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a 1 or a 0().\n", parserError);
 
             _property.setValue(null);
             parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a 1 or a 0(null).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a 1 or a 0(null).\n", parserError);
         }
 
         @Test
@@ -126,7 +126,7 @@ public class BooleanParamsValidator implements IParamsValidator
         {
             _property.setValue("foo");
             String parserError = _property.validate();
-            assertEquals(_property.getInputXmlLabels().get(0) + ", this value must be a 1 or a 0(foo).\n", parserError);
+            assertEquals(_property.getInputXmlLabels().getFirst() + ", this value must be a 1 or a 0(foo).\n", parserError);
 
         }
     }

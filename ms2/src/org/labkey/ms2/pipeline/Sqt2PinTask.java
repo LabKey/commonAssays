@@ -33,7 +33,6 @@ import org.labkey.api.util.FileType;
 import org.labkey.api.writer.PrintWriters;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;

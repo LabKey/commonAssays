@@ -42,7 +42,7 @@ public class SampleIdMap<V>
         return new SampleIdMap<>()
         {
             @Override
-            public void put(String id, String name, Object value)
+            public void put(@NotNull String id, @NotNull String name, @NotNull Object value)
             {
                 throw new UnsupportedOperationException();
             }

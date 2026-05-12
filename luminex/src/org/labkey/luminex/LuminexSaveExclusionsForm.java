@@ -184,7 +184,7 @@ public class LuminexSaveExclusionsForm implements ApiJsonForm
             form.validate(errors);
             allErrors = errors.getAllErrors();
             assertEquals("Expected 1 form validation error", 1, allErrors.size());
-            assertEquals("Invalid command provided for exclusion: InvalidCommand", allErrors.get(0).getDefaultMessage());
+            assertEquals("Invalid command provided for exclusion: InvalidCommand", allErrors.getFirst().getDefaultMessage());
 
             command.setCommand("insert");
             errors = new NullSafeBindException(form, "form");

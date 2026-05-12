@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex.model;
 
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.plate.Plate;
 import org.labkey.api.assay.plate.WellData;
 
@@ -118,7 +119,7 @@ public class LuminexWell implements WellData, Comparable<LuminexWell>
     }
 
     @Override
-    public int compareTo(LuminexWell w)
+    public int compareTo(@NotNull LuminexWell w)
     {
         if (getDose() == null && w.getDose() == null)
         {

@@ -32,7 +32,7 @@ public class uniprot_entry_feature_location_end extends ParseActions
             return;
         }
 
-        UniprotAnnotation surroundingFeature = context.getAnnotations().get(context.getAnnotations().size() - 1);
+        UniprotAnnotation surroundingFeature = context.getAnnotations().getLast();
         String position = attrs.getValue("position");
         if (position != null)
             surroundingFeature.setEndPos(Integer.valueOf(position));

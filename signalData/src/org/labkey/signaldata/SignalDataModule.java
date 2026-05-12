@@ -18,7 +18,6 @@ package org.labkey.signaldata;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
@@ -94,10 +93,4 @@ public class SignalDataModule extends DefaultModule
         return new SignalDataUpgradeCode();
     }
 
-    @Override
-    @NotNull
-    public Collection<String> getSummary(Container c)
-    {
-        return Collections.emptyList();
-    }
 }

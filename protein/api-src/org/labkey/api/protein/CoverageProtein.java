@@ -273,7 +273,7 @@ public class CoverageProtein extends SimpleProtein
                         if (_sequence.startsWith(peptide.substring(1)))
                             ranges.add(new Range(0, peptide.length() - 2, cnt));
                         else
-                            _log.debug("Can't find " + peptide + " at start of sequence");
+                            _log.debug("Can't find {} at start of sequence", peptide);
                     }
                     else if (peptide.charAt(peptide.length() - 1) == '-')
                     {
@@ -284,7 +284,7 @@ public class CoverageProtein extends SimpleProtein
                         if (_sequence.endsWith(peptide.substring(0, peptide.length() - 1)))
                             ranges.add(new Range(start, length, cnt));
                         else
-                            _log.debug("Can't find " + peptide + " at end of sequence");
+                            _log.debug("Can't find {} at end of sequence", peptide);
                     }
                     else
                     {
@@ -292,7 +292,7 @@ public class CoverageProtein extends SimpleProtein
 
                         if (start <= -1)
                         {
-                            _log.debug("Can't find " + peptide + " in middle of sequence");
+                            _log.debug("Can't find {} in middle of sequence", peptide);
                             continue;
                         }
 

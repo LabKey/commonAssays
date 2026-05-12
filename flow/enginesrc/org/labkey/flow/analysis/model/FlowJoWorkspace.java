@@ -828,7 +828,7 @@ abstract public class FlowJoWorkspace extends Workspace
             Analysis analysis = workspace.getSampleAnalysis(sampleInfo);
             Population cd3cd4 = workspace.findPopulation(analysis, SubsetSpec.fromUnescapedString("Viable/Lymphocytes/CD3+CD4+"));
             assertEquals(1, cd3cd4.getGates().size());
-            PolygonGate cd3cd4gate = (PolygonGate)cd3cd4.getGates().get(0);
+            PolygonGate cd3cd4gate = (PolygonGate)cd3cd4.getGates().getFirst();
             assertEquals("PE-A", cd3cd4gate.getXAxis());
             assertEquals("APC-A", cd3cd4gate.getYAxis());
             assertEquals(8, cd3cd4gate.getPolygon().len);
@@ -979,10 +979,10 @@ abstract public class FlowJoWorkspace extends Workspace
         @Test
         public void testVersionMethod()
         {
-            assertEquals(true, isVersionGreaterThan10_0_7("10.2"));
-            assertEquals(true, isVersionGreaterThan10_0_7("10.0.8"));
-            assertEquals(false, isVersionGreaterThan10_0_7("10.0.7"));
-            assertEquals(false, isVersionGreaterThan10_0_7("7.2.5"));
+            assertTrue(isVersionGreaterThan10_0_7("10.2"));
+            assertTrue(isVersionGreaterThan10_0_7("10.0.8"));
+            assertFalse(isVersionGreaterThan10_0_7("10.0.7"));
+            assertFalse(isVersionGreaterThan10_0_7("7.2.5"));
         }
 
         private void assertAdvanced(Workspace workspace, String version, boolean mac)
@@ -1027,7 +1027,7 @@ abstract public class FlowJoWorkspace extends Workspace
             else
             {
                 assertEquals(StringUtils.join(workspace.getWarnings(), "\n"), 1, workspace.getWarnings().size());
-                assertTrue(workspace.getWarnings().get(0).contains("Mode statistic not yet supported"));
+                assertTrue(workspace.getWarnings().getFirst().contains("Mode statistic not yet supported"));
             }
 
             String windowsSampleId = "2";
@@ -1044,7 +1044,7 @@ abstract public class FlowJoWorkspace extends Workspace
             Analysis analysis = workspace.getSampleAnalysis(sample);
             assertEquals(20, analysis.getPopulations().size());
             Population A = workspace.findPopulation(analysis, SubsetSpec.fromParts("A"));
-            PolygonGate Agate = (PolygonGate)A.getGates().get(0);
+            PolygonGate Agate = (PolygonGate)A.getGates().getFirst();
             assertEquals("Fluor", Agate.getXAxis());
             assertEquals("PhyEry", Agate.getYAxis());
             if (mac)
@@ -1063,7 +1063,7 @@ abstract public class FlowJoWorkspace extends Workspace
             }
 
             Population AandnotB = workspace.findPopulation(analysis, SubsetSpec.fromParts("A and not B"));
-            AndGate AandnotBgate = (AndGate)AandnotB.getGates().get(0);
+            AndGate AandnotBgate = (AndGate)AandnotB.getGates().getFirst();
             assertEquals("A", ((SubsetRef)AandnotBgate.getGates().get(0)).getRef().toString());
             if (mac)
             {
@@ -1077,7 +1077,7 @@ abstract public class FlowJoWorkspace extends Workspace
             }
 
             Population bifurcateCD8plus = workspace.findPopulation(analysis, SubsetSpec.fromParts("bifurcate CD8+"));
-            IntervalGate bifurcateCD8plusGate = (IntervalGate)bifurcateCD8plus.getGates().get(0);
+            IntervalGate bifurcateCD8plusGate = (IntervalGate)bifurcateCD8plus.getGates().getFirst();
             assertEquals("PhyEry", bifurcateCD8plusGate.getXAxis());
             if (mac)
             {
@@ -1102,7 +1102,7 @@ abstract public class FlowJoWorkspace extends Workspace
 
             // Not gate that references an ellipse gate
             Population notCD4CD8ellipse = workspace.findPopulation(analysis, SubsetSpec.fromParts("not CD4, CD8 ellipse"));
-            NotGate notCD4CD8ellipseGate = (NotGate)notCD4CD8ellipse.getGates().get(0);
+            NotGate notCD4CD8ellipseGate = (NotGate)notCD4CD8ellipse.getGates().getFirst();
             SubsetRef CD4CD8ellipseRef = (SubsetRef)notCD4CD8ellipseGate.getGate();
             assertEquals("CD4, CD8 ellipse", CD4CD8ellipseRef.getRef().toString());
 
@@ -1116,7 +1116,7 @@ abstract public class FlowJoWorkspace extends Workspace
             // I labeled the mac quadrant gates backwards
             String Q1name = mac ? "Q1: CD8-, CD4+" : "Q1: CD4- , CD8+";
             Population Q1 = workspace.findPopulation(analysis, SubsetSpec.fromParts(Q1name));
-            PolygonGate Q1gate = (PolygonGate)Q1.getGates().get(0);
+            PolygonGate Q1gate = (PolygonGate)Q1.getGates().getFirst();
             //assertEquals(...);
 
             AttributeSet results = workspace.getSampleAnalysisResults(sample);
@@ -1285,7 +1285,7 @@ abstract public class FlowJoWorkspace extends Workspace
                     aliases.add(alias.toString());
 
                 assertEquals(1, aliases.size());
-                String alias = aliases.get(0);
+                String alias = aliases.getFirst();
                 assertEquals("({A & co: fun}&!(B|{C (awesome)})):Count", alias);
             }
 
@@ -1309,7 +1309,7 @@ abstract public class FlowJoWorkspace extends Workspace
                     aliases.add(alias.toString());
 
                 assertEquals(1, aliases.size());
-                String alias = aliases.get(0);
+                String alias = aliases.getFirst();
 
                 // Alias as it will appear in the database
                 assertEquals("B/Z;|;<z>!:Freq_Of_Parent", alias);
@@ -1326,7 +1326,7 @@ abstract public class FlowJoWorkspace extends Workspace
                     aliases.add(alias.toString());
 
                 assertEquals(1, aliases.size());
-                String alias = aliases.get(0);
+                String alias = aliases.getFirst();
                 // Alias is escaped because it contains illegal characters in the expression.
                 assertEquals("B/({Y{foo\\}}&({Z;|;<z>!}|!{X (x&x)})):Count", alias);
             }
@@ -1347,18 +1347,18 @@ abstract public class FlowJoWorkspace extends Workspace
             // And gate named "A&B"
             Population AandB = analysis.getPopulation(PopulationName.fromString("A&B"));
             assertEquals(1, AandB.getGates().size());
-            assertTrue(AandB.getGates().get(0) instanceof AndGate);
+            assertTrue(AandB.getGates().getFirst() instanceof AndGate);
 
-            AndGate AandBgate = (AndGate)AandB.getGates().get(0);
+            AndGate AandBgate = (AndGate)AandB.getGates().getFirst();
             assertEquals(SubsetSpec.fromParts("A"), ((SubsetRef)AandBgate.getGates().get(0)).getRef());
             assertEquals(SubsetSpec.fromParts("B"), ((SubsetRef)AandBgate.getGates().get(1)).getRef());
 
             // Or gate named "C|D"
             Population CorD = AandB.getPopulation(PopulationName.fromString("C|D"));
             assertEquals(1, CorD.getGates().size());
-            assertTrue(CorD.getGates().get(0) instanceof OrGate);
+            assertTrue(CorD.getGates().getFirst() instanceof OrGate);
 
-            OrGate CorDgate = (OrGate)CorD.getGates().get(0);
+            OrGate CorDgate = (OrGate)CorD.getGates().getFirst();
             assertEquals(SubsetSpec.fromParts("A&B", "C"), ((SubsetRef)CorDgate.getGates().get(0)).getRef());
             assertEquals(SubsetSpec.fromParts("A&B", "D"), ((SubsetRef)CorDgate.getGates().get(1)).getRef());
 
@@ -1397,10 +1397,10 @@ abstract public class FlowJoWorkspace extends Workspace
 
             Population trucount_neg = analysis.getPopulation(PopulationName.fromString("trucount beads-"));
             assertEquals(1, trucount_neg.getGates().size());
-            assertTrue(trucount_neg.getGates().get(0) instanceof NotGate);
+            assertTrue(trucount_neg.getGates().getFirst() instanceof NotGate);
 
             Population cd45_less_debris = trucount_neg.getPopulation(PopulationName.fromString("CD45+, less debris"));
-            assertTrue(cd45_less_debris.getGates().get(0) instanceof PolygonGate);
+            assertTrue(cd45_less_debris.getGates().getFirst() instanceof PolygonGate);
 
             // Check count stats of the boolean populations.
             AttributeSet results = sampleInfo.getAnalysisResults();

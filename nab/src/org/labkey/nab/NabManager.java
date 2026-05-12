@@ -109,7 +109,7 @@ public class NabManager extends AbstractNabManager
         List<Integer> runIds = new TableSelector(tableInfo.getColumn("RunId"), filter, null).getArrayList(Integer.class);
         if (!runIds.isEmpty())
         {
-            ExpRun run = ExperimentService.get().getExpRun(runIds.get(0));
+            ExpRun run = ExperimentService.get().getExpRun(runIds.getFirst());
             if (null != run)
                 return run;
         }

@@ -121,7 +121,7 @@ public class ScriptAnalyzer
             ret.addGate(Gate.readGate((Element) gateElement.getDomNode()));
             if (ret.getGates().size() == 1)
             {
-                ret.getGates().get(0).setName(ret.getName());
+                ret.getGates().getFirst().setName(ret.getName());
             }
         }
         else
@@ -422,7 +422,7 @@ public class ScriptAnalyzer
                 if (samples.size() > 1)
                     throw new RuntimeException("Found duplicate samples for '" + sampleId + "'");
                 if (!samples.isEmpty())
-                    sample = samples.get(0);
+                    sample = samples.getFirst();
             }
             if (sample == null)
                 throw new RuntimeException("Cannot find sample '" + sampleId + "'");

@@ -513,8 +513,8 @@ public class MS2Schema extends UserSchema
     {
         ProteinGroupTableInfo result = new ProteinGroupTableInfo(this, cf);
         List<FieldKey> defaultColumns = new ArrayList<>(result.getDefaultVisibleColumns());
-        defaultColumns.add(0, FieldKey.fromParts("ProteinProphet","Run"));
-        defaultColumns.add(0, FieldKey.fromParts("ProteinProphet", "Run", "Folder"));
+        defaultColumns.addFirst(FieldKey.fromParts("ProteinProphet","Run"));
+        defaultColumns.addFirst(FieldKey.fromParts("ProteinProphet", "Run", "Folder"));
         result.setDefaultVisibleColumns(defaultColumns);
         return result;
     }
@@ -1412,7 +1412,7 @@ public class MS2Schema extends UserSchema
         if ((form != null) && (form.getTargetSeqIds()!=null) && form.getTargetSeqIds().size() == 1)
         {
             linkUrlOnRunColuumn =new ActionURL(MS2Controller.ShowProteinAction.class,getContainer());
-            linkUrlOnRunColuumn.addParameter("seqId", form.getTargetSeqIds().get(0));
+            linkUrlOnRunColuumn.addParameter("seqId", form.getTargetSeqIds().getFirst());
             linkUrlOnRunColuumn.addParameter(ProteinViewBean.ALL_PEPTIDES_URL_PARAM, "true");
             linkUrlOnRunColuumn.addParameter("protein", form.getTargetProtein());
             if (form.isCustomViewPeptideFilter()  && form.getPeptideCustomViewName(context) != null)

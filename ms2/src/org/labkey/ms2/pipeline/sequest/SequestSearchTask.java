@@ -15,7 +15,6 @@
  */
 package org.labkey.ms2.pipeline.sequest;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
@@ -43,8 +42,6 @@ import org.labkey.vfs.FileSystemLike;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -124,7 +121,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
     private FileLike getIndexFileWithoutExtension() throws PipelineJobException
     {
-        FileLike fastaFile = getJob().getSequenceFiles().get(0);
+        FileLike fastaFile = getJob().getSequenceFiles().getFirst();
         FileLike fastaRoot = getJob().getSequenceRootDirectory();
 
         Map<String, String> params = getJob().getParameters();
@@ -210,7 +207,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 assert getJob().getSequenceFiles().size() == 1 : "Only one FASTA is supported when using indices";
 
                 getJob().setStatus("CREATING FASTA INDEX");
-                getJob().info("Creating a FASTA index for " + getJob().getSequenceFiles().get(0) + " as " + indexFileBase);
+                getJob().info("Creating a FASTA index for " + getJob().getSequenceFiles().getFirst() + " as " + indexFileBase);
 
                 // Create a makedb.params to control the index creation
                 FileLike fileWorkParams = _wd.newFile(MAKE_DB_PARAMS);
@@ -231,7 +228,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 getJob().runSubProcess(pb, FileSystemLike.wrapFile(dir));
 
                 RecordedAction action = new RecordedAction(MAKEDB_ACTION_NAME);
-                action.addInput(getJob().getSequenceFiles().get(0), "FASTA");
+                action.addInput(getJob().getSequenceFiles().getFirst(), "FASTA");
                 action.addInput(fileWorkParams, "MakeDB Params");
                 action.addOutput(indexFile, "FASTA Index", false);
                 action.addParameter(RecordedAction.COMMAND_LINE_PARAM, StringUtils.join(args, " "));
@@ -373,8 +370,8 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 {
                     assert sequenceFiles.size() == 1;
                     // We want the pepXML file to point at the FASTA file, not at the indexed copy
-                    String indexPath = sequenceFiles.get(0).toNioPathForRead().toFile().getAbsolutePath();
-                    String fastaPath = getJob().getSequenceFiles().get(0).toNioPathForRead().toFile().getAbsolutePath();
+                    String indexPath = sequenceFiles.getFirst().toNioPathForRead().toFile().getAbsolutePath();
+                    String fastaPath = getJob().getSequenceFiles().getFirst().toNioPathForRead().toFile().getAbsolutePath();
                     replacements.put(indexPath, fastaPath);
                     getJob().info("Replacing index path (" + indexPath + ") with FASTA path (" + fastaPath + ")");
                 }
@@ -518,7 +515,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         ArrayList<String> paramsCmd = new ArrayList<>();
         for (Param conv : converters)
         {
-            String value = paramsXml.get(conv.getInputXmlLabels().get(0));
+            String value = paramsXml.get(conv.getInputXmlLabels().getFirst());
             if (value == null || value.isEmpty())
             {
                 if(conv.getValue() == null || conv.getValue().isEmpty())

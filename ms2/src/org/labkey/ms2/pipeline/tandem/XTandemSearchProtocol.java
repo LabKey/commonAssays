@@ -23,7 +23,6 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 import org.labkey.vfs.FileLike;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 

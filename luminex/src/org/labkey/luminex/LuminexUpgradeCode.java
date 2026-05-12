@@ -89,16 +89,16 @@ public class LuminexUpgradeCode implements UpgradeCode
                 ExpRun expRun = ExperimentService.get().getExpRun(runid);
                 if (expRun == null)
                 {
-                    LOG.warn("Could not find run for runid: " + runid + ", skipping missing summary row check for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type);
+                    LOG.warn("Could not find run for runid: {}, skipping missing summary row check for Luminex dataId: {}, analyteId: {}, type: {}", runid, dataId, analyteId, type);
                     return;
                 }
 
-                LOG.info("Missing summary row for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type + " in run: " + expRun.getName() + " (" + expRun.getRowId() + ")");
+                LOG.info("Missing summary row for Luminex dataId: {}, analyteId: {}, type: {} in run: {} ({})", dataId, analyteId, type, expRun.getName(), expRun.getRowId());
 
                 // currently only inserting summary rows for Background (type = B) data rows
                 if (!"B".equals(type))
                 {
-                    LOG.warn("...not inserting missing summary row for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type + " because type is not 'B' (Background)");
+                    LOG.warn("...not inserting missing summary row for Luminex dataId: {}, analyteId: {}, type: {} because type is not 'B' (Background)", dataId, analyteId, type);
                     return;
                 }
 
@@ -207,11 +207,11 @@ public class LuminexUpgradeCode implements UpgradeCode
                         OntologyManager.insertTabDelimited(tableInfo, expRun.getContainer(), user, helper, MapDataIterator.of(List.of(row)).getDataIterator(new DataIteratorContext()), true, LOG, null);
                         String comment = "Inserted missing summary row for Luminex runId: " + runid + ", dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type + ", standard: " + groupKey.standard;
                         ExperimentService.get().auditRunEvent(user, protocol, expRun, null, "LuminexUpgradeCode.checkForMissingSummaryRows: " + comment, null);
-                        LOG.info("..." + comment);
+                        LOG.info("...{}", comment);
                     }
                     catch (BatchValidationException e)
                     {
-                        LOG.warn("...failed to insert missing summary row for Luminex dataId: " + dataId + ", analyteId: " + analyteId + ", type: " + type + ", standard: " + groupKey.standard, e);
+                        LOG.warn("...failed to insert missing summary row for Luminex dataId: {}, analyteId: {}, type: {}, standard: {}", dataId, analyteId, type, groupKey.standard, e);
                     }
                 }
             });

@@ -26,7 +26,7 @@
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 
 <% EditWellForm form = (EditWellForm) __form;
-    FlowWell well = form.getWells().get(0);
+    FlowWell well = form.getWells().getFirst();
     List<FlowWell> wells = form.getWells();%>
 <labkey:errors/>
 <%-- NOTE: form.reportValiditiy not supported on all browsers (cough, IE and old Firefox): https://caniuse.com/#search=reportValidity --%>
@@ -76,7 +76,7 @@
         <tr>
             <td>Well Name:</td>
             <td><input type="text" name="ff_name" value="<%=h(form.ff_name)%>">
-                <input type="hidden" name="ff_fileRowId" value="<%=wells.get(0).getRowId()%>"></td>
+                <input type="hidden" name="ff_fileRowId" value="<%=wells.getFirst().getRowId()%>"></td>
         </tr>
         <tr>
             <td>Comment:</td>

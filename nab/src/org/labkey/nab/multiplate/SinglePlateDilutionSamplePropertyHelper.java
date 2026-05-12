@@ -30,7 +30,6 @@ import org.labkey.nab.NabAssayProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;

@@ -104,7 +104,7 @@
                 </tr>
                 <tr>
                     <% if (!run.getRunType().getScoreColumnList().isEmpty()) { %>
-                        <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(0)) %></td><td><%= h(p.getRawScore() == null ? "" : Formats.f3.format(p.getRawScore())) %></td>
+                        <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().getFirst()) %></td><td><%= h(p.getRawScore() == null ? "" : Formats.f3.format(p.getRawScore())) %></td>
                     <% } %>
                     <td class="labkey-form-label">PeptideProphet</td><td><%= h((p.getPeptideProphet() == null) ? "" : Formats.f2.format(p.getPeptideProphet())) %></td>
                     <td class="labkey-form-label" rowspan="2">Run</td><td rowspan="2"><%= h(run.getDescription()) %></td>
@@ -303,12 +303,7 @@ var peaks = [
         String libraMatch = libra != null ? libra.getMatch(mzs[i], 0.2) : null;
         if (libraMatch != null)
         {
-            java.util.List<Pair<Float, Float>> peaks = customHits.get(libraMatch);
-            if (peaks == null)
-            {
-                peaks = new ArrayList<>();
-                customHits.put(libraMatch, peaks);
-            }
+            java.util.List<Pair<Float, Float>> peaks = customHits.computeIfAbsent(libraMatch, _ -> new ArrayList<>());
             peaks.add(new Pair<>(mzs[i], intensities[i]));
         }
         else

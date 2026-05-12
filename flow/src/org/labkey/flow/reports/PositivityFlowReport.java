@@ -157,7 +157,7 @@ public class PositivityFlowReport extends FilterFlowReport
 
         // Filter out any wells with no background statistic
         List<Filter> filters = super.getFilters();
-        filters.add(0, new Filter(getSubset() + ":Count", "background", null, CompareType.NONBLANK.getPreferredUrlKey()));
+        filters.addFirst(new Filter(getSubset() + ":Count", "background", null, CompareType.NONBLANK.getPreferredUrlKey()));
         return filters;
     }
 

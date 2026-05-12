@@ -112,7 +112,7 @@ public abstract class BaseFlowController extends SpringActionController
         ArrayList<NavTree> children = new ArrayList<>();
         while (object != null)
         {
-            children.add(0, new NavTree(object.getLabel(), object.urlShow()));
+            children.addFirst(new NavTree(object.getLabel(), object.urlShow()));
             object = object.getParent();
         }
 

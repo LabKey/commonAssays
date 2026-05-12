@@ -61,7 +61,6 @@ import org.labkey.elisa.query.CurveFitDb;
 import org.labkey.elisa.query.ElisaManager;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -349,7 +348,7 @@ public class ElisaDataHandler extends AbstractAssayTsvDataHandler implements Tra
                     regression.addData(concentration, mean);
                 }
                 else
-                    LOG.info("Unable to find a standard concentration for the replicate well group : " + key);
+                    LOG.info("Unable to find a standard concentration for the replicate well group : {}", key);
             }
 
             if (!points.isEmpty())

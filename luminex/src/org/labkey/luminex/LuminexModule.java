@@ -22,7 +22,6 @@ import org.labkey.api.assay.AssayDefaultFlagHandler;
 import org.labkey.api.assay.AssayFlagHandler;
 import org.labkey.api.assay.AssayQCFlagColumn;
 import org.labkey.api.assay.AssayService;
-import org.labkey.api.data.Container;
 import org.labkey.api.data.UpgradeCode;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.PropertyService;
@@ -67,13 +66,6 @@ public class LuminexModule extends DefaultModule
     public boolean hasScripts()
     {
         return true;
-    }
-
-    @Override
-    @NotNull
-    public Collection<String> getSummary(Container c)
-    {
-        return Collections.emptyList();
     }
 
     @Override

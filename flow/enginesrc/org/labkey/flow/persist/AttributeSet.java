@@ -248,7 +248,7 @@ public class AttributeSet implements Serializable
 
         String existing = _keywordNames.put(keyword, keyword);
         if (existing != null && !existing.equals(keyword))
-            LOG.warn("Duplicate keyword '" + existing + "' and '" + keyword + "'");
+            LOG.warn("Duplicate keyword '{}' and '{}'", existing, keyword);
 
         _keywords.put(keyword, value);
     }
@@ -265,7 +265,7 @@ public class AttributeSet implements Serializable
         if (_keywordAliases == null)
             _keywordAliases = new CaseInsensitiveTreeMap<>();
 
-        Set<String> aliases = _keywordAliases.computeIfAbsent(spec, k -> new LinkedHashSet<>());
+        Set<String> aliases = _keywordAliases.computeIfAbsent(spec, _ -> new LinkedHashSet<>());
         aliases.add(alias);
     }
 
@@ -301,7 +301,7 @@ public class AttributeSet implements Serializable
         {
             StatisticSpec existing = _statisticNames.put(stat.toString(), stat);
             if (existing != null && !existing.toString().equals(stat.toString()))
-                LOG.warn("Duplicate statistic '" + existing + "' and '" + stat + "'");
+                LOG.warn("Duplicate statistic '{}' and '{}'", existing, stat);
             _statistics.put(stat, value);
         }
     }
@@ -343,7 +343,7 @@ public class AttributeSet implements Serializable
 
         GraphSpec existing = _graphNames.put(graph.toString(), graph);
         if (existing != null && !existing.toString().equals(graph.toString()))
-            LOG.warn("Duplicate graph '" + existing + "' and '" + graph + "'");
+            LOG.warn("Duplicate graph '{}' and '{}'", existing, graph);
 
         _graphs.put(graph, data);
     }

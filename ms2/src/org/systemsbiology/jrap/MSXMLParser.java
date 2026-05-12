@@ -246,7 +246,7 @@ public final class MSXMLParser
             indexPosition = Long.parseLong(footer);
         } catch (Exception e)
         {
-            _log.info("exception:" + e, e);
+            _log.info("exception:{}", e, e);
         }
 
         // Parse to locate indexOffset tag
@@ -262,7 +262,7 @@ public final class MSXMLParser
             fileIN.skip(indexPosition);
         } catch (Exception e)
         {
-            _log.info("File exception:" + e, e);
+            _log.info("File exception:{}", e, e);
         }
         try
         {

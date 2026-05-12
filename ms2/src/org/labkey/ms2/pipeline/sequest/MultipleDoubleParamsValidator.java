@@ -48,7 +48,7 @@ public class MultipleDoubleParamsValidator extends AbstractMultipleValueParamsVa
         double d = Double.parseDouble(value);
         if (d < _minValue || d > _maxValue)
         {
-            return "Value \"" + value + "\" for parameter \"" + spp.getInputXmlLabels().get(0) + "\" is not between " + _minValue + " and " + _maxValue + ", inclusive.";
+            return "Value \"" + value + "\" for parameter \"" + spp.getInputXmlLabels().getFirst() + "\" is not between " + _minValue + " and " + _maxValue + ", inclusive.";
         }
         return null;
     }

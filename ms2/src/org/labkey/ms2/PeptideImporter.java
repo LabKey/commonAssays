@@ -166,7 +166,7 @@ public abstract class PeptideImporter extends MS2Importer
             }
             else
             {
-                _log.warn("Could not find FASTA " + dbName);
+                _log.warn("Could not find FASTA {}", dbName);
             }
         }
 
@@ -372,7 +372,7 @@ public abstract class PeptideImporter extends MS2Importer
                 }
                 catch (SQLException e)
                 {
-                    _log.error("Failed to insert prophet info for scan " + peptide.getScan() + " with charge " + peptide.getCharge() + " from " + _gzFileName);
+                    _log.error("Failed to insert prophet info for scan {} with charge {} from {}", peptide.getScan(), peptide.getCharge(), _gzFileName);
                     throw e;
                 }
             }
@@ -394,7 +394,7 @@ public abstract class PeptideImporter extends MS2Importer
                         }
                         catch (SQLException e)
                         {
-                            _log.error("Failed to insert quantitation info for scan " + peptide.getScan() + " with charge " + peptide.getCharge() + " from " + _gzFileName);
+                            _log.error("Failed to insert quantitation info for scan {} with charge {} from {}", peptide.getScan(), peptide.getCharge(), _gzFileName);
                             throw e;
                         }
                     }
@@ -410,7 +410,7 @@ public abstract class PeptideImporter extends MS2Importer
             }
             catch (SQLException e)
             {
-                _log.error("Failed to insert scan " + peptide.getScan() + " with charge " + peptide.getCharge() + " from " + _gzFileName);
+                _log.error("Failed to insert scan {} with charge {} from {}", peptide.getScan(), peptide.getCharge(), _gzFileName);
                 throw e;
             }
 

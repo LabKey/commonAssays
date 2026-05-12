@@ -953,7 +953,7 @@ public class MS2Test extends AbstractMS2ImportTest
         List<Map<String, Object>> rows = executeSelectRowCommand("exp", "RunGroupMap").getRows();
         assertEquals("Unexpected number of rows in RunGroupMap", 5, rows.size());
 
-        Set<String> keys = rows.get(0).keySet();
+        Set<String> keys = rows.getFirst().keySet();
         for (String header : new String[] {"RunGroup", "Created", "CreatedBy", "Run"})
         {
             assertTrue("Run Group Map missing column: " + header, keys.contains(header));

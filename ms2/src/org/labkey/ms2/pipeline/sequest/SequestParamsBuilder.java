@@ -173,7 +173,7 @@ public abstract class SequestParamsBuilder
         }
 
         Param database1 = _params.getFASTAParam();
-        FileLike databaseFile = databaseFiles.get(0);
+        FileLike databaseFile = databaseFiles.getFirst();
         if (!databaseFile.exists() && !DUMMY_FASTA_NAME.equals(databaseFile.getName()))
         {
             return Collections.singletonList("pipeline, database; The database does not exist(" + databaseFile + ")");

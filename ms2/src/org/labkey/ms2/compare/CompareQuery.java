@@ -203,7 +203,7 @@ public class CompareQuery extends SQLFragment
         addColumn("RunCount");
         appendNewLine();
 
-        String firstColumnName = _gridColumns.get(0).getLabel();
+        String firstColumnName = _gridColumns.getFirst().getLabel();
 
         // Limit "pattern" to first 63 bits otherwise we'll overflow a BIGINT
         int patternRunCount = Math.min(_runs.size(), 63);
@@ -268,7 +268,7 @@ public class CompareQuery extends SQLFragment
 
         addWhereClauses(filter);
 
-        String firstType = _runs.get(0).getType();
+        String firstType = _runs.getFirst().getType();
         boolean sameType = true;
         for (MS2Run run : _runs)
         {

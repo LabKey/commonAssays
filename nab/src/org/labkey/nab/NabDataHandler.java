@@ -18,7 +18,6 @@ package org.labkey.nab;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.apache.poi.ss.usermodel.DataValidationHelper;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
 import org.labkey.api.assay.dilution.DilutionAssayRun;
@@ -53,7 +52,6 @@ import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -375,7 +373,7 @@ public abstract class NabDataHandler extends DilutionDataHandler implements Vali
         }
 
         if (!plates.isEmpty())
-            LOG.debug("found " + plates.size() + " list style plate data in " + dataFile.getName());
+            LOG.debug("found {} list style plate data in {}", plates.size(), dataFile.getName());
 
         return plates;
     }

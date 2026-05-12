@@ -94,7 +94,7 @@ public class CumulativeTimer
         double seconds = (double)elapsedTimeNano / 1000000000;
         double minutes = seconds / 60;
 
-        _log.debug(Formats.f2.format(seconds) + " seconds " + ((minutes > 1) ? ("(" + Formats.f2.format(seconds / 60) + " minutes) ") : "") + "to " + action);
+        _log.debug("{} seconds {}to {}", Formats.f2.format(seconds), (minutes > 1) ? ("(" + Formats.f2.format(seconds / 60) + " minutes) ") : "", action);
     }
 
     private class Task
@@ -112,7 +112,7 @@ public class CumulativeTimer
         private void start()
         {
             _startTime = System.nanoTime();
-            _log.info("Starting to " + getDescription());
+            _log.info("Starting to {}", getDescription());
         }
 
         private void end()
@@ -121,9 +121,8 @@ public class CumulativeTimer
 
             synchronized(_cumulativeTime)
             {
-                Long cumulative = _cumulativeTime.get(_tt);
 
-                _cumulativeTime.put(_tt, (null == cumulative ? elapsed : cumulative.longValue() + elapsed));
+                _cumulativeTime.compute(_tt, (_, cumulative) -> (null == cumulative ? elapsed : cumulative.longValue() + elapsed));
             }
 
             logElapsedTime(elapsed, getDescription());

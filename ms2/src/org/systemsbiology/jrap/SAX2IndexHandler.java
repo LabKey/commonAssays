@@ -183,7 +183,7 @@ public final class SAX2IndexHandler extends DefaultHandler
 
     /** Characters. */
     @Override
-    public void characters(char ch[], int start, int length)
+    public void characters(char[] ch, int start, int length)
     {
         if (foundIdxOffset || foundScanOffset)
         {
@@ -193,7 +193,7 @@ public final class SAX2IndexHandler extends DefaultHandler
 
     /** Ignorable whitespace. */
     @Override
-    public void ignorableWhitespace(char ch[], int start, int length)
+    public void ignorableWhitespace(char[] ch, int start, int length)
     {
         // Do nothing
     } // ignorableWhitespace(char[],int,int);

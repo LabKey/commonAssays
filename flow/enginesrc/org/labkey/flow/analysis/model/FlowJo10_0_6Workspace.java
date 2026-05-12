@@ -124,7 +124,7 @@ public class FlowJo10_0_6Workspace extends PC75Workspace
 
         if (axes.size() == 1)
         {
-            return new IntervalGate(axes.get(0), lstMin.get(0), lstMax.get(0));
+            return new IntervalGate(axes.getFirst(), lstMin.getFirst(), lstMax.getFirst());
         }
         else if (axes.size() == 2)
         {

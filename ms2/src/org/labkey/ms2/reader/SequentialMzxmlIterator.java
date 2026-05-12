@@ -143,7 +143,7 @@ public class SequentialMzxmlIterator extends AbstractMzxmlIterator
             }
             catch (XMLStreamException e)
             {
-                _log.error("Failed to parse file " + _file, e);
+                _log.error("Failed to parse file {}", _file, e);
                 return false;
             }
         }

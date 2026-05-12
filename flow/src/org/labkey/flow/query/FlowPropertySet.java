@@ -72,8 +72,7 @@ public class FlowPropertySet
                 String name = spec.getSubset().toString();
                 if (ret.containsKey(name))
                 {
-                    SubsetSpec spec2 = ret.get(name);
-                    ret.put(name, SubsetSpec.commonAncestor(spec, spec2));
+                    ret.compute(name, (_, spec2) -> SubsetSpec.commonAncestor(spec, spec2));
                 }
                 else
                 {
@@ -153,7 +152,7 @@ public class FlowPropertySet
         catch (Exception e)
         {
             assert false : "Error with subset '" + subset + "' and ancestor '" + commonAncestor + "'";
-            _log.error("Error with subset '" + subset + "' and ancestor '" + commonAncestor + "'", e);
+            _log.error("Error with subset '{}' and ancestor '{}'", subset, commonAncestor, e);
             return subset;
         }
     }
@@ -219,7 +218,6 @@ public class FlowPropertySet
         {
             var subset1 = SubsetSpec.fromParts(StringUtils.split("Trucount beads-/CD45+, less debris/Singlets/CD45+/CD14-/CD3+ T/CD4+ T/CD127low-,CD25+ (Treg)",'/'));
             var subset2 = SubsetSpec.fromParts(StringUtils.split("trucount beads-/CD45+, less debris/Singlets/CD45+/CD14-/CD3+ T/CD4+ T/CD127low-,CD25+ (Treg)",'/'));
-            SubsetSpec simplify1, simplify2;
 
             // this tests that we do not hit the assert in the catch block in simplifySubset()
             FlowPropertySet fps = new FlowPropertySet(JunitUtil.getTestContainer());

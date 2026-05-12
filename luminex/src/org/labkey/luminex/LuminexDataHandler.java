@@ -100,7 +100,6 @@ import org.labkey.luminex.query.LuminexDataTable;
 import org.labkey.luminex.query.LuminexProtocolSchema;
 import org.labkey.vfs.FileLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -169,7 +168,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
     {
         if (!dataFile.exists())
         {
-            log.warn("Could not find file " + dataFile + " on disk for data with LSID " + data.getLSID());
+            log.warn("Could not find file {} on disk for data with LSID {}", dataFile, data.getLSID());
             return;
         }
         ExpRun expRun = data.getRun();
@@ -528,7 +527,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
         }
         catch (SQLException e)
         {
-            log.error("Failed to load from data file " + data.getFile().getAbsolutePath(), e);
+            log.error("Failed to load from data file {}", data.getFile().getAbsolutePath(), e);
             throw new ExperimentException("Failed to load from data file " + data.getFile().getAbsolutePath() + "(" + e + ")", e);
         }
     }
@@ -945,13 +944,13 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             }
             else
             {
-                LOGGER.warn("Could not parse standard curve: " + stdCurve);
+                LOGGER.warn("Could not parse standard curve: {}", stdCurve);
             }
         }
 
         if (!wellGroup.getWellData(false).isEmpty())
         {
-            LuminexDataRow firstDataRow = wellGroup.getWellData(false).get(0)._dataRow;
+            LuminexDataRow firstDataRow = wellGroup.getWellData(false).getFirst()._dataRow;
             CurveFit rumi5PLFit = importRumiCurveFit(StatsService.CurveFitType.FIVE_PARAMETER, firstDataRow, wellGroup, user, titration, analyte, existingCurveFits);
             if (rumi5PLFit != null)
             {
@@ -1035,7 +1034,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
 
         if (!wells.isEmpty())
         {
-            LuminexWell previousWell = wells.get(0);
+            LuminexWell previousWell = wells.getFirst();
             for (int i = 1; i < wells.size(); i++)
             {
                 LuminexWell well = wells.get(i);
@@ -1174,7 +1173,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             LuminexWellGroup group = new LuminexWellGroup(wells);
 
             assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
-            assertEquals("Check replicate value", 30427.0, group.getWellData(true).get(0).getValue(), DELTA);
+            assertEquals("Check replicate value", 30427.0, group.getWellData(true).getFirst().getValue(), DELTA);
             assertEquals("Check number of raw wells", 10, group.getWellData(false).size());
 
             assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0, DELTA);
@@ -1195,7 +1194,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             group = new LuminexWellGroup(wells);
 
             assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
-            assertEquals("Check replicate value", 10.5, group.getWellData(true).get(0).getValue(), DELTA);
+            assertEquals("Check replicate value", 10.5, group.getWellData(true).getFirst().getValue(), DELTA);
             assertEquals("Check number of raw wells", 10, group.getWellData(false).size());
 
             assertEquals("AUC", 74375.6, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0, DELTA);
@@ -1230,7 +1229,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             LuminexWellGroup group = new LuminexWellGroup(wells);
 
             assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
-            assertEquals("Check replicate value", 30427.0, group.getWellData(true).get(0).getValue(), DELTA);
+            assertEquals("Check replicate value", 30427.0, group.getWellData(true).getFirst().getValue(), DELTA);
             assertEquals("Check number of raw wells", 20, group.getWellData(false).size());
 
             assertEquals("AUC", 60310.8, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0, DELTA);
@@ -1261,7 +1260,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             group = new LuminexWellGroup(wells);
 
             assertEquals("Check number of replicates found", 10, group.getWellData(true).size());
-            assertEquals("Check replicate value", 10.5, group.getWellData(true).get(0).getValue(), DELTA);
+            assertEquals("Check replicate value", 10.5, group.getWellData(true).getFirst().getValue(), DELTA);
             assertEquals("Check number of raw wells", 20, group.getWellData(false).size());
 
             assertEquals("AUC", 74375.6, Math.round(new LuminexDataHandler().calculateTrapezoidalAUC(group, null) * 10.0) / 10.0, DELTA);
@@ -1386,7 +1385,7 @@ public class LuminexDataHandler extends AbstractExperimentDataHandler implements
             // Issue 16767
             assertEquals("Wrong out of guide set range type", "over", GuideSet.getOutOfRangeType(0.024779, 0.016229, null));
             assertEquals("Wrong out of guide set range type", "under", GuideSet.getOutOfRangeType(0.017644, 0.021754, null));
-            assertEquals("Wrong out of guide set range type", null, GuideSet.getOutOfRangeType(0.017644, 0.017644, 0.0));
+            assertNull("Wrong out of guide set range type", GuideSet.getOutOfRangeType(0.017644, 0.017644, 0.0));
         }
     }
 

@@ -1121,7 +1121,7 @@ public class NabAssayController extends SpringActionController
                             List<Map<String, Object>> rawData = dataHandler.calculateDilutionStats(run, getUser(), null, true, true);
                             if (!rawData.isEmpty())
                             {
-                                ExpData data = run.getDataOutputs().get(0);
+                                ExpData data = run.getDataOutputs().getFirst();
                                 List<Map<String, Object>> specimenRows = new ArrayList<>();
                                 List<Map<String, Object>> cutoffRows = new ArrayList<>();
                                 Map<String, Integer> specimenLsidToRowid = new HashMap<>();

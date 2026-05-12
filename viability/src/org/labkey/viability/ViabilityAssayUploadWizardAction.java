@@ -55,8 +55,6 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.web.servlet.ModelAndView;
 
-import jakarta.servlet.ServletException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -214,7 +212,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                     initialValue = row.get(propertyName);
 
                 // third, if the field is editable get the property's default value from a previous run
-                String lowerPoolID = poolID.replaceAll(" ", "").toLowerCase();
+                String lowerPoolID = poolID.replace(" ", "").toLowerCase();
                 Map<String, Object> reRun = reRunResults.get(lowerPoolID);
                 if (copyReRunValue && reRun != null && reRun.containsKey(propertyName))
                     initialValue = reRun.get(propertyName);
@@ -362,7 +360,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         }
 
         @Override
-        public boolean executeStep(ViabilityAssayRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public boolean executeStep(ViabilityAssayRunUploadForm form, BindException errors)
         {
             try (DbScope.Transaction transaction = ExperimentService.get().ensureTransaction())
             {
@@ -414,7 +412,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
         }
 
         @Override
-        public ModelAndView getNextStep(ViabilityAssayRunUploadForm form, BindException errors) throws ServletException, SQLException, ExperimentException
+        public ModelAndView getNextStep(ViabilityAssayRunUploadForm form, BindException errors) throws ExperimentException
         {
             if (form.isResetDefaultValues() || errors.hasErrors())
                 return getResultsView(form, !form.isResetDefaultValues(), errors);

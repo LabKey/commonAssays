@@ -19,7 +19,6 @@ package org.labkey.test.tests.luminex;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.BeforeClass;
 import org.labkey.api.query.QueryKey;
-import org.labkey.api.util.FileUtil;
 import org.labkey.remoteapi.CommandException;
 import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.assay.GetProtocolCommand;
@@ -683,7 +682,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
         _customizeViewsHelper.saveCustomView();
 
         //verify expected values in column
-        List<String> var = new DataRegionTable("Runs", getDriver()).getFullColumnValues("QC Flags").get(0);
+        List<String> var = new DataRegionTable("Runs", getDriver()).getFullColumnValues("QC Flags").getFirst();
         String[] flags = var.toArray(new String[0]);
         for (int i=0; i<flags.length; i++)
         {

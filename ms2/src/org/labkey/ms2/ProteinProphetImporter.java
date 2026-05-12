@@ -85,7 +85,7 @@ public class ProteinProphetImporter
     public MS2Run importFile(ViewBackgroundInfo info, Logger log) throws SQLException, XMLStreamException, IOException, ExperimentException
     {
         long startTime = System.currentTimeMillis();
-        log.info("Starting to load ProteinProphet file " + _file.getPath());
+        log.info("Starting to load ProteinProphet file {}", _file.getPath());
 
         if (!NetworkDrive.exists(_file))
         {
@@ -204,7 +204,7 @@ public class ProteinProphetImporter
                     }
                     if (proteinGroupIndex % 10000 == 0)
                     {
-                        log.info("Loaded " + proteinGroupIndex + " protein groups...");
+                        log.info("Loaded {} protein groups...", proteinGroupIndex);
                     }
                 }
 
@@ -228,7 +228,7 @@ public class ProteinProphetImporter
                 mergePeptideStmt = connection.prepareStatement(mergePeptideSQL);
                 mergePeptideStmt.setLong(1, run.getRun());
                 mergePeptideStmt.executeUpdate();
-                log.info("Finished with moving data into ms2.PeptidesMemberships after " + (System.currentTimeMillis() - insertStartTime) + " ms");
+                log.info("Finished with moving data into ms2.PeptidesMemberships after {} ms", System.currentTimeMillis() - insertStartTime);
 
                 insertStartTime = System.currentTimeMillis();
                 log.info("Starting to move data into ms2.ProteinGroupMemberships");
@@ -256,14 +256,14 @@ public class ProteinProphetImporter
                     mergeProteinStmt.setInt(index++, fastaId);
                 }
                 mergeProteinStmt.executeUpdate();
-                log.info("Finished with moving data into ms2.ProteinGroupMemberships after " + (System.currentTimeMillis() - insertStartTime) + " ms");
+                log.info("Finished with moving data into ms2.ProteinGroupMemberships after {} ms", System.currentTimeMillis() - insertStartTime);
 
                 file.setUploadCompleted(true);
                 Table.update(info.getUser(), MS2Manager.getTableInfoProteinProphetFiles(), file, file.getRowId());
 
                 success = true;
 
-                log.info("ProteinProphet file import finished successfully, " + proteinGroupIndex + " protein groups loaded");
+                log.info("ProteinProphet file import finished successfully, {} protein groups loaded", proteinGroupIndex);
             }
             finally
             {
@@ -307,11 +307,11 @@ public class ProteinProphetImporter
 
             if (!success)
             {
-                log.error("Failed when importing group " + proteinGroupIndex);
+                log.error("Failed when importing group {}", proteinGroupIndex);
             }
         }
         long endTime = System.currentTimeMillis();
-        log.info("ProteinProphet import took " + ((endTime - startTime) / 1000) + " seconds.");
+        log.info("ProteinProphet import took {} seconds.", (endTime - startTime) / 1000);
         return run;
     }
 
@@ -322,12 +322,12 @@ public class ProteinProphetImporter
         {
             if (ppFile.isUploadCompleted())
             {
-                logger.info(_file.getPath() + " had already been uploaded successfully, not uploading again.");
+                logger.info("{} had already been uploaded successfully, not uploading again.", _file.getPath());
                 return MS2Manager.getRun(ppFile.getRun());
             }
             else
             {
-                logger.info(_file.getPath() + " had already been partially uploaded, deleting the existing data.");
+                logger.info("{} had already been partially uploaded, deleting the existing data.", _file.getPath());
                 MS2Manager.purgeProteinProphetFile(ppFile.getRowId());
             }
         }
@@ -388,7 +388,7 @@ public class ProteinProphetImporter
             }
         }
 
-        log.info("Resolved referenced PepXML file to " + pepXMLFile.getPath());
+        log.info("Resolved referenced PepXML file to {}", pepXMLFile.getPath());
         MS2Run run = MS2Manager.addRun(info, log, FileSystemLike.wrapFile(pepXMLFile), false, _context);
         if (_experimentRunLSID != null && run.getExperimentRunLSID() == null)
         {

@@ -27,6 +27,7 @@ import org.labkey.test.util.DataRegionTable;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @Category({Daily.class, Assays.class})
@@ -100,7 +101,7 @@ public class LuminexEC50Test extends LuminexTest
                 assertEquals(" ", ec50.get(i));
                 //auc=populated (for all non-blank analytes)
                 if (!analyte.get(i).startsWith("Blank"))
-                    assertTrue( "AUC was unpopulated for row " + i, !auc.get(i).isEmpty());
+                    assertFalse("AUC was unpopulated for row " + i, auc.get(i).isEmpty());
             }
         }
 
@@ -114,7 +115,7 @@ public class LuminexEC50Test extends LuminexTest
         table.setFilter("CurveType", "Equals", "Four Parameter");
         assertEquals("Expected one Four Parameter curve fit failure flag", 1, table.getDataRowCount());
         List<String> values = table.getColumnDataAsText("Analyte");
-        assertTrue("Unexpected analyte for Four Parameter curve fit failure", values.size() == 1 && values.get(0).equals("ENV6"));
+        assertTrue("Unexpected analyte for Four Parameter curve fit failure", values.size() == 1 && values.getFirst().equals("ENV6"));
         table.clearFilter("CurveType");
 
         // expect no 5PL curve fits

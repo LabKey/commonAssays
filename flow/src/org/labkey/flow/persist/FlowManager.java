@@ -384,12 +384,12 @@ public class FlowManager
             if (!caseSensitive)
             {
                 // Use the first attribute, sorted by case
-                int rowId = others.get(0)._rowId;
+                int rowId = others.getFirst()._rowId;
 
                 // If more than one attribute matches, check that all are pointing to the same preferred attribute
                 if (others.size() > 1)
                 {
-                    int preferredId = others.get(0)._aliasId;
+                    int preferredId = others.getFirst()._aliasId;
                     if (others.stream().anyMatch(item -> item._aliasId != preferredId))
                         throw new FlowCasingMismatchException("Can't create " + type + " with same casing as other " + type + "s when there is more than one preferred attribute.", sampleLabel, type, others, attr);
                 }
@@ -1292,7 +1292,7 @@ public class FlowManager
                 merge(allMetrics, containerMetrics);
             }
 
-            _log.debug("Collected flow usage metrics:\n" + allMetrics);
+            _log.debug("Collected flow usage metrics:\n{}", allMetrics);
             return allMetrics;
         });
     }
@@ -1341,7 +1341,7 @@ public class FlowManager
     // Get usage metrics in a single container
     public Map<String, Object> getUsageMetrics(User user, Container c, boolean includeAttributeCounts)
     {
-        _log.debug("Collecting metrics in '" + c.getPath() + "'");
+        _log.debug("Collecting metrics in '{}'", c.getPath());
         Map<String, Object> metrics = new LinkedHashMap<>();
 
         FlowSchema schema = new FlowSchema(user, c);
@@ -1393,7 +1393,7 @@ public class FlowManager
             metrics.put("graph", getAttributeMetrics(AttributeType.graph));
         }
 
-        _log.debug("Collected metrics in '" + c.getPath() + "':\n" + metrics);
+        _log.debug("Collected metrics in '{}':\n{}", c.getPath(), metrics);
         return metrics;
     }
 
@@ -1419,7 +1419,7 @@ public class FlowManager
     public int getTempTableCount()
     {
         return new SqlSelector(DbScope.getLabKeyScope(), "SELECT COUNT(*) FROM information_schema.tables \n" +
-                "WHERE TABLE_SCHEMA = 'temp' and (table_name LIKE 'ffo%' or table_name LIKE 'fbg%')").getArrayList(Integer.class).get(0);
+                "WHERE TABLE_SCHEMA = 'temp' and (table_name LIKE 'ffo%' or table_name LIKE 'fbg%')").getArrayList(Integer.class).getFirst();
     }
 
     public Map<String, Object> getAttributeMetrics(AttributeType attributeType)
@@ -1460,7 +1460,7 @@ public class FlowManager
 
         Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
         //TODO: multiple aggregates
-        Aggregate.Result result = agg.get(aggregates.get(0).getColumnName()).get(0);
+        Aggregate.Result result = agg.get(aggregates.getFirst().getColumnName()).getFirst();
         if (result != null && result.getValue() instanceof Number n)
             return n.intValue();
 
@@ -1478,7 +1478,7 @@ public class FlowManager
         List<Aggregate> aggregates = Collections.singletonList(new Aggregate(FieldKey.fromParts("RowId"), Aggregate.BaseType.COUNT));
         List<ColumnInfo> columns = Collections.singletonList(table.getColumn("RowId"));
         Map<String, List<Aggregate.Result>> agg = new TableSelector(table, columns, filter, null).getAggregates(aggregates);
-        Aggregate.Result result = agg.get("RowId").get(0);
+        Aggregate.Result result = agg.get("RowId").getFirst();
         if (result != null && result.getValue() instanceof Number)
             return ((Number)result.getValue()).intValue();
 
@@ -1680,7 +1680,7 @@ public class FlowManager
                 String dateStr = (String) row.get("datetime");
                 if (dateStr == null)
                 {
-                    _log.info("Skipping update for row; no datetime keywords for row: " + row);
+                    _log.info("Skipping update for row; no datetime keywords for row: {}", row);
                     return;
                 }
 
@@ -1693,11 +1693,11 @@ public class FlowManager
                 {
                     if (!d.equals(currentDate))
                     {
-                        _log.warn("Current date value '" + currentDate + "' does not match parsed date '" + d + "' for row: " + row);
+                        _log.warn("Current date value '{}' does not match parsed date '{}' for row: {}", currentDate, d, row);
                     }
                     else
                     {
-                        _log.debug("Skipping update for row; current date value matches the parsed date '" + d + "' for row: " + row);
+                        _log.debug("Skipping update for row; current date value matches the parsed date '{}' for row: {}", d, row);
                     }
                 }
                 else

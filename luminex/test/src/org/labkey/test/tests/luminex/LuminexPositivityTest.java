@@ -161,7 +161,7 @@ public final class LuminexPositivityTest extends LuminexTest
         createNewAssayRun(TEST_ASSAY_LUM, RUN_ID_BASE + " Threshold Default Test");
         checkCheckbox(Locator.name("CalculatePositivity"));
         selectPositivityFile(TEST_ASSAY_LUM_FILE12, true);
-        verifyAnalytePosThresholdValue(_analyteNames.get(0), 98);
+        verifyAnalytePosThresholdValue(_analyteNames.getFirst(), 98);
         clickButton("Cancel");
     }
 
@@ -185,9 +185,9 @@ public final class LuminexPositivityTest extends LuminexTest
         setNegativeControlParams(true, false);
         uploadPositivityFile(TEST_ASSAY_LUM, RUN_ID_BASE + " Baseline Visit Previous Run Error", TEST_ASSAY_LUM_FILE12, "1", "3", false, false);
         assertTextPresent(
-                "Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=" + _analyteNames.get(0) + ", Participant=123400001, Visit=1.",
-                "Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=" + _analyteNames.get(0) + ", Participant=123400002, Visit=1.",
-                "Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=" + _analyteNames.get(0) + ", Participant=123400003, Visit=1.");
+                "Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=" + _analyteNames.getFirst() + ", Participant=123400001, Visit=1.",
+                "Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=" + _analyteNames.getFirst() + ", Participant=123400002, Visit=1.",
+                "Error: Baseline visit data found in more than one prevoiusly uploaded run: Analyte=" + _analyteNames.getFirst() + ", Participant=123400003, Visit=1.");
         clickButton("Cancel");
 
         // delete all but one run of data so we have the expected number of previous baseline visits rows
@@ -204,7 +204,7 @@ public final class LuminexPositivityTest extends LuminexTest
 
         // now we exclude the analytes in the remaining run to test that version of the baseline visit query
         waitAndClickAndWait(Locator.linkWithText(runToKeep));
-        excludeAnalyteForRun(_analyteNames.get(0), true, "");
+        excludeAnalyteForRun(_analyteNames.getFirst(), true, "");
         verifyExclusionPipelineJobComplete(2, "INSERT analyte exclusion", runToKeep, "");
 
         setPositivityThresholdParams(100, 99);
@@ -213,7 +213,7 @@ public final class LuminexPositivityTest extends LuminexTest
         checkPositivityValues("negative", 0, new String[0], drt);
         clickAndWait(Locator.linkWithText("view runs"));
         waitAndClickAndWait(Locator.linkWithText(runToKeep));
-        excludeAnalyteForRun(_analyteNames.get(0), false, "");
+        excludeAnalyteForRun(_analyteNames.getFirst(), false, "");
         _extHelper.waitForExtDialog("Warning");
         _extHelper.clickExtButton("Warning", "Yes", 0);
         verifyExclusionPipelineJobComplete(3, "DELETE analyte exclusion", runToKeep, "");

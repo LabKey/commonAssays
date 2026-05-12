@@ -111,11 +111,11 @@ public class LuminexManager
                 StringBuilder sb = new StringBuilder();
                 if (commands.size() > 1)
                 {
-                    sb.append("MULTIPLE " + getDescription(commands.get(0)).toLowerCase() + "s");
+                    sb.append("MULTIPLE " + getDescription(commands.getFirst()).toLowerCase() + "s");
                 }
                 else if (commands.size() == 1)
                 {
-                    LuminexSingleExclusionCommand command = commands.get(0);
+                    LuminexSingleExclusionCommand command = commands.getFirst();
                     sb.append(command.getCommand().toUpperCase()).
                             append(" ").
                             append(getDescription(command).toLowerCase()).
@@ -174,7 +174,7 @@ public class LuminexManager
                 String info = "MULTIPLE " + getDescription(null).toLowerCase() + "s";
                 if (commands.size() == 1)
                 {
-                    LuminexSingleExclusionCommand command = commands.get(0);
+                    LuminexSingleExclusionCommand command = commands.getFirst();
                     info = command.getCommand().toUpperCase() + " " + getDescription(command).toLowerCase()
                             + " (Description: " + command.getDescription() + ", Dilution: " + command.getDilution() + ")";
                 }
@@ -209,7 +209,7 @@ public class LuminexManager
                 String info = "MULTIPLE " + getDescription(null).toLowerCase() + "s";
                 if (commands.size() == 1)
                 {
-                    LuminexSingleExclusionCommand command = commands.get(0);
+                    LuminexSingleExclusionCommand command = commands.getFirst();
                     info = command.getCommand().toUpperCase() + " " + getDescription(command).toLowerCase()
                             + " (Description: " + command.getDescription() + ")";
                 }
@@ -242,7 +242,7 @@ public class LuminexManager
                 String info = getDescription(null).toLowerCase();
                 if (commands.size() == 1)
                 {
-                    info = commands.get(0).getCommand().toUpperCase() + " " + info;
+                    info = commands.getFirst().getCommand().toUpperCase() + " " + info;
                 }
                 return info;
             }
@@ -606,38 +606,39 @@ public class LuminexManager
                     if (exclusionType == null)
                         exclusionType = command.getExclusionType();
 
-                    logger.info("Starting " + command.getCommand() + " " +  exclusionType.getDescription(command).toLowerCase());
+                    logger.info("Starting {} {}", command.getCommand(), exclusionType.getDescription(command).toLowerCase());
 
                     rows.add(exclusionType.getRowMap(command, runId, false));
                     keys.add(exclusionType.getRowMap(command, runId, true));
 
-                    String logVerb;
-                    switch (command.getCommand())
+                    String logVerb = switch (command.getCommand())
                     {
-                        case "insert":
+                        case "insert" ->
+                        {
                             results = qus.insertRows(user, c, rows, errors, options, additionalContext);
-                            logVerb = " inserted into ";
-                            break;
-                        case "update":
+                            yield " inserted into ";
+                        }
+                        case "update" ->
+                        {
                             results = qus.updateRows(user, c, rows, keys, errors, options, additionalContext);
-                            logVerb = " updated in ";
-                            break;
-                        case "delete":
+                            yield " updated in ";
+                        }
+                        case "delete" ->
+                        {
                             results = qus.deleteRows(user, c, keys, options, additionalContext);
-                            logVerb = " deleted from ";
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Invalid command type: " + command.getCommand());
-                    }
+                            yield " deleted from ";
+                        }
+                        default -> throw new IllegalArgumentException("Invalid command type: " + command.getCommand());
+                    };
 
-                    logger.info(StringUtilsLabKey.pluralize(results.size(), "record") + logVerb + tableInfo.getName());
+                    logger.info("{}{}{}", StringUtilsLabKey.pluralize(results.size(), "record"), logVerb, tableInfo.getName());
 
                     if (errors.hasErrors())
                     {
                         throw errors;
                     }
 
-                    logger.info("Finished " + command.getCommand() + " " +  exclusionType.getDescription(command).toLowerCase());
+                    logger.info("Finished {} {}", command.getCommand(), exclusionType.getDescription(command).toLowerCase());
                 }
             }
         }

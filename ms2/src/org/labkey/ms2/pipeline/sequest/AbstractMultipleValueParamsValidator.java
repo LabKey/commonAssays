@@ -41,12 +41,12 @@ public abstract class AbstractMultipleValueParamsValidator implements IParamsVal
         String value = spp.getValue();
         if (value == null)
         {
-            return "\"" + spp.getInputXmlLabels().get(0) + "\" must have " + getValueCount() + " values. " + getValueDescription();
+            return "\"" + spp.getInputXmlLabels().getFirst() + "\" must have " + getValueCount() + " values. " + getValueDescription();
         }
         String[] values = value.split("\\s");
         if (values.length != getValueCount())
         {
-            return "\"" + spp.getInputXmlLabels().get(0) + "\" must have " + getValueCount() + " values, but had " + values.length + ". " + getValueDescription();
+            return "\"" + spp.getInputXmlLabels().getFirst() + "\" must have " + getValueCount() + " values, but had " + values.length + ". " + getValueDescription();
         }
 
         for (String s : values)
@@ -61,7 +61,7 @@ public abstract class AbstractMultipleValueParamsValidator implements IParamsVal
             }
             catch (NumberFormatException e)
             {
-                return "Could not parse value \"" + s + "\" for parameter \"" + spp.getInputXmlLabels().get(0) + "\". " + getValueDescription();
+                return "Could not parse value \"" + s + "\" for parameter \"" + spp.getInputXmlLabels().getFirst() + "\". " + getValueDescription();
             }
         }
 

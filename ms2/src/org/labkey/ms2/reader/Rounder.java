@@ -22,10 +22,10 @@ package org.labkey.ms2.reader;
 public class Rounder
 {
     //utility array
-    protected static final double factors[] =
+    protected static final double[] factors =
             {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
 
-    protected static final float floatFactors[] =
+    protected static final float[] floatFactors =
             {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
 
     /**

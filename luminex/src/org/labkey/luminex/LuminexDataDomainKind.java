@@ -17,7 +17,6 @@ package org.labkey.luminex;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayDomainKind;
-import org.labkey.api.collections.CaseInsensitiveHashSet;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainUtil;
 import org.labkey.api.security.User;

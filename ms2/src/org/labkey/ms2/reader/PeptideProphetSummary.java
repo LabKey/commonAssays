@@ -451,9 +451,9 @@ public class PeptideProphetSummary extends SensitivitySummary
             assertEquals(4.5, parseTPPVersion("PeptideProphet  (TPP v4.5.1 JETSTREAM rev 1, Build 201011301302 (linux))"), DELTA);
 
             // Test some garbage input
-            assertEquals(null, parseTPPVersion("PeptideProphet  (TPP vBAD JETSTREAM rev 1, Build 201011301302 (linux))"));
-            assertEquals(null, parseTPPVersion(null));
-            assertEquals(null, parseTPPVersion("PeptideProphet"));
+            assertNull(parseTPPVersion("PeptideProphet  (TPP vBAD JETSTREAM rev 1, Build 201011301302 (linux))"));
+            assertNull(parseTPPVersion(null));
+            assertNull(parseTPPVersion("PeptideProphet"));
         }
     }
 }

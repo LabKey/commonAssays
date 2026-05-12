@@ -375,7 +375,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             if (lookupColumn != null)
                 selectedColumns.add(lookupColumn);
             else
-                _log.warn("Flow sample join property '" + propertyName + "' not found on SampleType");
+                _log.warn("Flow sample join property '{}' not found on SampleType", propertyName);
         }
 
         Map<Long, ExpMaterial> materialMap = new LongHashMap<>();
@@ -428,17 +428,17 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
     public int updateSampleIds(User user)
     {
-        _log.info("updateSampleIds: protocol=" + this.getName() + ", folder=" + this.getContainerPath());
+        _log.info("updateSampleIds: protocol={}, folder={}", this.getName(), this.getContainerPath());
 
         ExperimentService svc = ExperimentService.get();
         Map<String, FieldKey> joinFields = getSampleTypeJoinFields();
-        _log.debug("joinFields: " + joinFields);
+        _log.debug("joinFields: {}", joinFields);
 
         Map<SampleKey, ExpMaterial> sampleMap = getSampleMap(user);
-        _log.debug("sampleMap=" + sampleMap.size());
+        _log.debug("sampleMap={}", sampleMap.size());
 
         ExpSampleType st = getSampleType();
-        _log.debug("sampleType=" + (st == null ? "<none>" : st.getName()) + ", lsid=" + (st == null ? "<none>" : st.getLSID()));
+        _log.debug("sampleType={}, lsid={}", st == null ? "<none>" : st.getName(), st == null ? "<none>" : st.getLSID());
 
         FlowSchema schema = new FlowSchema(user, getContainer());
         TableInfo fcsFilesTable = schema.getTable("FCSFiles");
@@ -477,7 +477,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             {
                 Long fcsFileId = colRowId.getLongValue(rs);
                 ExpData fcsFile = fcsFileMap.get(fcsFileId);
-                _log.debug("-- fcsFileId=" + fcsFileId + ", fcsFile=" + fcsFile);
+                _log.debug("-- fcsFileId={}, fcsFile={}", fcsFileId, fcsFile);
                 if (fcsFile == null)
                     continue;
                 fcsFileCount++;
@@ -492,12 +492,12 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     }
                     key.addValue(value);
                 }
-                _log.debug("   sampleKey=" + key);
+                _log.debug("   sampleKey={}", key);
 
                 ExpMaterial sample = sampleMap.get(key);
                 Long newSampleId = sample == null ? null : sample.getRowId();
                 Object oldSampleId = colSampleId.getValue(rs);
-                _log.debug("   newSampleId=" + newSampleId + ", oldSampleId=" + oldSampleId);
+                _log.debug("   newSampleId={}, oldSampleId={}", newSampleId, oldSampleId);
                 if (Objects.equals(newSampleId, oldSampleId))
                 {
                     unchanged++;
@@ -511,7 +511,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     _log.debug("   orphaned FCSFile");
                     continue;
                 }
-                _log.debug("   protocol app=" + app.getName());
+                _log.debug("   protocol app={}", app.getName());
 
                 boolean changed = false;
                 boolean found = false;
@@ -519,7 +519,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 {
                     if (material.getCpasType() == null || !Objects.equals(material.getCpasType(), st.getLSID()))
                     {
-                        _log.debug("   sample's sampletype isn't ours: " + material.getCpasType());
+                        _log.debug("   sample's sampletype isn't ours: {}", material.getCpasType());
                         continue;
                     }
                     if (sample != null)
@@ -532,7 +532,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                             break;
                         }
                     }
-                    _log.debug("   found previously linked sample no longer needed, remove = " + material.getName());
+                    _log.debug("   found previously linked sample no longer needed, remove = {}", material.getName());
                     app.removeMaterialInput(user, material);
                     changed = true;
                 }
@@ -553,7 +553,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
 
             if (!fcsFileRuns.isEmpty())
             {
-                _log.info(fcsFileRuns.size() + " runs changed, syncing edges");
+                _log.info("{} runs changed, syncing edges", fcsFileRuns.size());
                 ExperimentService.get().syncRunEdges(fcsFileRuns);
             }
 
@@ -572,7 +572,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             throw new RuntimeSQLException(e);
         }
 
-        _log.debug("fcsFileCount=" + fcsFileCount + ", sampleCount=" + sampleMap.size() + ", linked=" + linked + ", unchanged=" + unchanged);
+        _log.debug("fcsFileCount={}, sampleCount={}, linked={}, unchanged={}", fcsFileCount, sampleMap.size(), linked, unchanged);
         return linked;
     }
 
@@ -639,7 +639,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                     sampleIds.add(sampleRowId);
                     if (fcsFileRowId != null)
                     {
-                        var fcsFiles = samplesToFcsFiles.computeIfAbsent(sampleRowId, k -> new ArrayList<>());
+                        var fcsFiles = samplesToFcsFiles.computeIfAbsent(sampleRowId, _ -> new ArrayList<>());
                         fcsFiles.add(fcsFileRowId);
                         linkedFcsFileCount++;
                     }
@@ -815,7 +815,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             while (rs.next())
             {
                 int rowid = ((Number) colRowId.getValue(rs)).intValue();
-                FlowObject obj = FlowDataObject.fromRowId(rowid);
+                FlowObject<?> obj = FlowDataObject.fromRowId(rowid);
                 if (obj instanceof FlowFCSAnalysis)
                 {
                     ExpData data = ((FlowFCSAnalysis) obj).getData();
@@ -956,7 +956,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         StringBuilder ret = new StringBuilder("Protocol Settings (");
         if (parts.size() ==1)
         {
-            ret.append(parts.get(0));
+            ret.append(parts.getFirst());
         }
         else
         {
@@ -1013,7 +1013,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             assertNotNull(runs);
             assertEquals(1, runs.size());
 
-            FlowRun run = runs.get(0);
+            FlowRun run = runs.getFirst();
             long runId = run.getRunId();
             FlowFCSFile[] fcsFiles = run.getFCSFiles();
             assertEquals(2, fcsFiles.length);
@@ -1080,7 +1080,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
             {
                 List<? extends ExpMaterial> samples = file.getSamples();
                 assertEquals(1, samples.size());
-                ExpMaterial sample = samples.get(0);
+                ExpMaterial sample = samples.getFirst();
 
                 String WELL_ID = file.getKeyword("WELL ID");
                 String wellId = (String)sample.getProperty(wellIdProp);

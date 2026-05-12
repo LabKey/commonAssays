@@ -160,7 +160,7 @@ public class SampleUtil
                 }
 
                 if (maxMatches >= MIN_MATCHES && candidates[maxMatches].size() == 1)
-                    perfectMatch = candidates[maxMatches].get(0);
+                    perfectMatch = candidates[maxMatches].getFirst();
 
                 for (int i = candidates.length-1; i >= 0; i--)
                     partialMatches.addAll(candidates[i]);

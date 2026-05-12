@@ -263,7 +263,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
     public void beforeDeleteData(List<ExpData> datas, User user)
     {
         // Don't bother calling super, since we aren't storing data in StorageProvisioner backed tables
-        Container c = datas.get(0).getContainer();
+        Container c = datas.getFirst().getContainer();
         ViabilityManager.deleteAll(datas, c);
     }
 
@@ -436,17 +436,17 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             List<Map<String, Object>> rows = parser.getResultData();
             assertEquals("Expected 3 rows", 3, rows.size());
 
-            Map<String, Object> row = rows.get(0);
+            Map<String, Object> row = rows.getFirst();
             assertEquals(8, row.size());
             assertEquals(1, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
             assertEquals("1235-5", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
             assertEquals("1235", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
-            assertEquals(null, row.get(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME));
+            assertNull(row.get(ViabilityAssayProvider.SPECIMENIDS_PROPERTY_NAME));
             assertEquals(5.0, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
             assertEquals(900, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
             assertEquals(1000, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
 
-            row = rows.get(rows.size()-1);
+            row = rows.getLast();
             assertEquals(8, row.size());
             assertEquals(3, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
             assertEquals("1234-7", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
@@ -465,7 +465,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             List<Map<String, Object>> rows = parser.getResultData();
             assertEquals("Expected 7 rows", 7, rows.size());
 
-            Map<String, Object> row = rows.get(0);
+            Map<String, Object> row = rows.getFirst();
             assertEquals(7, row.size());
             assertEquals(1, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
             assertEquals("160450533-5", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
@@ -475,7 +475,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             assertEquals(31268270.5, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
             assertEquals(37003872.5, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
 
-            row = rows.get(rows.size()-1);
+            row = rows.getLast();
             assertEquals(7, row.size());
             assertEquals(34, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
             assertEquals("159401872v5", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
@@ -494,7 +494,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             List<Map<String, Object>> rows = parser.getResultData();
             assertEquals("Expected 8 rows", 8, rows.size());
 
-            Map<String, Object> row = rows.get(0);
+            Map<String, Object> row = rows.getFirst();
             assertEquals(7, row.size());
             assertEquals(1, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
             assertEquals("541001 v 11", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
@@ -504,13 +504,13 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             assertEquals(23952602.0, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
             assertEquals(24976645.0, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
 
-            row = rows.get(rows.size()-1);
+            row = rows.getLast();
             assertEquals(6, row.size());
             assertEquals(32, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
             // NOTE: the pool id is split into participant and visit, but participant=Comp and visit is not parsed
             assertEquals("Comp - RAC0096", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
             assertEquals("Comp", row.get(ViabilityAssayProvider.PARTICIPANTID_PROPERTY_NAME));
-            assertEquals(null, row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
+            assertNull(row.get(ViabilityAssayProvider.VISITID_PROPERTY_NAME));
             assertTrue(Math.abs(0.965 - (Double)row.get("Viability")) < 0.0001);
             assertEquals(34203120.0, row.get(ViabilityAssayProvider.VIABLE_CELLS_PROPERTY_NAME));
             assertEquals(35443647.5, row.get(ViabilityAssayProvider.TOTAL_CELLS_PROPERTY_NAME));
@@ -524,7 +524,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             List<Map<String, Object>> rows = parser.getResultData();
             assertEquals("Expected 16 rows", 16, rows.size());
 
-            Map<String, Object> row = rows.get(0);
+            Map<String, Object> row = rows.getFirst();
             assertEquals(7, row.size());
             assertEquals(1, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
             assertEquals("B01", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));
@@ -536,7 +536,7 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             assertEquals(10.0, row.get("OriginalVolume"));
 
             // Last row
-            row = rows.get(rows.size()-1);
+            row = rows.getLast();
             assertEquals(16, row.get(ViabilityAssayProvider.SAMPLE_NUM_PROPERTY_NAME));
             // NOTE: no splitting of PoolD into participant-visit
             assertEquals("C-04", row.get(ViabilityAssayProvider.POOL_ID_PROPERTY_NAME));

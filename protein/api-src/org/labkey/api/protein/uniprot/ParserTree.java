@@ -127,7 +127,7 @@ public class ParserTree
             if (result == null)
             {
                 result = new ParserTreeNode(this, elementName);
-                _log.debug("Detected " + result.getDescription() + " element, but not parsing it.");
+                _log.debug("Detected {} element, but not parsing it.", result.getDescription());
                 _children.put(elementName, result);
             }
             return result;

@@ -158,7 +158,7 @@ public class MascotClientImpl implements SearchClient
             }
             catch (MalformedURLException x)
             {
-                getLogger().info("request(proxyURL="+proxyURL+")", x);
+                getLogger().info("request(proxyURL={})", proxyURL, x);
             }
         }
         if (succeeded)
@@ -315,7 +315,7 @@ public class MascotClientImpl implements SearchClient
         }
         catch (MalformedURLException x)
         {
-            getLogger().error("connect("+_url+","+_userAccount+","+_userPassword+","+_proxyURL+")", x);
+            getLogger().error("connect({},{},{},{})", _url, _userAccount, _userPassword, _proxyURL, x);
             //Fail to parse Mascot Server URL
             errorCode = 1;
             errorString = "Failed to parse Mascot Server URL";
@@ -389,7 +389,7 @@ public class MascotClientImpl implements SearchClient
                         writer.write(result, nPos2 + 1, numChunkSize);
                         offset += numChunkSize;
 
-                        getLogger().info("Downloaded " + offset + " bytes.");
+                        getLogger().info("Downloaded {} bytes.", offset);
 
                     }
                     else
@@ -461,7 +461,7 @@ public class MascotClientImpl implements SearchClient
         }
         catch (IOException e)
         {
-            getLogger().warn("Encounter exception after reading " + sb.length() + " byte(s)", e);
+            getLogger().warn("Encountered exception after reading {} byte(s)", sb.length(), e);
         }
 
         return sb.toString();
@@ -587,7 +587,7 @@ public class MascotClientImpl implements SearchClient
         }
         catch (IOException | InterruptedException e)
         {
-            getLogger().warn("Failed to get Mascot server information via '" + mascotRequestURL + "'", e);
+            getLogger().warn("Failed to get Mascot server information via '{}'", mascotRequestURL, e);
         }
 
         result = result.replaceAll("[\r\n]"," ");
@@ -670,13 +670,12 @@ public class MascotClientImpl implements SearchClient
                 String errorValue = results.getProperty("error", "-1");
                 if (!"0".equals(errorValue)) {
                     // fall thru', return the full HTTP Content as we need the full text for diagnosis
-                    getLogger().info("Mascot search task status error: (" + results.getProperty("error", "-1") + ") " +
-                            results.getProperty("errorstring", ""));
+                    getLogger().info("Mascot search task status error: ({}) {}", results.getProperty("error", "-1"), results.getProperty("errorstring", ""));
                     if ("-1".equals(errorValue)) {
-                        getLogger().info("Full Mascot response: (" + results.getProperty("HTTPContent", "") + ")");
+                        getLogger().info("Full Mascot response: ({})", results.getProperty("HTTPContent", ""));
                     } else {
                         String mascotErrorMessage = getMascotErrorMessage(Integer.parseInt(errorValue));
-                        getLogger().info("Mascot message: (" + mascotErrorMessage + ")");
+                        getLogger().info("Mascot message: ({})", mascotErrorMessage);
                     }
                 }
             } else
@@ -686,7 +685,7 @@ public class MascotClientImpl implements SearchClient
             //TODO: wch - do we want to dump this, how frequent will this be?
             String lcStatus = statusString.toLowerCase();
             if (!lcStatus.startsWith("complete\n") && !lcStatus.startsWith("complete\r\n")) {
-                getLogger().info("Mascot response: (" + results.getProperty("HTTPContent", "") + ")");
+                getLogger().info("Mascot response: ({})", results.getProperty("HTTPContent", ""));
             }
         }
 
@@ -810,7 +809,7 @@ public class MascotClientImpl implements SearchClient
             getLogger().info("Fail to start Mascot session");
             return 2;
         } else {
-            getLogger().info("Mascot session#"+mascotSessionId+" started.");
+            getLogger().info("Mascot session#{} started.", mascotSessionId);
         }
 
         int returnCode = 0;
@@ -834,7 +833,7 @@ public class MascotClientImpl implements SearchClient
                 returnCode = 5;
                 break;
             } else {
-                getLogger().info("Mascot search task#"+taskID+" created with '"+actionString+"'.");
+                getLogger().info("Mascot search task#{} created with '{}'.", taskID, actionString);
             }
 
             // submit job to mascot server
@@ -866,7 +865,7 @@ public class MascotClientImpl implements SearchClient
                 secSinceSameStatus += delayAfterSubmitSec;
                 if (!searchStatus.equals(prevSearchStatus)
                         || secSinceSameStatus >= delayBetweenSameStatus) {
-                    getLogger().info("Mascot search status: " + searchStatus);
+                    getLogger().info("Mascot search status: {}", searchStatus);
                     secSinceSameStatus = 0;
                 }
                 prevSearchStatus = searchStatus;
@@ -876,7 +875,7 @@ public class MascotClientImpl implements SearchClient
                     if (numOfNegativeError>=maxNegativeErrorTry) {
                         break;
                     }
-                    getLogger().info(searchStatus+", will retry..");
+                    getLogger().info("{}, will retry..", searchStatus);
                 }
                 else if (searchStatus.toLowerCase().contains("complete") ||
                         searchStatus.toLowerCase().contains("error=")) {
@@ -937,18 +936,16 @@ public class MascotClientImpl implements SearchClient
             {
                 ParamParser.Error err = parser.getErrors()[0];
                 if (err.getLine() == 0)
-                    getLogger().error("Failed parsing Mascot input xml '" + parametersFile.getPath() + "'.\n" +
-                            err.getMessage());
+                    getLogger().error("Failed parsing Mascot input xml '{}'.\n{}", parametersFile.getPath(), err.getMessage());
                 else
-                    getLogger().error("Failed parsing Mascot input xml '" + parametersFile.getPath() + "'.\n" +
-                            "Line " + err.getLine() + ": " + err.getMessage());
+                    getLogger().error("Failed parsing Mascot input xml '{}'.\nLine {}: {}", parametersFile.getPath(), err.getLine(), err.getMessage());
                 return null;
             }
             return parser;
         }
         catch (IOException eio)
         {
-            getLogger().error("Failed to read Mascot input xml '" + parametersFile.getPath() + "'.");
+            getLogger().error("Failed to read Mascot input xml '{}'.", parametersFile.getPath());
             return null;
         }
     }
@@ -971,7 +968,7 @@ public class MascotClientImpl implements SearchClient
         ParamParser parser = getInputParameters(queryParamFile);
         if (null == parser)
         {
-        	getLogger().error("I'm sorry, I could not parse the parameter file '" + paramFile + "'.");
+            getLogger().error("I'm sorry, I could not parse the parameter file '{}'.", paramFile);
             return false;
         }
 
@@ -1110,7 +1107,7 @@ public class MascotClientImpl implements SearchClient
             parts.forEach(builder::addTextBody);
 
             File queryFile = new File(analysisFile);
-            getLogger().info("Submitting query file, size="+queryFile.length());
+            getLogger().info("Submitting query file, size={}", queryFile.length());
             builder.addPart("FILE", new FileBody(queryFile));
 
             post.setEntity(builder.build());
@@ -1156,33 +1153,25 @@ public class MascotClientImpl implements SearchClient
                         }
                         if (!uploadFinished)
                         {
-                            getLogger().error("Failed to get response from Mascot query '" + mascotRequestURL + "' for " +
-                                    queryFile.getPath() + " with parameters " + queryParamFile.getPath() + " on attempt#" +
-                                    (attempt + 1) + ".\n" + "Mascot output: " + sb);
+                            getLogger().error("Failed to get response from Mascot query '{}' for {} with parameters {} on attempt#{}.\nMascot output: {}", mascotRequestURL, queryFile.getPath(), queryParamFile.getPath(), attempt + 1, sb);
                         }
                     }
                     catch (IOException err)
                     {
-                        getLogger().error("Failed to get response from Mascot query '" + mascotRequestURL + "' for " +
-                                queryFile.getPath() + " with parameters " + queryParamFile.getPath() + " on attempt#" +
-                                (attempt + 1) + ".\n", err);
+                        getLogger().error("Failed to get response from Mascot query '{}' for {} with parameters {} on attempt#{}.\n", mascotRequestURL, queryFile.getPath(), queryParamFile.getPath(), attempt + 1, err);
                     }
                     return uploadFinished;
                 }
                 catch (IOException err)
                 {
-                    getLogger().error("Failed to submit Mascot query '" + mascotRequestURL + "' for " +
-                            queryFile.getPath() + " with parameters " + queryParamFile.getPath() + " on attempt#" +
-                            (attempt + 1) + ".\n", err);
+                    getLogger().error("Failed to submit Mascot query '{}' for {} with parameters {} on attempt#{}.\n", mascotRequestURL, queryFile.getPath(), queryParamFile.getPath(), attempt + 1, err);
                     attempt = maxAttempt;
                 }
                 attempt++;
             }
 
             // We ran out of retries!
-            getLogger().error("Failed to submit Mascot query '" + mascotRequestURL + "' for " +
-                    queryFile.getPath() + " with parameters " + queryParamFile.getPath() + "." +
-                    " Tried " + maxAttempt + " times.");
+            getLogger().error("Failed to submit Mascot query '{}' for {} with parameters {}. Tried " + maxAttempt + " times.", mascotRequestURL, queryFile.getPath(), queryParamFile.getPath());
         }
         catch (IOException e)
         {
@@ -1231,7 +1220,7 @@ public class MascotClientImpl implements SearchClient
         {
             // a read or write error occurred
             ioError = true;
-            getLogger().error("getResultFile(result="+resultFile+",session="+sessionID+",taskid="+taskID+")", e);
+            getLogger().error("getResultFile(result={},session={},taskid={})", resultFile, sessionID, taskID, e);
         }
         finally
         {
@@ -1242,7 +1231,7 @@ public class MascotClientImpl implements SearchClient
             }
         }
 
-        getLogger().info("Downloaded "+lByteRead+" bytes of result file.");
+        getLogger().info("Downloaded {} bytes of result file.", lByteRead);
 
         if (ioError)
             return false;
@@ -1266,10 +1255,10 @@ public class MascotClientImpl implements SearchClient
         {
         }
 
-        firstLine=contentLines.get(0);
+        firstLine=contentLines.getFirst();
         if (!firstLine.startsWith("MIME-Version:")) {
             getLogger().info("First line of Mascot result file does not start with 'MIME-Version:'... will remove file");
-            getLogger().info("First "+contentLines.size()+" line(s)\n"+ StringUtils.join(contentLines.iterator(),"\n"));
+            getLogger().info("First {} line(s)\n{}", contentLines.size(), StringUtils.join(contentLines.iterator(), "\n"));
             outFile.delete();
             return false;
         }
@@ -1424,9 +1413,7 @@ public class MascotClientImpl implements SearchClient
             String password = parameters.getProperty("password","");
             if (!password.isEmpty())
                 mascotRequestURL = mascotRequestURL.replace(password, "***");
-            getLogger().warn("Exception "+x.getClass()+" connect("+_url+","+parameters.getProperty("username","<null>")+","
-                    +(!parameters.getProperty("password", "").isEmpty() ? "***" : "")
-                    +","+_proxyURL+")="+mascotRequestURL, x);
+            getLogger().warn("Exception {} connect({},{},{},{})={}", x.getClass(), _url, parameters.getProperty("username", "<null>"), !parameters.getProperty("password", "").isEmpty() ? "***" : "", _proxyURL, mascotRequestURL, x);
             //Fail to parse Mascot Server URL
             errorCode = 1;
         }
@@ -1435,9 +1422,7 @@ public class MascotClientImpl implements SearchClient
             String password = parameters.getProperty("password","");
             if (!password.isEmpty())
                 mascotRequestURL = mascotRequestURL.replace(password, "***");
-            getLogger().warn("Exception "+x.getClass()+" on connect("+_url+","+parameters.getProperty("username","<null>")+","
-                    +(!parameters.getProperty("password", "").isEmpty() ? "***" : "")
-                    +","+_proxyURL+")="+mascotRequestURL, x);
+            getLogger().warn("Exception {} on connect({},{},{},{})={}", x.getClass(), _url, parameters.getProperty("username", "<null>"), !parameters.getProperty("password", "").isEmpty() ? "***" : "", _proxyURL, mascotRequestURL, x);
             //Fail to interact with Mascot Server
             errorCode = 2;
         }

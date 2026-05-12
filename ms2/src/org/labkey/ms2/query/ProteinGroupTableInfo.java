@@ -228,7 +228,7 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
                     ActionURL url = new ActionURL(MS2Controller.ShowProteinAction.class, _userSchema.getContainer());
                     if (_runs != null && _runs.size() == 1)
                     {
-                        url.addParameter("run", Long.toString(_runs.get(0).getRun()));
+                        url.addParameter("run", Long.toString(_runs.getFirst().getRun()));
                     }
                     result1.setURL(url.addParameter("proteinGroupId", "${RowId}").addParameter("seqId", "${" + colInfo.getName() + "}"));
                     return result1;

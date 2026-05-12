@@ -296,7 +296,7 @@ public class ViabilityManager
                     rs.next();
                     return rs.getLong(1);
                 });
-                LOG.debug(String.format("viability specimens: create temp table: rows=%d, duration=%d", count, t.getTotalMilliseconds()));
+                LOG.debug("viability specimens: create temp table: rows={}, duration={}", count, t.getTotalMilliseconds());
             }
 
             // CONSIDER: add indices on the temp table
@@ -356,7 +356,7 @@ public class ViabilityManager
             t.start();
             int rows = executor.execute(updateFrag);
             t.stop();
-            LOG.info(String.format("viability specimens: update aggregates: rows=%d, duration=%d", rows, t.getTotalMilliseconds()));
+            LOG.info("viability specimens: update aggregates: rows={}, duration={}", rows, t.getTotalMilliseconds());
 
             tx.commit();
         }
@@ -437,11 +437,11 @@ public class ViabilityManager
         {
             DbScope scope = schema.getDbSchema().getScope();
 
-            LOG.debug(String.format("viability specimens: all for container=%s, protocol=%d, run=%d", schema.getContainer().getPath(), schema.getProtocol().getRowId(), run == null ? 0 : run.getRowId()));
+            LOG.debug("viability specimens: all for container={}, protocol={}, run={}", schema.getContainer().getPath(), schema.getProtocol().getRowId(), run == null ? 0 : run.getRowId());
             ResultSet allResultSet = new SqlSelector(scope, sub).getResultSet();
             ResultSetUtil.logData(allResultSet, LOG);
 
-            LOG.debug(String.format("viability specimens: aggregates for container=%s, protocol=%d, run=%d", schema.getContainer().getPath(), schema.getProtocol().getRowId(), run == null ? 0 : run.getRowId()));
+            LOG.debug("viability specimens: aggregates for container={}, protocol={}, run={}", schema.getContainer().getPath(), schema.getProtocol().getRowId(), run == null ? 0 : run.getRowId());
             ResultSet groupResultSet = new SqlSelector(scope, groupFrag).getResultSet();
             ResultSetUtil.logData(groupResultSet, LOG);
         }
@@ -709,7 +709,7 @@ public class ViabilityManager
                 assertTrue(properties.isEmpty());
 
                 String[] specimens = ViabilityManager.getSpecimens(resultId);
-                assertTrue(specimens.length == 0);
+                assertEquals(0, specimens.length);
 
                 ViabilityResult result = ViabilityManager.getResult(c, resultId);
                 assertNull(result);
