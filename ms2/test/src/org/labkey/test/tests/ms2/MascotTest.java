@@ -249,7 +249,8 @@ public class MascotTest extends AbstractMS2SearchEngineTest
 
         // really 466 peptides in the .dat import, but only first 100 show in default view
         assertEquals("Wrong number of peptides found", 100, peptidesTable.getDataRowCount());
-        List<String> peptideRow = peptidesTable.getRowDataAsText(0);
+        List<String> peptideRow = new ArrayList<>(peptidesTable.getRowDataAsText(0));
+        peptideRow.replaceAll(s -> s.replace("⁠", "")); // Strip trailing non-breaking character
         List<String> expectedPeptideRow = new ArrayList<>(Arrays.asList(
                 "4",                // Scan
                 "3+",               // Z
@@ -315,7 +316,8 @@ public class MascotTest extends AbstractMS2SearchEngineTest
         peptidesTable = new DataRegionTable(REGION_NAME_PEPTIDES, this);
 
         assertEquals("Wrong number of peptides found", 67, peptidesTable.getDataRowCount());
-        List<String> peptideRow = peptidesTable.getRowDataAsText(0);
+        List<String> peptideRow = new ArrayList<>(peptidesTable.getRowDataAsText(0));
+        peptideRow.replaceAll(s -> s.replace("⁠", ""));  // Strip trailing non-breaking character
         List<String> expectedPeptideRow = new ArrayList<>(Arrays.asList(
                 "20",             // Scan
                 "1+",               // Z
