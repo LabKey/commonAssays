@@ -25,6 +25,7 @@ import org.labkey.api.util.Path;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Daily;
+import org.labkey.test.components.ext4.Window;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.pages.signaldata.SignalDataAssayBeginPage;
 import org.labkey.test.pages.signaldata.SignalDataRunViewerPage;
@@ -32,7 +33,6 @@ import org.labkey.test.pages.signaldata.SignalDataUploadPage;
 import org.labkey.test.params.FieldDefinition;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
-import org.labkey.test.components.ext4.Window;
 import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.data.TestDataUtils;
 import org.labkey.test.util.signaldata.SignalDataInitializer;
@@ -47,6 +47,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 @Category({Daily.class})
 public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnlyTest
@@ -126,6 +127,40 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
         WebElement plotEl = runsPage.showPlot();
         List<WebElement> plotLines = Locator.tagWithClass("path", "line").findElements(plotEl);
         assertEquals("Wrong number of lines in plot", 2, plotLines.size());
+    }
+
+    @Test
+    public void testSpectrumPlotLegend()
+    {
+        List<String> filenames = List.of(RESULT_FILENAME_1, RESULT_FILENAME_2, RESULT_FILENAME_3);
+        List<String> expectedRunNames = filenames.stream().map(this::resultNameFromFilename).toList();
+
+        log("Select " + filenames.size() + " runs for the spectrum plot");
+        SignalDataAssayBeginPage beginPage = navigateToAssayLandingPage(SignalDataInitializer.RAW_SignalData_ASSAY);
+        for (String filename : filenames)
+            beginPage.selectData(filename, DEFAULT_RUN);
+
+        SignalDataRunViewerPage runsPage = beginPage.viewRuns();
+        for (String runName : expectedRunNames)
+            runsPage.checkRunViewerCheckbox(runName);
+
+        WebElement plotEl = runsPage.showPlot();
+
+        log("Verify one plotted line per run");
+        List<WebElement> plotLines = Locator.tagWithClass("path", "line").findElements(plotEl);
+        assertEquals("Wrong number of lines in spectrum plot", filenames.size(), plotLines.size());
+
+        log("Verify legend renders with one item per run");
+        List<WebElement> legendItems = Locator.tagWithClass("g", "legend-item").findElements(plotEl);
+        assertEquals("Wrong number of legend items in spectrum plot", filenames.size(), legendItems.size());
+
+        log("Verify legend labels match run names");
+        List<String> legendLabels = Locator.tag("tspan").findElements(plotEl).stream()
+                .map(WebElement::getText)
+                .filter(t -> !t.isBlank())
+                .toList();
+        assertTrue("Legend labels " + legendLabels + " do not contain all expected run names " + expectedRunNames,
+                legendLabels.containsAll(expectedRunNames));
     }
 
     private String resultNameFromFilename(String filename)
