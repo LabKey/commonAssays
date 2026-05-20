@@ -15,13 +15,11 @@
  */
 package org.labkey.elispot.query;
 
-import org.jetbrains.annotations.NotNull;
 import org.labkey.api.assay.AssayDomainKind;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.PropertyStorageSpec;
 import org.labkey.api.exp.property.Domain;
-import org.labkey.api.security.User;
 import org.labkey.elispot.ElispotAssayProvider;
 import org.labkey.elispot.ElispotDataHandler;
 import org.labkey.elispot.ElispotManager;
@@ -85,11 +83,5 @@ public class ElispotAntigenDomainKind extends AssayDomainKind
     public String getStorageSchemaName()
     {
         return ElispotProtocolSchema.ELISPOT_ANTIGEN_SCHEMA_NAME;
-    }
-
-    @Override
-    public @NotNull Set<String> getReservedPropertyNames(Domain domain, User user)
-    {
-        return getAssayReservedPropertyNames();
     }
 }

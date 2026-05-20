@@ -27,10 +27,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * User: jeckels
- * Date: Jan 27, 2012
- */
 public class LuminexDataDomainKind extends AssayDomainKind
 {
     public static final Set<String> RESERVED_NAMES;
@@ -49,6 +45,7 @@ public class LuminexDataDomainKind extends AssayDomainKind
 
         RESERVED_NAMES = DomainUtil.getNamesAndLabels(names);
     }
+
     public LuminexDataDomainKind()
     {
         super(LuminexAssayProvider.ASSAY_DOMAIN_CUSTOM_DATA);
@@ -61,7 +58,7 @@ public class LuminexDataDomainKind extends AssayDomainKind
     }
 
     @Override
-    public @NotNull Set<String> getReservedPropertyNames(Domain domain, User user)
+    protected @NotNull Set<String> getKindReservedPropertyNames(Domain domain, User user, boolean forCreate)
     {
         return RESERVED_NAMES;
     }
