@@ -1400,20 +1400,20 @@ public class FlowManager
     // get the count of analysis folders
     public int getAnalysisFolderCount(FlowSchema schema)
     {
-        return QueryService.get().selector(schema, "SELECT COUNT(*) FROM " + FlowSchema.SCHEMANAME + "." + FlowTableType.Analyses.name()).getObject(Long.class).intValue();
+        return QueryService.get().getSelectBuilder(schema, "SELECT COUNT(*) FROM " + FlowSchema.SCHEMANAME + "." + FlowTableType.Analyses.name()).buildSqlSelector().getObject(Long.class).intValue();
     }
 
     // get the count of analysis scripts
     public int getAnalysisScriptCount(FlowSchema schema)
     {
-        return QueryService.get().selector(schema, "SELECT COUNT(*) FROM " + FlowSchema.SCHEMANAME + "." + FlowTableType.AnalysisScripts.name()).getObject(Long.class).intValue();
+        return QueryService.get().getSelectBuilder(schema, "SELECT COUNT(*) FROM " + FlowSchema.SCHEMANAME + "." + FlowTableType.AnalysisScripts.name()).buildSqlSelector().getObject(Long.class).intValue();
     }
 
     // get the count of samples in the sample set
     public int getSampleCount(Container c, User user, ExpSampleType st)
     {
         UserSchema schema = QueryService.get().getUserSchema(user, c, SamplesSchema.SCHEMA_SAMPLES);
-        return QueryService.get().selector(schema, "SELECT COUNT(*) FROM samples." + st.getName()).getObject(Long.class).intValue();
+        return QueryService.get().getSelectBuilder(schema, "SELECT COUNT(*) FROM samples." + st.getName()).buildSqlSelector().getObject(Long.class).intValue();
     }
 
     public int getTempTableCount()
@@ -1494,7 +1494,7 @@ public class FlowManager
     // count of runs created from an Analysis Script
     public Map<String, Object> getAnalysisScriptRunCount(FlowSchema schema)
     {
-        return removeRowNum(QueryService.get().selector(schema, """
+        return removeRowNum(QueryService.get().getSelectBuilder(schema, """
                         SELECT
                           COUNT(*) AS RunCount,
                           MAX(Created) AS CreatedMax,
@@ -1502,13 +1502,13 @@ public class FlowManager
                           SUM(CompensationControlCount) AS CompControlCount,
                           SUM(FCSFileCount) AS FCSFileCount
                         FROM flow.Runs
-                        WHERE AnalysisScript IS NOT NULL""").getMap());
+                        WHERE AnalysisScript IS NOT NULL""").buildSqlSelector().getMap());
     }
 
     // count of runs created from a FlowJo Workspace
     public Map<String, Object> getWorkspaceRunCount(FlowSchema schema)
     {
-        return removeRowNum(QueryService.get().selector(schema, """
+        return removeRowNum(QueryService.get().getSelectBuilder(schema, """
                         SELECT
                           COUNT(*) AS RunCount,
                           MAX(Created) AS CreatedMax,
@@ -1516,13 +1516,13 @@ public class FlowManager
                           SUM(CompensationControlCount) AS CompControlCount,
                           SUM(FCSFileCount) AS FCSFileCount
                         FROM flow.Runs
-                        WHERE Workspace IS NOT NULL""").getMap());
+                        WHERE Workspace IS NOT NULL""").buildSqlSelector().getMap());
     }
 
     // count of runs created from an analysis archive import
     public Map<String, Object> getExternalAnalysisRunCount(FlowSchema schema)
     {
-        return removeRowNum(QueryService.get().selector(schema,
+        return removeRowNum(QueryService.get().getSelectBuilder(schema,
                 "SELECT\n" +
                 "  COUNT(*) AS RunCount,\n" +
                 "  MAX(Created) AS CreatedMax,\n" +
@@ -1530,12 +1530,12 @@ public class FlowManager
                 "  SUM(CompensationControlCount) AS CompControlCount,\n" +
                 "  SUM(FCSFileCount) AS FCSFileCount\n" +
                 "FROM flow.Runs\n" +
-                "WHERE AnalysisEngine = '" + AnalysisEngine.Archive.name() + "'").getMap());
+                "WHERE AnalysisEngine = '" + AnalysisEngine.Archive.name() + "'").buildSqlSelector().getMap());
     }
 
     public Map<String, Object> getFCSFileOnlyRunCount(FlowSchema schema)
     {
-        return removeRowNum(QueryService.get().selector(schema, """
+        return removeRowNum(QueryService.get().getSelectBuilder(schema, """
                         SELECT
                           COUNT(*) AS RunCount,
                           MAX(Created) AS CreatedMax,
@@ -1543,7 +1543,7 @@ public class FlowManager
                           SUM(CompensationControlCount) AS CompControlCount,
                           SUM(FCSFileCount) AS FCSFileCount
                         FROM flow.Runs
-                        WHERE ProtocolStep = 'Keywords'""").getMap());
+                        WHERE ProtocolStep = 'Keywords'""").buildSqlSelector().getMap());
     }
 
     public int getRunCount(Container container, ObjectType type)
