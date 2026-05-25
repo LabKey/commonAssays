@@ -11,11 +11,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * User: tholzman
- * Date: Jul 13, 2006
- * Time: 9:43:40 AM
- */
-/**
 /*
 /* reference, O. V. Krokhin, R. Craig, V. Spicer, W. Ens, K. G. Standing, R. C. Beavis, J. A. Wilkins
 /* An improved model for prediction of retention times of tryptic peptides in ion-pair reverse-phase HPLC:
