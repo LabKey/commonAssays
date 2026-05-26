@@ -51,8 +51,8 @@ Ext4.define('LABKEY.SignalData.SpectrumPlot', {
         }
 
         var layers = [];
+        var legendData = [];
         var colors = this.colors;
-
         var xleft = this.leftRight[0], xright = this.leftRight[1],
                 low = this.lowHigh[0], high = this.lowHigh[1];
 
@@ -84,6 +84,10 @@ Ext4.define('LABKEY.SignalData.SpectrumPlot', {
             c++;
 
             layers.push(pointLayer);
+            legendData.push({
+                text: contents[i].runName,
+                color: color
+            });
         }
 
         this.update('');
@@ -101,7 +105,11 @@ Ext4.define('LABKEY.SignalData.SpectrumPlot', {
             width: width,
             height: height,
             layers: layers,
-            legendPos: 'none',
+            legendPos: 'right',
+            legendData: legendData,
+            margins: {
+                right: 200
+            },
             labels: {
                 x: {value: this.xLabel},
                 y: {value: this.yLabel}
