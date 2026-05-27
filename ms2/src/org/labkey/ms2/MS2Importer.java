@@ -55,13 +55,8 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.labkey.api.exp.api.ExperimentService.asInteger;
+import static org.labkey.api.util.IntegerUtils.asInteger;
 
-/**
- * User: arauch
- * Date: Aug 18, 2005
- * Time: 1:56:35 AM
- */
 public abstract class MS2Importer
 {
     public static final int STATUS_RUNNING = 0;
