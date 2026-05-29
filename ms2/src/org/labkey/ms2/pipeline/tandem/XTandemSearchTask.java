@@ -24,6 +24,7 @@ import org.labkey.api.pipeline.RecordedAction;
 import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.LabKeyProcessBuilder;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.writer.PrintWriters;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
@@ -143,7 +144,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
 
             // Avoid re-running an X! Tandem search, if the .xtan.xml already exists.
             // Several labs soft-link or copy .xtan.xml files to reduce processing time.
-            ProcessBuilder xTandemPB = null;
+            LabKeyProcessBuilder xTandemPB = null;
             FileLike fileOutputXML = getNativeFileType(support.getGZPreference()).newFile(support.getAnalysisDirectory(), baseName);
             FileLike fileWorkOutputXML = null;
             FileLike fileJobTandemXML = null;
@@ -151,7 +152,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
 
             FileLike fileMzXML = _factory.findInputFile(getJobSupport());
             FileLike fileInputSpectra;
-            try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
+            try (WorkDirectory.CopyingResource _ = _wd.ensureCopyingLock())
             {
                 fileInputSpectra = _wd.inputFile(fileMzXML, false);
                 if (searchComplete)
@@ -186,7 +187,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
                     // Try it again without the file extension
                     exePath = PipelineJobService.get().getExecutablePath("tandem", null, "xtandem", ver, getJob().getLogger());
                 }
-                xTandemPB = new ProcessBuilder(exePath, INPUT_XML);
+                xTandemPB = new LabKeyProcessBuilder(exePath, INPUT_XML);
 
                 getJob().runSubProcess(xTandemPB, _wd.getDir());
 
@@ -202,7 +203,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
 
             String ver = TPPTask.getTPPVersion(getJob());
             String exePath = PipelineJobService.get().getExecutablePath("Tandem2XML", null, "tpp", ver, getJob().getLogger());
-            ProcessBuilder tandem2XmlPB = new ProcessBuilder(exePath,
+            LabKeyProcessBuilder tandem2XmlPB = new LabKeyProcessBuilder(exePath,
                 _wd.getRelativePath(fileWorkOutputXML),
                 fileWorkPepXMLRaw.getName());
             getJob().runSubProcess(tandem2XmlPB,
@@ -210,7 +211,7 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
 
             // Move final outputs to analysis directory.
             FileLike filePepXMLRaw;
-            try (WorkDirectory.CopyingResource lock = _wd.ensureCopyingLock())
+            try (WorkDirectory.CopyingResource _ = _wd.ensureCopyingLock())
             {
                 if (!searchComplete)
                     fileOutputXML = _wd.outputFile(fileWorkOutputXML);
@@ -269,16 +270,6 @@ public class XTandemSearchTask extends AbstractMS2SearchTask<XTandemSearchTask.F
         // Default parameters are just written into this parameters file, so don't need to
         // specify them again.
         params.remove("list path, default parameters");
-
-        // CONSIDER: If we remove these, they will not end up in the pepXML file.
-        //  ... which is a bad thing, since we currently rely on "pipeline, import spectra"
-        //  to keep from loading all spectra into the database.
-/*        for (String key : params.keySet().toArray(new String[params.size()]))
-        {
-            if (key.startsWith("pipeline"))
-                params.remove(key);
-        }
-*/
 
         try
         {
