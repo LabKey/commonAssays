@@ -28,14 +28,15 @@ import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.GUID;
+import org.labkey.api.util.LabKeyProcessBuilder;
 import org.labkey.api.util.Path;
 import org.labkey.api.util.StringUtilsLabKey;
 import org.labkey.api.writer.PrintWriters;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchProtocol;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
-import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.ms2.pipeline.ParameterNames;
+import org.labkey.ms2.pipeline.TPPTask;
 import org.labkey.vfs.FileLike;
 import org.labkey.vfs.FileSystemLike;
 
@@ -88,7 +89,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         return AbstractMS2SearchPipelineJob.getPepXMLConvertFile(dirAnalysis,baseName,gzSupport);
     }
 
-    public static class Factory extends AbstractSequestSearchTaskFactory
+    public static class Factory extends AbstractSequestSearchTaskFactory<Factory>
     {
         public Factory()
         {
@@ -96,7 +97,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
         }
 
         @Override
-        public PipelineJob.Task createTask(PipelineJob job)
+        public SequestSearchTask createTask(PipelineJob job)
         {
             return new SequestSearchTask(this, job);
         }
@@ -221,7 +222,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 args.add(makeDBExecutable.getAbsolutePath());
                 args.add("-O" + indexFileBase);
                 args.add("-P" + fileWorkParams.toNioPathForRead().toFile().getAbsolutePath());
-                ProcessBuilder pb = new ProcessBuilder(args);
+                LabKeyProcessBuilder pb = new LabKeyProcessBuilder(args);
 
                 // In order to find sort.exe, use the Sequest directory as the working directory
                 File dir = makeDBExecutable.getParentFile();
@@ -303,7 +304,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             sequestArgs.add("-F" + dirOutputDta.toNioPathForRead().toFile().getAbsolutePath());
             // Trailing argument that makes Sequest not barf
             sequestArgs.add("x");
-            ProcessBuilder sequestPB = new ProcessBuilder(sequestArgs);
+            LabKeyProcessBuilder sequestPB = new LabKeyProcessBuilder(sequestArgs);
             FileLike sequestLogFileWork = SEQUEST_LOG_FILE_TYPE.getFile(_wd.getDir(), getJob().getBaseName());
             _wd.newFile(sequestLogFileWork.getName());
             boolean copySequestLogFile = true;
@@ -330,7 +331,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
                 out2XMLArgs.add("1");
                 out2XmlParams.getParam("-E").setValue(enzyme);
                 out2XMLArgs.addAll(convertParams(out2XmlParams.getParams(), params));
-                ProcessBuilder out2XMLPB = new ProcessBuilder(out2XMLArgs);
+                LabKeyProcessBuilder out2XMLPB = new LabKeyProcessBuilder(out2XMLArgs);
                 out2XMLPB.environment().put("WEBSERVER_ROOT", StringUtils.trimToEmpty(new File(out2XMLPath).getParent()));
                 getJob().runSubProcess(out2XMLPB, _wd.getDir());
 
@@ -491,7 +492,7 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
 
         actions.add(action);
 
-        getJob().runSubProcess(new ProcessBuilder(mzXML2SearchArgs), _wd.getDir());
+        getJob().runSubProcess(new LabKeyProcessBuilder(mzXML2SearchArgs), _wd.getDir());
     }
 
     private FileLike writeDtaList(FileLike dirOutputDta) throws IOException
@@ -546,13 +547,13 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             assertEquals(Collections.<String>emptyList(), convertParams(out2XmlParams.getParams(), Collections.singletonMap("out2xml, all", "0")));
             assertEquals(Collections.<String>emptyList(), convertParams(out2XmlParams.getParams(), Collections.singletonMap("out2xml, all", "")));
 
-            assertEquals(Arrays.asList("-all"), convertParams(out2XmlParams.getParams(), Collections.singletonMap("out2xml, all", "1")));
+            assertEquals(List.of("-all"), convertParams(out2XmlParams.getParams(), Collections.singletonMap("out2xml, all", "1")));
         }
 
         @Test
         public void testOut2XmlEnzyme() throws SequestParamsException
         {
-            assertEquals(Arrays.asList("-EtestEnzyme"), convertParams(new Out2XmlParams().getParams(), Collections.singletonMap("out2xml, enzyme", "testEnzyme")));
+            assertEquals(List.of("-EtestEnzyme"), convertParams(new Out2XmlParams().getParams(), Collections.singletonMap("out2xml, enzyme", "testEnzyme")));
             assertEquals(Collections.<String>emptyList(), convertParams(new Out2XmlParams().getParams(), Collections.singletonMap("out2xml, enzyme", "")));
         }
     }
