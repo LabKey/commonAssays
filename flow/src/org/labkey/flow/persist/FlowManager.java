@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007-2019 LabKey Corporation
+ * Copyright (c) 2007-2026 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertNotNull;
-import static org.labkey.api.exp.api.ExperimentService.asInteger;
+import static org.labkey.api.util.IntegerUtils.asInteger;
 import static org.labkey.flow.data.AttributeType.keyword;
 
 public class FlowManager

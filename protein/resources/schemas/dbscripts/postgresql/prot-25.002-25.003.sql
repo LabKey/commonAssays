@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
 -- This index overlaps with ix_annotations_annotident
 DROP INDEX prot.ix_annotations_identid;
 -- This index overlaps with uq_customannotationset

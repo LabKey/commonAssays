@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014-2018 LabKey Corporation
+ * Copyright (c) 2014-2026 LabKey Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,12 +57,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.labkey.api.exp.api.ExperimentService.asInteger;
+import static org.labkey.api.util.IntegerUtils.asInteger;
 
-/**
- * User: kevink
- * Date: 4/30/14
- */
 public class PersistTests
 {
     private Container c;

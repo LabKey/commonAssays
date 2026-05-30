@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2025-2026 LabKey Corporation
+ *
+ * Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
+ */
 -- These columns are unused and, due to data type differences, are problematic for SQL Server -> PostgreSQL migration
 ALTER TABLE prot.InfoSources DROP COLUMN Deleted;
 ALTER TABLE prot.AnnotationTypes DROP COLUMN Deleted;
