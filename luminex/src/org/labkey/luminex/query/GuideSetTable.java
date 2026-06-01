@@ -206,7 +206,7 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
                 joinTable.getColumn("IncludeInGuideSetCalculation"),
                 joinTable.getColumn(srcFIColumnName));
         SQLFragment baseSQL = new SQLFragment(" FROM (");
-        baseSQL.append(QueryService.get().getSelectSQL(joinTable, columns, null, null, Table.ALL_ROWS, 0, false));
+        baseSQL.append(QueryService.get().getSelectBuilder(joinTable).columns(columns).buildSqlFragment());
         baseSQL.append(") x WHERE x.");
         baseSQL.append(guideSetColumnName);
         baseSQL.append(" = ");
