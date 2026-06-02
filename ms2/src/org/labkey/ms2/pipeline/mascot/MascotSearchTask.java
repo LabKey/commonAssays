@@ -25,6 +25,7 @@ import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.LabKeyProcessBuilder;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PepXMLFileType;
 import org.labkey.ms2.MS2RunType;
@@ -219,7 +220,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                 argsM2S.add("-P" + paramMinPeakCount);
             argsM2S.add(fileWorkSpectra.toNioPathForRead().toFile().getAbsolutePath());
 
-            getJob().runSubProcess(new ProcessBuilder(argsM2S), _wd.getDir());
+            getJob().runSubProcess(new LabKeyProcessBuilder(argsM2S), _wd.getDir());
 
             //  1. perform Mascot search
             getJob().header("mascot client output");
@@ -354,7 +355,7 @@ public class MascotSearchTask extends AbstractMS2SearchTask<MascotSearchTask.Fac
                 //     will fail to access protein associated information in mascot run
                 //,"-shortid"
             };
-            getJob().runSubProcess(new ProcessBuilder(args), _wd.getDir());
+            getJob().runSubProcess(new LabKeyProcessBuilder(args), _wd.getDir());
 
             PepXMLFileType pepxft = new PepXMLFileType(true); // "true" == accept .xml as valid extension for older converters
             FileLike fileOutputPepXML = _wd.newFile(pepxft);

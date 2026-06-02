@@ -18,6 +18,7 @@ package org.labkey.flow.controllers.run;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
@@ -54,6 +55,7 @@ import org.labkey.api.util.ConfigurationException;
 import org.labkey.api.util.FileNameUniquifier;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.GUID;
+import org.labkey.api.util.LabKeyProcessBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.StringUtilsLabKey;
@@ -92,7 +94,6 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -844,7 +845,7 @@ public class RunController extends BaseFlowController
             env.put("exportFormat", _exportToScriptFormat);
             List<String> params = parse(_exportToScriptCommandLine, env);
 
-            ProcessBuilder pb = new ProcessBuilder(params);
+            LabKeyProcessBuilder pb = new LabKeyProcessBuilder(params);
             info("Executing script: " + StringUtils.join(pb.command(), " "));
 
             try

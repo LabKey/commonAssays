@@ -24,6 +24,7 @@ import org.labkey.api.pipeline.RecordedAction;
 import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.LabKeyProcessBuilder;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.TPPTask;
@@ -33,7 +34,6 @@ import org.labkey.vfs.FileLike;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -47,7 +47,7 @@ public class CometSearchTask extends AbstractMS2SearchTask<CometSearchTask.Facto
 
     private static final String COMET_ACTION_NAME = "Comet Search";
 
-    public static class Factory extends AbstractSequestSearchTaskFactory
+    public static class Factory extends AbstractSequestSearchTaskFactory<Factory>
     {
         public Factory()
         {
@@ -55,7 +55,7 @@ public class CometSearchTask extends AbstractMS2SearchTask<CometSearchTask.Facto
         }
 
         @Override
-        public PipelineJob.Task createTask(PipelineJob job)
+        public CometSearchTask createTask(PipelineJob job)
         {
             return new CometSearchTask(this, job);
         }
@@ -63,7 +63,7 @@ public class CometSearchTask extends AbstractMS2SearchTask<CometSearchTask.Facto
         @Override
         public List<String> getProtocolActionNames()
         {
-            return Arrays.asList(COMET_ACTION_NAME);
+            return List.of(COMET_ACTION_NAME);
         }
     }
 
@@ -110,7 +110,7 @@ public class CometSearchTask extends AbstractMS2SearchTask<CometSearchTask.Facto
             String cometPath = PipelineJobService.get().getExecutablePath("comet", null, "comet", null, getJob().getLogger());
             args.add(cometPath);
             args.add(localMzXML.getName());
-            ProcessBuilder processBuilder = new ProcessBuilder(args);
+            LabKeyProcessBuilder processBuilder = new LabKeyProcessBuilder(args);
             getJob().runSubProcess(processBuilder, _wd.getDir());
 
 

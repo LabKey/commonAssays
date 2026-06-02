@@ -15,12 +15,12 @@
  */
 package org.labkey.ms2.pipeline;
 
-import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jmock.Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
+import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.exp.PropertyType;
 import org.labkey.api.pipeline.AbstractTaskFactory;
@@ -34,6 +34,7 @@ import org.labkey.api.pipeline.ToolExecutionException;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.pipeline.WorkDirectoryTask;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.LabKeyProcessBuilder;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.PepXMLFileType;
@@ -448,7 +449,7 @@ public class TPPTask extends WorkDirectoryTask<TPPTask.Factory>
             for (FileLike fileInput : inputWorkFiles)
                 interactCmd.add(_wd.getRelativePath(fileInput));
 
-            ProcessBuilder builder = new ProcessBuilder(interactCmd);
+            LabKeyProcessBuilder builder = new LabKeyProcessBuilder(interactCmd);
             // Add the TPP directory to the PATH so that xinteract can find it
             if (null != xinteractFile.getParentFile() && xinteractFile.getParentFile().exists())
             {

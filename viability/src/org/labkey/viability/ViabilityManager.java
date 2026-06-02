@@ -400,7 +400,7 @@ public class ViabilityManager
             // Only update results in the run
             filter.addCondition(FieldKey.fromParts("ResultID", "Run"), run.getRowId());
         }
-        SQLFragment sub = QueryService.get().getSelectSQL(rs, columnMap.values(), filter, null, Table.ALL_ROWS, Table.NO_OFFSET, false);
+        SQLFragment sub = QueryService.get().getSelectBuilder(rs).columns(columnMap.values()).filter(filter).buildSqlFragment();
 
         SQLFragment groupFrag = new SQLFragment();
         groupFrag.append("SELECT\n");

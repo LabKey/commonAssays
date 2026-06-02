@@ -82,7 +82,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         // TODO ContainerFilter -- Do we really want a non-permission checking container filter here?
         LuminexDataTable dataTable = schema.createDataTable(ContainerFilter.getUnsafeEverythingFilter(), false);
         List<ColumnInfo> dataColumns = Arrays.asList(dataTable.getColumn("FlaggedAsExcluded"), dataTable.getColumn("FIBackground"), dataTable.getColumn("Description"), dataTable.getColumn("Data"), dataTable.getColumn("Analyte"));
-        avgFiSQL.append(QueryService.get().getSelectSQL(dataTable, dataColumns, null, null, Table.ALL_ROWS, 0, false));
+        avgFiSQL.append(QueryService.get().getSelectBuilder(dataTable).columns(dataColumns).buildSqlFragment());
         avgFiSQL.append(") dr, ");
         avgFiSQL.append(ExperimentService.get().getTinfoData(), "d");
         avgFiSQL.append(", ");

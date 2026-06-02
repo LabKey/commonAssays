@@ -410,7 +410,7 @@ public abstract class AbstractMS2RunView
 
         QueryService.get().ensureRequiredColumns(tinfo, columns, filter, sort, new HashSet<>());
 
-        SQLFragment sql = QueryService.get().getSelectSQL(tinfo, columns, filter, sort, Table.ALL_ROWS, Table.NO_OFFSET, false);
+        SQLFragment sql = QueryService.get().getSelectBuilder(tinfo).columns(columns).filter(filter).sort(sort).buildSqlFragment();
         return new Pair<>(desiredCol, sql);
     }
 

@@ -30,6 +30,7 @@ import org.labkey.api.pipeline.WorkDirectoryTask;
 import org.labkey.api.pipeline.cmd.TaskPath;
 import org.labkey.api.pipeline.file.AbstractFileAnalysisJob;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.LabKeyProcessBuilder;
 import org.labkey.api.writer.PrintWriters;
 import org.labkey.vfs.FileLike;
 
@@ -108,7 +109,7 @@ public class Sqt2PinTask extends WorkDirectoryTask<Sqt2PinTask.Factory>
                 args.add(targetListFile.getName());
                 args.add(decoyListFile.getName());
 
-                ProcessBuilder pb = new ProcessBuilder(args);
+                LabKeyProcessBuilder pb = new LabKeyProcessBuilder(args);
                 pb.directory(_wd.getDir().toNioPathForRead().toFile());
 
                 job.runSubProcess(pb, _wd.getDir());

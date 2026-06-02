@@ -25,6 +25,7 @@ import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.WorkDirectory;
 import org.labkey.api.pipeline.file.FileAnalysisJobSupport;
 import org.labkey.api.util.FileType;
+import org.labkey.api.util.LabKeyProcessBuilder;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
@@ -34,7 +35,6 @@ import org.labkey.vfs.FileLike;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -70,7 +70,7 @@ public class XTandemToXMLTask extends AbstractMS2SearchTask<XTandemToXMLTask.Fac
         @Override
         public List<String> getProtocolActionNames()
         {
-            return Arrays.asList(XTandemSearchTask.TANDEM2_XML_ACTION_NAME);
+            return List.of(XTandemSearchTask.TANDEM2_XML_ACTION_NAME);
         }
 
         @Override
@@ -108,7 +108,7 @@ public class XTandemToXMLTask extends AbstractMS2SearchTask<XTandemToXMLTask.Fac
 
             String ver = TPPTask.getTPPVersion(getJob());
             String exePath = PipelineJobService.get().getExecutablePath("Tandem2XML", null, "tpp", ver, getJob().getLogger());
-            ProcessBuilder tandem2XmlPB = new ProcessBuilder(exePath,
+            LabKeyProcessBuilder tandem2XmlPB = new LabKeyProcessBuilder(exePath,
                 _wd.getRelativePath(fileWorkOutputXML),
                 fileWorkPepXMLRaw.getName());
             getJob().runSubProcess(tandem2XmlPB,
