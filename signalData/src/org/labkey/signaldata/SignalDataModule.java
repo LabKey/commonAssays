@@ -19,16 +19,16 @@ package org.labkey.signaldata;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.UpgradeCode;
-import org.labkey.api.module.DefaultModule;
 import org.labkey.api.module.ModuleContext;
 import org.labkey.api.module.ModuleProperty;
+import org.labkey.api.module.SpringModule;
 import org.labkey.api.view.WebPartFactory;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class SignalDataModule extends DefaultModule
+public class SignalDataModule extends SpringModule
 {
     public static final String NAME = "SignalData";
     public static final String QC_PROVIDER_PROPERTY_NAME = "QCViewProviderModule";
@@ -65,11 +65,6 @@ public class SignalDataModule extends DefaultModule
     }
 
     @Override
-    public void doStartup(ModuleContext moduleContext)
-    {
-    }
-
-    @Override
     public @Nullable Double getSchemaVersion()
     {
         return 26.000;
@@ -93,4 +88,8 @@ public class SignalDataModule extends DefaultModule
         return new SignalDataUpgradeCode();
     }
 
+    @Override
+    protected void startupAfterSpringConfig(ModuleContext moduleContext)
+    {
+    }
 }

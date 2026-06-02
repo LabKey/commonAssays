@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+
+    <bean id="experimentPipelineRegistry" class="org.labkey.api.pipeline.TaskPipelineRegistrar">
+        <property name="factoryImpls">
+            <list>
+                <bean class="org.labkey.signaldata.pipeline.SignalDataImportTask$Factory"/>
+            </list>
+        </property>
+
+        <property name="pipelines">
+            <list>
+                <!-- Signal Data import pipeline -->
+                <bean class="org.labkey.api.pipeline.file.FileAnalysisTaskPipelineSettings">
+                    <constructor-arg value="SignalDataImportTask"/>
+                    <property name="description" value="Import Signal Data run from a Metadata File"/>
+                    <property name="protocolObjectId" value="signaldata.signalDataImport"/>
+                    <property name="protocolName" value="Signal Data Import"/>
+                    <property name="protocolFactoryName" value="signaldataImport"/>
+                    <property name="defaultDisplayState" value="hidden"/>
+                    <property name="allowForTriggerConfiguration" value="true"/>
+                    <property name="initialInputExts">
+                        <list>
+                            <ref bean="csvFileType"/>
+                            <ref bean="tsvFileType"/>
+                        </list>
+                    </property>
+                    <property name="taskProgressionSpec">
+                        <list>
+                            <bean id="signaldataImportTask" class="org.labkey.api.pipeline.TaskId">
+                                <constructor-arg><value type="java.lang.Class">org.labkey.signaldata.pipeline.SignalDataImportTask</value></constructor-arg>
+                            </bean>
+                        </list>
+                    </property>
+                    <property name="helpText" value="The selected Pipeline task can be initiated on .csv, and .tsv files.
+                        The file represents the signal data metadata file and will validate and import the data files into the Signal Data assay." />
+                    <property name="customFields">
+                        <list>
+                            <bean class="org.labkey.api.formSchema.TextField">
+                                <constructor-arg index="0" value="protocolName"/>
+                                <constructor-arg index="1" value="Assay Protocol"/>
+                                <constructor-arg index="2" value="Protocol Name" />
+                                <constructor-arg index="3" value="true"/>
+                                <constructor-arg index="4" value=""/>
+                                <constructor-arg index="5" value="The name of the Signal Data protocol you will be importing data into. This
+                                    parameter is required. The protocol name can be found in the assay design name configuration."/>
+                            </bean>
+                        </list>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+    <bean id="csvFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value=".csv"/>
+    </bean>
+    <bean id="tsvFileType" class="org.labkey.api.util.FileType">
+        <constructor-arg value=".tsv"/>
+    </bean>
+</beans>
