@@ -130,7 +130,7 @@ public class FCSFileCoalescingColumn extends ExprColumn
         fields.addAll(coalesceFields);
 
         Map<FieldKey, ColumnInfo> columnMap = QueryService.get().getColumns(parentTable, fields);
-        SQLFragment sub = QueryService.get().getSelectSQL(parentTable, columnMap.values(), null, null, Table.ALL_ROWS, Table.NO_OFFSET, false);
+        SQLFragment sub = QueryService.get().getSelectBuilder(parentTable).columns(columnMap.values()).buildSqlFragment();
 
         SQLFragment coalesceFrag = new SQLFragment();
         coalesceFrag.append("SELECT\n");

@@ -220,8 +220,8 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
                     QuerySchema microarray = DefaultSchema.get(user, container).getSchema("Microarray");
                     if (null == microarray)
                         return;
-                    Map<Long,String> map = QueryService.get().selector(microarray, "SELECT RowId, Name FROM FeatureAnnotationSet")
-                            .getValueMap(Long.class);
+                    Map<Long,String> map = QueryService.get().getSelectBuilder(microarray, "SELECT RowId, Name FROM FeatureAnnotationSet")
+                            .buildSqlSelector().getValueMap(Long.class);
                     mapRowIdName = (Map<Long,String>)map;
                     // Make sure this is really <Integer,String>?
                     if (!mapRowIdName.isEmpty())
@@ -253,8 +253,8 @@ public class ExpressionMatrixAssayProvider extends AbstractAssayProvider
                     if (null == microarray)
                         return;
                     Map<String,Long> map = new HashMap<>();
-                    QueryService.get().selector(microarray, "SELECT Name, RowId FROM FeatureAnnotationSet")
-                            .forEach(rs -> map.put(rs.getString(1),rs.getLong(2)));
+                    QueryService.get().getSelectBuilder(microarray, "SELECT Name, RowId FROM FeatureAnnotationSet")
+                            .buildSqlSelector().forEach(rs -> map.put(rs.getString(1),rs.getLong(2)));
                     mapNameRowId = map;
                     // Make sure this is really <Integer,String>?
                     if (!mapNameRowId.isEmpty())
