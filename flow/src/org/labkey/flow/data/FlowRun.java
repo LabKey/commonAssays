@@ -124,7 +124,7 @@ public class FlowRun extends FlowObject<ExpRun>
         {
             _allDatas = getDatas(null);
         }
-        
+
         List<FlowWell> wells = new ArrayList<>();
         for (FlowDataObject obj : _allDatas)
         {
@@ -181,7 +181,7 @@ public class FlowRun extends FlowObject<ExpRun>
             return null;
         return new FlowCompensationMatrix(datas.getFirst());
     }
-    
+
     public long getRunId()
     {
         return getExperimentRun().getRowId();
@@ -384,7 +384,7 @@ public class FlowRun extends FlowObject<ExpRun>
             childProtocol = childFlowProtocol.getProtocol();
         }
 
-        ExperimentService.get().getExpRuns(container, null, childProtocol, run -> 
+        ExperimentService.get().getExpRuns(container, null, childProtocol, run ->
                 runFilePathRoot == null || (run.getFilePathRoot() != null && runFilePathRoot.toNioPathForRead().toFile().equals(run.getFilePathRoot()))
             ).forEach( run -> ret.add(new FlowRun(run)));
 
@@ -433,7 +433,7 @@ public class FlowRun extends FlowObject<ExpRun>
             filter.addAllClauses(protocol.getFCSAnalysisFilter());
         if (settings != null)
             filter.addAllClauses(settings.getFilter());
-        try (ResultSet rs = QueryService.get().select(table, new ArrayList<>(Arrays.asList(colRowId)), filter, null))
+        try (ResultSet rs = QueryService.get().getSelectBuilder(table).columns(new ArrayList<>(Arrays.asList(colRowId))).filter(filter).select())
         {
             while (rs.next())
             {
