@@ -3,28 +3,65 @@ package org.labkey.signaldata.pipeline;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.assay.AssayService;
+import org.labkey.api.assay.DefaultAssayRunCreator;
+import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.data.Container;
+import org.labkey.api.dataiterator.MapDataIterator;
+import org.labkey.api.exp.ExperimentException;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
+import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.query.ExpDataTable;
+import org.labkey.api.files.FileContentService;
 import org.labkey.api.pipeline.AbstractTaskFactory;
 import org.labkey.api.pipeline.AbstractTaskFactorySettings;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineJob;
+import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.RecordedActionSet;
 import org.labkey.api.pipeline.file.FileAnalysisJobSupport;
+import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.DataLoaderFactory;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.webdav.WebdavResource;
+import org.labkey.api.webdav.WebdavService;
+import org.labkey.signaldata.assay.SignalDataAssayDataHandler;
 import org.labkey.vfs.FileLike;
+import org.labkey.vfs.FileSystemLike;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import static org.labkey.api.files.FileContentService.UPLOADED_FILE;
 
 public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.Factory>
 {
     public static final String PROTOCOL_NAME_PROPERTY = "protocolName";
+
+    // metadata file column names
+    private static final String INPUT_NAME = "Name";
+    private static final String INPUT_DATA_FILE = "DataFile";
+
+    private String _folderName;
 
     private SignalDataImportTask(SignalDataImportTask.Factory factory, PipelineJob job)
     {
@@ -40,6 +77,7 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
         job.setLogFile(support.getDataDirectory().resolveChild(FileUtil.makeFileNameWithTimestamp("triggered_signaldata_import", "log")));
         job.setStatus("RELOADING", "Job started at: " + DateUtil.nowISO());
         Logger log = job.getLogger();
+        Container container = job.getContainer();
 
         // validate the protocol
         String protocolName = job.getParameters().get(PROTOCOL_NAME_PROPERTY);
@@ -49,7 +87,7 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
             return new RecordedActionSet();
         }
 
-        ExpProtocol protocol = AssayService.get().getAssayProtocolByName(job.getContainer(), protocolName);
+        ExpProtocol protocol = AssayService.get().getAssayProtocolByName(container, protocolName);
         if (protocol == null)
         {
             log.error("Could not resolve the specified protocol name : {}", protocolName);
@@ -60,8 +98,136 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
         assert support.getInputFiles().size() == 1;
         FileLike dataFile = support.getInputFiles().getFirst();
 
-        log.info("Loading {}", dataFile.getName());
-        List<Map<String, Object>> dataRows = parseMetadata(dataFile, log);
+        try
+        {
+            FileLike runRoot = getTargetFolder(container, log);
+            if (runRoot == null)
+                return new RecordedActionSet();
+
+            log.info("Loading {}", dataFile.getName());
+            List<Map<String, Object>> dataRows = parseMetadata(dataFile, log);
+            List<Map<String, Object>> dataInputs = new ArrayList<>();
+
+            for (Map<String, Object> row : dataRows)
+            {
+                // parse out the name and datafile properties
+                String name = Objects.toString(row.get(INPUT_NAME), "");
+                String dataFilePath = Objects.toString(row.get(INPUT_DATA_FILE), "").trim();
+
+                // validate the existance of the datafile property and make a copy to the run root
+                if (StringUtils.isBlank(dataFilePath))
+                {
+                    log.warn("Skipping row '{}' with blank DataFile property", name);
+                    continue;
+                }
+
+                // If the value is just a filename (no directory separators), resolve it relative to
+                // the metadata file's directory; otherwise treat it as a full server-side path
+                String dataFileName = FileUtil.getFileName(Path.of(dataFilePath));
+                FileLike sourceFile;
+                if (dataFilePath.equals(dataFileName))
+                {
+                    sourceFile = dataFile.getParent().resolveChild(dataFilePath);
+                }
+                else
+                {
+                    sourceFile = FileSystemLike.wrapFile(new File(dataFilePath));
+                }
+
+                if (!sourceFile.exists())
+                {
+                    log.info("Data file not found: {}", sourceFile.getPath());
+                    row.remove(INPUT_DATA_FILE);
+                    continue;
+                }
+
+                // add a data input entry for the run
+                Map<String, Object> dataInput = new CaseInsensitiveHashMap<>();
+                dataInputs.add(dataInput);
+
+                log.info("Copying {} to run folder", sourceFile.getName());
+                FileLike destFile = runRoot.resolveChild(sourceFile.getName());
+                FileUtil.copyFile(sourceFile, destFile);
+
+                log.info("Ensuring input data is created for {}", destFile.getName());
+                URI uri = FileContentService.get().getWebDavUrl(destFile, container, FileContentService.PathType.full);
+                if (uri != null)
+                {
+                    WebdavResource resource = WebdavService.get().lookup(uri.getPath());
+                    if (resource != null)
+                    {
+                        ExpData data = FileContentService.get().getDataObject(resource, container);
+                        if (data == null)
+                        {
+                            // create the ExpData object for the input data
+                            data = ExperimentService.get().createData(container, UPLOADED_FILE);
+                            data.setName(destFile.getName());
+                            data.setDataFileURI(destFile.toURI());
+                            data.save(job.getUser());
+                        }
+
+                        FileLike d = FileUtil.getAbsoluteCaseSensitiveFile(destFile);
+                        String url = d.toURI().toURL().toString();
+
+                        if (url != null)
+                        {
+                            dataInput.put(ExpDataTable.Column.Name.name(), data.getName());
+                            dataInput.put(ExpDataTable.Column.DataFileUrl.name(), data.getDataFileUrl());
+
+                            // file data type for this run data field
+                            String dataFileUrl = URLDecoder.decode(url, "UTF-8");
+                            row.replace(INPUT_DATA_FILE, dataFileUrl.replace("file:", ""));
+                        }
+                    }
+                }
+            }
+
+            // create and save the run
+            AssayProvider provider = AssayService.get().getProvider(protocol);
+            if (provider != null)
+            {
+                AssayRunUploadContext.Factory<?,?> runFactory = provider.createRunUploadFactory(protocol, job.getUser(), container);
+
+                runFactory.setName(_folderName);
+                runFactory.setLogger(log);
+                runFactory.setRawData(MapDataIterator.of(dataRows));
+                runFactory.setRunProperties(Map.of("RunIdentifier", _folderName));
+
+                Map<ExpData, String> inputDatasMap = new HashMap<>();
+                for (Map<String, Object> inputMap : dataInputs)
+                {
+                    String dataFileUrl = Objects.toString(inputMap.get(ExpDataTable.Column.DataFileUrl.name()), "");
+                    if (!dataFileUrl.isEmpty())
+                    {
+                        ExpData expData = ExperimentService.get().getExpDataByURL(dataFileUrl, container);
+                        if (expData != null)
+                            inputDatasMap.put(expData, Objects.toString(inputMap.get(ExpDataTable.Column.Name.name()), ""));
+                    }
+                }
+                if (!inputDatasMap.isEmpty())
+                    runFactory.setInputDatas(inputDatasMap);
+
+                // generate output data
+                Map<Object, String> outputData = new HashMap<>();
+                DefaultAssayRunCreator.generateResultData(job.getUser(), container, provider, dataRows, outputData, log);
+                runFactory.setOutputDatas(outputData);
+
+                try
+                {
+                    provider.getRunCreator().saveExperimentRun(runFactory.create(), null);
+                }
+                catch (ValidationException | ExperimentException e)
+                {
+                    log.error("Error saving assay run: {}", e.getMessage(), e);
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            log.error("Error importing data : {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
 
         return new RecordedActionSet();
     }
@@ -85,6 +251,28 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
             log.error("Error parsing the metadata file : {}", e.getMessage());
             return Collections.emptyList();
         }
+    }
+
+    @Nullable
+    private FileLike getTargetFolder(Container container, Logger log) throws IOException
+    {
+        PipeRoot root = PipelineService.get().findPipelineRoot(container);
+        if (root != null)
+        {
+            _folderName = LocalDateTime.now()
+                    .format(DateTimeFormatter.ofPattern("yyyy_M_d_H_m_s"));
+
+            //Create folder if needed
+            FileLike runRoot = root.getRootFileLike().resolveChild(SignalDataAssayDataHandler.NAMESPACE).resolveChild(_folderName);
+            if (!runRoot.exists())
+                runRoot.mkdirs();
+
+            return runRoot;
+        }
+        else
+            log.error("Unable to find a pipeline root for container : {}", container.getPath());
+
+        return null;
     }
 
     public static class Factory extends AbstractTaskFactory<AbstractTaskFactorySettings, Factory>
