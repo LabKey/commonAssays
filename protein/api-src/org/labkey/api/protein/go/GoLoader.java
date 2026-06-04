@@ -16,7 +16,6 @@
 
 package org.labkey.api.protein.go;
 
-import jakarta.servlet.ServletException;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
@@ -25,6 +24,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
@@ -146,16 +146,16 @@ public abstract class GoLoader implements Closeable
     public static void dropGoIndexes()
     {
         DbSchema schema = ProteinSchema.getSchema();
-        new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "drop_go_indexes", ""));
+        new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "drop_go_indexes", new SQLFragment()));
     }
 
     public static void createGoIndexes()
     {
         DbSchema schema = ProteinSchema.getSchema();
-        new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "create_go_indexes", ""));
+        new SqlExecutor(schema).execute(schema.getSqlDialect().execute(schema, "create_go_indexes", new SQLFragment()));
     }
 
-    private void loadGoFromGz() throws SQLException, IOException, ServletException
+    private void loadGoFromGz() throws SQLException, IOException
     {
         Map<String, GoLoadBean> map = getGoLoadMap();
         long start = System.currentTimeMillis();
