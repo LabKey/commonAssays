@@ -16,6 +16,7 @@
 
 package org.labkey.flow.data;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.attachments.Attachment;
 import org.labkey.api.attachments.AttachmentService;
@@ -42,8 +43,6 @@ import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
-
-import jakarta.servlet.http.HttpServletRequest;
 import org.labkey.vfs.FileLike;
 
 import java.io.File;
@@ -433,7 +432,7 @@ public class FlowRun extends FlowObject<ExpRun>
             filter.addAllClauses(protocol.getFCSAnalysisFilter());
         if (settings != null)
             filter.addAllClauses(settings.getFilter());
-        try (ResultSet rs = QueryService.get().getSelectBuilder(table).columns(new ArrayList<>(Arrays.asList(colRowId))).filter(filter).select())
+        try (ResultSet rs = QueryService.get().getSelectBuilder(table).columns(List.of(colRowId)).filter(filter).select())
         {
             while (rs.next())
             {
