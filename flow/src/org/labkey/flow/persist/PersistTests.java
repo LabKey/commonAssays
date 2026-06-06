@@ -19,6 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
@@ -154,13 +155,13 @@ public class PersistTests
             // verify query
             FlowSchema schema = new FlowSchema(user, c);
 
-            try (ResultSet results = QueryService.get().select(schema, "SELECT " +
+            try (ResultSet results = QueryService.get().getSelectBuilder(schema, "SELECT " +
                     "A.Name, " +
                     "A.Keyword.keyword1 AS k1, " +
                     "A.Keyword.\"keyword1-alias\" AS k1_alias, " +
                     "A.Keyword('keyword1') AS k1_method, " +
                     "A.Keyword('keyword1-alias') AS k1_alias_method " +
-                    "FROM flow.FCSFiles AS A"))
+                    "FROM flow.FCSFiles AS A").select())
             {
                 assertTrue(results.next());
                 assertEquals(this.getClass().getSimpleName(), results.getString("Name"));
@@ -221,13 +222,13 @@ public class PersistTests
             // verify query
             FlowSchema schema = new FlowSchema(user, c);
 
-            try (ResultSet results = QueryService.get().select(schema, "SELECT " +
+            try (ResultSet results = QueryService.get().getSelectBuilder(schema, "SELECT " +
                     "A.Name, " +
                     "A.Keyword.keyword2 AS k2, " +
                     "A.Keyword.\"keyword2-alias\" AS k2_alias, " +
                     "A.Keyword('keyword2') AS k2_method, " +
                     "A.Keyword('keyword2-alias') AS k2_alias_method " +
-                    "FROM flow.FCSFiles AS A"))
+                    "FROM flow.FCSFiles AS A").select())
             {
                 assertTrue(results.next());
                 assertEquals(this.getClass().getSimpleName(), results.getString("Name"));
@@ -301,14 +302,14 @@ public class PersistTests
         // verify stat values
         FlowSchema schema = new FlowSchema(user, c);
 
-        try (TableResultSet rs = (TableResultSet)QueryService.get().select(schema, "SELECT " +
+        try (Results rs = QueryService.get().getSelectBuilder(schema, "SELECT " +
                 "A.Name, " +
                 "A.Statistic.\"X:Count\" AS stat, " +
                 "A.Statistic.\"x:count\" AS stat_lowercase, " +
                 "A.Statistic.\"X-alias:Count\" AS stat_alias, " +
                 "A.Statistic('X:Count') AS stat_method, " +
                 "A.Statistic('X-alias:Count') AS stat_alias_method " +
-                "FROM flow.FCSAnalyses AS A ORDER BY Name"))
+                "FROM flow.FCSAnalyses AS A ORDER BY Name").select(true))
         {
             assertEquals(2, rs.getSize());
 

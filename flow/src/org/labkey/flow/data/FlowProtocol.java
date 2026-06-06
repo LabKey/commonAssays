@@ -625,7 +625,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         Map<Long, Pair<Long, String>> fcsFileRuns = new LongHashMap<>();
         int linkedFcsFileCount = 0;
 
-        try (TableResultSet rs = QueryService.get().select(schema, sql, tableMap, false, false))
+        try (TableResultSet rs = QueryService.get().getSelectBuilder(schema, sql, false, tableMap).select())
         {
             for (Map<String, Object> row : rs)
             {
