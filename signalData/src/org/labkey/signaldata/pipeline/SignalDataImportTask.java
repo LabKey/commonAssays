@@ -36,11 +36,11 @@ import org.labkey.signaldata.assay.SignalDataAssayDataHandler;
 import org.labkey.vfs.FileLike;
 import org.labkey.vfs.FileSystemLike;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -95,7 +95,11 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
         }
 
         // guaranteed to only have a single file
-        assert support.getInputFiles().size() == 1;
+        if (support.getInputFiles().size() != 1)
+        {
+            log.error("Expecting a single input file but received {}", support.getInputFiles().size());
+            return new RecordedActionSet();
+        }
         FileLike dataFile = support.getInputFiles().getFirst();
 
         try
@@ -131,7 +135,14 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
                 }
                 else
                 {
-                    sourceFile = FileSystemLike.wrapFile(new File(dataFilePath));
+                    Path resolvedPath = Path.of(dataFilePath).toAbsolutePath().normalize();
+                    if (!isUnderAnyPipelineRoot(resolvedPath))
+                    {
+                        log.error("DataFile '{}' is not under a server-managed pipeline root", dataFilePath);
+                        row.remove(INPUT_DATA_FILE);
+                        continue;
+                    }
+                    sourceFile = FileSystemLike.wrapFile(resolvedPath.toFile());
                 }
 
                 if (!sourceFile.exists())
@@ -169,22 +180,19 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
                         FileLike d = FileUtil.getAbsoluteCaseSensitiveFile(destFile);
                         String url = d.toURI().toURL().toString();
 
-                        if (url != null)
-                        {
-                            dataInput.put(ExpDataTable.Column.Name.name(), data.getName());
-                            dataInput.put(ExpDataTable.Column.DataFileUrl.name(), data.getDataFileUrl());
+                        dataInput.put(ExpDataTable.Column.Name.name(), data.getName());
+                        dataInput.put(ExpDataTable.Column.DataFileUrl.name(), data.getDataFileUrl());
 
-                            // file data type for this run data field
-                            String dataFileUrl = URLDecoder.decode(url, "UTF-8");
-                            row.replace(INPUT_DATA_FILE, dataFileUrl.replace("file:", ""));
-                        }
+                        // file data type for this run data field, adjust the URL to be compatible
+                        String dataFileUrl = URLDecoder.decode(url, StandardCharsets.UTF_8);
+                        row.replace(INPUT_DATA_FILE, dataFileUrl.replace("file:", ""));
                     }
                 }
             }
 
             // create and save the run
             AssayProvider provider = AssayService.get().getProvider(protocol);
-            if (provider != null)
+            if (provider != null && !dataRows.isEmpty())
             {
                 AssayRunUploadContext.Factory<?,?> runFactory = provider.createRunUploadFactory(protocol, job.getUser(), container);
 
@@ -273,6 +281,12 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
             log.error("Unable to find a pipeline root for container : {}", container.getPath());
 
         return null;
+    }
+
+    private boolean isUnderAnyPipelineRoot(Path resolvedPath)
+    {
+        return PipelineService.get().getAllPipelineRoots().values().stream()
+                .anyMatch(pipeRoot -> pipeRoot.isUnderRoot(resolvedPath));
     }
 
     public static class Factory extends AbstractTaskFactory<AbstractTaskFactorySettings, Factory>
