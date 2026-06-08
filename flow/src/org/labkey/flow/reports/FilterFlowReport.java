@@ -385,7 +385,8 @@ public abstract class FilterFlowReport extends FlowReport
         }
 
         _query = query.toString();
-        Results results = QueryService.get().getSelectBuilder(flow, _query).select();
+        // Pass true to get a CachedResultSet, which this code requires (see getWrapped() and date manipulation below)
+        Results results = QueryService.get().getSelectBuilder(flow, _query).select(true);
         // This still breaks encapsulation, but it's better than a direct cast.
         CachedResultSet rs = results.getWrapped(CachedResultSet.class);
         if (null == rs)

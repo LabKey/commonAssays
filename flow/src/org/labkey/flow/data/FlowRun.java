@@ -16,6 +16,7 @@
 
 package org.labkey.flow.data;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.attachments.Attachment;
 import org.labkey.api.attachments.AttachmentService;
@@ -42,8 +43,6 @@ import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.persist.InputRole;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
-
-import jakarta.servlet.http.HttpServletRequest;
 import org.labkey.vfs.FileLike;
 
 import java.io.File;
@@ -124,7 +123,7 @@ public class FlowRun extends FlowObject<ExpRun>
         {
             _allDatas = getDatas(null);
         }
-        
+
         List<FlowWell> wells = new ArrayList<>();
         for (FlowDataObject obj : _allDatas)
         {
@@ -181,7 +180,7 @@ public class FlowRun extends FlowObject<ExpRun>
             return null;
         return new FlowCompensationMatrix(datas.getFirst());
     }
-    
+
     public long getRunId()
     {
         return getExperimentRun().getRowId();
@@ -384,7 +383,7 @@ public class FlowRun extends FlowObject<ExpRun>
             childProtocol = childFlowProtocol.getProtocol();
         }
 
-        ExperimentService.get().getExpRuns(container, null, childProtocol, run -> 
+        ExperimentService.get().getExpRuns(container, null, childProtocol, run ->
                 runFilePathRoot == null || (run.getFilePathRoot() != null && runFilePathRoot.toNioPathForRead().toFile().equals(run.getFilePathRoot()))
             ).forEach( run -> ret.add(new FlowRun(run)));
 
@@ -433,7 +432,7 @@ public class FlowRun extends FlowObject<ExpRun>
             filter.addAllClauses(protocol.getFCSAnalysisFilter());
         if (settings != null)
             filter.addAllClauses(settings.getFilter());
-        try (ResultSet rs = QueryService.get().select(table, new ArrayList<>(Arrays.asList(colRowId)), filter, null))
+        try (ResultSet rs = QueryService.get().getSelectBuilder(table).columns(List.of(colRowId)).filter(filter).select())
         {
             while (rs.next())
             {
