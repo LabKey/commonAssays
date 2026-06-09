@@ -73,7 +73,12 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
     {
         try
         {
-            String scriptIdStr = getRequest().getParameter("scriptId");
+            ActionURL url = getViewContext().getActionURL();
+            // Read scriptId from the action URL (falling back to the request parameter) so it resolves under both
+            // real browser requests and in-JVM mock dispatch, mirroring how runId/compId below are read from the URL.
+            String scriptIdStr = url.getParameter("scriptId");
+            if (scriptIdStr == null)
+                scriptIdStr = getRequest().getParameter("scriptId");
             if (scriptIdStr == null)
             {
                 throw new NotFoundException("scriptId required");
@@ -92,6 +97,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
             {
                 throw new NotFoundException("scriptId not found: " + scriptIdStr);
             }
+            flowObject.checkContainer(getContainer(), getUser(), url);
             _runCount = flowObject.getRunCount();
             step = FlowProtocolStep.fromRequest(getRequest());
             _run = FlowRun.fromURL(getViewContext().getActionURL(), getRequest(), getViewContext().getContainer(), getUser());
