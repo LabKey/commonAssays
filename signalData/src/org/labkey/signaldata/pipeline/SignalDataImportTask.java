@@ -8,8 +8,10 @@ import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayRunUploadContext;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.DefaultAssayRunCreator;
+import org.labkey.api.assay.transform.DataTransformService;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
 import org.labkey.api.data.Container;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.ExperimentException;
 import org.labkey.api.exp.api.ExpData;
@@ -36,6 +38,7 @@ import org.labkey.signaldata.assay.SignalDataAssayDataHandler;
 import org.labkey.vfs.FileLike;
 import org.labkey.vfs.FileSystemLike;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -128,24 +131,41 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
                 // If the value is just a filename (no directory separators), resolve it relative to
                 // the metadata file's directory; otherwise treat it as a full server-side path
                 String dataFileName = FileUtil.getFileName(Path.of(dataFilePath));
-                FileLike sourceFile;
+                FileLike sourceFile = null;
                 if (dataFilePath.equals(dataFileName))
                 {
-                    sourceFile = dataFile.getParent().resolveChild(dataFilePath);
+                    String sourcePath = support.getParameters().get(DataTransformService.ORIGINAL_SOURCE_PATH);
+                    if (StringUtils.isNotBlank(sourcePath))
+                    {
+                        FileLike originalSource = FileSystemLike.wrapFile(new File(sourcePath));
+                        sourceFile = originalSource.getParent().resolveChild(dataFilePath);
+                    }
                 }
                 else
                 {
-                    Path resolvedPath = Path.of(dataFilePath).toAbsolutePath().normalize();
-                    if (!isUnderAnyPipelineRoot(resolvedPath))
+                    // check to see if it's a webdav url
+                    WebdavResource resource = WebdavService.get().lookup(dataFilePath);
+                    if (resource != null)
                     {
-                        log.error("DataFile '{}' is not under a server-managed pipeline root", dataFilePath);
-                        row.remove(INPUT_DATA_FILE);
-                        continue;
+                        sourceFile = FileSystemLike.wrapFile(resource.getFile());
                     }
-                    sourceFile = FileSystemLike.wrapFile(resolvedPath.toFile());
+
+                    // check to see if it's a server-side path
+                    if (sourceFile == null)
+                    {
+                        Path resolvedPath = Path.of(dataFilePath).toAbsolutePath().normalize();
+
+                        if (!isUnderAnyPipelineRoot(resolvedPath))
+                        {
+                            log.error("DataFile '{}' is not under a server-managed pipeline root", dataFilePath);
+                            row.remove(INPUT_DATA_FILE);
+                            continue;
+                        }
+                        sourceFile = FileSystemLike.wrapFile(resolvedPath.toFile());
+                    }
                 }
 
-                if (!sourceFile.exists())
+                if (sourceFile != null && !sourceFile.exists())
                 {
                     log.info("Data file not found: {}", sourceFile.getPath());
                     row.remove(INPUT_DATA_FILE);
@@ -283,10 +303,35 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
         return null;
     }
 
+    /**
+     * Determine whether the given path falls under a pipeline root for some container, using the same semantics as
+     * {@link PipelineService#findPipelineRoot(Container)} (which includes the default file-root fallback, not just
+     * explicitly configured pipeline roots). First try to resolve the path directly to its owning container(s); if
+     * that comes up empty (e.g. a container with a custom, non-default file root that the path-resolution logic does
+     * not yet handle), fall back to scanning every container's pipeline root.
+     */
     private boolean isUnderAnyPipelineRoot(Path resolvedPath)
     {
-        return PipelineService.get().getAllPipelineRoots().values().stream()
-                .anyMatch(pipeRoot -> pipeRoot.isUnderRoot(resolvedPath));
+        for (Container c : FileContentService.get().getContainersForFilePath(resolvedPath))
+        {
+            if (isUnderPipelineRoot(c, resolvedPath))
+                return true;
+        }
+
+        // Path could not be resolved to a container directly; fall back to scanning all containers
+        for (Container c : ContainerManager.getAllChildren(ContainerManager.getRoot()))
+        {
+            if (isUnderPipelineRoot(c, resolvedPath))
+                return true;
+        }
+
+        return false;
+    }
+
+    private boolean isUnderPipelineRoot(Container container, Path resolvedPath)
+    {
+        PipeRoot root = PipelineService.get().findPipelineRoot(container);
+        return root != null && root.isUnderRoot(resolvedPath);
     }
 
     public static class Factory extends AbstractTaskFactory<AbstractTaskFactorySettings, Factory>
