@@ -234,6 +234,11 @@ public class NabAssayController extends SpringActionController
             {
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
             }
+
+            // GitHub Issue #1892: getExpRun() resolves by global rowId; ensure the run belongs to the current container
+            if (!run.getContainer().equals(getContainer()))
+                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
+
             File file = getDataHandler(run).getDataFile(run);
             if (file == null)
             {
@@ -447,6 +452,10 @@ public class NabAssayController extends SpringActionController
             }
             _run = ExperimentService.get().getExpRun(form.getRowId());
             if (_run == null)
+                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
+
+            // GitHub Issue #1892: getExpRun() resolves by global rowId; ensure the run belongs to the current container
+            if (!_run.getContainer().equals(getContainer()))
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
 
             if (form.isReupload())

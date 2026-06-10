@@ -58,6 +58,7 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AbstractContainerScopingTest;
 import org.labkey.api.security.roles.EditorRole;
 import org.labkey.api.security.roles.ReaderRole;
 import org.labkey.api.util.DateUtil;

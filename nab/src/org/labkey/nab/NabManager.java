@@ -16,8 +16,11 @@
 
 package org.labkey.nab;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.Before;
+import org.junit.Test;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.Container;
@@ -38,6 +41,10 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AbstractContainerScopingTest;
+import org.labkey.api.security.roles.EditorRole;
+import org.labkey.api.security.roles.ReaderRole;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.study.Dataset;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
@@ -45,6 +52,7 @@ import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.nab.query.NabProtocolSchema;
 import org.labkey.nab.query.NabRunDataTable;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -204,6 +212,72 @@ public class NabManager extends AbstractNabManager
         catch (SQLException e)
         {
             throw new RuntimeSQLException(e);
+        }
+    }
+
+    public static class ContainerScopingTestCase extends AbstractContainerScopingTest
+    {
+        private Container _folderA;
+        private Container _folderB;
+        private User _admin;
+
+        @Before
+        public void setup()
+        {
+            _admin = getAdmin();
+            _folderA = createContainer("A");
+            _folderB = createContainer("B");
+        }
+
+        @Test
+        public void testDeleteRunContainerScoping() throws Exception
+        {
+            // Regression test for NAB-1. NabAssayController.DeleteRunAction resolves a
+            // run via ExperimentService.getExpRun(rowId) from a global rowId and then deletes it.
+            ExpProtocol protocol = ExperimentService.get().ensureSampleDerivationProtocol(_admin);
+            ExpRun run = ExperimentService.get().createExperimentRun(_folderB, "scope-test-run");
+            run.setProtocol(protocol);
+            run.save(_admin);
+            int rowId = run.getRowId();
+
+            ActionURL foreignUrl = new ActionURL(NabAssayController.DeleteRunAction.class, _folderA)
+                    .addParameter("rowId", rowId);
+
+            User deleterAonly = createUserInRole(_folderA, EditorRole.class);
+            assertStatus(HttpServletResponse.SC_NOT_FOUND, post(foreignUrl, deleterAonly));
+            assertNotNull("Foreign-container run must not be deleted", ExperimentService.get().getExpRun(rowId));
+
+            ActionURL ownUrl = new ActionURL(NabAssayController.DeleteRunAction.class, _folderB)
+                    .addParameter("rowId", rowId);
+            assertStatus(HttpServletResponse.SC_FOUND, post(ownUrl, _admin));
+            assertNull("Run should have been deleted from its own container", ExperimentService.get().getExpRun(rowId));
+        }
+
+        @Test
+        public void testDownloadDatafileContainerScoping() throws Exception
+        {
+            // Regression test for NAB-2. NabAssayController.DownloadDatafileAction resolves a run via
+            // ExperimentService.getExpRun(rowId) from a global rowId
+            ExpProtocol protocol = ExperimentService.get().ensureSampleDerivationProtocol(_admin);
+            ExpRun run = ExperimentService.get().createExperimentRun(_folderB, "scope-test-download-run");
+            run.setProtocol(protocol);
+            run.save(_admin);
+            int rowId = run.getRowId();
+
+            User readerAonly = createUserInRole(_folderA, ReaderRole.class);
+            ActionURL foreignUrl = new ActionURL(NabAssayController.DownloadDatafileAction.class, _folderA)
+                    .addParameter("rowId", rowId);
+            MockHttpServletResponse foreignResponse = get(foreignUrl, readerAonly);
+            assertStatus(HttpServletResponse.SC_NOT_FOUND, foreignResponse);
+            assertTrue("Foreign-container download must be rejected by the container check",
+                    foreignResponse.getContentAsString().contains("does not exist"));
+
+            ActionURL ownUrl = new ActionURL(NabAssayController.DownloadDatafileAction.class, _folderB)
+                    .addParameter("rowId", rowId);
+            MockHttpServletResponse ownResponse = get(ownUrl, _admin);
+            assertStatus(HttpServletResponse.SC_NOT_FOUND, ownResponse);
+            assertTrue("Same-container request should advance past the container check to the data handler",
+                    ownResponse.getContentAsString().contains("is not a NAb run"));
         }
     }
 }
