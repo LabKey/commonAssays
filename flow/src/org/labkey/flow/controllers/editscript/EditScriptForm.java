@@ -97,6 +97,7 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
             {
                 throw new NotFoundException("scriptId not found: " + scriptIdStr);
             }
+            // GitHub Issue #1892: validate container
             flowObject.checkContainer(getContainer(), getUser(), url);
             _runCount = flowObject.getRunCount();
             step = FlowProtocolStep.fromRequest(getRequest());

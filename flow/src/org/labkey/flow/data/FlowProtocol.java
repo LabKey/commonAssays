@@ -161,6 +161,7 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         if (ret == null)
             return null;
 
+        // GitHub Issue #1892: validate container
         ret.checkContainer(context.getContainer(), user, url);
         if (!ret.getContainer().hasPermission(user, ReadPermission.class))
         {

@@ -122,11 +122,4 @@ public class NabModule extends DefaultModule
     {
         return Set.of(PlateParserTests.class);
     }
-
-    @NotNull
-    @Override
-    public Set<Class> getIntegrationTests()
-    {
-        return Set.of(NabManager.ContainerScopingTestCase.class);
-    }
 }

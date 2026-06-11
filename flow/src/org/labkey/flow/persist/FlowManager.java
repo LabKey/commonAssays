@@ -1835,22 +1835,17 @@ public class FlowManager
         @Test
         public void testScriptContainerScoping() throws Exception
         {
-            // A flow script that lives in folder B.
+            // GitHub Issue #1892: Regression test for FLOW-1.
             FlowScript script = FlowScript.create(_admin, _folderB, "scope-test",
                     "<script xmlns=\"http://www.labkey.org/data/xml/flowScript\"/>");
             int scriptId = script.getScriptId();
 
-            // DownloadAction resolves the script through EditScriptForm; dispatch it against folder A while pointing
-            // scriptId at B's script -- the FLOW-1 attack shape (reaching a script that lives in another folder).
             ActionURL foreignUrl = new ActionURL(ScriptController.DownloadAction.class, _folderA)
                     .addParameter(FlowParam.scriptId.toString(), scriptId);
 
             User readerAonly = createUserInRole(_folderA, ReaderRole.class);
             assertStatus(HttpServletResponse.SC_NOT_FOUND, get(foreignUrl, readerAonly));
 
-            // Redirect branch: a caller who can read both folders is redirected to B (where its own permissions are
-            // re-enforced) instead of being served B's script from A's context. This is the core vulnerability:
-            // without checkContainer() in EditScriptForm.reset() the action streams B's script from folder A (200).
             User readerAreaderB = createUserInRole(_folderA, ReaderRole.class);
             grantRole(readerAreaderB, _folderB, ReaderRole.class);
             MockHttpServletResponse resp = get(foreignUrl, readerAreaderB);
@@ -1868,22 +1863,16 @@ public class FlowManager
         @Test
         public void testProtocolContainerScoping() throws Exception
         {
-            // Regression test for FLOW-2. A FlowProtocol is accessed by a global experimentId.
-            // A flow protocol that lives in folder B.
+            // GitHub Issue #1892: Regression test for FLOW-2. A FlowProtocol is accessed by a global experimentId.
             FlowProtocol protocolB = FlowProtocol.ensureForContainer(_admin, _folderB);
             int experimentId = protocolB.getProtocol().getRowId();
 
-            // EditFCSAnalysisFilter is an UpdatePermission action; dispatch it against folder A while pointing
-            // experimentId at B's protocol -- the FLOW-2 attack shape (editor in A reaching a protocol in B).
             ActionURL foreignUrl = new ActionURL(ProtocolController.EditFCSAnalysisFilterAction.class, _folderA)
                     .addParameter(FlowParam.experimentId.toString(), experimentId);
 
             User editorAonly = createUserInRole(_folderA, EditorRole.class);
             assertStatus(HttpServletResponse.SC_NOT_FOUND, get(foreignUrl, editorAonly));
 
-            // Redirect branch: a caller who can edit folder A and read folder B is redirected to B (where its own
-            // permissions are re-enforced) instead of operating on B's protocol from A's context. This is the core
-            // vulnerability: without checkContainer() in fromURL() the action proceeds in folder A (HTTP 200).
             User editorAreaderB = createUserInRole(_folderA, EditorRole.class);
             grantRole(editorAreaderB, _folderB, ReaderRole.class);
             MockHttpServletResponse resp = get(foreignUrl, editorAreaderB);
@@ -1901,7 +1890,7 @@ public class FlowManager
         @Test
         public void testExportAnalysisContainerScoping() throws Exception
         {
-            // Regression test for FLOW-3 RunController.ExportAnalysis resolves
+            // GitHub Issue #1892: Regression test for FLOW-3. RunController.ExportAnalysis resolves
             // URL supplied runId/wellId via the global FlowRun.
             ExpData data = ExperimentService.get().createData(_folderB, FlowDataType.FCSFile, "scope-test-well");
             URI dataFileURI = new URI("file:///attributes.flowdata.xml");
@@ -1912,18 +1901,12 @@ public class FlowManager
             AttributeSetHelper.save(attrs, _admin, data);
             int wellId = data.getRowId();
 
-            // Point wellId at B's well while dispatching the export against folder A -- the FLOW-3 attack shape.
             ActionURL foreignUrl = new ActionURL(RunController.ExportAnalysis.class, _folderA)
                     .addParameter(FlowParam.wellId.toString(), wellId);
 
-            // Deny branch: a caller who can read folder A but has no rights in folder B must not learn B's well exists,
-            // nor export it -> 404.
             User readerAonly = createUserInRole(_folderA, ReaderRole.class);
             assertStatus(HttpServletResponse.SC_NOT_FOUND, post(foreignUrl, readerAonly));
 
-            // Redirect branch: a caller who can read both folders is redirected to B (where its own permissions are
-            // re-enforced) instead of having B's well exported from A's context. This is the core vulnerability: without
-            // checkContainer() in validateCommand() the action exports B's well from folder A.
             User readerAreaderB = createUserInRole(_folderA, ReaderRole.class);
             grantRole(readerAreaderB, _folderB, ReaderRole.class);
             MockHttpServletResponse resp = post(foreignUrl, readerAreaderB);
@@ -1940,8 +1923,8 @@ public class FlowManager
         @Test
         public void testRunDownloadContainerScoping() throws Exception
         {
-            // Regression test for FLOW-4. RunController.DownloadAction (and
-            // DownloadAttachmentAction) resolve a run via RunForm.getRun() -> FlowRun.fromRunId() from a global runId
+            // GitHub Issue #1892: Regression test for FLOW-4. RunController.DownloadAction (and
+            // DownloadAttachmentAction) resolve a run via RunForm.getRun() -> FlowRun.fromRunId() from a global runId.
             FlowProtocol protocolB = FlowProtocol.ensureForContainer(_admin, _folderB);
             ExpRun expRun = ExperimentService.get().createExperimentRun(_folderB, "scope-test-run");
             expRun.setProtocol(protocolB.getProtocol());
@@ -1954,9 +1937,6 @@ public class FlowManager
             User readerAonly = createUserInRole(_folderA, ReaderRole.class);
             assertStatus(HttpServletResponse.SC_NOT_FOUND, get(foreignUrl, readerAonly));
 
-            // Redirect branch: a caller who can read both folders is redirected to B (where its own permissions are
-            // re-enforced) instead of having B's run streamed from A's context. This is the core vulnerability: without
-            // checkContainer() in DownloadAction.validate() the action streams B's run from folder A.
             User readerAreaderB = createUserInRole(_folderA, ReaderRole.class);
             grantRole(readerAreaderB, _folderB, ReaderRole.class);
             MockHttpServletResponse resp = get(foreignUrl, readerAreaderB);

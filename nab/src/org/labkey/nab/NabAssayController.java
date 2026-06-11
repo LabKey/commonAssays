@@ -401,9 +401,33 @@ public class NabAssayController extends SpringActionController
         }
     }
 
+    private static void _verifyObjectIdsReadable(User user, int[] ids)
+    {
+        if (ids == null)
+            return;
+
+        // GitHub Issue #1892: (NAB-9) The object ids come straight from the request and getDilutionSummaries() resolves them to runs
+        // via a global, cross-container lookup.
+        for (int id : ids)
+        {
+            ExpRun run = NabManager.get().getNAbRunByObjectId(id);
+            if (run == null)
+                throw new NotFoundException("One or more requested specimens do not exist.");
+            if (run.getContainer().hasPermission(user, ReadPermission.class))
+                continue;
+            throw new NotFoundException("One or more requested specimens do not exist.");
+        }
+    }
+
     @RequiresPermission(ReadPermission.class)
     public static class NabGraphSelectedAction extends GraphSelectedAction<GraphSelectedForm>
     {
+        @Override
+        protected void verifyObjectIdsReadable(int[] ids)
+        {
+            _verifyObjectIdsReadable(getUser(), ids);
+        }
+
         @Override
         protected GraphSelectedBean createSelectionBean(ViewContext context, ExpProtocol protocol, int[] cutoffs, int[] dataObjectIds, String caption, String title)
         {
@@ -493,6 +517,11 @@ public class NabAssayController extends SpringActionController
     @ContextualRoles(RunDatasetContextualRoles.class)
     public static class NabMultiGraphAction extends MultiGraphAction<GraphSelectedForm>
     {
+        @Override
+        protected void verifyObjectIdsReadable(int[] ids)
+        {
+            _verifyObjectIdsReadable(getUser(), ids);
+        }
     }
 
     @RequiresPermission(ReadPermission.class)
