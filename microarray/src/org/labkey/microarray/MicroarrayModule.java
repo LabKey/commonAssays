@@ -44,15 +44,14 @@ import java.util.Set;
 public class MicroarrayModule extends SpringModule
 {
     private static final String WEBPART_FEATURE_ANNOTATION_SET = "Feature Annotation Sets";
-
     private static final String FEATURE_ANNOTATION_SET_CONTROLLER_NAME = "feature-annotationset";
-
     public static final String DB_SCHEMA_NAME = "microarray";
+    public static final String NAME = "Microarray";
 
     @Override
     public String getName()
     {
-        return "Microarray";
+        return NAME;
     }
 
     @Override
@@ -120,5 +119,13 @@ public class MicroarrayModule extends SpringModule
     public Set<String> getSchemaNames()
     {
         return Collections.singleton(DB_SCHEMA_NAME);
+    }
+
+    @Override
+    public @NotNull Set<Class> getIntegrationTests()
+    {
+        return Set.of(
+            FeatureAnnotationSetController.ContainerScopingTestCase.class
+        );
     }
 }
