@@ -554,9 +554,32 @@ public class FeatureAnnotationSetController extends SpringActionController
                     featureAnnotationSetExists(projectSetRowId));
         }
 
+        @Test
+        public void testDeleteActionRejectsBatchContainingUndeletableSet() throws Exception
+        {
+            User editor = createUserInRole(folderA, EditorRole.class);
+            grantRole(editor, project, ReaderRole.class);
+            int folderASetRowId = insertFeatureAnnotationSet(folderA, "Folder A Set");
+
+            // A multi-select delete mixing a deletable set with one in a Reader-only folder must be rejected wholesale.
+            assertStatus(HttpServletResponse.SC_FORBIDDEN, post(deleteUrl(folderA, folderASetRowId, projectSetRowId), editor));
+
+            // Fail-closed: neither set is deleted
+            assertTrue("Deletable set in a rejected batch must be preserved", featureAnnotationSetExists(folderASetRowId));
+            assertTrue("Undeletable set in another container must be preserved", featureAnnotationSetExists(projectSetRowId));
+        }
+
         private static ActionURL deleteUrl(Container c, int rowId)
         {
             return new ActionURL(DeleteAction.class, c).addParameter("singleObjectRowId", rowId);
+        }
+
+        private static ActionURL deleteUrl(Container c, int... rowIds)
+        {
+            ActionURL url = new ActionURL(DeleteAction.class, c);
+            for (int rowId : rowIds)
+                url.addParameter(DataRegion.SELECT_CHECKBOX_NAME, rowId);
+            return url;
         }
 
         private int insertFeatureAnnotationSet(Container c, String name) throws Exception

@@ -74,8 +74,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.labkey.api.data.DataRegion.MessagePart.filter;
-
 public class MicroarrayManager
 {
     private static final MicroarrayManager _instance = new MicroarrayManager();
@@ -247,8 +245,10 @@ public class MicroarrayManager
                 if (!processed.contains(containerId))
                 {
                     Container container = ContainerManager.getForId(containerId);
+                    if (container == null)
+                        throw new UnauthorizedException("Unable to determine container for feature annotation set (" + rowId + ")");
                     if (!container.hasPermission(user, permission))
-                        throw new UnauthorizedException("You do not have sufficient permission in " + container.getPath() + " for feature annotation set (" + rowId + ").");
+                        throw new UnauthorizedException("You do not have sufficient permission in " + container.getPath() + " for feature annotation set (" + rowId + ")");
 
                     processed.add(containerId);
                 }
