@@ -867,6 +867,12 @@ public class AnalysisScriptController extends BaseFlowController
                             return null;
                         }
 
+                        if (!file.getContainer().equals(getContainer()))
+                        {
+                            errors.reject(ERROR_MSG, "Resolved FCS file '" + file.getName() + "' is not in this folder.");
+                            return null;
+                        }
+
                         if (!file.isOriginalFCSFile())
                         {
                             errors.reject(ERROR_MSG, "Resolved FCS file '" + file.getName() + "' is a FCS files created from importing an external analysis.");

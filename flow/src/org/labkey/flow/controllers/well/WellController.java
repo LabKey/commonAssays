@@ -305,7 +305,9 @@ public class WellController extends BaseFlowController
 
                     for (String wellId : selected)
                     {
-                        _wells.add(FlowWell.fromWellId(Integer.parseInt(wellId)));
+                        FlowWell well = FlowWell.fromWellId(Integer.parseInt(wellId));
+                        well.checkContainer(getContainer(), getUser(), getActionURL());
+                        _wells.add(well);
                     }
                     DataRegionSelection.clearAll(form.getViewContext());
                 }
