@@ -20,16 +20,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Before;
+import org.junit.Test;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.jsp.FormPage;
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.pipeline.PipeRoot;
@@ -38,11 +44,16 @@ import org.labkey.api.query.QueryAction;
 import org.labkey.api.security.ContextualRoles;
 import org.labkey.api.security.RequiresNoPermission;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AbstractContainerScopingTest;
 import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.security.roles.ReaderRole;
+import org.labkey.api.test.TestWhen;
 import org.labkey.api.util.ExceptionUtil;
 import org.labkey.api.util.HeartBeat;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.URIUtil;
@@ -52,6 +63,7 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
+import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewContext;
 import org.labkey.flow.analysis.model.FCSHeader;
 import org.labkey.flow.analysis.web.FCSAnalyzer;
@@ -63,16 +75,23 @@ import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.data.FlowCompensationMatrix;
 import org.labkey.flow.data.FlowDataObject;
+import org.labkey.flow.data.FlowDataType;
+import org.labkey.flow.data.FlowFCSFile;
+import org.labkey.flow.data.FlowProtocol;
 import org.labkey.flow.data.FlowProtocolStep;
 import org.labkey.flow.data.FlowRun;
 import org.labkey.flow.data.FlowWell;
 import org.labkey.flow.persist.AttributeCache;
+import org.labkey.flow.persist.AttributeSet;
+import org.labkey.flow.persist.AttributeSetHelper;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowTableType;
 import org.labkey.flow.script.FlowAnalyzer;
+import org.labkey.flow.script.KeywordsJob;
 import org.labkey.flow.util.KeywordUtil;
 import org.labkey.flow.view.GraphColumn;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
@@ -372,6 +391,19 @@ public class WellController extends BaseFlowController
         }
     }
 
+    private @NotNull FlowWell checkContainer(ChooseGraphForm form)
+    {
+        FlowWell well = form.getWell();
+        if (well == null)
+            throw new NotFoundException("Well not found");
+
+        checkContainer(well);
+        checkContainer(form.getScript());
+        checkContainer(form.getCompensationMatrix());
+
+        return well;
+    }
+
     @RequiresPermission(ReadPermission.class)
     public class ChooseGraphAction extends SimpleViewAction<ChooseGraphForm>
     {
@@ -380,11 +412,7 @@ public class WellController extends BaseFlowController
         @Override
         public ModelAndView getView(ChooseGraphForm form, BindException errors)
         {
-            _well = form.getWell();
-            if (null == _well)
-            {
-                throw new NotFoundException();
-            }
+            _well = checkContainer(form);
 
             URI fileURI = _well.getFCSURI();
             if (fileURI == null)
@@ -497,10 +525,7 @@ public class WellController extends BaseFlowController
         @Override
         public ModelAndView getView(ChooseGraphForm form, BindException errors) throws IOException
         {
-            FlowWell well = form.getWell();
-            if (well == null)
-                throw new NotFoundException("Well not found");
-
+            checkContainer(form);
             String graph = getParam(FlowParam.graph);
             if (graph == null)
                 throw new NotFoundException("Graph spec required");
@@ -884,6 +909,96 @@ public class WellController extends BaseFlowController
             }
 
             return null;
+        }
+    }
+
+    @TestWhen(TestWhen.When.BVT)
+    public static class WellContainerScopingTestCase extends AbstractContainerScopingTest
+    {
+        private User _admin;
+        private Container _folderA;
+        private Container _folderB;
+        private int _wellIdA;
+        private int _scriptIdB;
+        private int _compIdB;
+
+        @Before
+        public void setUp() throws Exception
+        {
+            _admin = getAdmin();
+            _folderA = createContainer("A");
+            _folderB = createContainer("B");
+
+            _wellIdA = createFlowDataId(_folderA, FlowDataType.FCSFile, "wellA");
+            _scriptIdB = createFlowDataId(_folderB, FlowDataType.Script, "scriptB");
+            _compIdB = createFlowDataId(_folderB, FlowDataType.CompensationMatrix, "compB");
+        }
+
+        private int createFlowDataId(Container c, FlowDataType type, String name) throws Exception
+        {
+            URI uri = new URI("file:///" + getClass().getSimpleName() + "-" + name + ".flowdata.xml");
+            ExpData data = ExperimentService.get().createData(c, type, getClass().getSimpleName() + "-" + name);
+            data.setDataFileURI(uri);
+            data.save(_admin);
+            // fromWellId/fromCompId resolve via FlowDataObject.fromData(), which returns null unless the data has an
+            // AttrObject (these FlowDataTypes set requireAttrObject). Attach a minimal one so the object resolves.
+            AttributeSetHelper.save(new AttributeSet(type.getObjectType(), uri), _admin, data);
+            return data.getRowId();
+        }
+
+        // A foreign object must be 404 for a caller with no rights to its container, and a 302 redirect to that
+        // container for a caller who can read it.
+        private void assertForeignRejected(ActionURL foreignUrl) throws Exception
+        {
+            User readerAonly = createUserInRole(_folderA, ReaderRole.class);
+            assertStatus(HttpServletResponse.SC_NOT_FOUND, get(foreignUrl, readerAonly));
+
+            User readerAreaderB = createUserInRole(_folderA, ReaderRole.class);
+            grantRole(readerAreaderB, _folderB, ReaderRole.class);
+            MockHttpServletResponse resp = get(foreignUrl, readerAreaderB);
+            assertStatus(HttpServletResponse.SC_FOUND, resp);
+            String location = resp.getRedirectedUrl();
+            assertNotNull("Redirect must have a Location", location);
+            assertTrue("Redirect should target the object's own container, was: " + location, location.contains(_folderB.getPath()));
+        }
+
+        // ChooseGraphForm.getWell() resolves the well by global rowId. The valid case imports a legitimate run, so the
+        // well is backed by a readable FCS file, and the graph actually renders.
+        @Test
+        public void testWellContainerScoping() throws Exception
+        {
+            int foreignWellId = createFlowDataId(_folderB, FlowDataType.FCSFile, "wellB");
+            assertForeignRejected(new ActionURL(GenerateGraphAction.class, _folderA).addParameter("wellId", foreignWellId));
+
+            // valid case: import a real run into B, then render a graph from its well in its own container
+            FlowProtocol protocol = FlowProtocol.ensureForContainer(_admin, _folderB);
+            PipeRoot root = PipelineService.get().findPipelineRoot(_folderB);
+            ViewBackgroundInfo info = new ViewBackgroundInfo(_folderB, _admin, null);
+            File dir = JunitUtil.getSampleData(null, "flow/flowjoquery/microFCS");
+            FlowFCSFile realWell = new KeywordsJob(info, protocol, List.of(dir), null, root).go().get(0).getFCSFiles()[0];
+
+            // Build a graph spec from two of the well's real FCS parameter names.
+            List<String> params = new ArrayList<>(FlowAnalyzer.getParameters(realWell, null).keySet());
+            String graph = "(" + params.get(0) + ":" + params.get(1) + ")";
+            ActionURL ownUrl = new ActionURL(GenerateGraphAction.class, _folderB)
+                    .addParameter("wellId", realWell.getWellId()).addParameter("graph", graph);
+            assertStatus(HttpServletResponse.SC_OK, get(ownUrl, _admin));
+        }
+
+        // ChooseGraphForm.getScript() resolves an analysis script by global rowId; a foreign script must be scoped.
+        @Test
+        public void testScriptContainerScoping() throws Exception
+        {
+            assertForeignRejected(new ActionURL(GenerateGraphAction.class, _folderA)
+                    .addParameter("wellId", _wellIdA).addParameter("scriptId", _scriptIdB));
+        }
+
+        // ChooseGraphForm.getCompensationMatrix() resolves a comp matrix by global rowId; a foreign one must be scoped.
+        @Test
+        public void testCompensationMatrixContainerScoping() throws Exception
+        {
+            assertForeignRejected(new ActionURL(GenerateGraphAction.class, _folderA)
+                    .addParameter("wellId", _wellIdA).addParameter("compId", _compIdB));
         }
     }
 }
