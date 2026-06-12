@@ -17,6 +17,17 @@ package org.labkey.test.tests.luminex;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.api.query.QueryKey;
+import org.labkey.remoteapi.CommandException;
+import org.labkey.remoteapi.Connection;
+import org.labkey.remoteapi.assay.GetProtocolCommand;
+import org.labkey.remoteapi.assay.Protocol;
+import org.labkey.remoteapi.assay.SaveProtocolCommand;
+import org.labkey.remoteapi.query.DeleteRowsCommand;
+import org.labkey.remoteapi.query.Filter;
+import org.labkey.remoteapi.query.InsertRowsCommand;
+import org.labkey.remoteapi.query.SelectRowsCommand;
+import org.labkey.remoteapi.query.SelectRowsResponse;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
@@ -35,6 +46,7 @@ import org.openqa.selenium.WebElement;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -643,5 +655,65 @@ public final class LuminexGuideSetTest extends LuminexTest
         }
 
         clickButton("Save");
+    }
+
+    /*
+        GitHub Kanban #1892: Verify that a user with delete permission in one assay folder can't delete
+        guide sets belonging to a different protocol/folder by passing arbitrary RowIds to the GuideSet delete path.
+     */
+    @Test
+    public void testCrossProtocolGuideSetDeleteDenied() throws Exception
+    {
+        final String assayB = "GuideSetAuthAssayB";
+        final String analyteB = "Auth Analyte";
+        final String folderB = getProjectName() + "/" + TEST_ASSAY_SUBFOLDER;
+        Connection connection = createDefaultConnection();
+
+        log("Create a second Luminex assay design in the subfolder via the API");
+        Protocol protocolB = new GetProtocolCommand("Luminex").execute(connection, folderB).getProtocol();
+        protocolB.setName(assayB).setDescription("Second Luminex design for guide set protocol-auth test");
+        new SaveProtocolCommand(protocolB).execute(connection, folderB);
+
+        final String schemaA = "assay.Luminex." + QueryKey.encodePart(TEST_ASSAY_LUM);
+        final String schemaB = "assay.Luminex." + QueryKey.encodePart(assayB);
+
+        log("Insert a guide set into the second assay design");
+        InsertRowsCommand insertB = new InsertRowsCommand(schemaB, "GuideSet");
+        Map<String, Object> guideSet = new HashMap<>();
+        guideSet.put("AnalyteName", analyteB);
+        guideSet.put("CurrentGuideSet", false);
+        insertB.addRow(guideSet);
+        insertB.execute(connection, folderB);
+        long guideSetIdB = getGuideSetRowId(connection, schemaB, folderB, analyteB);
+
+        log("Attempt to delete the second protocol's guide set (RowId " + guideSetIdB + ") through the first protocol's GuideSet query - must be denied");
+        DeleteRowsCommand crossDelete = new DeleteRowsCommand(schemaA, "GuideSet");
+        Map<String, Object> key = new HashMap<>();
+        key.put("RowId", guideSetIdB);
+        crossDelete.addRow(key);
+        crossDelete.execute(connection, getProjectName());
+        assertEquals("Cross-protocol delete must not remove the other protocol's guide set", 1, guideSetRowCount(connection, schemaB, folderB, guideSetIdB));
+
+        log("Verify the guide set can still be deleted through its own protocol's query");
+        DeleteRowsCommand ownDelete = new DeleteRowsCommand(schemaB, "GuideSet");
+        ownDelete.addRow(key);
+        ownDelete.execute(connection, folderB);
+        assertEquals("Guide set should be deletable through its own protocol's query", 0, guideSetRowCount(connection, schemaB, folderB, guideSetIdB));
+    }
+
+    private int guideSetRowCount(Connection connection, String schema, String folderPath, long rowId) throws Exception
+    {
+        SelectRowsCommand select = new SelectRowsCommand(schema, "GuideSet");
+        select.addFilter(new Filter("RowId", rowId, Filter.Operator.EQUAL));
+        return select.execute(connection, folderPath).getRowCount().intValue();
+    }
+
+    private long getGuideSetRowId(Connection connection, String schema, String folderPath, String analyteName) throws Exception
+    {
+        SelectRowsCommand select = new SelectRowsCommand(schema, "GuideSet");
+        select.addFilter(new Filter("AnalyteName", analyteName, Filter.Operator.EQUAL));
+        SelectRowsResponse response = select.execute(connection, folderPath);
+        assertEquals("Expected exactly one guide set for analyte " + analyteName, 1, response.getRowCount().intValue());
+        return ((Number) response.getRowset().iterator().next().getValue("RowId")).longValue();
     }
 }
