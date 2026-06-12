@@ -16,6 +16,7 @@
 
 package org.labkey.elispot;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -543,6 +544,15 @@ public class ElispotController extends SpringActionController
             Set<String> selections = DataRegionSelection.getSelected(getViewContext(), true);
             if (!selections.isEmpty())
             {
+                // GitHub Kanban #1892: Verify each selected run belongs to the current container before queuing
+                for (String selection : selections)
+                {
+                    int rowId = NumberUtils.toInt(selection, -1);
+                    ExpRun run = rowId != -1 ? ExperimentService.get().getExpRun(rowId, getContainer()) : null;
+                    if (run == null)
+                        throw new NotFoundException("Run " + selection + " does not exist.");
+                }
+
                 ViewBackgroundInfo info = new ViewBackgroundInfo(getContainer(), getUser(), getViewContext().getActionURL());
                 BackgroundSubtractionJob job = new BackgroundSubtractionJob(ElispotPipelineProvider.NAME, info,
                         PipelineService.get().findPipelineRoot(getContainer()), selections);
