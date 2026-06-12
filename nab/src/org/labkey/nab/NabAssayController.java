@@ -231,15 +231,12 @@ public class NabAssayController extends SpringActionController
             {
                 throw new NotFoundException("No run specified");
             }
-            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            // GitHub Kanban #1892: getExpRun() resolves by global rowId; ensure the run belongs to the current container
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId(), getContainer());
             if (run == null)
             {
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
             }
-
-            // GitHub Issue #1892: getExpRun() resolves by global rowId; ensure the run belongs to the current container
-            if (!run.getContainer().equals(getContainer()))
-                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
 
             File file = getDataHandler(run).getDataFile(run);
             if (file == null)
@@ -408,7 +405,7 @@ public class NabAssayController extends SpringActionController
         if (ids == null)
             return;
 
-        // GitHub Issue #1892: (NAB-9) The object ids come straight from the request and getDilutionSummaries() resolves them to runs
+        // GitHub Kanban #1892: (NAB-9) The object ids come straight from the request and getDilutionSummaries() resolves them to runs
         // via a global, cross-container lookup.
         for (int id : ids)
         {
@@ -484,12 +481,9 @@ public class NabAssayController extends SpringActionController
             {
                 throw new NotFoundException("No run specified");
             }
-            _run = ExperimentService.get().getExpRun(form.getRowId());
+            // GitHub Kanban #1892: getExpRun() resolves by global rowId; ensure the run belongs to the current container
+            _run = ExperimentService.get().getExpRun(form.getRowId(), getContainer());
             if (_run == null)
-                throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
-
-            // GitHub Issue #1892: getExpRun() resolves by global rowId; ensure the run belongs to the current container
-            if (!_run.getContainer().equals(getContainer()))
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
 
             if (form.isReupload())
