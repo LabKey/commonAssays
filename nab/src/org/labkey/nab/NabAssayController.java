@@ -50,6 +50,7 @@ import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionDataRow;
 import org.labkey.api.assay.dilution.DilutionManager;
+import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.dilution.WellDataRow;
 import org.labkey.api.assay.nab.Luc5Assay;
@@ -107,6 +108,7 @@ import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.roles.ReaderRole;
+import org.labkey.api.security.roles.Role;
 import org.labkey.api.study.assay.RunDatasetContextualRoles;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.JsonUtil;
@@ -413,8 +415,16 @@ public class NabAssayController extends SpringActionController
             ExpRun run = NabManager.get().getNAbRunByObjectId(id);
             if (run == null)
                 throw new NotFoundException("One or more requested specimens do not exist.");
-            if (run.getContainer().hasPermission(user, ReadPermission.class))
+
+            Container runContainer = run.getContainer();
+            if (runContainer.hasPermission(user, ReadPermission.class))
                 continue;
+
+            // contextual roles from assay linked to study
+            Set<Role> contextualRoles = RunDatasetContextualRoles.getContextualRolesForRun(runContainer, user, run, FieldKey.fromParts(DilutionProviderSchema.RUN_ID_COLUMN_NAME));
+            if (runContainer.hasPermission(user, ReadPermission.class, contextualRoles))
+                continue;
+
             throw new NotFoundException("One or more requested specimens do not exist.");
         }
     }
