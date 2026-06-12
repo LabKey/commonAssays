@@ -837,7 +837,8 @@ public class NabAssayController extends SpringActionController
             if (!getContainer().hasPermission(getUser(), AdminPermission.class))
                 form.setEdit(false);
 
-            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            // GitHub Kanban #1892: Resolve the run scoped to the current container
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId(), getContainer());
             if (run == null)
             {
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
@@ -879,7 +880,8 @@ public class NabAssayController extends SpringActionController
         public ApiResponse execute(NabQCForm form, BindException errors) throws Exception
         {
             ApiSimpleResponse response = new ApiSimpleResponse();
-            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            // GitHub Kanban #1892: Resolve the run scoped to the current container
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId(), getContainer());
             if (run == null)
             {
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
@@ -1078,7 +1080,8 @@ public class NabAssayController extends SpringActionController
         @Override
         public void validateForm(QCControlInfo form, Errors errors)
         {
-            _run = ExperimentService.get().getExpRun(form.getRunId());
+            // GitHub Kanban #1892: Resolve the run scoped to the current container
+            _run = ExperimentService.get().getExpRun(form.getRunId(), getContainer());
             if (_run == null)
             {
                 errors.reject(ERROR_MSG, "NAb Run " + form.getRunId() + " does not exist.");
@@ -1306,7 +1309,8 @@ public class NabAssayController extends SpringActionController
         public ApiResponse execute(RenderAssayBean form, BindException errors)
         {
             ApiSimpleResponse response = new ApiSimpleResponse();
-            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            // GitHub Kanban #1892: Resolve the run scoped to the current container
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId(), getContainer());
             if (run != null)
             {
                 List<WellExclusion> exclusions = new ArrayList<>();
@@ -1381,7 +1385,7 @@ public class NabAssayController extends SpringActionController
             }
             else
             {
-                errors.reject(ERROR_MSG, "NAb Run " + form.getRunId() + " does not exist.");
+                errors.reject(ERROR_MSG, "NAb Run " + form.getRowId() + " does not exist.");
             }
             return response;
         }
