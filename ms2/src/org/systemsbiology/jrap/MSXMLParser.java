@@ -144,7 +144,7 @@ public final class MSXMLParser
         // Create parser using the centrally-configured, XXE-safe factory
         try
         {
-            parser = XmlBeansUtil.SAX_PARSER_FACTORY.newSAXParser().getXMLReader();
+            parser = XmlBeansUtil.SAX_PARSER_FACTORY_ALLOWING_DOCTYPE.newSAXParser().getXMLReader();
         } catch (Exception e)
         {
             System.err.println("error: Unable to instantiate parser");
