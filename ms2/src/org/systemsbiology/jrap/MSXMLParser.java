@@ -40,8 +40,8 @@ package org.systemsbiology.jrap;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.labkey.api.util.XmlBeansUtil;
 import org.xml.sax.*;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.FileInputStream;
 import java.io.File;
@@ -136,35 +136,22 @@ public final class MSXMLParser
         this.file = file;
 
         // The defaults for the parser
-        boolean namespaces = DEFAULT_NAMESPACES;
         boolean namespacePrefixes = DEFAULT_NAMESPACE_PREFIXES;
-        boolean validation = DEFAULT_VALIDATION;
-        boolean schemaValidation = DEFAULT_SCHEMA_VALIDATION;
-        boolean schemaFullChecking = DEFAULT_SCHEMA_FULL_CHECKING;
-        boolean dynamicValidation = DEFAULT_DYNAMIC_VALIDATION;
 
         // Create a new index handler
         indexHandler = new SAX2IndexHandler();
 
-        // Create parser
+        // Create parser using the centrally-configured, XXE-safe factory
         try
         {
-            parser = XMLReaderFactory.createXMLReader(DEFAULT_PARSER_NAME);
+            parser = XmlBeansUtil.SAX_PARSER_FACTORY.newSAXParser().getXMLReader();
         } catch (Exception e)
         {
-            System.err.println("error: Unable to instantiate parser ("
-                    + DEFAULT_PARSER_NAME + ")");
+            System.err.println("error: Unable to instantiate parser");
         }
 
-        // Set parser features
-        try
-        {
-            parser.setFeature(NAMESPACES_FEATURE_ID, namespaces);
-        } catch (SAXException e)
-        {
-            System.err.println("warning: Parser does not support feature ("
-                    + NAMESPACES_FEATURE_ID + ")");
-        }
+        // Set parser features. Namespaces and validation are configured by the factory; only the
+        // remaining, non-security-relevant features need to be set here.
         try
         {
             parser.setFeature(NAMESPACE_PREFIXES_FEATURE_ID, namespacePrefixes);
@@ -172,42 +159,6 @@ public final class MSXMLParser
         {
             System.err.println("warning: Parser does not support feature ("
                     + NAMESPACE_PREFIXES_FEATURE_ID + ")");
-        }
-        try
-        {
-            parser.setFeature(VALIDATION_FEATURE_ID, validation);
-        } catch (SAXException e)
-        {
-            System.err.println("warning: Parser does not support feature ("
-                    + VALIDATION_FEATURE_ID + ")");
-        }
-        try
-        {
-            parser.setFeature(SCHEMA_VALIDATION_FEATURE_ID, schemaValidation);
-        } catch (SAXNotRecognizedException | SAXNotSupportedException e)
-        {
-            System.err.println("warning: Parser does not support feature ("
-                    + SCHEMA_VALIDATION_FEATURE_ID + ")");
-
-        }
-        try
-        {
-            parser.setFeature(SCHEMA_FULL_CHECKING_FEATURE_ID,
-                    schemaFullChecking);
-        } catch (SAXNotRecognizedException | SAXNotSupportedException e)
-        {
-            System.err.println("warning: Parser does not support feature ("
-                    + SCHEMA_FULL_CHECKING_FEATURE_ID + ")");
-
-        }
-        try
-        {
-            parser.setFeature(DYNAMIC_VALIDATION_FEATURE_ID, dynamicValidation);
-        } catch (SAXNotRecognizedException | SAXNotSupportedException e)
-        {
-            System.err.println("warning: Parser does not support feature ("
-                    + DYNAMIC_VALIDATION_FEATURE_ID + ")");
-
         }
         try
         {

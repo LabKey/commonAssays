@@ -1101,7 +1101,7 @@ public class ProteinController extends SpringActionController
         }
     }
 
-    @RequiresPermission(AdminPermission.class)
+    @RequiresPermission(AdminOperationsPermission.class)
     public static class SetBestNameAction extends FormHandlerAction<SetBestNameForm>
     {
         @Override
