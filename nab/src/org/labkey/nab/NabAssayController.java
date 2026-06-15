@@ -50,6 +50,7 @@ import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionDataRow;
 import org.labkey.api.assay.dilution.DilutionManager;
+import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.dilution.WellDataRow;
 import org.labkey.api.assay.nab.Luc5Assay;
@@ -107,6 +108,7 @@ import org.labkey.api.security.permissions.AdminPermission;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.roles.ReaderRole;
+import org.labkey.api.security.roles.Role;
 import org.labkey.api.study.assay.RunDatasetContextualRoles;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.JsonUtil;
@@ -229,11 +231,13 @@ public class NabAssayController extends SpringActionController
             {
                 throw new NotFoundException("No run specified");
             }
-            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            // GitHub Kanban #1892: getExpRun() resolves by global rowId; ensure the run belongs to the current container
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId(), getContainer());
             if (run == null)
             {
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
             }
+
             File file = getDataHandler(run).getDataFile(run);
             if (file == null)
             {
@@ -396,9 +400,41 @@ public class NabAssayController extends SpringActionController
         }
     }
 
+    private static void _verifyObjectIdsReadable(User user, int[] ids)
+    {
+        if (ids == null)
+            return;
+
+        // GitHub Kanban #1892: (NAB-9) The object ids come straight from the request and getDilutionSummaries() resolves them to runs
+        // via a global, cross-container lookup.
+        for (int id : ids)
+        {
+            ExpRun run = NabManager.get().getNAbRunByObjectId(id);
+            if (run == null)
+                throw new NotFoundException("One or more requested specimens do not exist.");
+
+            Container runContainer = run.getContainer();
+            if (runContainer.hasPermission(user, ReadPermission.class))
+                continue;
+
+            // contextual roles from assay linked to study
+            Set<Role> contextualRoles = RunDatasetContextualRoles.getContextualRolesForRun(runContainer, user, run, FieldKey.fromParts(DilutionProviderSchema.RUN_ID_COLUMN_NAME));
+            if (runContainer.hasPermission(user, ReadPermission.class, contextualRoles))
+                continue;
+
+            throw new NotFoundException("One or more requested specimens do not exist.");
+        }
+    }
+
     @RequiresPermission(ReadPermission.class)
     public static class NabGraphSelectedAction extends GraphSelectedAction<GraphSelectedForm>
     {
+        @Override
+        protected void verifyObjectIdsReadable(int[] ids)
+        {
+            _verifyObjectIdsReadable(getUser(), ids);
+        }
+
         @Override
         protected GraphSelectedBean createSelectionBean(ViewContext context, ExpProtocol protocol, int[] cutoffs, int[] dataObjectIds, String caption, String title)
         {
@@ -445,7 +481,8 @@ public class NabAssayController extends SpringActionController
             {
                 throw new NotFoundException("No run specified");
             }
-            _run = ExperimentService.get().getExpRun(form.getRowId());
+            // GitHub Kanban #1892: getExpRun() resolves by global rowId; ensure the run belongs to the current container
+            _run = ExperimentService.get().getExpRun(form.getRowId(), getContainer());
             if (_run == null)
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
 
@@ -484,6 +521,11 @@ public class NabAssayController extends SpringActionController
     @ContextualRoles(RunDatasetContextualRoles.class)
     public static class NabMultiGraphAction extends MultiGraphAction<GraphSelectedForm>
     {
+        @Override
+        protected void verifyObjectIdsReadable(int[] ids)
+        {
+            _verifyObjectIdsReadable(getUser(), ids);
+        }
     }
 
     @RequiresPermission(ReadPermission.class)
@@ -795,7 +837,8 @@ public class NabAssayController extends SpringActionController
             if (!getContainer().hasPermission(getUser(), AdminPermission.class))
                 form.setEdit(false);
 
-            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            // GitHub Kanban #1892: Resolve the run scoped to the current container
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId(), getContainer());
             if (run == null)
             {
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
@@ -837,7 +880,8 @@ public class NabAssayController extends SpringActionController
         public ApiResponse execute(NabQCForm form, BindException errors) throws Exception
         {
             ApiSimpleResponse response = new ApiSimpleResponse();
-            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            // GitHub Kanban #1892: Resolve the run scoped to the current container
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId(), getContainer());
             if (run == null)
             {
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
@@ -1036,7 +1080,8 @@ public class NabAssayController extends SpringActionController
         @Override
         public void validateForm(QCControlInfo form, Errors errors)
         {
-            _run = ExperimentService.get().getExpRun(form.getRunId());
+            // GitHub Kanban #1892: Resolve the run scoped to the current container
+            _run = ExperimentService.get().getExpRun(form.getRunId(), getContainer());
             if (_run == null)
             {
                 errors.reject(ERROR_MSG, "NAb Run " + form.getRunId() + " does not exist.");
@@ -1264,7 +1309,8 @@ public class NabAssayController extends SpringActionController
         public ApiResponse execute(RenderAssayBean form, BindException errors)
         {
             ApiSimpleResponse response = new ApiSimpleResponse();
-            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            // GitHub Kanban #1892: Resolve the run scoped to the current container
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId(), getContainer());
             if (run != null)
             {
                 List<WellExclusion> exclusions = new ArrayList<>();
@@ -1339,7 +1385,7 @@ public class NabAssayController extends SpringActionController
             }
             else
             {
-                errors.reject(ERROR_MSG, "NAb Run " + form.getRunId() + " does not exist.");
+                errors.reject(ERROR_MSG, "NAb Run " + form.getRowId() + " does not exist.");
             }
             return response;
         }

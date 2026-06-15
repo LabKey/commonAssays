@@ -16,12 +16,14 @@
 
 package org.labkey.flow.persist;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.iterators.ArrayIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Before;
 import org.junit.Test;
 import org.labkey.api.audit.AuditLogService;
 import org.labkey.api.data.Aggregate;
@@ -46,6 +48,7 @@ import org.labkey.api.exp.Handler;
 import org.labkey.api.exp.OntologyManager;
 import org.labkey.api.exp.PropertyDescriptor;
 import org.labkey.api.exp.api.ExpData;
+import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExpSampleType;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.SamplesSchema;
@@ -55,20 +58,31 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AbstractContainerScopingTest;
+import org.labkey.api.security.roles.EditorRole;
+import org.labkey.api.security.roles.ReaderRole;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.view.ActionURL;
 import org.labkey.flow.FlowModule;
 import org.labkey.flow.analysis.web.GraphSpec;
 import org.labkey.flow.analysis.web.StatisticSpec;
+import org.labkey.flow.controllers.FlowParam;
+import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisEngine;
+import org.labkey.flow.controllers.protocol.ProtocolController;
+import org.labkey.flow.controllers.run.RunController;
 import org.labkey.flow.data.AttributeType;
 import org.labkey.flow.data.FlowDataObject;
+import org.labkey.flow.data.FlowDataType;
 import org.labkey.flow.data.FlowProperty;
 import org.labkey.flow.data.FlowProtocol;
+import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.data.ICSMetadata;
 import org.labkey.flow.query.FlowSchema;
 import org.labkey.flow.query.FlowTableType;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.net.URI;
 import java.sql.ResultSet;
@@ -1800,6 +1814,140 @@ public class FlowManager
         {
             Map<String, Object> metrics = FlowManager.get().getUsageMetrics();
             assertNotNull(metrics.get("flowTempTableCount"));
+        }
+    }
+
+    public static class ContainerScopingTestCase extends AbstractContainerScopingTest
+    {
+        private Container _folderA;
+        private Container _folderB;
+        private User _admin;
+
+        @Before
+        public void setup()
+        {
+            // Regression test for FLOW-1. A FlowScript is addressed by a global scriptId.
+            _admin = getAdmin();
+            _folderA = createContainer("A");
+            _folderB = createContainer("B");
+        }
+
+        @Test
+        public void testScriptContainerScoping() throws Exception
+        {
+            // GitHub Issue #1892: Regression test for FLOW-1.
+            FlowScript script = FlowScript.create(_admin, _folderB, "scope-test",
+                    "<script xmlns=\"http://www.labkey.org/data/xml/flowScript\"/>");
+            int scriptId = script.getScriptId();
+
+            ActionURL foreignUrl = new ActionURL(ScriptController.DownloadAction.class, _folderA)
+                    .addParameter(FlowParam.scriptId.toString(), scriptId);
+
+            User readerAonly = createUserInRole(_folderA, ReaderRole.class);
+            assertStatus(HttpServletResponse.SC_NOT_FOUND, get(foreignUrl, readerAonly));
+
+            User readerAreaderB = createUserInRole(_folderA, ReaderRole.class);
+            grantRole(readerAreaderB, _folderB, ReaderRole.class);
+            MockHttpServletResponse resp = get(foreignUrl, readerAreaderB);
+            assertStatus(HttpServletResponse.SC_FOUND, resp);
+            String location = resp.getRedirectedUrl();
+            assertNotNull("Redirect must have a Location", location);
+            assertTrue("Redirect should target the script's own container, was: " + location, location.contains(_folderB.getPath()));
+
+            // valid case
+            ActionURL ownUrl = new ActionURL(ScriptController.DownloadAction.class, _folderB)
+                    .addParameter(FlowParam.scriptId.toString(), scriptId);
+            assertStatus(HttpServletResponse.SC_OK, get(ownUrl, _admin));
+        }
+
+        @Test
+        public void testProtocolContainerScoping() throws Exception
+        {
+            // GitHub Issue #1892: Regression test for FLOW-2. A FlowProtocol is accessed by a global experimentId.
+            FlowProtocol protocolB = FlowProtocol.ensureForContainer(_admin, _folderB);
+            int experimentId = protocolB.getProtocol().getRowId();
+
+            ActionURL foreignUrl = new ActionURL(ProtocolController.EditFCSAnalysisFilterAction.class, _folderA)
+                    .addParameter(FlowParam.experimentId.toString(), experimentId);
+
+            User editorAonly = createUserInRole(_folderA, EditorRole.class);
+            assertStatus(HttpServletResponse.SC_NOT_FOUND, get(foreignUrl, editorAonly));
+
+            User editorAreaderB = createUserInRole(_folderA, EditorRole.class);
+            grantRole(editorAreaderB, _folderB, ReaderRole.class);
+            MockHttpServletResponse resp = get(foreignUrl, editorAreaderB);
+            assertStatus(HttpServletResponse.SC_FOUND, resp);
+            String location = resp.getRedirectedUrl();
+            assertNotNull("Redirect must have a Location", location);
+            assertTrue("Redirect should target the protocol's own container, was: " + location, location.contains(_folderB.getPath()));
+
+            // valid case
+            ActionURL ownUrl = new ActionURL(ProtocolController.EditFCSAnalysisFilterAction.class, _folderB)
+                    .addParameter(FlowParam.experimentId.toString(), experimentId);
+            assertStatus(HttpServletResponse.SC_OK, get(ownUrl, _admin));
+        }
+
+        @Test
+        public void testExportAnalysisContainerScoping() throws Exception
+        {
+            // GitHub Issue #1892: Regression test for FLOW-3. RunController.ExportAnalysis resolves
+            // URL supplied runId/wellId via the global FlowRun.
+            ExpData data = ExperimentService.get().createData(_folderB, FlowDataType.FCSFile, "scope-test-well");
+            URI dataFileURI = new URI("file:///attributes.flowdata.xml");
+            data.setDataFileURI(dataFileURI);
+            data.save(_admin);
+            AttributeSet attrs = new AttributeSet(ObjectType.fcsKeywords, dataFileURI);
+            attrs.setKeyword("keyword1", "value1");
+            AttributeSetHelper.save(attrs, _admin, data);
+            int wellId = data.getRowId();
+
+            ActionURL foreignUrl = new ActionURL(RunController.ExportAnalysis.class, _folderA)
+                    .addParameter(FlowParam.wellId.toString(), wellId);
+
+            User readerAonly = createUserInRole(_folderA, ReaderRole.class);
+            assertStatus(HttpServletResponse.SC_NOT_FOUND, post(foreignUrl, readerAonly));
+
+            User readerAreaderB = createUserInRole(_folderA, ReaderRole.class);
+            grantRole(readerAreaderB, _folderB, ReaderRole.class);
+            MockHttpServletResponse resp = post(foreignUrl, readerAreaderB);
+            assertStatus(HttpServletResponse.SC_FOUND, resp);
+            String location = resp.getRedirectedUrl();
+            assertNotNull("Redirect must have a Location", location);
+            assertTrue("Redirect should target the well's own container, was: " + location, location.contains(_folderB.getPath()));
+
+            ActionURL ownUrl = new ActionURL(RunController.ExportAnalysis.class, _folderB)
+                    .addParameter(FlowParam.wellId.toString(), wellId);
+            assertStatus(HttpServletResponse.SC_OK, post(ownUrl, _admin));
+        }
+
+        @Test
+        public void testRunDownloadContainerScoping() throws Exception
+        {
+            // GitHub Issue #1892: Regression test for FLOW-4. RunController.DownloadAction (and
+            // DownloadAttachmentAction) resolve a run via RunForm.getRun() -> FlowRun.fromRunId() from a global runId.
+            FlowProtocol protocolB = FlowProtocol.ensureForContainer(_admin, _folderB);
+            ExpRun expRun = ExperimentService.get().createExperimentRun(_folderB, "scope-test-run");
+            expRun.setProtocol(protocolB.getProtocol());
+            expRun.save(_admin);
+            int runId = expRun.getRowId();
+
+            ActionURL foreignUrl = new ActionURL(RunController.DownloadAction.class, _folderA)
+                    .addParameter(FlowParam.runId.toString(), runId);
+
+            User readerAonly = createUserInRole(_folderA, ReaderRole.class);
+            assertStatus(HttpServletResponse.SC_NOT_FOUND, get(foreignUrl, readerAonly));
+
+            User readerAreaderB = createUserInRole(_folderA, ReaderRole.class);
+            grantRole(readerAreaderB, _folderB, ReaderRole.class);
+            MockHttpServletResponse resp = get(foreignUrl, readerAreaderB);
+            assertStatus(HttpServletResponse.SC_FOUND, resp);
+            String location = resp.getRedirectedUrl();
+            assertNotNull("Redirect must have a Location", location);
+            assertTrue("Redirect should target the run's own container, was: " + location, location.contains(_folderB.getPath()));
+
+            ActionURL ownUrl = new ActionURL(RunController.DownloadAction.class, _folderB)
+                    .addParameter(FlowParam.runId.toString(), runId);
+            assertStatus(HttpServletResponse.SC_OK, get(ownUrl, _admin));
         }
     }
 }
