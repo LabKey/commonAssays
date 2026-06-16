@@ -16,6 +16,10 @@
 
 package org.labkey.signaldata;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.jetbrains.annotations.Nullable;
+import org.junit.Before;
+import org.junit.Test;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.MutatingApiAction;
@@ -33,9 +37,14 @@ import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.query.QueryUpdateService;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AbstractContainerScopingTest;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.security.roles.ReaderRole;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.Path;
 import org.labkey.api.util.UnexpectedException;
+import org.labkey.api.view.ActionURL;
 import org.labkey.api.webdav.WebdavResource;
 import org.labkey.api.webdav.WebdavService;
 import org.labkey.signaldata.assay.SignalDataAssayDataHandler;
@@ -44,6 +53,7 @@ import org.springframework.validation.BindException;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -137,7 +147,7 @@ public class SignalDataController extends SpringActionController
             Map<String, String> props = new HashMap<>();
             Container c = getContainer();
 
-            if (null != resource)
+            if (isAuthorizedResource(getUser(), c, resource))
             {
                 FileContentService svc = FileContentService.get();
                 ExpData data = svc.getDataObject(resource, c);
@@ -210,6 +220,102 @@ public class SignalDataController extends SpringActionController
             }
 
             return new ApiSimpleResponse(props);
+        }
+    }
+
+    /**
+     * GitHub Issue 1236: the requested path is client-supplied and WebdavService.lookup() resolves globally with no ACL
+     * or container scoping. Before disclosing a resource's metadata or creating an exp.data row that references
+     * it, require that (a) the caller can actually read the resolved resource and (b) it lives under this
+     * container's pipeline root. Signal data files always reside under the container's own pipeline root, so a
+     * path resolving outside it indicates a cross-container probe rather than a legitimate request.
+     */
+    static boolean isAuthorizedResource(User user, Container c, @Nullable WebdavResource resource)
+    {
+        if (null == resource || !resource.canRead(user, true))
+            return false;
+
+        File file = resource.getFile();
+        if (null == file)
+            return false;
+
+        PipeRoot root = PipelineService.get().findPipelineRoot(c);
+        return null != root && root.isUnderRoot(file);
+    }
+
+    /**
+     * GitHub Issue 1236 regression test.
+     */
+    public static class ContainerScopingTestCase extends AbstractContainerScopingTest
+    {
+        private Container _folderA;
+        private Container _folderB;
+        private User _readerA;
+
+        @Before
+        public void setup() throws Exception
+        {
+            _folderA = createContainer("A");
+            _folderB = createContainer("B");
+            _readerA = createUserInRole(_folderA, ReaderRole.class);
+        }
+
+        @Test
+        public void testGetSignalDataResourceContainerScoping() throws Exception
+        {
+            File foreignFile = writeFileUnderFileRoot(_folderB, "foreign.txt");
+            ExperimentService exp = ExperimentService.get();
+
+            // Deny (read ACL): a caller who can read folder A but NOT folder B requests a file in B's pipeline root
+            // with test=true. The action returns 200 with empty props either way, so we assert the real side effect:
+            // no exp.data row is created in folder A referencing the foreign file. Pre-fix the global WebdavService
+            // lookup resolved the file with no ACL check and createData() persisted a reference in folder A.
+            assertStatus(HttpServletResponse.SC_OK, post(resourceUrl(_folderA, _folderB, "foreign.txt"), _readerA));
+            assertNull("A foreign-folder file the caller cannot read must not be imported into folder A",
+                    exp.getExpDataByURL(foreignFile, _folderA));
+
+            // Deny (pipeline-root containment): even a site admin who CAN read folder B must not be able to pull a
+            // file from B's pipeline root into folder A. This is the case the canRead check alone would miss.
+            assertStatus(HttpServletResponse.SC_OK, post(resourceUrl(_folderA, _folderB, "foreign.txt"), getAdmin()));
+            assertNull("A file outside the request container's pipeline root must not be imported, even for an admin",
+                    exp.getExpDataByURL(foreignFile, _folderA));
+
+            // Positive control: the same request for a file under folder A's own pipeline root still creates the
+            // exp.data row, proving the fix did not break the legitimate in-container flow.
+            File localFile = writeFileUnderFileRoot(_folderA, "local.txt");
+            assertStatus(HttpServletResponse.SC_OK, post(resourceUrl(_folderA, _folderA, "local.txt"), getAdmin()));
+            assertNotNull("A file under the request container's own pipeline root should still be imported",
+                    exp.getExpDataByURL(localFile, _folderA));
+        }
+
+        /**
+         * Build a getSignalDataResource URL in {@code requestContainer} whose path points at a file under {@code fileContainer}'s @files root.
+         */
+        private static ActionURL resourceUrl(Container requestContainer, Container fileContainer, String name)
+        {
+            String path = filesPath(fileContainer).append(name).toString();
+            return new ActionURL(getSignalDataResourceAction.class, requestContainer)
+                    .addParameter("path", path)
+                    .addParameter("test", true);
+        }
+
+        private static Path filesPath(Container c)
+        {
+            return WebdavService.getPath().append(c.getParsedPath()).append(FileContentService.FILES_LINK);
+        }
+
+        private static File writeFileUnderFileRoot(Container c, String name) throws Exception
+        {
+            WebdavResource filesNode = WebdavService.get().lookup(filesPath(c));
+            assertNotNull("Test requires a @files node for " + c.getName(), filesNode);
+            File dir = filesNode.getFile();
+            assertNotNull("Test requires a file root for " + c.getName(), dir);
+            FileUtil.mkdirs(dir);
+
+            File file = FileUtil.appendName(dir, name);
+            if (!file.exists())
+                Files.writeString(file.toPath(), "test");
+            return file;
         }
     }
 }

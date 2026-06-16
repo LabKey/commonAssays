@@ -25,6 +25,7 @@ import org.labkey.api.view.WebPartFactory;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 public class SignalDataModule extends CodeOnlyModule
 {
@@ -72,5 +73,12 @@ public class SignalDataModule extends CodeOnlyModule
     public Collection<String> getSummary(Container c)
     {
         return Collections.emptyList();
+    }
+
+    @Override
+    @NotNull
+    public Set<Class> getIntegrationTests()
+    {
+        return Set.of(SignalDataController.ContainerScopingTestCase.class);
     }
 }

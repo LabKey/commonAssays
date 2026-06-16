@@ -50,9 +50,9 @@ import org.labkey.api.assay.dilution.DilutionAssayRun;
 import org.labkey.api.assay.dilution.DilutionDataHandler;
 import org.labkey.api.assay.dilution.DilutionDataRow;
 import org.labkey.api.assay.dilution.DilutionManager;
-import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.assay.dilution.DilutionSummary;
 import org.labkey.api.assay.dilution.WellDataRow;
+import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
 import org.labkey.api.assay.nab.Luc5Assay;
 import org.labkey.api.assay.nab.NabUrls;
 import org.labkey.api.assay.nab.RenderAssayBean;
@@ -676,7 +676,9 @@ public class NabAssayController extends SpringActionController
         {
             ViewContext context = getViewContext();
             ExpProtocol protocol = ExperimentService.get().getExpProtocol(sampleSpreadsheetForm.getProtocol());
-            if (protocol == null)
+            // GitHub Kanban #1236: verify protocol is in scope for the specified container.
+            if (protocol == null ||
+                    AssayService.get().getAssayProtocols(getContainer()).stream().noneMatch(p -> p.getRowId() == protocol.getRowId()))
             {
                 throw new NotFoundException("Protocol " + sampleSpreadsheetForm.getProtocol() + " does not exist.");
             }

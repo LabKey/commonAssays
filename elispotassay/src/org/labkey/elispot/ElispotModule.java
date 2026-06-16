@@ -96,4 +96,10 @@ public class ElispotModule extends DefaultModule
 
         PipelineService.get().registerPipelineProvider(new ElispotPipelineProvider(this));
     }
+
+    @Override
+    public @NotNull Set<Class> getIntegrationTests()
+    {
+        return Set.of(ElispotController.ContainerScopingTestCase.class);
+    }
 }
