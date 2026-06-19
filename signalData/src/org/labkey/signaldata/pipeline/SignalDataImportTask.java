@@ -1,6 +1,8 @@
 package org.labkey.signaldata.pipeline;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -97,6 +99,13 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
             return new RecordedActionSet();
         }
 
+        AssayProvider provider = AssayService.get().getProvider(protocol);
+        if (provider == null)
+        {
+            log.error("No Assay provider found for protocol name : {}", protocolName);
+            return new RecordedActionSet();
+        }
+
         // guaranteed to only have a single file
         if (support.getInputFiles().size() != 1)
         {
@@ -118,10 +127,16 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
             for (Map<String, Object> row : dataRows)
             {
                 // parse out the name and datafile properties
-                String name = Objects.toString(row.get(INPUT_NAME), "");
+                String name = Objects.toString(row.get(INPUT_NAME), "").trim();
                 String dataFilePath = Objects.toString(row.get(INPUT_DATA_FILE), "").trim();
 
-                // validate the existence of the datafile property and make a copy to the run root
+                // validate the existence of the name and datafile property and make a copy to the run root
+                if (StringUtils.isBlank(name))
+                {
+                    log.warn("Skipping row with blank Name property");
+                    continue;
+                }
+
                 if (StringUtils.isBlank(dataFilePath))
                 {
                     log.warn("Skipping row '{}' with blank DataFile property", name);
@@ -207,12 +222,15 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
                         String dataFileUrl = URLDecoder.decode(url, StandardCharsets.UTF_8);
                         row.replace(INPUT_DATA_FILE, dataFileUrl.replace("file:", ""));
                     }
+                    else
+                        log.warn("Unable to locate the webdav resource at {}", uri.getPath());
                 }
+                else
+                    log.warn("Unable to resolve a webdav URL for {}", destFile.getName());
             }
 
             // create and save the run
-            AssayProvider provider = AssayService.get().getProvider(protocol);
-            if (provider != null && !dataRows.isEmpty())
+            if (!dataRows.isEmpty())
             {
                 AssayRunUploadContext.Factory<?,?> runFactory = provider.createRunUploadFactory(protocol, job.getUser(), container);
 
