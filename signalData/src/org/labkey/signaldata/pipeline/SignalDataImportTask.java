@@ -121,7 +121,7 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
                 String name = Objects.toString(row.get(INPUT_NAME), "");
                 String dataFilePath = Objects.toString(row.get(INPUT_DATA_FILE), "").trim();
 
-                // validate the existance of the datafile property and make a copy to the run root
+                // validate the existence of the datafile property and make a copy to the run root
                 if (StringUtils.isBlank(dataFilePath))
                 {
                     log.warn("Skipping row '{}' with blank DataFile property", name);
