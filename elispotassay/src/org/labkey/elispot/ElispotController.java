@@ -16,9 +16,13 @@
 
 package org.labkey.elispot;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 import org.labkey.api.action.ApiResponse;
 import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.FormHandlerAction;
@@ -26,8 +30,17 @@ import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
+import org.labkey.api.assay.AssayProtocolSchema;
+import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayService;
+import org.labkey.api.assay.AssayUrls;
+import org.labkey.api.assay.actions.AssayHeaderView;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
+import org.labkey.api.assay.plate.Plate;
+import org.labkey.api.assay.plate.PlateReader;
+import org.labkey.api.assay.plate.Position;
 import org.labkey.api.data.CompareType;
+import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.SimpleFilter;
@@ -39,22 +52,18 @@ import org.labkey.api.exp.api.ExpMaterial;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.query.CrosstabView;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QuerySettings;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AbstractContainerScopingTest;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
-import org.labkey.api.assay.plate.Plate;
-import org.labkey.api.assay.plate.Position;
-import org.labkey.api.assay.actions.AssayHeaderView;
-import org.labkey.api.assay.AssayProtocolSchema;
-import org.labkey.api.assay.AssayProvider;
-import org.labkey.api.assay.AssayService;
-import org.labkey.api.assay.AssayUrls;
-import org.labkey.api.assay.plate.PlateReader;
+import org.labkey.api.security.roles.ReaderRole;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -72,6 +81,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -280,7 +290,8 @@ public class ElispotController extends SpringActionController
         @Override
         public ActionURL getRedirectURL(DetailsForm form)
         {
-            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
+            // GitHub Kanban #1236: getExpRun() resolves by rowId; ensure the run belongs to the current container
+            ExpRun run = ExperimentService.get().getExpRun(form.getRowId(), getContainer());
             if (run == null)
             {
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
@@ -543,6 +554,15 @@ public class ElispotController extends SpringActionController
             Set<String> selections = DataRegionSelection.getSelected(getViewContext(), true);
             if (!selections.isEmpty())
             {
+                // GitHub Kanban #1892: Verify each selected run belongs to the current container before queuing
+                for (String selection : selections)
+                {
+                    int rowId = NumberUtils.toInt(selection, -1);
+                    ExpRun run = rowId != -1 ? ExperimentService.get().getExpRun(rowId, getContainer()) : null;
+                    if (run == null)
+                        throw new NotFoundException("Run " + selection + " does not exist.");
+                }
+
                 ViewBackgroundInfo info = new ViewBackgroundInfo(getContainer(), getUser(), getViewContext().getActionURL());
                 BackgroundSubtractionJob job = new BackgroundSubtractionJob(ElispotPipelineProvider.NAME, info,
                         PipelineService.get().findPipelineRoot(getContainer()), selections);
@@ -558,6 +578,60 @@ public class ElispotController extends SpringActionController
         public URLHelper getSuccessURL(Object o)
         {
             return urlProvider(PipelineUrls.class).urlBegin(getContainer());
+        }
+    }
+
+    /**
+     * GitHub Kanban #1236 regression test
+     */
+    public static class ContainerScopingTestCase extends AbstractContainerScopingTest
+    {
+        private Container _folderA;
+        private Container _folderB;
+        private User _readerA;
+
+        @Before
+        public void setup() throws Exception
+        {
+            _folderA = createContainer("A");
+            _folderB = createContainer("B");
+            _readerA = createUserInRole(_folderA, ReaderRole.class);
+        }
+
+        @Test
+        public void testRunDetailRedirectContainerScoping() throws Exception
+        {
+            // A run that genuinely exists in folder B. Its global rowId is valid; only its container differs.
+            ExpRun runInB = createRun(_folderB);
+
+            // Deny: requesting B's run from folder A must 404 -- for a reader in A and for a site admin who can read B --
+            // proving the rejection is the container scoping, not a permission failure. Pre-fix getExpRun(rowId) was
+            // global and only null-checked, so this issued a redirect that disclosed the foreign run's existence.
+            ActionURL foreignUrl = new ActionURL(RunDetailRedirectAction.class, _folderA).addParameter("rowId", runInB.getRowId());
+            assertStatus(HttpServletResponse.SC_NOT_FOUND, get(foreignUrl, _readerA));
+            assertStatus(HttpServletResponse.SC_NOT_FOUND, get(foreignUrl, getAdmin()));
+
+            // Control: the same run resolves through the container-scoped lookup from its own container but not from
+            // folder A, demonstrating the mechanism the fix relies on (the run exists identically in both calls).
+            ExperimentService exp = ExperimentService.get();
+            assertNotNull("Run should resolve within its own container", exp.getExpRun(runInB.getRowId(), _folderB));
+            assertNull("Run must not resolve from a foreign container", exp.getExpRun(runInB.getRowId(), _folderA));
+        }
+
+        private ExpRun createRun(Container c) throws Exception
+        {
+            ExperimentService exp = ExperimentService.get();
+            ExpRun run = exp.createExperimentRun(c, "elispot-2-scope-test");
+            PipeRoot root = PipelineService.get().findPipelineRoot(c);
+            assertNotNull("Test requires a pipeline root for " + c.getName(), root);
+            run.setFilePathRoot(root.getRootPath());
+
+            // for this test case it won't matter if the run is not an elispot assay run
+            run.setProtocol(exp.ensureSampleDerivationProtocol(getAdmin()));
+
+            ViewBackgroundInfo info = new ViewBackgroundInfo(c, getAdmin(), null);
+            return exp.saveSimpleExperimentRun(run, Collections.emptyMap(), Collections.emptyMap(), Collections.emptyMap(),
+                    Collections.emptyMap(), Collections.emptyMap(), info, null, false);
         }
     }
 }

@@ -20,8 +20,11 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
+import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Before;
+import org.junit.Test;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -36,11 +39,16 @@ import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AbstractContainerScopingTest;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.security.roles.EditorRole;
+import org.labkey.api.security.roles.ReaderRole;
 import org.labkey.api.study.Study;
 import org.labkey.api.study.StudyService;
+import org.labkey.api.test.TestWhen;
 import org.labkey.api.usageMetrics.SimpleMetricsService;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
@@ -87,10 +95,13 @@ import org.labkey.flow.script.WorkspaceJob;
 import org.labkey.flow.util.SampleUtil;
 import org.labkey.vfs.FileLike;
 import org.labkey.vfs.FileSystemLike;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -187,16 +198,20 @@ public class AnalysisScriptController extends BaseFlowController
             DataRegionSelection.clearAll(getViewContext());
 
             FlowExperiment experiment = FlowExperiment.fromLSID(experimentLSID);
+            checkContainer(experiment);
             String experimentName = form.ff_analysisName;
             if (experiment != null)
             {
                 experimentName = experiment.getName();
             }
             FlowScript analysis = form.getProtocol();
+            checkContainer(analysis);
             AnalyzeJob job = new AnalyzeJob(getViewBackgroundInfo(), experimentName, experimentLSID, FlowProtocol.ensureForContainer(getUser(), getContainer()), analysis, form.getProtocolStep(), runIds, PipelineService.get().findPipelineRoot(getContainer()));
             if (form.getCompensationMatrixId() != 0)
             {
-                job.setCompensationMatrix(FlowCompensationMatrix.fromCompId(form.getCompensationMatrixId()));
+                FlowCompensationMatrix comp = FlowCompensationMatrix.fromCompId(form.getCompensationMatrixId());
+                checkContainer(comp);
+                job.setCompensationMatrix(comp);
             }
             job.setCompensationExperimentLSID(form.getCompensationExperimentLSID());
             return HttpView.redirect(executeScript(job));
@@ -218,6 +233,7 @@ public class AnalysisScriptController extends BaseFlowController
         public ModelAndView getView(ChooseRunsToAnalyzeForm form, BindException errors)
         {
             script = form.getProtocol();
+            checkContainer(script);
             return chooseRunsToAnalyze(form, errors);
         }
     }
@@ -229,11 +245,18 @@ public class AnalysisScriptController extends BaseFlowController
         public ModelAndView getView(ChooseRunsToAnalyzeForm form, BindException errors) throws Exception
         {
             script = form.getProtocol();
+            checkContainer(script);
             int[] runIds = form.getSelectedRunIds();
             if (runIds.length == 0)
             {
                 errors.reject(ERROR_MSG, "Please select at least one run to analyze.");
                 return chooseRunsToAnalyze(form, errors);
+            }
+            for (int runId : runIds)
+            {
+                FlowRun run = FlowRun.fromRunId(runId);
+                if (run == null || !run.getContainer().hasPermission(getUser(), ReadPermission.class))
+                    throw new NotFoundException("Run not found: " + runId);
             }
             String experimentLSID = form.getAnalysisLSID();
             if (experimentLSID == null)
@@ -849,6 +872,12 @@ public class AnalysisScriptController extends BaseFlowController
                         if (file == null)
                         {
                             errors.reject(ERROR_MSG, "Failed to find resolved FCS file with rowid '" + resolvedSample.getMatchedFile() + "'");
+                            return null;
+                        }
+
+                        if (!file.getContainer().equals(getContainer()))
+                        {
+                            errors.reject(ERROR_MSG, "Resolved FCS file '" + file.getName() + "' is not in this folder.");
                             return null;
                         }
 
@@ -1502,6 +1531,53 @@ public class AnalysisScriptController extends BaseFlowController
             if (title != null)
                 display += ": " + title;
             root.addChild(display);
+        }
+    }
+
+    @TestWhen(TestWhen.When.BVT)
+    public static class AnalysisScriptContainerScopingTestCase extends AbstractContainerScopingTest
+    {
+        private User _admin;
+        private Container _folderA;
+        private Container _folderB;
+        private long _scriptIdB;
+
+        @Before
+        public void setUp() throws Exception
+        {
+            _admin = getAdmin();
+            _folderA = createContainer("A");
+            _folderB = createContainer("B");
+
+            // Pre-create the flow protocol/steps in B so the valid-case ChooseRunsToAnalyzeForm.populate() finds them.
+            FlowProtocol.ensureForContainer(_admin, _folderB);
+
+            // Create a flow analysis script with a single analysis step so populate() has a usable protocol step.
+            ScriptDocument doc = ScriptDocument.Factory.newInstance();
+            doc.addNewScript().addNewAnalysis();
+            _scriptIdB = FlowScript.create(_admin, _folderB, getClass().getSimpleName() + "-" + "scriptB", doc.toString()).getScriptId();
+        }
+
+        // ChooseRunsToAnalyzeForm resolves the analysis script by global rowId; a foreign script must be scoped.
+        @Test
+        public void testAnalysisScriptContainerScoping() throws Exception
+        {
+            ActionURL foreignUrl = new ActionURL(ChooseRunsToAnalyzeAction.class, _folderA).addParameter("scriptId", _scriptIdB);
+
+            User folderAEditor = createUserInRole(_folderA, EditorRole.class);
+            assertStatus(HttpServletResponse.SC_NOT_FOUND, get(foreignUrl, folderAEditor));
+
+            User folderBEditor = createUserInRole(_folderA, EditorRole.class);
+            grantRole(folderBEditor, _folderB, ReaderRole.class);
+            MockHttpServletResponse resp = get(foreignUrl, folderBEditor);
+            assertStatus(HttpServletResponse.SC_FOUND, resp);
+            String location = resp.getRedirectedUrl();
+            assertNotNull("Redirect must have a Location", location);
+            assertTrue("Redirect should target the script's own container, was: " + location, location.contains(_folderB.getPath()));
+
+            // valid case: the script in its own container is accepted (renders the choose-runs wizard).
+            assertStatus(HttpServletResponse.SC_OK,
+                    get(new ActionURL(ChooseRunsToAnalyzeAction.class, _folderB).addParameter("scriptId", _scriptIdB), _admin));
         }
     }
 }

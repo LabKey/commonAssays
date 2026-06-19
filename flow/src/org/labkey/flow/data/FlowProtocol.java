@@ -74,6 +74,7 @@ import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
+import org.labkey.api.view.ViewContext;
 import org.labkey.flow.controllers.FlowController;
 import org.labkey.flow.controllers.FlowParam;
 import org.labkey.flow.controllers.protocol.ProtocolController;
@@ -152,15 +153,19 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
                 DEFAULT_PROTOCOL_NAME.equals(protocol.getName());
     }
 
-    static public FlowProtocol fromURL(User user, ActionURL url, HttpServletRequest request) throws UnauthorizedException
+    static public FlowProtocol fromURL(User user, ViewContext context, HttpServletRequest request) throws UnauthorizedException
     {
+        ActionURL url = context.getActionURL();
         FlowProtocol ret = fromProtocolId(getIntParam(url, request, FlowParam.experimentId));
         if (ret == null)
         {
-            ret = FlowProtocol.getForContainer(ContainerManager.getForPath(url.getExtraPath()));
+            ret = FlowProtocol.getForContainer(context.getContainer());
         }
         if (ret == null)
             return null;
+
+        // GitHub Issue #1892: validate container
+        ret.checkContainer(context.getContainer(), user, url);
         if (!ret.getContainer().hasPermission(user, ReadPermission.class))
         {
             throw new UnauthorizedException();
@@ -168,11 +173,11 @@ public class FlowProtocol extends FlowObject<ExpProtocol>
         return ret;
     }
 
-    public static FlowProtocol fromURLRedirectIfNull(User user, ActionURL url, HttpServletRequest request)
+    public static FlowProtocol fromURLRedirectIfNull(User user, ViewContext context, HttpServletRequest request)
     {
-        FlowProtocol protocol = fromURL(user, url, request);
+        FlowProtocol protocol = fromURL(user, context, request);
         if (protocol == null)
-            throw new RedirectException(url.clone().setAction(FlowController.BeginAction.class));
+            throw new RedirectException(context.getActionURL().clone().setAction(FlowController.BeginAction.class));
 
         return protocol;
     }
