@@ -15,7 +15,11 @@
  */
 package org.labkey.microarray.controllers;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.SimpleRedirectAction;
 import org.labkey.api.action.SimpleViewAction;
@@ -27,10 +31,10 @@ import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegion;
 import org.labkey.api.data.DataRegionSelection;
-import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.TableInfo;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.DuplicateKeyException;
 import org.labkey.api.query.FieldKey;
@@ -40,12 +44,19 @@ import org.labkey.api.query.QuerySettings;
 import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.query.QueryView;
 import org.labkey.api.query.ValidationException;
+import org.labkey.api.module.Module;
+import org.labkey.api.module.ModuleLoader;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.security.RequiresPermission;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.AbstractContainerScopingTest;
 import org.labkey.api.security.permissions.DeletePermission;
 import org.labkey.api.security.permissions.InsertPermission;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
+import org.labkey.api.security.roles.EditorRole;
+import org.labkey.api.security.roles.ReaderRole;
+import org.labkey.api.test.TestWhen;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
@@ -58,6 +69,7 @@ import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewForm;
 import org.labkey.api.view.WebPartView;
 import org.labkey.microarray.MicroarrayManager;
+import org.labkey.microarray.MicroarrayModule;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
@@ -67,7 +79,10 @@ import org.springframework.web.servlet.ModelAndView;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * User: kevink
@@ -118,9 +133,9 @@ public class FeatureAnnotationSetController extends SpringActionController
         @Override
         public boolean handlePost(DeleteFeatureAnnotationSetForm form, BindException errors)
         {
-            DbSchema schema = MicroarrayUserSchema.getSchema();
-
-            int rowsDeleted = MicroarrayManager.get().deleteFeatureAnnotationSet(form.getIds(false));
+            List<Integer> deletableRowIds = MicroarrayManager.get().getFeatureAnnotationSets(getContainer(), getUser(), form.getIds(false), DeletePermission.class);
+            if (!deletableRowIds.isEmpty())
+                MicroarrayManager.get().deleteFeatureAnnotationSet(deletableRowIds);
 
             // TODO catch somewhere on attempting to delete one that is in use, prompt to cascade the delete
             // Similarly, deleting a referenced sample type currently throws an FK exception. again, deal with it
@@ -353,23 +368,24 @@ public class FeatureAnnotationSetController extends SpringActionController
 
         private boolean _forceDelete;
         private String _dataRegionSelectionKey;
-        private Integer _singleObjectRowId;
+        private Long _singleObjectRowId;
 
-        public int[] getIds(boolean clear)
+        public Set<Long> getIds(boolean clear)
         {
             if (_singleObjectRowId != null)
             {
-                return new int[] {_singleObjectRowId};
+                return Set.of(_singleObjectRowId);
             }
-            return PageFlowUtil.toInts(DataRegionSelection.getSelected(getViewContext(), clear));
+
+            return DataRegionSelection.getSelectedIntegers(getViewContext(), clear);
         }
 
-        public Integer getSingleObjectRowId()
+        public Long getSingleObjectRowId()
         {
             return _singleObjectRowId;
         }
 
-        public void setSingleObjectRowId(Integer singleObjectRowId)
+        public void setSingleObjectRowId(Long singleObjectRowId)
         {
             _singleObjectRowId = singleObjectRowId;
         }
@@ -467,4 +483,117 @@ public class FeatureAnnotationSetController extends SpringActionController
         }
     }
 
+    @TestWhen(TestWhen.When.BVT)
+    public static class ContainerScopingTestCase extends AbstractContainerScopingTest
+    {
+        // Executed in its own project due to folder scoping rules for microarray
+        private static final String PROJECT_NAME = "FeatureAnnotationContainerScopingTestCase Project";
+
+        private Container project;
+        private Container folderA;
+        private int projectSetRowId;
+
+        @Before
+        public void setUp() throws Exception
+        {
+            deleteProject();
+            project = activateModules(ContainerManager.ensureContainer(PROJECT_NAME, getAdmin()));
+            folderA = activateModules(ContainerManager.ensureContainer(project, "Folder A", getAdmin()));
+            projectSetRowId = insertFeatureAnnotationSet(project, "Project Set");
+        }
+
+        @After
+        public void tearDown()
+        {
+            deleteProject();
+        }
+
+        private void deleteProject()
+        {
+            Container c = ContainerManager.getForPath(PROJECT_NAME);
+            if (c != null)
+                ContainerManager.deleteAll(c, getAdmin());
+        }
+
+        private Container activateModules(Container c)
+        {
+            Set<Module> modules = new HashSet<>(c.getActiveModules(getAdmin()));
+            modules.add(ModuleLoader.getInstance().getModule(MicroarrayModule.NAME));
+            c.setActiveModules(modules, getAdmin());
+            return c;
+        }
+
+        @Test
+        public void testDeleteActionCannotDeleteForeignSet() throws Exception
+        {
+            // The caller is an Editor (has DeletePermission) in folderA only, with no access to the project.
+            User editor = createUserInRole(folderA, EditorRole.class);
+
+            // Negative control: the caller can't read the project, so the project set is out of scope and survives.
+            post(deleteUrl(folderA, projectSetRowId), editor);
+            assertTrue("A feature annotation set the caller cannot see must not be deleted",
+                    featureAnnotationSetExists(projectSetRowId));
+
+            // Positive control: deleting a set that actually lives in the caller's own folder succeeds.
+            int folderASetRowId = insertFeatureAnnotationSet(folderA, "Folder A Set");
+            post(deleteUrl(folderA, folderASetRowId), editor);
+            assertFalse("A feature annotation set in the caller's own folder should be deleted",
+                    featureAnnotationSetExists(folderASetRowId));
+        }
+
+        @Test
+        public void testDeleteActionRejectsInScopeSetWithoutDeletePermission() throws Exception
+        {
+            // Editor in folderA (passes the action's DeletePermission check) plus Reader in the project.
+            User editor = createUserInRole(folderA, EditorRole.class);
+            grantRole(editor, project, ReaderRole.class);
+
+            // The project set is now in scope, but the caller can't delete it there, so the action rejects the request.
+            assertStatus(HttpServletResponse.SC_FORBIDDEN, post(deleteUrl(folderA, projectSetRowId), editor));
+            assertTrue("A set the caller may read but not delete must not be deleted",
+                    featureAnnotationSetExists(projectSetRowId));
+        }
+
+        @Test
+        public void testDeleteActionRejectsBatchContainingUndeletableSet() throws Exception
+        {
+            User editor = createUserInRole(folderA, EditorRole.class);
+            grantRole(editor, project, ReaderRole.class);
+            int folderASetRowId = insertFeatureAnnotationSet(folderA, "Folder A Set");
+
+            // A multi-select delete mixing a deletable set with one in a Reader-only folder must be rejected wholesale.
+            assertStatus(HttpServletResponse.SC_FORBIDDEN, post(deleteUrl(folderA, folderASetRowId, projectSetRowId), editor));
+
+            // Fail-closed: neither set is deleted
+            assertTrue("Deletable set in a rejected batch must be preserved", featureAnnotationSetExists(folderASetRowId));
+            assertTrue("Undeletable set in another container must be preserved", featureAnnotationSetExists(projectSetRowId));
+        }
+
+        private static ActionURL deleteUrl(Container c, int rowId)
+        {
+            return new ActionURL(DeleteAction.class, c).addParameter("singleObjectRowId", rowId);
+        }
+
+        private static ActionURL deleteUrl(Container c, int... rowIds)
+        {
+            ActionURL url = new ActionURL(DeleteAction.class, c);
+            for (int rowId : rowIds)
+                url.addParameter(DataRegion.SELECT_CHECKBOX_NAME, rowId);
+            return url;
+        }
+
+        private int insertFeatureAnnotationSet(Container c, String name) throws Exception
+        {
+            BatchValidationException errors = new BatchValidationException();
+            Integer rowId = MicroarrayManager.get().insertFeatureAnnotationSet(getAdmin(), c, name, "Test", null, null, errors);
+            if (errors.hasErrors())
+                throw errors;
+            return rowId;
+        }
+
+        private boolean featureAnnotationSetExists(int rowId)
+        {
+            return new TableSelector(MicroarrayManager.getAnnotationSetSchemaTableInfo(), new SimpleFilter(FieldKey.fromParts("RowId"), rowId), null).exists();
+        }
+    }
 }

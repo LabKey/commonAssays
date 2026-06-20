@@ -19,14 +19,16 @@ package org.labkey.api.protein.annotation;
 import org.labkey.api.protein.uniprot.ParseActions;
 import org.labkey.api.protein.uniprot.ParseContext;
 import org.labkey.api.protein.uniprot.ParserTree;
+import org.labkey.api.util.XmlBeansUtil;
 import org.labkey.vfs.FileLike;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
 import java.util.HashSet;
@@ -112,17 +114,21 @@ public class XMLProteinHandler extends DefaultHandler
                 )
         );
 
-        // create parser
-        setParser(XMLReaderFactory.createXMLReader(DEFAULT_PARSER_NAME));
+        // create parser using the centrally-configured, XXE-safe factory
+        try
+        {
+            setParser(XmlBeansUtil.SAX_PARSER_FACTORY.newSAXParser().getXMLReader());
+        }
+        catch (ParserConfigurationException e)
+        {
+            throw new SAXException(e);
+        }
 
         try
         {
-            getParser().setFeature(NAMESPACES_FEATURE_ID, DEFAULT_NAMESPACES);
+            // Namespaces and validation are configured by the factory; only the remaining,
+            // non-security-relevant features need to be set here.
             getParser().setFeature(NAMESPACE_PREFIXES_FEATURE_ID, DEFAULT_NAMESPACE_PREFIXES);
-            getParser().setFeature(VALIDATION_FEATURE_ID, DEFAULT_VALIDATION);
-            getParser().setFeature(SCHEMA_VALIDATION_FEATURE_ID, DEFAULT_SCHEMA_VALIDATION);
-            getParser().setFeature(SCHEMA_FULL_CHECKING_FEATURE_ID, DEFAULT_SCHEMA_FULL_CHECKING);
-            getParser().setFeature(DYNAMIC_VALIDATION_FEATURE_ID, DEFAULT_DYNAMIC_VALIDATION);
         }
         catch (Exception e)
         {

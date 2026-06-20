@@ -1103,7 +1103,7 @@ public class ProteinController extends SpringActionController
         }
     }
 
-    @RequiresPermission(AdminPermission.class)
+    @RequiresPermission(AdminOperationsPermission.class)
     public static class SetBestNameAction extends FormHandlerAction<SetBestNameForm>
     {
         @Override
@@ -1433,11 +1433,6 @@ public class ProteinController extends SpringActionController
 
             ProteinController controller = new ProteinController();
 
-            // @RequiresPermission(AdminPermission.class)
-            assertForAdminPermission(user,
-                    new SetBestNameAction()
-            );
-
             // @RequiresSiteAdmin
             assertForRequiresSiteAdmin(user,
                 controller.new LoadGoAction(),
@@ -1454,7 +1449,8 @@ public class ProteinController extends SpringActionController
             // @AdminConsoleAction
             // @RequiresPermission(AdminOperationsPermission.class)
             assertForAdminOperationsPermission(ContainerManager.getRoot(), user,
-                    controller.new ShowProteinAdminAction()
+                    controller.new ShowProteinAdminAction(),
+                    new SetBestNameAction()
             );
         }
     }

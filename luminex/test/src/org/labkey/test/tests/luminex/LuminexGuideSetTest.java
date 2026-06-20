@@ -17,6 +17,17 @@ package org.labkey.test.tests.luminex;
 
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.api.query.QueryKey;
+import org.labkey.remoteapi.CommandException;
+import org.labkey.remoteapi.Connection;
+import org.labkey.remoteapi.assay.GetProtocolCommand;
+import org.labkey.remoteapi.assay.Protocol;
+import org.labkey.remoteapi.assay.SaveProtocolCommand;
+import org.labkey.remoteapi.query.DeleteRowsCommand;
+import org.labkey.remoteapi.query.Filter;
+import org.labkey.remoteapi.query.InsertRowsCommand;
+import org.labkey.remoteapi.query.SelectRowsCommand;
+import org.labkey.remoteapi.query.SelectRowsResponse;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.TestFileUtils;
@@ -30,16 +41,20 @@ import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.PortalHelper;
+import org.labkey.test.util.SimpleHttpRequest;
+import org.labkey.test.util.SimpleHttpResponse;
 import org.labkey.test.util.WikiHelper;
 import org.labkey.test.util.luminex.LuminexGuideSetHelper;
 import org.openqa.selenium.WebElement;
 
 import java.io.File;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.labkey.test.util.PermissionsHelper.EDITOR_ROLE;
 import static org.labkey.test.util.PermissionsHelper.READER_ROLE;
@@ -646,5 +661,126 @@ public final class LuminexGuideSetTest extends LuminexTest
         }
 
         clickButton("Save");
+    }
+
+    /*
+        GitHub Kanban #1892: Verify that a user with delete permission in one assay folder can't delete
+        guide sets belonging to a different protocol/folder by passing arbitrary RowIds to the GuideSet delete path.
+     */
+    @Test
+    public void testCrossProtocolGuideSetDeleteDenied() throws Exception
+    {
+        final String assayB = "GuideSetAuthAssayB";
+        final String analyteB = "Auth Analyte";
+        final String folderB = getProjectName() + "/" + TEST_ASSAY_SUBFOLDER;
+        Connection connection = createDefaultConnection();
+
+        log("Create a second Luminex assay design in the subfolder via the API");
+        Protocol protocolB = new GetProtocolCommand("Luminex").execute(connection, folderB).getProtocol();
+        protocolB.setName(assayB).setDescription("Second Luminex design for guide set protocol-auth test");
+        new SaveProtocolCommand(protocolB).execute(connection, folderB);
+
+        final String schemaA = "assay.Luminex." + QueryKey.encodePart(TEST_ASSAY_LUM);
+        final String schemaB = "assay.Luminex." + QueryKey.encodePart(assayB);
+
+        log("Insert a guide set into the second assay design");
+        InsertRowsCommand insertB = new InsertRowsCommand(schemaB, "GuideSet");
+        Map<String, Object> guideSet = new HashMap<>();
+        guideSet.put("AnalyteName", analyteB);
+        guideSet.put("CurrentGuideSet", false);
+        insertB.addRow(guideSet);
+        insertB.execute(connection, folderB);
+        long guideSetIdB = getGuideSetRowId(connection, schemaB, folderB, analyteB);
+
+        log("Attempt to delete the second protocol's guide set (RowId " + guideSetIdB + ") through the first protocol's GuideSet query - must be denied");
+        DeleteRowsCommand crossDelete = new DeleteRowsCommand(schemaA, "GuideSet");
+        Map<String, Object> key = new HashMap<>();
+        key.put("RowId", guideSetIdB);
+        crossDelete.addRow(key);
+        crossDelete.execute(connection, getProjectName());
+        assertEquals("Cross-protocol delete must not remove the other protocol's guide set", 1, guideSetRowCount(connection, schemaB, folderB, guideSetIdB));
+
+        log("Verify the guide set can still be deleted through its own protocol's query");
+        DeleteRowsCommand ownDelete = new DeleteRowsCommand(schemaB, "GuideSet");
+        ownDelete.addRow(key);
+        ownDelete.execute(connection, folderB);
+        assertEquals("Guide set should be deletable through its own protocol's query", 0, guideSetRowCount(connection, schemaB, folderB, guideSetIdB));
+    }
+
+    @Test // GitHub Kanban #...
+    public void testCrossProtocolGuideSetConfirmViewDenied() throws Exception
+    {
+        final String assayB = "GuideSetAuthConfirmAssayB";
+        final String analyteB = "Auth Confirm Analyte";
+        // distinctive, HTML-safe token that is only ever stored in protocol B's guide set comment
+        final String commentMarker = "LUM2DisclosureMarker";
+        final String folderB = getProjectName() + "/" + TEST_ASSAY_SUBFOLDER;
+        Connection connection = createDefaultConnection();
+
+        log("Create a second Luminex assay design in the subfolder via the API");
+        Protocol protocolB = new GetProtocolCommand("Luminex").execute(connection, folderB).getProtocol();
+        protocolB.setName(assayB).setDescription("Second Luminex design for guide set confirm-view disclosure test");
+        new SaveProtocolCommand(protocolB).execute(connection, folderB);
+
+        final String schemaB = "assay.Luminex." + QueryKey.encodePart(assayB);
+
+        log("Insert a guide set with a distinctive comment into the second assay design");
+        InsertRowsCommand insertB = new InsertRowsCommand(schemaB, "GuideSet");
+        Map<String, Object> guideSet = new HashMap<>();
+        guideSet.put("AnalyteName", analyteB);
+        guideSet.put("CurrentGuideSet", false);
+        guideSet.put("Comment", commentMarker);
+        insertB.addRow(guideSet);
+        insertB.execute(connection, folderB);
+        long guideSetIdB = getGuideSetRowId(connection, schemaB, folderB, analyteB);
+
+        log("Request the delete-confirm view through the first protocol (in the project), selecting protocol B's guide set - its comment must NOT be disclosed");
+        String crossBody = getGuideSetConfirmView(getProjectName(), TEST_ASSAY_LUM, guideSetIdB);
+        assertFalse("Cross-protocol delete-confirm view must not disclose the other protocol's guide set comment", crossBody.contains(commentMarker));
+
+        log("Request the delete-confirm view through protocol B's own design - its comment is disclosed (positive control)");
+        String ownBody = getGuideSetConfirmView(folderB, assayB, guideSetIdB);
+        assertTrue("Delete-confirm view should show the guide set comment for the guide set's own protocol", ownBody.contains(commentMarker));
+
+        log("Clean up the guide set inserted for this test");
+        DeleteRowsCommand cleanup = new DeleteRowsCommand(schemaB, "GuideSet");
+        Map<String, Object> key = new HashMap<>();
+        key.put("RowId", guideSetIdB);
+        cleanup.addRow(key);
+        cleanup.execute(connection, folderB);
+    }
+
+    /**
+     * GET the DeleteGuideSetAction confirm view (a FormViewAction GET renders getView, building the bean directly via a
+     * raw TableSelector). The selection is passed as the DataRegion ".select" request param, which getSelectedIntegers
+     * reads straight from request params - so no session selection key plumbing is needed. Returns the response body.
+     */
+    private String getGuideSetConfirmView(String containerPath, String assayName, long guideSetRowId) throws Exception
+    {
+        Map<String, Object> params = new HashMap<>();
+        params.put("assayName", assayName);
+        params.put(".select", guideSetRowId);
+        String url = WebTestHelper.buildURL("luminex", containerPath, "deleteGuideSet", params);
+        SimpleHttpRequest request = new SimpleHttpRequest(url);
+        request.copySession(getDriver());
+        SimpleHttpResponse response = request.getResponse();
+        assertEquals("Unexpected status from delete-confirm view", 200, response.getResponseCode());
+        return response.getResponseBody();
+    }
+
+    private int guideSetRowCount(Connection connection, String schema, String folderPath, long rowId) throws Exception
+    {
+        SelectRowsCommand select = new SelectRowsCommand(schema, "GuideSet");
+        select.addFilter(new Filter("RowId", rowId, Filter.Operator.EQUAL));
+        return select.execute(connection, folderPath).getRowCount().intValue();
+    }
+
+    private long getGuideSetRowId(Connection connection, String schema, String folderPath, String analyteName) throws Exception
+    {
+        SelectRowsCommand select = new SelectRowsCommand(schema, "GuideSet");
+        select.addFilter(new Filter("AnalyteName", analyteName, Filter.Operator.EQUAL));
+        SelectRowsResponse response = select.execute(connection, folderPath);
+        assertEquals("Expected exactly one guide set for analyte " + analyteName, 1, response.getRowCount().intValue());
+        return ((Number) response.getRowset().iterator().next().getValue("RowId")).longValue();
     }
 }

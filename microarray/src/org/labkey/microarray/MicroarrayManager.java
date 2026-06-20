@@ -21,11 +21,15 @@ import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
+import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.JdbcType;
+import org.labkey.api.data.Results;
+import org.labkey.api.data.RuntimeSQLException;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlExecutor;
@@ -50,20 +54,25 @@ import org.labkey.api.query.QueryUpdateServiceException;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.TabLoader;
 import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.util.ContainerUtil;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.PageFlowUtil;
+import org.labkey.api.view.UnauthorizedException;
 import org.labkey.microarray.controllers.FeatureAnnotationSetController;
 import org.labkey.microarray.matrix.ExpressionMatrixProtocolSchema;
 import org.labkey.microarray.query.MicroarrayUserSchema;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.labkey.api.exp.api.ExperimentService.asInteger;
 
@@ -89,7 +98,7 @@ public class MicroarrayManager
         return schema.getTable(MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION, false);
     }
 
-    private static TableInfo getAnnotationSetSchemaTableInfo()
+    public static TableInfo getAnnotationSetSchemaTableInfo()
     {
         DbSchema schema = MicroarrayUserSchema.getSchema();
         return schema.getTable(MicroarrayUserSchema.TABLE_FEATURE_ANNOTATION_SET);
@@ -107,32 +116,22 @@ public class MicroarrayManager
         return selector.getRowCount();
     }
 
-    public int deleteFeatureAnnotationSet(int... rowId)
+    public int deleteFeatureAnnotationSet(Collection<Integer> ids)
     {
-        DbScope scope = MicroarrayUserSchema.getSchema().getScope();
-
-        Integer[] ids = ArrayUtils.toObject(rowId);
-
-        try (DbScope.Transaction tx = scope.ensureTransaction())
+        try (DbScope.Transaction tx = MicroarrayUserSchema.getSchema().getScope().ensureTransaction())
         {
             // Delete all annotations first.
-            TableInfo annotationSchemaTableInfo = getAnnotationSchemaTableInfo();
-            SimpleFilter filter = new SimpleFilter();
-            filter.addInClause(FieldKey.fromParts("FeatureAnnotationSetId"), Arrays.asList(ids));
-            int rowsDeleted = Table.delete(annotationSchemaTableInfo, filter);
+            int rowsDeleted = Table.delete(getAnnotationSchemaTableInfo(), new SimpleFilter(FieldKey.fromParts("FeatureAnnotationSetId"), ids, CompareType.IN));
 
             // Then delete annotation set.
-            TableInfo annotationSetSchemaTableInfo = getAnnotationSetSchemaTableInfo();
-            filter = new SimpleFilter();
-            filter.addInClause(FieldKey.fromParts("RowId"), Arrays.asList(ids));
-            Table.delete(annotationSetSchemaTableInfo, filter);
+            Table.delete(getAnnotationSetSchemaTableInfo(), new SimpleFilter(FieldKey.fromParts("RowId"), ids, CompareType.IN));
 
             tx.commit();
             return rowsDeleted;
         }
     }
 
-    private Integer insertFeatureAnnotationSet(User user, Container container, String name, String vendor, String description, String comment, BatchValidationException errors)
+    public Integer insertFeatureAnnotationSet(User user, Container container, String name, String vendor, String description, String comment, BatchValidationException errors)
             throws SQLException, BatchValidationException, QueryUpdateServiceException, DuplicateKeyException
     {
         MicroarrayUserSchema schema = new MicroarrayUserSchema(user, container);
@@ -177,7 +176,7 @@ public class MicroarrayManager
         return -1;
     }
 
-    /** Creates feature annotation set AND inserts all feature annotations from TSV */
+    /** Creates a feature annotation set AND inserts all feature annotations from TSV */
     public Integer createFeatureAnnotationSet(User user, Container c, FeatureAnnotationSetController.FeatureAnnotationSetForm form, DataLoader loader, BatchValidationException errors)
             throws SQLException, BatchValidationException, QueryUpdateServiceException, DuplicateKeyException
     {
@@ -189,48 +188,82 @@ public class MicroarrayManager
         return -1;
     }
 
-    /**
-     * Get feature annotation set by name if it is in scope (current, project, and shared container).
-     */
-    @Nullable
-    public Integer getFeatureAnnotationSet(Container c, User user, String featureSetName)
+    private void applyContainerFilter(Container c, User user, SimpleFilter filter)
     {
-        SimpleFilter filter = new SimpleFilter();
-        filter.addCondition(FieldKey.fromParts("Name"), featureSetName);
-
         // The container filter matches the assay's featureSet run property lookup
         ContainerFilter cf = new ContainerFilter.CurrentPlusProjectAndShared(c, user);
         filter.addClause(cf.createFilterClause(MicroarrayUserSchema.getSchema(), FieldKey.fromParts("container")));
-
-        TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSetSchemaTableInfo(), PageFlowUtil.set("RowId"), filter, null);
-        List<Integer> rowIds = featureAnnotationSelector.getArrayList(Integer.class);
-        // TODO: Order results by container depth
-        if (!rowIds.isEmpty())
-            return rowIds.get(0);
-
-        return null;
     }
 
     /**
-     * Get feature annotation set by id if it is in scope (current, project, and shared container).
+     * Get a feature annotation set by name if it is in scope (current, project, and shared container).
      */
-    @Nullable
-    public Integer getFeatureAnnotationSet(Container c, User user, int id)
+    public @Nullable Integer getFeatureAnnotationSet(Container c, User user, String featureSetName)
     {
-        SimpleFilter filter = new SimpleFilter();
-        filter.addCondition(FieldKey.fromParts("RowId"), id);
+        return getFeatureAnnotationSet(c, user, new SimpleFilter(FieldKey.fromParts("Name"), featureSetName));
+    }
 
-        // The container filter matches the assay's featureSet run property lookup
-        ContainerFilter cf = new ContainerFilter.CurrentPlusProjectAndShared(c, user);
-        filter.addClause(cf.createFilterClause(MicroarrayUserSchema.getSchema(), FieldKey.fromParts("container")));
+    /**
+     * Get a feature annotation set by id if it is in scope (current, project, and shared container).
+     */
+    public @Nullable Integer getFeatureAnnotationSet(Container c, User user, int id)
+    {
+        return getFeatureAnnotationSet(c, user, new SimpleFilter(FieldKey.fromParts("RowId"), id));
+    }
 
-        TableSelector featureAnnotationSelector = new TableSelector(getAnnotationSetSchemaTableInfo(), PageFlowUtil.set("RowId"), filter, null);
-        List<Integer> rowIds = featureAnnotationSelector.getArrayList(Integer.class);
+    private @Nullable Integer getFeatureAnnotationSet(Container c, User user, SimpleFilter filter)
+    {
+        applyContainerFilter(c, user, filter);
+        List<Integer> rowIds = new TableSelector(getAnnotationSetSchemaTableInfo(), PageFlowUtil.set("RowId"), filter, null).getArrayList(Integer.class);
+
         // TODO: Order results by container depth
-        if (!rowIds.isEmpty())
-            return rowIds.get(0);
+        if (rowIds.isEmpty())
+            return null;
 
-        return null;
+        return rowIds.get(0);
+    }
+
+    /**
+     * Gets feature annotation sets by id that are in folder scope (current, project, and shared container). The user
+     * must have the provided permissions in all containers that the feature annotation sets are declared in.
+     */
+    public @NotNull List<Integer> getFeatureAnnotationSets(Container c, User user, Collection<Long> rowIds, Class<? extends Permission> permission)
+    {
+        if (rowIds == null || rowIds.isEmpty())
+            return Collections.emptyList();
+
+        SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("RowId"), rowIds, CompareType.IN);
+        applyContainerFilter(c, user, filter);
+
+        List<Integer> setRowIds = new ArrayList<>();
+        Set<String> processed = new HashSet<>();
+        try (Results results = new TableSelector(getAnnotationSetSchemaTableInfo(), PageFlowUtil.set("RowId", "Container"), filter, null).getResults())
+        {
+            while (results.next())
+            {
+                Integer rowId = results.getInt(FieldKey.fromParts("RowId"));
+                String containerId = results.getString(FieldKey.fromParts("Container"));
+
+                if (!processed.contains(containerId))
+                {
+                    Container container = ContainerManager.getForId(containerId);
+                    if (container == null)
+                        throw new UnauthorizedException("Unable to determine container for feature annotation set (" + rowId + ")");
+                    if (!container.hasPermission(user, permission))
+                        throw new UnauthorizedException("You do not have sufficient permission in " + container.getPath() + " for feature annotation set (" + rowId + ")");
+
+                    processed.add(containerId);
+                }
+
+                setRowIds.add(rowId);
+            }
+        }
+        catch (SQLException e)
+        {
+            throw new RuntimeSQLException(e);
+        }
+
+        return Collections.unmodifiableList(setRowIds);
     }
 
     /**

@@ -733,7 +733,10 @@ public class LuminexController extends SpringActionController
 
             Set<Long> selections = DataRegionSelection.getSelectedIntegers(getViewContext(), false);
 
+            // GitHub Kanban #1236: guide sets are scoped to the protocol rather than the container (see GuideSetTable.getContainerFilter),
+            // so scope this read to the current (validated, in-scope) protocol's RowId
             SimpleFilter filter = new SimpleFilter();
+            filter.addCondition(FieldKey.fromParts("ProtocolId"), form.getProtocol().getRowId());
             filter.addInClause(FieldKey.fromParts("RowId"), selections);
 
             List<GuideSet> guideSets = new TableSelector(LuminexProtocolSchema.getTableInfoGuideSet(), filter, null).getArrayList(GuideSet.class);
