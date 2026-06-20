@@ -42,10 +42,9 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AbstractContainerScopingTest;
 import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.security.permissions.UpdatePermission;
-import org.labkey.api.security.roles.ReaderRole;
+import org.labkey.api.security.roles.EditorRole;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Path;
-import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.webdav.WebdavResource;
 import org.labkey.api.webdav.WebdavService;
@@ -247,7 +246,7 @@ public class SignalDataController extends SpringActionController
         {
             _folderA = createContainer("A");
             _folderB = createContainer("B");
-            _readerA = createUserInRole(_folderA, ReaderRole.class);
+            _readerA = createUserInRole(_folderA, EditorRole.class);
         }
 
         @Test
@@ -283,10 +282,10 @@ public class SignalDataController extends SpringActionController
          */
         private static ActionURL resourceUrl(Container requestContainer, Container fileContainer, String name)
         {
-            String path = filesPath(fileContainer).append(name).toString();
+            String[] paths = { filesPath(fileContainer).append(name).toString() };
+            String[] files = { name };
             return new ActionURL(getSignalDataResourceAction.class, requestContainer)
-                    .addParameter("path", path)
-                    .addParameter("test", true);
+                    .addParameters(Map.of("paths", paths, "files", files));
         }
 
         private static Path filesPath(Container c)
