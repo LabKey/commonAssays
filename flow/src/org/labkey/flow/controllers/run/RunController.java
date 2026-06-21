@@ -233,6 +233,8 @@ public class RunController extends BaseFlowController
                 errors.reject(ERROR_MSG, "run not found");
                 return;
             }
+            // GitHub Issue #1892: validate container
+            _run.checkContainer(getContainer(), getUser(), getActionURL());
 
             FlowWell[] wells = _run.getWells(true);
             if (wells.length == 0)
@@ -465,6 +467,8 @@ public class RunController extends BaseFlowController
                     if (run == null)
                         throw new NotFoundException("Flow run not found");
 
+                    // GitHub Issue #1892: validate container
+                    run.checkContainer(getContainer(), getUser(), getActionURL());
                     runs.add(run);
                 }
                 _runs = runs;
@@ -478,6 +482,8 @@ public class RunController extends BaseFlowController
                     if (well == null)
                         throw new NotFoundException("Flow well not found");
 
+                    // GitHub Issue #1892: validate container
+                    well.checkContainer(getContainer(), getUser(), getActionURL());
                     wells.add(well);
                 }
                 _wells = wells;
@@ -935,6 +941,8 @@ public class RunController extends BaseFlowController
             {
                 throw new NotFoundException();
             }
+            // GitHub Issue #1892: validate container
+            run.checkContainer(getContainer(), getUser(), getViewContext().getActionURL());
 
             return new Pair<>(new ExpRunAttachmentParent(run.getExperimentRun()), form.getName());
         }

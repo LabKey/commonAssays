@@ -51,6 +51,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.UserPrincipal;
 import org.labkey.api.security.permissions.Permission;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexDataHandler;
 import org.labkey.luminex.model.AnalyteSinglePointControl;
@@ -419,12 +420,23 @@ public class GuideSetTable extends AbstractCurveFitPivotTable
         @Override
         public GuideSet get(User user, Container container, int key)
         {
-            return new TableSelector(LuminexProtocolSchema.getTableInfoGuideSet()).getObject(key, GuideSet.class);
+            GuideSet guideSet = new TableSelector(LuminexProtocolSchema.getTableInfoGuideSet()).getObject(key, GuideSet.class);
+
+            // Guide sets are scoped to the protocol rather than the container (see getContainerFilter), so a RowId
+            // belonging to another protocol must not be accessible through this protocol-scoped schema.
+            if (guideSet != null && guideSet.getProtocolId() != _protocol.getRowId())
+                return null;
+
+            return guideSet;
         }
 
         @Override
         public void delete(User user, Container container, int key)
         {
+            // Verify the requested guide set belongs to this schema's protocol before deleting
+            if (get(user, container, key) == null)
+                throw new NotFoundException("No guide set found for RowId " + key + " in assay design '" + _protocol.getName() + "'");
+
             DbScope scope = LuminexProtocolSchema.getSchema().getScope();
             SimpleFilter filter = new SimpleFilter(FieldKey.fromParts("GuideSetId"), key);
 
