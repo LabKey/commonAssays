@@ -133,8 +133,8 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
                 // validate the existence of the name and datafile property and make a copy to the run root
                 if (StringUtils.isBlank(name))
                 {
-                    log.warn("Skipping row with blank Name property");
-                    continue;
+                    log.error("The name property value is required, a blank value was encountered.");
+                    return new RecordedActionSet();
                 }
 
                 if (StringUtils.isBlank(dataFilePath))
@@ -193,7 +193,15 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
 
                 log.info("Copying {} to run folder", sourceFile.getName());
                 FileLike destFile = runRoot.resolveChild(sourceFile.getName());
-                FileUtil.copyFile(sourceFile, destFile);
+                try
+                {
+                    FileUtil.copyFile(sourceFile, destFile);
+                }
+                catch (IOException e)
+                {
+                    log.error("Error copying file : {}. The file may already exist in the destination folder.", e.getMessage());
+                    return new RecordedActionSet();
+                }
 
                 log.info("Ensuring input data is created for {}", destFile.getName());
                 URI uri = FileContentService.get().getWebDavUrl(destFile, container, FileContentService.PathType.full);
