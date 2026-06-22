@@ -32,6 +32,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.security.RequiresPermission;
 import org.labkey.api.security.permissions.ReadPermission;
+import org.labkey.api.view.NotFoundException;
 import org.labkey.elisa.actions.ElisaUploadWizardAction;
 import org.labkey.elisa.query.CurveFitDb;
 import org.labkey.elisa.query.ElisaManager;
@@ -109,10 +110,10 @@ public class ElisaController extends SpringActionController
         @Override
         public void validateForm(GetCurveFitXYPairsForm form, Errors errors)
         {
-            _run = ExperimentService.get().getExpRun(form.getRunId());
+            // GitHub Kanban #1236: getExpRun() resolves by global rowId; ensure the run belongs to the current container
+            _run = ExperimentService.get().getExpRun(form.getRunId(), getContainer());
             if (_run == null)
-                errors.reject(ERROR_MSG, "Unable to find run for ID " + form.getRunId() + ".");
-
+                throw new NotFoundException("Run " + form.getRunId() + " does not exist.");
             if (form.getNumberOfPoints() < 2)
                 errors.reject(ERROR_MSG, "At least 2 points must be requested.");
             if (form.getxMin() >= form.getxMax())
