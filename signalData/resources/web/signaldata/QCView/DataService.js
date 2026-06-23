@@ -184,10 +184,11 @@ Ext4.define('LABKEY.SignalData.DataService', {
 
         var context = {
             RunIds: runIds,
-            DataNames: dataNames
+            DataNames: dataNames,
+            ProtocolName: schema.lastIndexOf('.') > 0 ? schema.substring(schema.lastIndexOf('.') + 1, schema.length) : ''
         }, _count = 0;
 
-        var loader = function() {
+        var loader = function()   {
             _count++;
             if (_count == 4) {
 
@@ -301,14 +302,14 @@ Ext4.define('LABKEY.SignalData.DataService', {
         //
         // Get the associated Assay information
         //
-        this.getAssayDefinition('Signal Data', function(def) {
+        this.getAssayDefinition('Signal Data', context.ProtocolName, function(def) {
             context.AssayDefinition = def; loader();
         }, this);
 
         //
         // Get the associated HPLC Assay information
         //
-        this.getAssayDefinition('HPLC', function(def) {
+        this.getAssayDefinition('HPLC', context.ProtocolName, function(def) {
             context.HPLCDefinition = def; loader();
         }, this);
 
@@ -340,21 +341,28 @@ Ext4.define('LABKEY.SignalData.DataService', {
         }
     },
 
-    getAssayDefinition : function(assayType /* String */, callback, scope) {
-        //TODO: can we do this by ID?
+    createAssayDefinitionKey : function(assayType, protocolName) {
+        return assayType + ':' + protocolName;
+    },
+
+    getAssayDefinition : function(assayType /* String */, protocolName, callback, scope) {
         if (Ext4.isString(assayType)) {
-            if (Ext4.isObject(this._AssayTypeCache[assayType])) {
+            const cacheKey = this.createAssayDefinitionKey(assayType, protocolName);
+            if (Ext4.isObject(this._AssayTypeCache[cacheKey])) {
                 if (Ext4.isFunction(callback)) {
-                    callback.call(scope || this, this._AssayTypeCache[assayType]);
+                    callback.call(scope || this, this._AssayTypeCache[cacheKey]);
                 }
             }
             else {
                 LABKEY.Assay.getByType({
                     type: assayType,
                     success: function(defs) {
-                        this._AssayTypeCache[assayType] = defs[0];
+                        Ext4.each(defs, function(def) {
+                            this._AssayTypeCache[this.createAssayDefinitionKey(assayType, def.name)] = def;
+                        }, this);
+
                         if (Ext4.isFunction(callback)) {
-                            callback.call(scope || this, this._AssayTypeCache[assayType]);
+                            callback.call(scope || this, this._AssayTypeCache[cacheKey]);
                         }
                     },
                     scope: this
