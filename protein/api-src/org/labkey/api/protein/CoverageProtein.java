@@ -593,7 +593,7 @@ public class CoverageProtein extends SimpleProtein
                         String varmod = String.format("%d(%s)", counts.getCountModifications().get(modStr), modStr );
                         linkText += " / " + varmod;
                         if (!_forCoverageMapExport)
-                            details.append(varmod);
+                            details.append(PageFlowUtil.filter(varmod));
                     }
                     label = linkText;
                     if (!_forCoverageMapExport)
@@ -658,7 +658,7 @@ public class CoverageProtein extends SimpleProtein
 
                         }
                         label = PageFlowUtil.popupHelp(HtmlString.unsafe(details.toString()), "Peptide Details")
-                                .link(HtmlString.unsafe("<div style=\"color:" + range.pepcounts.foregroundColor +"\">" + linkText + "</div>"))
+                                .link(HtmlString.unsafe("<div style=\"color:" + PageFlowUtil.filter(range.pepcounts.foregroundColor) +"\">" + PageFlowUtil.filter(linkText) + "</div>"))
                                 .script(onClickScript)
                                 .width(250)
                                 .toString();
@@ -694,7 +694,7 @@ public class CoverageProtein extends SimpleProtein
             {
                 if (baseOutput.equalsIgnoreCase(PEPTIDE_START_TD))
                 {
-                    td = String.format(baseOutput, cssClass, "background-color:" + range.pepcounts.peptideColor, colsCurrentRow, label);
+                    td = String.format(baseOutput, cssClass, "background-color:" + PageFlowUtil.filter(range.pepcounts.peptideColor), colsCurrentRow, label);
                 }
                 else
                 {

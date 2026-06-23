@@ -16,8 +16,8 @@
 
 package org.labkey.flow.controllers.editscript;
 
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.security.permissions.UpdatePermission;
@@ -92,6 +92,8 @@ public class EditScriptForm extends FlowObjectForm<FlowScript>
             {
                 throw new NotFoundException("scriptId not found: " + scriptIdStr);
             }
+            // GitHub Issue #1892: validate container
+            flowObject.checkContainer(getContainer(), getUser(), getViewContext().getActionURL());
             _runCount = flowObject.getRunCount();
             step = FlowProtocolStep.fromRequest(getRequest());
             _run = FlowRun.fromURL(getViewContext().getActionURL(), getRequest(), getViewContext().getContainer(), getUser());

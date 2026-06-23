@@ -27,6 +27,7 @@ import org.labkey.api.view.WebPartFactory;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class SignalDataModule extends SpringModule
 {
@@ -92,4 +93,12 @@ public class SignalDataModule extends SpringModule
     protected void startupAfterSpringConfig(ModuleContext moduleContext)
     {
     }
+
+    @Override
+    @NotNull
+    public Set<Class<?>> getIntegrationTests()
+    {
+        return Set.of(SignalDataController.ContainerScopingTestCase.class);
+    }
+
 }
