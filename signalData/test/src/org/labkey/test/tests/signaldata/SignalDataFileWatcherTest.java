@@ -24,7 +24,7 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Path;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
-import org.labkey.test.categories.Daily;
+import org.labkey.test.categories.Git;
 import org.labkey.test.components.pipeline.PipelineTriggerWizard;
 import org.labkey.test.pages.signaldata.SignalDataAssayBeginPage;
 import org.labkey.test.util.DataRegionTable;
@@ -46,7 +46,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@Category({Daily.class})
+@Category({Git.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 10)
 public class SignalDataFileWatcherTest extends BaseWebDriverTest implements PostgresOnlyTest
 {
