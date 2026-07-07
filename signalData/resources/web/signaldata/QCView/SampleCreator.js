@@ -99,6 +99,21 @@ Ext4.define('LABKEY.SignalData.SampleCreator', {
                     xtype: 'toolbar',
                     dock: 'top',
                     items: [{
+                        id: 'selectall-btn',
+                        boxLabel: 'Select All',
+                        xtype: 'checkbox',
+                        padding: '0 0 0 5',
+                        handler: function (cmp, checked) {
+                            if (checked)
+                                this.getInputsSelectionModel().selectAll();
+                            else
+                                this.getInputsSelectionModel().deselectAll();
+                        },
+                        scope: this
+                    },
+                    {xtype: 'tbspacer'},
+                    {xtype: 'tbseparator'},
+                    {
                         id: 'startqcbtn',
                         text: 'Overlay Selected',
                         disabled: true,

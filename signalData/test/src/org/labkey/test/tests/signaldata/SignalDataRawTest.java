@@ -47,6 +47,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @Category({Daily.class})
@@ -161,6 +162,36 @@ public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnly
                 .toList();
         assertTrue("Legend labels " + legendLabels + " do not contain all expected run names " + expectedRunNames,
                 legendLabels.containsAll(expectedRunNames));
+    }
+
+    @Test
+    public void testQCToolSelectAll()
+    {
+        List<String> filenames = List.of(RESULT_FILENAME_1, RESULT_FILENAME_2, RESULT_FILENAME_3);
+        List<String> expectedRunNames = filenames.stream().map(this::resultNameFromFilename).toList();
+
+        log("Select " + filenames.size() + " runs and open the QC tool");
+        SignalDataAssayBeginPage beginPage = navigateToAssayLandingPage(SignalDataInitializer.RAW_SignalData_ASSAY);
+        for (String filename : filenames)
+            beginPage.selectData(filename, DEFAULT_RUN);
+        SignalDataRunViewerPage runsPage = beginPage.viewRuns();
+
+        log("Verify no inputs are selected and 'Overlay Selected' is disabled before using Select All");
+        for (String runName : expectedRunNames)
+            assertFalse("Input '" + runName + "' should not be selected before Select All is checked", runsPage.isInputSelected(runName));
+        assertFalse("'Overlay Selected' should be disabled with no inputs selected", runsPage.isOverlaySelectedEnabled());
+
+        log("Check 'Select All' and verify every input is selected");
+        runsPage.setSelectAll(true);
+        for (String runName : expectedRunNames)
+            assertTrue("Input '" + runName + "' should be selected after Select All is checked", runsPage.isInputSelected(runName));
+        assertTrue("'Overlay Selected' should be enabled after selecting all inputs", runsPage.isOverlaySelectedEnabled());
+
+        log("Uncheck 'Select All' and verify every input is deselected");
+        runsPage.setSelectAll(false);
+        for (String runName : expectedRunNames)
+            assertFalse("Input '" + runName + "' should be deselected after Select All is unchecked", runsPage.isInputSelected(runName));
+        assertFalse("'Overlay Selected' should be disabled after deselecting all inputs", runsPage.isOverlaySelectedEnabled());
     }
 
     private String resultNameFromFilename(String filename)
