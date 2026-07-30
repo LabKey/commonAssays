@@ -39,6 +39,7 @@ import org.labkey.test.components.assay.AssayConstants;
 import org.labkey.test.components.html.BootstrapMenu;
 import org.labkey.test.components.html.Checkbox;
 import org.labkey.test.pages.ReactAssayDesignerPage;
+import org.labkey.test.pages.files.WebDavPage;
 import org.labkey.test.pages.luminex.LuminexImportWizard;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.ExtHelper;
@@ -103,6 +104,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
 
     public static final File RTRANSFORM_SCRIPT_FILE_LABKEY = new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/labkey_luminex_transform.R");
     public static final File RTRANSFORM_SCRIPT_FILE_LAB =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/tomaras_luminex_transform.R");
+    public static final File RTRANSFORM_YOUTIL_FILE =  new File(TestFileUtils.getLabKeyRoot(), "server/modules/commonAssays/luminex/resources/transformscripts/youtil.R");
     public static final File RTRANSFORM_SCRIPT_FILE_NOOP = TestFileUtils.getSampleData("qc/noopTransform.R");
 
     public static final String ASSAY_DATA_FILE_LOCATION_MULTIPLE_FIELD = "__primaryFile__";
@@ -770,5 +772,12 @@ public abstract class LuminexTest extends BaseWebDriverTest
             table.clickHeaderButton("Delete");
             clickButton("Confirm Delete");
         }
+    }
+
+    protected void addRTransformUtil()
+    {
+        // need to upload youtil.R script as sibling in @scripts
+        WebDavPage webDavPage = WebDavPage.beginAt(this, getProjectName() + "/@scripts");
+        webDavPage.getFileBrowserHelper().uploadFile(RTRANSFORM_YOUTIL_FILE);
     }
 }

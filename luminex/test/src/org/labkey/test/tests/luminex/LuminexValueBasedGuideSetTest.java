@@ -48,6 +48,7 @@ public final class LuminexValueBasedGuideSetTest extends LuminexTest
 
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         assayDesigner.clickFinish();
+        init.addRTransformUtil();
     }
 
     @Test
