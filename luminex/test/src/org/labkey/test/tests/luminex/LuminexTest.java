@@ -285,7 +285,9 @@ public abstract class LuminexTest extends BaseWebDriverTest
         // Assay designs that use the luminex transform scripts need to upload youtil.R script as sibling in @scripts
         // so just include it there now for all cases
         WebDavPage webDavPage = WebDavPage.beginAt(this, getProjectName() + "/@scripts");
-        webDavPage.getFileBrowserHelper().uploadFile(RTRANSFORM_YOUTIL_FILE);
+        if (!webDavPage.getFileBrowserHelper().getFileList().contains(RTRANSFORM_YOUTIL_FILE.getName()))
+            webDavPage.getFileBrowserHelper().uploadFile(RTRANSFORM_YOUTIL_FILE);
+        goToProjectHome();
     }
 
     private void setFieldsToDomain(List<PropertyDescriptor> fields, Domain domain)
