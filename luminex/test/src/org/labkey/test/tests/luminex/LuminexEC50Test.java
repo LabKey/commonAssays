@@ -48,7 +48,6 @@ public class LuminexEC50Test extends LuminexTest
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LAB);
         assayDesigner.clickFinish();
-        init.addRTransformUtil();
     }
 
     @Test

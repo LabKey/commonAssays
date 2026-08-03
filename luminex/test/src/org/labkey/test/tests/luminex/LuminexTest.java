@@ -281,6 +281,11 @@ public abstract class LuminexTest extends BaseWebDriverTest
             SaveProtocolCommand saveProtocolCommand = new SaveProtocolCommand(assayProtocol);
             saveProtocolCommand.execute(createDefaultConnection(), getProjectName());
         }
+
+        // Assay designs that use the luminex transform scripts need to upload youtil.R script as sibling in @scripts
+        // so just include it there now for all cases
+        WebDavPage webDavPage = WebDavPage.beginAt(this, getProjectName() + "/@scripts");
+        webDavPage.getFileBrowserHelper().uploadFile(RTRANSFORM_YOUTIL_FILE);
     }
 
     private void setFieldsToDomain(List<PropertyDescriptor> fields, Domain domain)
@@ -772,12 +777,5 @@ public abstract class LuminexTest extends BaseWebDriverTest
             table.clickHeaderButton("Delete");
             clickButton("Confirm Delete");
         }
-    }
-
-    protected void addRTransformUtil()
-    {
-        // need to upload youtil.R script as sibling in @scripts
-        WebDavPage webDavPage = WebDavPage.beginAt(this, getProjectName() + "/@scripts");
-        webDavPage.getFileBrowserHelper().uploadFile(RTRANSFORM_YOUTIL_FILE);
     }
 }

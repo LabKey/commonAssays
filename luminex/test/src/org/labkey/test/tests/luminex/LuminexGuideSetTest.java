@@ -87,7 +87,6 @@ public final class LuminexGuideSetTest extends LuminexTest
         assayDesigner.expandFieldsPanel("Batch")
             .addField(new FieldDefinition("CustomProtocol", FieldDefinition.ColumnType.String).setLabel("Protocol"));
         assayDesigner.clickFinish();
-        addRTransformUtil();
 
         // upload the first set of files (2 runs)
         for (int i = 0; i < 2; i++)

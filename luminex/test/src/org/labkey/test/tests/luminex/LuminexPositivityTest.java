@@ -75,7 +75,6 @@ public final class LuminexPositivityTest extends LuminexTest
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LAB);
         assayDesigner.clickFinish();
-        init.addRTransformUtil();
     }
 
     @Test (timeout = 16 * 60 * 1000) // Preferable to have the individual test time out rather than the class

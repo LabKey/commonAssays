@@ -57,7 +57,6 @@ public final class LuminexRTransformTest extends LuminexTest
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LAB);
         assayDesigner.clickFinish();
-        init.addRTransformUtil();
     }
 
     //requires drc and xtable packages installed in R

@@ -57,7 +57,6 @@ public final class LuminexExcludableWellsTest extends LuminexTest
         ReactAssayDesignerPage assayDesigner = init._assayHelper.clickEditAssayDesign();
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LABKEY);
         assayDesigner.clickFinish();
-        init.addRTransformUtil();
     }
 
     @Before

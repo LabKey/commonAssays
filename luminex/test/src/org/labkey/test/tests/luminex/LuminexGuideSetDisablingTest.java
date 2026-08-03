@@ -91,7 +91,6 @@ public final class LuminexGuideSetDisablingTest extends LuminexTest
         assayDesigner.expandFieldsPanel("Batch")
             .addField(new FieldDefinition("CustomProtocol", FieldDefinition.ColumnType.String).setLabel("CustomProtocol"));
         assayDesigner.clickFinish();
-        addRTransformUtil();
 
         for (int i = 0; i < GUIDE_SET_FILES.length; i++)
             _guideSetHelper.importGuideSetRun(TEST_ASSAY_LUM, GUIDE_SET_FILES[i]);

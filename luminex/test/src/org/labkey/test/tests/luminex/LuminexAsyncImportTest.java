@@ -48,7 +48,6 @@ public final class LuminexAsyncImportTest extends LuminexTest
         assayDesigner.addTransformScript(RTRANSFORM_SCRIPT_FILE_LAB);
         assayDesigner.setBackgroundImport(true);
         assayDesigner.clickFinish();
-        init.addRTransformUtil();
     }
 
     @Test
