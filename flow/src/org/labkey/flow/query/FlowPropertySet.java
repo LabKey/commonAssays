@@ -73,7 +73,10 @@ public class FlowPropertySet
                 String name = spec.getSubset().toString();
                 if (ret.containsKey(name))
                 {
-                    ret.compute(name, (_, spec2) -> SubsetSpec.commonAncestor(spec, spec2));
+                    // put(), not compute(): compute() removes the key on a null result, so a later subset with
+                    // this same leaf name but no relation to the others would look like the first (unambiguous)
+                    // occurrence. Once a leaf name has no common ancestor, that must stick.
+                    ret.put(name, SubsetSpec.commonAncestor(spec, ret.get(name)));
                 }
                 else
                 {
@@ -270,19 +273,10 @@ public class FlowPropertySet
 
             FlowPropertySet fps = new FlowPropertySet(JunitUtil.getTestContainer());
             fps._subsets = Set.of(timeRooted, fooRooted);
+            fps._subsetNameAncestorMap = FlowPropertySet.getSubsetNameAncestorMap(fps._subsets);
 
-            // Force the ancestor map into the state that used to trigger the bug: process the unrelated
-            // "fooRooted" entry so the reduction for "CD8+" collapses to null (no common ancestor) and is
-            // removed from the map, then re-seed the map with a fresh, unreduced "timeRooted" entry -- which
-            // is NOT actually an ancestor of fooRooted. This mirrors what a HashSet iteration order can
-            // produce in production, without depending on real hash ordering.
-            fps._subsetNameAncestorMap = FlowPropertySet.getSubsetNameAncestorMap(List.of(timeRooted, fooRooted, timeRooted));
-
-            // Previously this hit the catch block in simplifySubset() (subset.toString().substring(...) on an
-            // ancestor that wasn't actually an ancestor of subset) and fell back to returning subset unchanged
-            // only via the assertion/logging path. It should now take the same "no applicable ancestor" path
-            // as a null lookup, cleanly and without logging an error.
             Assert.assertEquals(fooRooted, fps.simplifySubset(fooRooted));
+            Assert.assertEquals(timeRooted, fps.simplifySubset(timeRooted));
         }
     }
 }
