@@ -15,6 +15,7 @@
  */
 package org.labkey.microarray.matrix;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlExecutor;
@@ -35,7 +36,7 @@ import java.util.stream.Collectors;
 public class ExpressionMatrixExperimentListener implements ExperimentListener
 {
     @Override
-    public void beforeMaterialDelete(List<? extends ExpMaterial> materials, Container container, User user)
+    public void beforeMaterialDelete(List<? extends ExpMaterial> materials, Container container, User user, @Nullable String auditUserComment)
     {
         SqlDialect d = MicroarrayUserSchema.getSchema().getSqlDialect();
         SqlExecutor sqlExecutor = new SqlExecutor(MicroarrayUserSchema.getSchema());
