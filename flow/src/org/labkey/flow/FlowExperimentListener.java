@@ -15,6 +15,7 @@
  */
 package org.labkey.flow;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.exp.api.ExpMaterial;
@@ -28,7 +29,7 @@ import java.util.List;
 public class FlowExperimentListener implements ExperimentListener
 {
     @Override
-    public void beforeMaterialDelete(List<? extends ExpMaterial> materials, Container container, User user)
+    public void beforeMaterialDelete(List<? extends ExpMaterial> materials, Container container, User user, @Nullable String auditUserComment)
     {
         DbScope.Transaction tx = ExperimentService.get().getSchema().getScope().getCurrentTransaction();
         tx.addCommitTask(() -> FlowManager.get().flowObjectModified(), DbScope.CommitTaskOption.POSTCOMMIT);
