@@ -19,6 +19,7 @@ package org.labkey.flow.query;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.junit.Assert;
 import org.junit.Test;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.query.ExpDataTable;
@@ -72,7 +73,10 @@ public class FlowPropertySet
                 String name = spec.getSubset().toString();
                 if (ret.containsKey(name))
                 {
-                    ret.compute(name, (_, spec2) -> SubsetSpec.commonAncestor(spec, spec2));
+                    // put(), not compute(): compute() removes the key on a null result, so a later subset with
+                    // this same leaf name but no relation to the others would look like the first (unambiguous)
+                    // occurrence. Once a leaf name has no common ancestor, that must stick.
+                    ret.put(name, SubsetSpec.commonAncestor(spec, ret.get(name)));
                 }
                 else
                 {
@@ -111,6 +115,27 @@ public class FlowPropertySet
         return SubsetExpression.expression(ret.toString());
     }
 
+    /**
+     * Returns a shortened form of {@code subset} for display, relative to the shortest ancestor path that is
+     * common to every other subset in this container sharing the same leaf population name.
+     * <p>
+     * For example, if every occurrence of the leaf population "CD8+" in this container falls under
+     * "Time/Singlets/Lymphocytes/CD3+", a subset "Time/Singlets/Lymphocytes/CD3+/CD8+" simplifies to "CD8+",
+     * since the shared prefix carries no disambiguating information. If two subsets with the same leaf name
+     * diverge under different ancestors, the common ancestor is correspondingly shorter (or nonexistent).
+     * <p>
+     * Because the ancestor lookup in {@link #_subsetNameAncestorMap} is keyed on leaf population name alone
+     * (see {@link #getSubsetNameAncestorMap}), it is possible for two subsets with the same leaf name to come
+     * from otherwise-unrelated gating trees (e.g. one rooted at "Time", another rooted directly at "Singlets").
+     * In that case the ancestor recorded for the leaf name may not actually be an ancestor of {@code subset};
+     * this method detects that (via {@link SubsetSpec#hasAncestor}) and returns {@code subset} unchanged
+     * rather than simplifying against an ancestor that doesn't apply.
+     *
+     * @param subset the subset to simplify; returned unchanged if null or not one of the subsets processed by
+     *               {@link #initStatisticsAndGraphs()}
+     * @return a SubsetSpec equivalent to {@code subset} but with any common leading ancestor path removed,
+     *         or {@code subset} itself if no (applicable) common ancestor was found
+     */
     public SubsetSpec simplifySubset(SubsetSpec subset)
     {
         initStatisticsAndGraphs();
@@ -126,12 +151,18 @@ public class FlowPropertySet
         else
             name = subset.getPopulationName();
 
+        // The ancestor map is keyed by leaf population name only, so two unrelated gating trees that happen to
+        // share a leaf name (e.g. one rooted at "Time", another rooted directly at "Singlets") can collide on
+        // the same key. Guard against treating the stored ancestor as applicable when it isn't actually an
+        // ancestor of this subset.
         SubsetSpec commonAncestor = _subsetNameAncestorMap.get(subset.getSubset().toString());
-        if (commonAncestor == null)
+        if (commonAncestor == null || !subset.hasAncestor(commonAncestor))
+        {
             if (expr != null)
                 return new SubsetSpec(subset.getParent(), expr);
             else
                 return new SubsetSpec(subset.getParent(), name);
+        }
 
         if (commonAncestor.equals(subset))
         {
@@ -230,6 +261,22 @@ public class FlowPropertySet
             fps._subsetNameAncestorMap = FlowPropertySet.getSubsetNameAncestorMap(fps._subsets);
             fps.simplifySubset(subset1);
             fps.simplifySubset(subset2);
+        }
+
+        @Test
+        public void testSimplifySubsetUnrelatedRoots()
+        {
+            // Two gating trees rooted differently ("Time" vs "Foo") that happen to share a leaf population
+            // name ("CD8+"). getSubsetNameAncestorMap() keys purely on the leaf name, so these collide.
+            var timeRooted = SubsetSpec.fromParts(StringUtils.split("Time/Singlets/CD3+/CD8+", '/'));
+            var fooRooted = SubsetSpec.fromParts(StringUtils.split("Foo/Singlets/CD3+/CD8+", '/'));
+
+            FlowPropertySet fps = new FlowPropertySet(JunitUtil.getTestContainer());
+            fps._subsets = Set.of(timeRooted, fooRooted);
+            fps._subsetNameAncestorMap = FlowPropertySet.getSubsetNameAncestorMap(fps._subsets);
+
+            Assert.assertEquals(fooRooted, fps.simplifySubset(fooRooted));
+            Assert.assertEquals(timeRooted, fps.simplifySubset(timeRooted));
         }
     }
 }
