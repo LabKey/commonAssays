@@ -13,7 +13,7 @@
     "test": "cross-env NODE_ENV=test jest --silent"
   },
   "dependencies": {
-    "@labkey/components": "7.58.1-fb-remove-bootstrap.1"
+    "@labkey/components": "7.58.1"
   },
   "devDependencies": {
     "@labkey/build": "10.1.2",
