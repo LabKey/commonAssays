@@ -38,7 +38,7 @@ public class NabDilutionDataTable extends NabBaseTable
                 continue;
 
             if ("MaxDilution".equalsIgnoreCase(col.getName()))
-                continue;           // Do with MinDilution to ensure ordering (hack because SqlServer DB order is reversed)
+                continue;           // Added alongside MinDilution below to ensure ordering
 
             String name = col.getName();
             if ("RunDataId".equalsIgnoreCase(name))

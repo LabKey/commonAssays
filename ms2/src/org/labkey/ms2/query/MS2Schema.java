@@ -56,7 +56,6 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.exp.query.ExpRunTable;
 import org.labkey.api.exp.query.ExpSchema;
 import org.labkey.api.module.Module;
-import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.ProteomicsModule;
 import org.labkey.api.protein.query.SequencesTableInfo;
 import org.labkey.api.query.CustomView;
@@ -1533,23 +1532,7 @@ public class MS2Schema extends UserSchema
             @Override
             public TableInfo getLookupTableInfo()
             {
-                SequencesTableInfo result = createSequencesTable(getLookupContainerFilter());
-                // This is a horrible hack to try to deal with https://www.labkey.org/issues/home/Developer/issues/details.view?issueId=5237
-                // Performance on a SQLServer installation with a large number of runs and sequences is much better with
-                // this condition because it causes the query plan to flip to something that does a much more efficient
-                // join with the sequences tables. However, adding it significantly degrades performance on my admittedly
-                // small (though not tiny) Postgres dev database
-                if (_runs != null && MS2Manager.getSchema().getSqlDialect().isSqlServer())
-                {
-                    SQLFragment sql = new SQLFragment();
-                    sql.append("(SeqId IN (SELECT SeqId FROM " + ProteinSchema.getTableInfoFastaSequences() + " WHERE FastaId IN (SELECT FastaId FROM ");
-                    sql.append(MS2Manager.getTableInfoFastaRunMapping() + " WHERE Run IN ");
-                    appendRunInClause(sql);
-                    sql.append(")))");
-
-                    result.addCondition(sql, FieldKey.fromParts("SeqId"));
-                }
-                return result;
+                return createSequencesTable(getLookupContainerFilter());
             }
         };
     }

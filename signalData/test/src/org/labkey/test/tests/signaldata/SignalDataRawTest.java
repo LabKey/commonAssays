@@ -33,7 +33,6 @@ import org.labkey.test.pages.signaldata.SignalDataUploadPage;
 import org.labkey.test.params.FieldDefinition;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
-import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.data.TestDataUtils;
 import org.labkey.test.util.signaldata.SignalDataInitializer;
 import org.openqa.selenium.WebElement;
@@ -51,7 +50,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @Category({Daily.class})
-public class SignalDataRawTest extends BaseWebDriverTest implements PostgresOnlyTest
+public class SignalDataRawTest extends BaseWebDriverTest
 {
     private static final String PROJECT_NAME = "SignalDataRawTest";
     private static final String DEFAULT_RUN = "TestRun001";

@@ -72,9 +72,7 @@ public abstract class LuminexTest extends BaseWebDriverTest
     protected final static String TEST_ASSAY_SUBFOLDER = "Subfolder";//project for luminex test
 
 
-    // Issue 51845:
-    //  - Luminex assay not working well when assay name contains dot (.)
-    //  - use DOMAIN_SPECIAL_STRING instead of DOMAIN_TRICKY_CHARACTERS since sql server is not working with unicode characters
+    // Issue 51845: Luminex assay not working well when assay name contains dot (.)
     public static final String TEST_ASSAY_LUM =  "TestAssayLuminex" + DOMAIN_SPECIAL_STRING.replaceAll("\\.", "");
     protected static final String TEST_ASSAY_LUM_DESC = "Description for Luminex assay";
 

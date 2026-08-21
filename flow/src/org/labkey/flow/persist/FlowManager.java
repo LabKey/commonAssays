@@ -212,14 +212,7 @@ public class FlowManager
         SQLFragment sql = new SQLFragment("SELECT Name, RowId, Id FROM ")
                 .append(attributeTable(type))
                 .append(" WHERE Container = ?").add(containerId);
-        if (FlowManager.get().getSchema().getSqlDialect().isSqlServer())
-        {
-            sql.append(" AND cast(Name AS VARBINARY(512)) = cast(? AS VARBINARY(512))").add(attr);
-        }
-        else
-        {
-            sql.append(" AND Name = ?").add(attr);
-        }
+        sql.append(" AND Name = ?").add(attr);
 
         try (ResultSet rs = new SqlSelector(getSchema(), sql).getResultSet())
         {

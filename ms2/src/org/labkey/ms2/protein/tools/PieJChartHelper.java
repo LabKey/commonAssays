@@ -149,9 +149,7 @@ public class PieJChartHelper extends JChartHelper<ProteinPieDataset, PiePlot>
                 int seqId = rs.getInt(1);
                 int locId = rs.getInt(2);
 
-                // We are simulating SELECT MIN(ThirdLevelId) ... GROUP BY SeqId, LocId in Java because SQL Server 2000
-                // explodes if we add one more GROUP BY clause to this query, see issue #1664
-                //
+                // Simulates SELECT MIN(ThirdLevelId) ... GROUP BY SeqId, LocId in Java
                 // TODO: we should consider removing this and creating the chart with all matching ThirdLevelIds instead
                 if (seqId == prevSeqId && locId == prevLocId)
                     continue;

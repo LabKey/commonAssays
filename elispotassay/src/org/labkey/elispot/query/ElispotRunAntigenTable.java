@@ -42,10 +42,7 @@ public class ElispotRunAntigenTable extends PlateBasedAssayRunDataTable
 
         // Add column for AntigenStats heading
         SQLFragment sql = new SQLFragment("CASE WHEN AntigenName IS NULL OR AntigenName = AntigenWellgroupName THEN AntigenWellgroupName ELSE ");
-        if (getSqlDialect().isPostgreSQL())
-            sql.append("AntigenName || ' (' || SUBSTRING(AntigenWellgroupName, 9) || ')' END");
-        else
-            sql.append("CONCAT(AntigenName, ' (', REPLACE(AntigenWellgroupName, 'Antigen ', ''), ')') END");
+        sql.append("AntigenName || ' (' || SUBSTRING(AntigenWellgroupName, 9) || ')' END");
 
         ExprColumn antigenHeading = new ExprColumn(this, "AntigenHeading", sql, JdbcType.VARCHAR, getColumn("AntigenWellgroupName"), getColumn("AntigenName"));
         antigenHeading.setHidden(true);

@@ -225,7 +225,6 @@ public class PeptideManager
             }
             sql.add("%" + peptide.getTrimmedPeptide() + "%");
 
-            //based on observations of 2 larger ms2 databases, TOP 20 causes better query plan generation in SQL Server
             sql = ProteinSchema.getSchema().getSqlDialect().limitRows(sql, Math.max(20, hits));
         }
 
