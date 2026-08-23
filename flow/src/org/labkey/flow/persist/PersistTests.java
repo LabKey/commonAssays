@@ -23,7 +23,6 @@ import org.labkey.api.data.Results;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
-import org.labkey.api.data.TableResultSet;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
@@ -562,13 +561,12 @@ public class PersistTests
         assertTrue(protocol.isCaseSensitiveKeywords());
         assertFalse(protocol.isCaseSensitiveStatsAndGraphs());
 
-        final boolean sqlserver = FlowManager.get().getSchema().getSqlDialect().isSqlServer();
         final String UPPER_NAME = "CASE-TEST";
         final String lower_name = "case-test";
 
         // setup -- legacy databases may have existing attribute names which differ in casing
         int upperId;
-        int lowerId = -1;
+        int lowerId;
         {
             Map<String, Object> map = Table.insert(user, FlowManager.get().getTinfoKeywordAttr(),
                      CaseInsensitiveHashMap.of(
@@ -581,20 +579,17 @@ public class PersistTests
             map.put("Id", upperId);
             Table.update(user, FlowManager.get().getTinfoKeywordAttr(), map, upperId);
 
-            // Insert a duplicate name that only differs by case (NOTE: SQLServer default collation won't allow this)
-            if (!sqlserver)
-            {
-                map = Table.insert( user, FlowManager.get().getTinfoKeywordAttr(),
-                        CaseInsensitiveHashMap.of(
-                                "Container", c.getId(),
-                                "Name", lower_name,
-                                "Id", -1));
-                lowerId = asInteger(map.get("RowId"));
+            // Insert a duplicate name that only differs by case
+            map = Table.insert( user, FlowManager.get().getTinfoKeywordAttr(),
+                    CaseInsensitiveHashMap.of(
+                            "Container", c.getId(),
+                            "Name", lower_name,
+                            "Id", -1));
+            lowerId = asInteger(map.get("RowId"));
 
-                // Set the Id column to indicate that it is not an alias
-                map.put("Id", lowerId);
-                Table.update(user, FlowManager.get().getTinfoKeywordAttr(), map, lowerId);
-            }
+            // Set the Id column to indicate that it is not an alias
+            map.put("Id", lowerId);
+            Table.update(user, FlowManager.get().getTinfoKeywordAttr(), map, lowerId);
         }
 
         // verify -- attribute cache is case-insensitive
@@ -621,13 +616,10 @@ public class PersistTests
             assertEquals(UPPER_NAME, ke2.getAttribute());
             assertEquals(upperId, ke2.getRowId());
 
-            if (!sqlserver)
-            {
-                AttributeCache.KeywordEntry ke1 = AttributeCache.KEYWORDS.byRowId(c, lowerId);
-                assertNotNull(ke1);
-                assertEquals(lower_name, ke1.getAttribute());
-                assertEquals(lowerId, ke1.getRowId());
-            }
+            AttributeCache.KeywordEntry ke1 = AttributeCache.KEYWORDS.byRowId(c, lowerId);
+            assertNotNull(ke1);
+            assertEquals(lower_name, ke1.getAttribute());
+            assertEquals(lowerId, ke1.getRowId());
         }
 
         // verify -- can't insert new attribute names that differ by case
@@ -641,10 +633,7 @@ public class PersistTests
             assertThat(ex.getMessage(), containsString("Sample TEST: Can't create keyword with same casing as other keywords. Existing keyword"));
             assertThat(ex.getMessage(), containsString("with different casing from the requested name 'CaSe-TeSt':"));
             assertThat(ex.getMessage(), containsString(UPPER_NAME + " (id=" + upperId));
-            if (!sqlserver)
-            {
-                assertThat(ex.getMessage(), containsString(lower_name + " (id=" + lowerId));
-            }
+            assertThat(ex.getMessage(), containsString(lower_name + " (id=" + lowerId));
         }
 
         // verify -- can't insert alias that differs only by case
@@ -661,28 +650,22 @@ public class PersistTests
             assertThat(ex.getMessage(), containsString("Existing keyword"));
             assertThat(ex.getMessage(), containsString("with different casing from the requested name 'CaSe-TeSt':"));
             assertThat(ex.getMessage(), containsString(UPPER_NAME + " (id=" + upperId));
-            if (!sqlserver)
-            {
-                assertThat(ex.getMessage(), containsString(lower_name + " (id=" + lowerId));
-            }
+            assertThat(ex.getMessage(), containsString(lower_name + " (id=" + lowerId));
         }
 
         // verify -- allow insert alias that differs only by case if allowCaseChangeAlias is true
-        if (!sqlserver)
-        {
-            AttributeCache.KeywordEntry ke1 = AttributeCache.KEYWORDS.byName(c, UPPER_NAME);
-            assertNotNull(ke1);
-            assertTrue(ke1.getAliases().isEmpty());
+        AttributeCache.KeywordEntry ke1 = AttributeCache.KEYWORDS.byName(c, UPPER_NAME);
+        assertNotNull(ke1);
+        assertTrue(ke1.getAliases().isEmpty());
 
-            FlowManager.get().ensureAlias(AttributeType.keyword, ke1.getRowId(), "CaSe-TeSt", true, true, true);
+        FlowManager.get().ensureAlias(AttributeType.keyword, ke1.getRowId(), "CaSe-TeSt", true, true, true);
 
-            ke1 = AttributeCache.KEYWORDS.byName(c, UPPER_NAME);
-            Collection<AttributeCache.KeywordEntry> aliases = ke1.getAliases();
-            assertEquals(1, aliases.size());
-            AttributeCache.KeywordEntry alias = aliases.iterator().next();
-            assertEquals("CaSe-TeSt", alias.getName());
-            assertEquals(ke1, alias.getAliasedEntry());
-        }
+        ke1 = AttributeCache.KEYWORDS.byName(c, UPPER_NAME);
+        Collection<AttributeCache.KeywordEntry> aliases = ke1.getAliases();
+        assertEquals(1, aliases.size());
+        AttributeCache.KeywordEntry alias = aliases.iterator().next();
+        assertEquals("CaSe-TeSt", alias.getName());
+        assertEquals(ke1, alias.getAliasedEntry());
     }
 
     @Test

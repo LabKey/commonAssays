@@ -71,8 +71,6 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
     @Override
     protected SQLFragment sqlValue(ColumnInfo objectIdColumn, String attrName, int attrId)
     {
-        // SQL server 2000 does not allow a TEXT column (i.e. flow.keyword.value) to appear in this subquery.
-        // For this reason, we cast it to VARCHAR(4000).
         SQLFragment ret = new SQLFragment("(SELECT CAST(flow.Keyword.Value AS VARCHAR(4000)) FROM flow.Keyword WHERE flow.Keyword.ObjectId = ");
         ret.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));
         ret.append(" AND flow.Keyword.KeywordId = ");

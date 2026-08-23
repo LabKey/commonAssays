@@ -30,7 +30,6 @@ import org.labkey.test.pages.signaldata.SignalDataAssayBeginPage;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.PipelineStatusTable;
 import org.labkey.test.util.PortalHelper;
-import org.labkey.test.util.PostgresOnlyTest;
 import org.labkey.test.util.core.webdav.WebDavUploadHelper;
 import org.labkey.test.util.data.TestDataUtils;
 import org.labkey.test.util.query.QueryUtils;
@@ -48,7 +47,7 @@ import static org.junit.Assert.assertTrue;
 
 @Category({Git.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 10)
-public class SignalDataFileWatcherTest extends BaseWebDriverTest implements PostgresOnlyTest
+public class SignalDataFileWatcherTest extends BaseWebDriverTest
 {
     private static final String PROJECT_NAME = "SignalDataFileWatcherTest";
     private static final String DEFAULT_RUN = "TestRun001";

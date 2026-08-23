@@ -246,8 +246,7 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
             sql.append(", MIN(pd.trimmedpeptide) as TrimmedPeptide\n");
         }
 
-        // SQLServer can't GROUP BY a TEXT field, so convert to VARCHAR
-        String protSequenceSQL = getSqlDialect().isSqlServer() ? "CAST(s.ProtSequence AS VARCHAR(MAX))" : "s.ProtSequence";
+        String protSequenceSQL = "s.ProtSequence";
 
         if (_config.isGroupedByCharge())
         {
