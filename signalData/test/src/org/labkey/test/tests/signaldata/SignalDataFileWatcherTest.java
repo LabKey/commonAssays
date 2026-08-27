@@ -22,12 +22,18 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Path;
+import org.labkey.remoteapi.query.ContainerFilter;
+import org.labkey.remoteapi.query.Filter;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
+import org.labkey.test.TestFileUtils;
+import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.Git;
 import org.labkey.test.components.pipeline.PipelineTriggerWizard;
 import org.labkey.test.pages.signaldata.SignalDataAssayBeginPage;
+import org.labkey.test.util.ApiPermissionsHelper;
 import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.PermissionsHelper;
 import org.labkey.test.util.PipelineStatusTable;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.core.webdav.WebDavUploadHelper;
@@ -44,6 +50,7 @@ import java.util.List;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.labkey.test.util.PermissionsHelper.FOLDER_ADMIN_ROLE;
 
 @Category({Git.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 10)
@@ -65,6 +72,15 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
     // A file root subdirectory, separate from where metadata files are dropped, used to exercise data files
     // referenced by WebDAV path rather than by bare name.
     private static final String ALT_DATA_DIR = "altData";
+
+    // A separate project, whose pipeline root is disjoint from the test project's, holding a data file that an import
+    // running in the test project must refuse to reach (GitHub Issue #1391).
+    private static final String FOREIGN_PROJECT = PROJECT_NAME + "Other";
+    private static final String FOREIGN_FILENAME = "FOREIGN01.TXT";
+
+    // Folder admin in the test project with no role in FOREIGN_PROJECT. A trigger's "Run as" user becomes the import
+    // job's user, which is how the import runs without the site admin's read access to every container.
+    private static final String LIMITED_USER = "signaldata_limited@signaldatafilewatcher.test";
 
     @Nullable
     @Override
@@ -101,6 +117,21 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
             uploadHelper.uploadFile(file, "");
             uploadHelper.uploadFile(file, ALT_DATA_DIR);
         }
+
+        test._containerHelper.createProject(FOREIGN_PROJECT, null);
+        WebDavUploadHelper foreignUploadHelper = new WebDavUploadHelper(FOREIGN_PROJECT);
+        foreignUploadHelper.putText(FOREIGN_FILENAME, "foreign signal data");
+        assertTrue("Test requires a data file in the foreign project's file root", foreignUploadHelper.fileExists(FOREIGN_FILENAME));
+
+        test._userHelper.createUser(LIMITED_USER);
+        new ApiPermissionsHelper(test).addMemberToRole(LIMITED_USER, FOLDER_ADMIN_ROLE, PermissionsHelper.MemberType.user, test.getProjectName());
+    }
+
+    @Override
+    protected void doCleanup(boolean afterTest) throws TestTimeoutException
+    {
+        _userHelper.deleteUsers(false, LIMITED_USER);
+        super.doCleanup(afterTest);
     }
 
     @Before
@@ -218,7 +249,67 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
         assertTrue("Expected one of the pipeline jobs to be in error, statuses were: " + statuses, errorRow >= 0);
 
         statusTable.clickStatusLink(errorRow)
-                .waitForError(String.format("DataFile '%s' is not under a server-managed pipeline root", outsidePath));
+                .waitForError(String.format("DataFile '%s' is not under a pipeline root readable by this user", outsidePath));
+
+        // The rejection is logged as an error and surfaces in the server error log; account for it so the harness's
+        // post-test error check does not fail this test.
+        deleteAllPipelineJobs();
+        checkExpectedErrors(1);
+    }
+
+    /**
+     * GitHub Issue #1391: an absolute server-side path may resolve through any container's pipeline root, but only one
+     * the job's user can read. Runs the import as LIMITED_USER, who has no role in the foreign project.
+     */
+    @Test
+    public void testServerPathDataFileFromUnreadableProjectIsRejected() throws IOException
+    {
+        File foreignFile = FileUtil.appendName(TestFileUtils.getDefaultFileRoot(FOREIGN_PROJECT), FOREIGN_FILENAME);
+        assertTrue("Test requires the foreign data file to exist at " + foreignFile, foreignFile.exists());
+
+        verifyForeignDataFileRejected("foreignServerPathDatafiles.tsv", "Foreign server path trigger",
+                _userHelper.getDisplayNameForEmail(LIMITED_USER), foreignFile.getAbsolutePath(),
+                "is not under a pipeline root readable by this user");
+    }
+
+    /**
+     * Imports a metadata file holding one resolvable row and one row pointing at the foreign project, then verifies the
+     * foreign row was rejected.
+     *
+     * @param runAsDisplayName display name for the trigger's "Run as" user, or null to run as the current user
+     */
+    private void verifyForeignDataFileRejected(String metadataFileName, String triggerName, @Nullable String runAsDisplayName,
+                                               String foreignDataFilePath, String expectedError) throws IOException
+    {
+        List<List<String>> rows = new ArrayList<>();
+        rows.add(List.of("Name", "DataFile"));
+        rows.add(List.of(RESULT_FILENAME_1, RESULT_FILENAME_1));
+        rows.add(List.of(FOREIGN_FILENAME, foreignDataFilePath));
+        File metadataFile = TestDataUtils.writeRowsToTsv(metadataFileName, rows);
+
+        log("Configure a file watcher trigger for the Signal Data import pipeline");
+        createImportTrigger(triggerName, metadataFile.getName(), runAsDisplayName);
+
+        log("Drop a metadata file referencing a data file in another project");
+        goToProjectHome();
+        _fileBrowserHelper.dragDropUpload(metadataFile);
+
+        log("Wait for the file watcher import job to finish");
+        goToDataPipeline();
+        waitForPipelineJobsToFinish(2);
+
+        log("Verify the import job logged the rejection of the cross-project data file");
+        PipelineStatusTable statusTable = new PipelineStatusTable(getDriver());
+        List<String> statuses = statusTable.getColumnDataAsText("Status");
+        int errorRow = statuses.indexOf("ERROR");
+        assertTrue("Expected one of the pipeline jobs to be in error, statuses were: " + statuses, errorRow >= 0);
+
+        statusTable.clickStatusLink(errorRow)
+                .waitForError(String.format("DataFile '%s' %s", foreignDataFilePath, expectedError));
+
+        assertEquals("A data file from another project must not be imported into this project", 0,
+                executeSelectRowCommand("exp", "Data", ContainerFilter.CurrentAndSubfolders, "/" + getProjectName(),
+                        List.of(new Filter("Name", FOREIGN_FILENAME))).getRowCount().intValue());
 
         // The rejection is logged as an error and surfaces in the server error log; account for it so the harness's
         // post-test error check does not fail this test.
@@ -228,6 +319,11 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
 
     private void createImportTrigger(String name, String filePattern)
     {
+        createImportTrigger(name, filePattern, null);
+    }
+
+    private void createImportTrigger(String name, String filePattern, @Nullable String runAsDisplayName)
+    {
         goToProjectHome();
         goToFolderManagement().goToImportTab();
         waitAndClickAndWait(Locator.linkWithText(IMPORT_PIPELINE_TASK));
@@ -235,8 +331,10 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
         PipelineTriggerWizard wizard = new PipelineTriggerWizard(getDriver());
         wizard.setName(name)
                 .setTask(IMPORT_PIPELINE_TASK)
-                .setEnabled(true)
-                .goToConfiguration()
+                .setEnabled(true);
+        if (runAsDisplayName != null)
+            wizard.setUsername(runAsDisplayName);
+        wizard.goToConfiguration()
                 .setLocation(".")
                 .setFilePattern(filePattern)
                 // The 'protocolName' custom field declared by SignalDataImportTask's pipeline; the wizard binds
