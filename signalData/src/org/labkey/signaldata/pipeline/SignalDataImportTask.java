@@ -165,8 +165,6 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
                     Path resolvedPath = (resourceFile != null ? resourceFile.toPath() : Path.of(dataFilePath))
                             .toAbsolutePath().normalize();
 
-                    // GitHub Issue #1391: a webdav resource's own policy can be stricter than its container's, since a
-                    // pipeline root carries its own ACL
                     if (resourceFile != null && !resource.canRead(job.getUser(), true))
                     {
                         log.error("DataFile '{}' is not readable by this user", dataFilePath);

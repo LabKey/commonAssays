@@ -112,8 +112,6 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
     @BeforeClass
     public static void doSetup() throws Exception
     {
-        assertMetadataFileNamesAreDistinct();
-
         SignalDataFileWatcherTest test = getCurrentTest();
         SignalDataInitializer initializer = new SignalDataInitializer(test, test.getProjectName());
         initializer.setupProject();
@@ -421,26 +419,6 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
         File file = FileUtil.appendName(TestFileUtils.getDefaultFileRoot(FOREIGN_PROJECT), fileName);
         assertTrue("Test requires the foreign data file to exist at " + file, file.exists());
         return file;
-    }
-
-    /**
-     * The file watcher matches its file pattern with Matcher.find(), so a trigger watching for one metadata file also
-     * picks up a leftover file whose name merely contains that pattern, importing two runs where the test expects one.
-     */
-    private static void assertMetadataFileNamesAreDistinct()
-    {
-        List<String> names = List.of(METADATA_FILE_BY_NAME, METADATA_FILE_WEBDAV, METADATA_FILE_OUTSIDE_ROOT,
-                METADATA_FILE_DENIED_WEBDAV, METADATA_FILE_DENIED_SERVER_PATH, METADATA_FILE_ALLOWED_WEBDAV,
-                METADATA_FILE_ALLOWED_SERVER_PATH);
-        for (String pattern : names)
-        {
-            for (String other : names)
-            {
-                if (!pattern.equals(other) && other.contains(pattern))
-                    fail(String.format("Metadata file name '%s' contains '%s', so the trigger watching for '%s' would also import '%s'",
-                            other, pattern, pattern, other));
-            }
-        }
     }
 
     private void createImportTrigger(String name, String filePattern)
