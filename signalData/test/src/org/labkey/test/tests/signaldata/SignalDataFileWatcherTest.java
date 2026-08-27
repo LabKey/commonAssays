@@ -22,12 +22,18 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.Path;
+import org.labkey.remoteapi.query.ContainerFilter;
+import org.labkey.remoteapi.query.Filter;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
+import org.labkey.test.TestFileUtils;
+import org.labkey.test.TestTimeoutException;
 import org.labkey.test.categories.Git;
 import org.labkey.test.components.pipeline.PipelineTriggerWizard;
 import org.labkey.test.pages.signaldata.SignalDataAssayBeginPage;
+import org.labkey.test.util.ApiPermissionsHelper;
 import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.PermissionsHelper;
 import org.labkey.test.util.PipelineStatusTable;
 import org.labkey.test.util.PortalHelper;
 import org.labkey.test.util.core.webdav.WebDavUploadHelper;
@@ -43,7 +49,11 @@ import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.labkey.test.util.PermissionsHelper.FOLDER_ADMIN_ROLE;
+import static org.labkey.test.util.PermissionsHelper.READER_ROLE;
 
 @Category({Git.class})
 @BaseWebDriverTest.ClassTimeout(minutes = 10)
@@ -65,6 +75,26 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
     // A file root subdirectory, separate from where metadata files are dropped, used to exercise data files
     // referenced by WebDAV path rather than by bare name.
     private static final String ALT_DATA_DIR = "altData";
+
+    private static final String METADATA_FILE_BY_NAME = "datafiles.tsv";
+    private static final String METADATA_FILE_WEBDAV = "webdavDatafiles.tsv";
+    private static final String METADATA_FILE_OUTSIDE_ROOT = "outsideRoot.tsv";
+    private static final String METADATA_FILE_DENIED_WEBDAV = "crossProjectDeniedWebDav.tsv";
+    private static final String METADATA_FILE_DENIED_SERVER_PATH = "crossProjectDeniedServerPath.tsv";
+    private static final String METADATA_FILE_ALLOWED_WEBDAV = "crossProjectAllowedWebDav.tsv";
+    private static final String METADATA_FILE_ALLOWED_SERVER_PATH = "crossProjectAllowedServerPath.tsv";
+
+    // A separate project, whose pipeline root is disjoint from the test project's, holding data files that an import
+    // running in the test project reaches only when its user can read that project (GitHub Issue #1391).
+    private static final String FOREIGN_PROJECT = PROJECT_NAME + "Other";
+    private static final String FOREIGN_REJECTED_FILENAME = "FOREIGN01.TXT";
+    private static final String FOREIGN_WEBDAV_FILENAME = "FOREIGN02.TXT";
+    private static final String FOREIGN_SERVER_PATH_FILENAME = "FOREIGN03.TXT";
+
+    // Both are folder admin in the test project, which the file watcher requires of a trigger's "Run as" user; that
+    // user becomes the import job's user. Only CROSS_READER_USER can read FOREIGN_PROJECT.
+    private static final String LIMITED_USER = "signaldata_limited@signaldatafilewatcher.test";
+    private static final String CROSS_READER_USER = "signaldata_crossreader@signaldatafilewatcher.test";
 
     @Nullable
     @Override
@@ -101,6 +131,29 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
             uploadHelper.uploadFile(file, "");
             uploadHelper.uploadFile(file, ALT_DATA_DIR);
         }
+
+        test._containerHelper.createProject(FOREIGN_PROJECT, null);
+        WebDavUploadHelper foreignUploadHelper = new WebDavUploadHelper(FOREIGN_PROJECT);
+        for (String dataFile : List.of(FOREIGN_REJECTED_FILENAME, FOREIGN_WEBDAV_FILENAME, FOREIGN_SERVER_PATH_FILENAME))
+        {
+            foreignUploadHelper.putText(dataFile, "foreign signal data");
+            assertTrue("Test requires a data file in the foreign project's file root: " + dataFile, foreignUploadHelper.fileExists(dataFile));
+        }
+
+        test._userHelper.createUser(LIMITED_USER);
+        test._userHelper.createUser(CROSS_READER_USER);
+        ApiPermissionsHelper permissionsHelper = new ApiPermissionsHelper(test);
+        permissionsHelper.addMemberToRole(LIMITED_USER, FOLDER_ADMIN_ROLE, PermissionsHelper.MemberType.user, test.getProjectName());
+        permissionsHelper.addMemberToRole(CROSS_READER_USER, FOLDER_ADMIN_ROLE, PermissionsHelper.MemberType.user, test.getProjectName());
+        permissionsHelper.addMemberToRole(CROSS_READER_USER, READER_ROLE, PermissionsHelper.MemberType.user, FOREIGN_PROJECT);
+    }
+
+    @Override
+    protected void doCleanup(boolean afterTest) throws TestTimeoutException
+    {
+        _userHelper.deleteUsers(false, LIMITED_USER, CROSS_READER_USER);
+        _containerHelper.deleteProject(FOREIGN_PROJECT, afterTest);
+        _containerHelper.deleteProject(getProjectName(), afterTest);
     }
 
     @Before
@@ -118,7 +171,7 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
     @Test
     public void testMetadataFileWatcherImport()
     {
-        File metadataFile = getFile("RunsMetadata/datafiles.tsv");
+        File metadataFile = getFile("RunsMetadata/" + METADATA_FILE_BY_NAME);
 
         log("Configure a file watcher trigger for the Signal Data import pipeline");
         createImportTrigger("Signal Data import trigger", metadataFile.getName());
@@ -158,7 +211,7 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
         rows.add(List.of(RESULT_FILENAME_1, webDavPath(RESULT_FILENAME_1), "StringOne", "1"));
         rows.add(List.of(RESULT_FILENAME_2, webDavPath(RESULT_FILENAME_2), "StringTwo", "2"));
         rows.add(List.of(RESULT_FILENAME_3, webDavPath(RESULT_FILENAME_3), "StringThree", "3"));
-        File metadataFile = TestDataUtils.writeRowsToTsv("webdavDatafiles.tsv", rows);
+        File metadataFile = TestDataUtils.writeRowsToTsv(METADATA_FILE_WEBDAV, rows);
 
         log("Configure a file watcher trigger for the Signal Data import pipeline");
         createImportTrigger("WebDav paths trigger", metadataFile.getName());
@@ -198,7 +251,7 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
         rows.add(List.of("Name", "DataFile"));
         rows.add(List.of(RESULT_FILENAME_1, RESULT_FILENAME_1));
         rows.add(List.of("OutsideRoot.TXT", outsidePath));
-        File metadataFile = TestDataUtils.writeRowsToTsv("outsideRoot.tsv", rows);
+        File metadataFile = TestDataUtils.writeRowsToTsv(METADATA_FILE_OUTSIDE_ROOT, rows);
 
         log("Configure a file watcher trigger for the Signal Data import pipeline");
         createImportTrigger("Outside root trigger", metadataFile.getName());
@@ -218,7 +271,7 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
         assertTrue("Expected one of the pipeline jobs to be in error, statuses were: " + statuses, errorRow >= 0);
 
         statusTable.clickStatusLink(errorRow)
-                .waitForError(String.format("DataFile '%s' is not under a server-managed pipeline root", outsidePath));
+                .waitForError(String.format("DataFile '%s' is not under a pipeline root readable by this user", outsidePath));
 
         // The rejection is logged as an error and surfaces in the server error log; account for it so the harness's
         // post-test error check does not fail this test.
@@ -226,7 +279,154 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
         checkExpectedErrors(1);
     }
 
+    /**
+     * GitHub Issue #1391: a data file in a project the job's user cannot read must not be pulled into this one.
+     */
+    @Test
+    public void testWebDavDataFileFromUnreadableProjectIsRejected() throws IOException
+    {
+        verifyForeignDataFileRejected(METADATA_FILE_DENIED_WEBDAV, "Unreadable WebDav path trigger",
+                FOREIGN_REJECTED_FILENAME, foreignWebDavPath(FOREIGN_REJECTED_FILENAME));
+    }
+
+    /**
+     * GitHub Issue #1391: same as above for an absolute server-side path.
+     */
+    @Test
+    public void testServerPathDataFileFromUnreadableProjectIsRejected() throws IOException
+    {
+        verifyForeignDataFileRejected(METADATA_FILE_DENIED_SERVER_PATH, "Unreadable server path trigger",
+                FOREIGN_REJECTED_FILENAME, foreignFile(FOREIGN_REJECTED_FILENAME).getAbsolutePath());
+    }
+
+    /**
+     * GitHub Issue #1391: resolving a data file through another project's pipeline root is intended behavior when the
+     * job's user can read that project.
+     */
+    @Test
+    public void testWebDavDataFileFromReadableProjectIsImported() throws IOException
+    {
+        verifyForeignDataFileImported(METADATA_FILE_ALLOWED_WEBDAV, "Readable WebDav path trigger",
+                FOREIGN_WEBDAV_FILENAME, foreignWebDavPath(FOREIGN_WEBDAV_FILENAME));
+    }
+
+    /**
+     * GitHub Issue #1391: same as above for an absolute server-side path.
+     */
+    @Test
+    public void testServerPathDataFileFromReadableProjectIsImported() throws IOException
+    {
+        verifyForeignDataFileImported(METADATA_FILE_ALLOWED_SERVER_PATH, "Readable server path trigger",
+                FOREIGN_SERVER_PATH_FILENAME, foreignFile(FOREIGN_SERVER_PATH_FILENAME).getAbsolutePath());
+    }
+
+    /**
+     * Runs the cross-project import as LIMITED_USER and verifies the foreign row was rejected. The assertion matches
+     * only the data file path, since either the resource ACL or the pipeline root containment check can reject it
+     * depending on how the path was spelled.
+     */
+    private void verifyForeignDataFileRejected(String metadataFileName, String triggerName, String foreignFileName,
+                                               String foreignDataFilePath) throws IOException
+    {
+        runForeignDataFileImport(metadataFileName, triggerName, LIMITED_USER, foreignFileName, foreignDataFilePath);
+
+        log("Verify the import job logged the rejection of the cross-project data file");
+        PipelineStatusTable statusTable = new PipelineStatusTable(getDriver());
+        List<String> statuses = statusTable.getColumnDataAsText("Status");
+        int errorRow = statuses.indexOf("ERROR");
+        assertTrue("Expected one of the pipeline jobs to be in error, statuses were: " + statuses, errorRow >= 0);
+
+        statusTable.clickStatusLink(errorRow)
+                .waitForError(String.format("DataFile '%s'", foreignDataFilePath));
+
+        assertEquals("A data file from an unreadable project must not be imported into this project", 0,
+                foreignDataRowCount(foreignFileName));
+
+        // The rejection is logged as an error and surfaces in the server error log; account for it so the harness's
+        // post-test error check does not fail this test.
+        deleteAllPipelineJobs();
+        checkExpectedErrors(1);
+    }
+
+    /**
+     * Runs the same cross-project import as CROSS_READER_USER, who can read the foreign project, and verifies both rows
+     * imported and the foreign data file was registered in this project.
+     */
+    private void verifyForeignDataFileImported(String metadataFileName, String triggerName, String foreignFileName,
+                                               String foreignDataFilePath) throws IOException
+    {
+        runForeignDataFileImport(metadataFileName, triggerName, CROSS_READER_USER, foreignFileName, foreignDataFilePath);
+
+        log("Verify no pipeline job failed");
+        List<String> statuses = new PipelineStatusTable(getDriver()).getColumnDataAsText("Status");
+        assertFalse("No pipeline job should be in error, statuses were: " + statuses, statuses.contains("ERROR"));
+
+        log("Verify the run imported both the local and the cross-project data file");
+        SignalDataAssayBeginPage beginPage = navigateToAssayLandingPage(SignalDataInitializer.RAW_SignalData_ASSAY);
+        beginPage.setSearchBox(getImportedRunIdentifier(beginPage));
+        assertEquals("Incorrect number of rows imported by the file watcher", 2, beginPage.getRowCount());
+
+        // Sorted, because the grid's default order is not part of what this test is asserting.
+        List<String> names = new ArrayList<>(beginPage.getDataRegionTable().getColumnDataAsText("Name"));
+        Collections.sort(names);
+        assertEquals("Incorrect Name values for the imported run", List.of(foreignFileName, RESULT_FILENAME_1), names);
+
+        assertEquals("The cross-project data file should be registered in this project", 1,
+                foreignDataRowCount(foreignFileName));
+    }
+
+    /**
+     * Drops a metadata file holding one row resolvable in this project and one row pointing at FOREIGN_PROJECT, then
+     * waits for the file watcher's move and import jobs.
+     */
+    private void runForeignDataFileImport(String metadataFileName, String triggerName, String runAsUser,
+                                          String foreignFileName, String foreignDataFilePath) throws IOException
+    {
+        List<List<String>> rows = new ArrayList<>();
+        rows.add(List.of("Name", "DataFile"));
+        rows.add(List.of(RESULT_FILENAME_1, RESULT_FILENAME_1));
+        rows.add(List.of(foreignFileName, foreignDataFilePath));
+        File metadataFile = TestDataUtils.writeRowsToTsv(metadataFileName, rows);
+
+        log("Configure a file watcher trigger for the Signal Data import pipeline, running as " + runAsUser);
+        createImportTrigger(triggerName, metadataFile.getName(), _userHelper.getDisplayNameForEmail(runAsUser));
+
+        log("Drop a metadata file referencing a data file in another project");
+        goToProjectHome();
+        _fileBrowserHelper.dragDropUpload(metadataFile);
+
+        log("Wait for the file watcher import job to finish");
+        goToDataPipeline();
+        waitForPipelineJobsToFinish(2);
+    }
+
+    private int foreignDataRowCount(String foreignFileName) throws IOException
+    {
+        return executeSelectRowCommand("exp", "Data", ContainerFilter.CurrentAndSubfolders, "/" + getProjectName(),
+                List.of(new Filter("Name", foreignFileName))).getRowCount().intValue();
+    }
+
+    /**
+     * The server-relative WebDAV resource path for a data file at the top of FOREIGN_PROJECT's file root.
+     */
+    private String foreignWebDavPath(String fileName)
+    {
+        return String.format("/_webdav/%s/@files/%s", FOREIGN_PROJECT, fileName);
+    }
+
+    private File foreignFile(String fileName)
+    {
+        File file = FileUtil.appendName(TestFileUtils.getDefaultFileRoot(FOREIGN_PROJECT), fileName);
+        assertTrue("Test requires the foreign data file to exist at " + file, file.exists());
+        return file;
+    }
+
     private void createImportTrigger(String name, String filePattern)
+    {
+        createImportTrigger(name, filePattern, null);
+    }
+
+    private void createImportTrigger(String name, String filePattern, @Nullable String runAsDisplayName)
     {
         goToProjectHome();
         goToFolderManagement().goToImportTab();
@@ -235,8 +435,10 @@ public class SignalDataFileWatcherTest extends BaseWebDriverTest
         PipelineTriggerWizard wizard = new PipelineTriggerWizard(getDriver());
         wizard.setName(name)
                 .setTask(IMPORT_PIPELINE_TASK)
-                .setEnabled(true)
-                .goToConfiguration()
+                .setEnabled(true);
+        if (runAsDisplayName != null)
+            wizard.setUsername(runAsDisplayName);
+        wizard.goToConfiguration()
                 .setLocation(".")
                 .setFilePattern(filePattern)
                 // The 'protocolName' custom field declared by SignalDataImportTask's pipeline; the wizard binds

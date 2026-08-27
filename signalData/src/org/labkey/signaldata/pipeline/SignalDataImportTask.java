@@ -31,6 +31,8 @@ import org.labkey.api.pipeline.file.FileAnalysisJobSupport;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.reader.DataLoader;
 import org.labkey.api.reader.DataLoaderFactory;
+import org.labkey.api.security.User;
+import org.labkey.api.security.permissions.ReadPermission;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileType;
 import org.labkey.api.util.FileUtil;
@@ -158,29 +160,35 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
                 }
                 else
                 {
-                    // check to see if it's a webdav url
                     WebdavResource resource = WebdavService.get().lookup(dataFilePath);
-                    if (resource != null)
+                    File resourceFile = resource != null ? resource.getFile() : null;
+                    Path resolvedPath = (resourceFile != null ? resourceFile.toPath() : Path.of(dataFilePath))
+                            .toAbsolutePath().normalize();
+
+                    if (resourceFile != null && !resource.canRead(job.getUser(), true))
                     {
-                        sourceFile = FileSystemLike.wrapFile(resource.getFile());
+                        log.error("DataFile '{}' is not readable by this user", dataFilePath);
+                        row.remove(INPUT_DATA_FILE);
+                        continue;
                     }
 
-                    // check to see if it's a server-side path
-                    if (sourceFile == null)
+                    if (!isReadableUnderAnyPipelineRoot(job.getUser(), resolvedPath))
                     {
-                        Path resolvedPath = Path.of(dataFilePath).toAbsolutePath().normalize();
-
-                        if (!isUnderAnyPipelineRoot(resolvedPath))
-                        {
-                            log.error("DataFile '{}' is not under a server-managed pipeline root", dataFilePath);
-                            row.remove(INPUT_DATA_FILE);
-                            continue;
-                        }
-                        sourceFile = FileSystemLike.wrapFile(resolvedPath.toFile());
+                        log.error("DataFile '{}' is not under a pipeline root readable by this user", dataFilePath);
+                        row.remove(INPUT_DATA_FILE);
+                        continue;
                     }
+                    sourceFile = FileSystemLike.wrapFile(resolvedPath.toFile());
                 }
 
-                if (sourceFile != null && !sourceFile.exists())
+                if (sourceFile == null)
+                {
+                    log.error("Unable to resolve DataFile '{}' for row '{}'", dataFilePath, name);
+                    row.remove(INPUT_DATA_FILE);
+                    continue;
+                }
+
+                if (!sourceFile.exists())
                 {
                     log.info("Data file not found: {}", sourceFile.getPath());
                     row.remove(INPUT_DATA_FILE);
@@ -330,34 +338,37 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
     }
 
     /**
-     * Determine whether the given path falls under a pipeline root for some container, using the same semantics as
-     * {@link PipelineService#findPipelineRoot(Container)} (which includes the default file-root fallback, not just
-     * explicitly configured pipeline roots). First try to resolve the path directly to its owning container(s); if
-     * that comes up empty (e.g. a container with a custom, non-default file root that the path-resolution logic does
-     * not yet handle), fall back to scanning every container's pipeline root.
+     * Determine whether the given path falls under a pipeline root for some container that the user can read, using the
+     * same semantics as {@link PipelineService#findPipelineRoot(Container)} (which includes the default file-root
+     * fallback, not just explicitly configured pipeline roots). First try to resolve the path directly to its owning
+     * container(s); if that comes up empty (e.g. a container with a custom, non-default file root that the
+     * path-resolution logic does not yet handle), fall back to scanning every container's pipeline root.
      */
-    private boolean isUnderAnyPipelineRoot(Path resolvedPath)
+    private boolean isReadableUnderAnyPipelineRoot(User user, Path resolvedPath)
     {
         for (Container c : FileContentService.get().getContainersForFilePath(resolvedPath))
         {
-            if (isUnderPipelineRoot(c, resolvedPath))
+            if (isReadableUnderPipelineRoot(c, user, resolvedPath))
                 return true;
         }
 
         // Path could not be resolved to a container directly; fall back to scanning all containers
         for (Container c : ContainerManager.getAllChildren(ContainerManager.getRoot()))
         {
-            if (isUnderPipelineRoot(c, resolvedPath))
+            if (isReadableUnderPipelineRoot(c, user, resolvedPath))
                 return true;
         }
 
         return false;
     }
 
-    private boolean isUnderPipelineRoot(Container container, Path resolvedPath)
+    /**
+     * GitHub Issue #1391: reaching a path through a container's pipeline root additionally requires ReadPermission in that container.
+     */
+    private boolean isReadableUnderPipelineRoot(Container container, User user, Path resolvedPath)
     {
         PipeRoot root = PipelineService.get().findPipelineRoot(container);
-        return root != null && root.isUnderRoot(resolvedPath);
+        return root != null && root.isUnderRoot(resolvedPath) && root.hasPermission(container, user, ReadPermission.class);
     }
 
     public static class Factory extends AbstractTaskFactory<AbstractTaskFactorySettings, Factory>
