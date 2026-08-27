@@ -160,29 +160,37 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
                 }
                 else
                 {
-                    // check to see if it's a webdav url
                     WebdavResource resource = WebdavService.get().lookup(dataFilePath);
-                    if (resource != null)
+                    File resourceFile = resource != null ? resource.getFile() : null;
+                    Path resolvedPath = (resourceFile != null ? resourceFile.toPath() : Path.of(dataFilePath))
+                            .toAbsolutePath().normalize();
+
+                    // GitHub Issue #1391: a webdav resource's own policy can be stricter than its container's, since a
+                    // pipeline root carries its own ACL
+                    if (resourceFile != null && !resource.canRead(job.getUser(), true))
                     {
-                        sourceFile = FileSystemLike.wrapFile(resource.getFile());
+                        log.error("DataFile '{}' is not readable by this user", dataFilePath);
+                        row.remove(INPUT_DATA_FILE);
+                        continue;
                     }
 
-                    // check to see if it's a server-side path
-                    if (sourceFile == null)
+                    if (!isReadableUnderAnyPipelineRoot(job.getUser(), resolvedPath))
                     {
-                        Path resolvedPath = Path.of(dataFilePath).toAbsolutePath().normalize();
-
-                        if (!isReadableUnderAnyPipelineRoot(job.getUser(), resolvedPath))
-                        {
-                            log.error("DataFile '{}' is not under a pipeline root readable by this user", dataFilePath);
-                            row.remove(INPUT_DATA_FILE);
-                            continue;
-                        }
-                        sourceFile = FileSystemLike.wrapFile(resolvedPath.toFile());
+                        log.error("DataFile '{}' is not under a pipeline root readable by this user", dataFilePath);
+                        row.remove(INPUT_DATA_FILE);
+                        continue;
                     }
+                    sourceFile = FileSystemLike.wrapFile(resolvedPath.toFile());
                 }
 
-                if (sourceFile != null && !sourceFile.exists())
+                if (sourceFile == null)
+                {
+                    log.error("Unable to resolve DataFile '{}' for row '{}'", dataFilePath, name);
+                    row.remove(INPUT_DATA_FILE);
+                    continue;
+                }
+
+                if (!sourceFile.exists())
                 {
                     log.info("Data file not found: {}", sourceFile.getPath());
                     row.remove(INPUT_DATA_FILE);
