@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Test;
 import org.labkey.api.audit.AuditLogService;
-import org.labkey.api.collections.IntHashMap;
+import org.labkey.api.collections.LongHashMap;
 import org.labkey.api.data.Aggregate;
 import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
@@ -36,6 +36,7 @@ import org.labkey.api.data.DbSchema;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.Selector;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Sort;
 import org.labkey.api.data.SqlExecutor;
@@ -64,6 +65,7 @@ import org.labkey.api.security.roles.EditorRole;
 import org.labkey.api.security.roles.ReaderRole;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.IntegerUtils;
 import org.labkey.api.util.UnexpectedException;
 import org.labkey.api.view.ActionURL;
 import org.labkey.flow.FlowModule;
@@ -228,8 +230,8 @@ public class FlowManager
                 return null;
 
             String name = rs.getString("Name");
-            Integer rowId = rs.getInt("RowId");
-            Integer aliasId = rs.getInt("Id");
+            long rowId = rs.getLong("RowId");
+            long aliasId = rs.getLong("Id");
             return new FlowEntry(type, rowId, containerId, name, aliasId);
         }
         catch (SQLException e)
@@ -282,18 +284,14 @@ public class FlowManager
         TableInfo table = attributeTable(type);
         SimpleFilter filter = new SimpleFilter();
         filter.addCondition(FieldKey.fromParts("Container"), containerId);
-        TableSelector selector = new TableSelector(table, filter, null);
 
+        return getFlowEntries(new TableSelector(table, filter, null), type);
+    }
+
+    private Collection<FlowEntry> getFlowEntries(Selector selector, @NotNull final AttributeType type)
+    {
         final List<FlowEntry> entries = new ArrayList<>();
-        selector.forEachMap(row -> {
-            Integer rowId = (Integer)row.get("RowId");
-            String name = (String)row.get("Name");
-            String containerId1 = (String)row.get("Container");
-            Integer aliasId = (Integer)row.get("Id");
-            FlowEntry entry = new FlowEntry(type, rowId, containerId1, name, aliasId);
-
-            entries.add(entry);
-        });
+        selector.forEachMap(row -> entries.add(FlowEntry.fromRow(row, type)));
 
         return Collections.unmodifiableList(entries);
     }
@@ -347,6 +345,16 @@ public class FlowManager
         public int compareTo(FlowEntry o)
         {
             return _name.compareTo(o._name);
+        }
+
+        private static FlowEntry fromRow(Map<String, Object> row, @NotNull AttributeType type)
+        {
+            Integer rowId = (Integer)row.get("RowId");
+            String name = (String)row.get("Name");
+            String containerId = (String)row.get("Container");
+            Integer aliasId = (Integer)row.get("Id");
+
+            return new FlowEntry(type, rowId, containerId, name, aliasId);
         }
     }
 
@@ -738,20 +746,8 @@ public class FlowManager
         filter.addCondition(table.getColumn("Container"), entry._containerId);
         filter.addCondition(table.getColumn("Id"), entry._rowId);
         filter.addCondition(table.getColumn("RowId"), entry._rowId, CompareType.NEQ);
-        TableSelector selector = new TableSelector(table, filter, null);
 
-        final List<FlowEntry> aliases = new ArrayList<>();
-        selector.forEachMap(row -> {
-            Integer rowId = (Integer)row.get("RowId");
-            String name = (String)row.get("Name");
-            String containerId = (String)row.get("Container");
-            Integer aliasId = (Integer)row.get("Id");
-            FlowEntry alias = new FlowEntry(entry._type, rowId, containerId, name, aliasId);
-
-            aliases.add(alias);
-        });
-
-        return aliases;
+        return getFlowEntries(new TableSelector(table, filter, null), entry._type);
     }
 
     public Map<FlowEntry, Collection<FlowEntry>> getAliases(Container c, final AttributeType type)
@@ -763,11 +759,7 @@ public class FlowManager
 
         final Map<FlowEntry, Collection<FlowEntry>> aliasMap = new LinkedHashMap<>();
         selector.forEachMap(row -> {
-            Integer rowId = (Integer)row.get("RowId");
-            String name = (String)row.get("Name");
-            String containerId = (String)row.get("Container");
-            Integer aliasId = (Integer)row.get("Id");
-            FlowEntry entry = new FlowEntry(type, rowId, containerId, name, aliasId);
+            FlowEntry entry = FlowEntry.fromRow(row, type);
 
             FlowEntry preferredEntry;
             if (entry.isAlias())
@@ -811,20 +803,8 @@ public class FlowManager
                 .append("        AND attr.rowid IN (SELECT val.").append(valueTableAttrIdColumn).append(" FROM ").append(valueTable, "val").append(")\n")
                 .append("  )\n")
                 .append(")\n");
-        SqlSelector selector = new SqlSelector(getSchema(), sql);
 
-        final List<FlowEntry> unused = new ArrayList<>();
-        selector.forEachMap(row -> {
-            Integer rowId = (Integer)row.get("RowId");
-            String name = (String)row.get("Name");
-            String containerId = (String)row.get("Container");
-            Integer aliasId = (Integer)row.get("Id");
-            FlowEntry alias = new FlowEntry(type, rowId, containerId, name, aliasId);
-
-            unused.add(alias);
-        });
-
-        return Collections.unmodifiableList(unused);
+        return getFlowEntries(new SqlSelector(getSchema(), sql), type);
     }
 
     public void deleteUnused(@NotNull Container c)
@@ -940,7 +920,7 @@ public class FlowManager
     /**
      * Get usages for an attribute and its aliases.
      */
-    public Map<Integer, Collection<FlowDataObject>> getAllUsages(AttributeType type, long rowId)
+    public Map<Long, Collection<FlowDataObject>> getAllUsages(AttributeType type, long rowId)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
         if (entry == null)
@@ -960,10 +940,10 @@ public class FlowManager
             .append("WHERE fo.rowid = val.objectid\n")
             .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").appendValue(rowId).append("\n");
 
-        final Map<Integer, Collection<FlowDataObject>> usages = new IntHashMap<>();
+        final Map<Long, Collection<FlowDataObject>> usages = new LongHashMap<>();
         SqlSelector selector = new SqlSelector(getSchema(), sql);
         selector.forEachMap(row -> {
-            Integer attributeRowId = (Integer)row.get("OriginalAttrId");
+            Long attributeRowId = IntegerUtils.asLong(row.get("OriginalAttrId"));
             Integer dataId = (Integer)row.get("DataId");
 
             Collection<FlowDataObject> datas = usages.computeIfAbsent(attributeRowId, k -> new ArrayList<>());

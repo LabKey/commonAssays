@@ -214,7 +214,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         /** Get a list of usages of this attribute, including usages of this attribute's aliases. */
         public Map<Z, Collection<FlowDataObject>> getAllUsages()
         {
-            Map<Integer, Collection<FlowDataObject>> usagesMap = FlowManager.get().getAllUsages(_type, _rowId);
+            Map<Long, Collection<FlowDataObject>> usagesMap = FlowManager.get().getAllUsages(_type, _rowId);
             Map<Z, Collection<FlowDataObject>> ret = new HashMap<>();
 
             // Include usages of this attribute
