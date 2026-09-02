@@ -79,7 +79,7 @@ public class GraphForeignKey extends AttributeForeignKey<GraphSpec>
     // Select the string concatenated value of objectId+'~~~'+graphSpec
     // When rendering the image URL, we will split the values apart again.
     @Override
-    protected SQLFragment sqlValue(ColumnInfo objectIdColumn, GraphSpec attrName, int attrId)
+    protected SQLFragment sqlValue(ColumnInfo objectIdColumn, GraphSpec attrName, long attrId)
     {
         final SqlDialect dialect = objectIdColumn.getSqlDialect();
         final SQLFragment sepAndGraphSpec =

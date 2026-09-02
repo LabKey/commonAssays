@@ -261,7 +261,7 @@ public class FlowManager
      * DOES NOT USE CACHE
      */
     @Nullable
-    public FlowEntry getAttributeEntry(@NotNull AttributeType type, int rowId)
+    public FlowEntry getAttributeEntry(@NotNull AttributeType type, long rowId)
     {
         //_log.info("getAttributeEntry(" + type + ", " + rowId + ")");
         Map<String, Object> row = new SqlSelector(getSchema(), "SELECT Container, Name, Id FROM " + attributeTable(type) + " WHERE RowId = ?", rowId).getMap();
@@ -302,12 +302,12 @@ public class FlowManager
     public static class FlowEntry implements Comparable<FlowEntry>
     {
         public final AttributeType _type;
-        public final int _rowId;
+        public final long _rowId;
         public final String _containerId;
         public final String _name;
-        public final int _aliasId;
+        public final long _aliasId;
 
-        public FlowEntry(@NotNull AttributeType type, @NotNull int rowId, @NotNull String containerId, @NotNull String name, @NotNull Integer aliasId)
+        public FlowEntry(@NotNull AttributeType type, long rowId, @NotNull String containerId, @NotNull String name, long aliasId)
         {
             _type = type;
             _rowId = rowId;
@@ -339,7 +339,7 @@ public class FlowManager
         public int hashCode()
         {
             int result = _type.hashCode();
-            result = 31 * result + Integer.hashCode(_rowId);
+            result = 31 * result + Long.hashCode(_rowId);
             return result;
         }
 
@@ -363,7 +363,7 @@ public class FlowManager
      * @param allowCaseChangeAlias When true, allow an attribute to be registered as an alias of another attribute if it differs by casing.
      * @return The RowId of the newly inserted or existing attribute.
      */
-    private int ensureAttributeName(@NotNull Container container, @Nullable String sampleLabel, @NotNull AttributeType type, @NotNull String attr, int aliasId, boolean allowCaseChangeAlias)
+    private long ensureAttributeName(@NotNull Container container, @Nullable String sampleLabel, @NotNull AttributeType type, @NotNull String attr, long aliasId, boolean allowCaseChangeAlias)
     {
         // Get case-sensitivity rule
         final FlowProtocol protocol = FlowProtocol.getForContainer(container);
@@ -399,12 +399,12 @@ public class FlowManager
             if (!caseSensitive)
             {
                 // Use the first attribute, sorted by case
-                int rowId = others.getFirst()._rowId;
+                long rowId = others.getFirst()._rowId;
 
                 // If more than one attribute matches, check that all are pointing to the same preferred attribute
                 if (others.size() > 1)
                 {
-                    int preferredId = others.getFirst()._aliasId;
+                    long preferredId = others.getFirst()._aliasId;
                     if (others.stream().anyMatch(item -> item._aliasId != preferredId))
                         throw new FlowCasingMismatchException("Can't create " + type + " with same casing as other " + type + "s when there is more than one preferred attribute.", sampleLabel, type, others, attr);
                 }
@@ -450,37 +450,37 @@ public class FlowManager
         return rowId;
     }
 
-    private int ensureAttributeName(Container container, String sampleLabel, AttributeType type, String name)
+    private long ensureAttributeName(Container container, String sampleLabel, AttributeType type, String name)
     {
         return ensureAttributeName(container, sampleLabel, type, name, -1, false);
     }
 
 
-    public int ensureKeywordName(Container c, String sampleLabel, String name, boolean uncache)
+    public long ensureKeywordName(Container c, String sampleLabel, String name, boolean uncache)
     {
         return ensureAttributeNameAndAliases(c, sampleLabel, keyword, name, Collections.emptyList(), uncache);
     }
 
 
-    public int ensureStatisticNameAndAliases(Container c, String sampleLabel, String name, Collection<?> aliases, boolean uncache)
+    public long ensureStatisticNameAndAliases(Container c, String sampleLabel, String name, Collection<?> aliases, boolean uncache)
     {
         return ensureAttributeNameAndAliases(c, sampleLabel, AttributeType.statistic, name, aliases, uncache);
     }
 
 
-    public int ensureKeywordNameAndAliases(Container c, String sampleLabel, String name, Collection<?> aliases, boolean uncache)
+    public long ensureKeywordNameAndAliases(Container c, String sampleLabel, String name, Collection<?> aliases, boolean uncache)
     {
         return ensureAttributeNameAndAliases(c, sampleLabel, keyword, name, aliases, uncache);
     }
 
 
-    public int ensureGraphNameAndAliases(Container c, String sampleLabel, String name, Collection<?> aliases, boolean uncache)
+    public long ensureGraphNameAndAliases(Container c, String sampleLabel, String name, Collection<?> aliases, boolean uncache)
     {
         return ensureAttributeNameAndAliases(c, sampleLabel, AttributeType.graph, name, aliases, uncache);
     }
 
 
-    private int ensureAttributeNameAndAliases(Container c, String sampleLabel, AttributeType type, String name, Collection<?> aliases, boolean uncache)
+    private long ensureAttributeNameAndAliases(Container c, String sampleLabel, AttributeType type, String name, Collection<?> aliases, boolean uncache)
     {
         //_log.info("ensureAlias(" + c + ", " + type + ", " + name + ", aliases)");
         try
@@ -491,7 +491,7 @@ public class FlowManager
                 names.add(alias.toString());
 
             // Check for an existing alias in the list of new attribute names.
-            Integer aliasId = null;
+            Long aliasId = null;
             for (String s : names)
             {
                 FlowEntry entry = getAttributeEntryCaseSensitive(c.getId(), type, s);
@@ -526,7 +526,7 @@ public class FlowManager
     }
 
     @NotNull
-    private FlowEntry getAttributeEntryForAliasing(@NotNull AttributeType type, int rowId)
+    private FlowEntry getAttributeEntryForAliasing(@NotNull AttributeType type, long rowId)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
         if (entry == null)
@@ -538,7 +538,7 @@ public class FlowManager
         return entry;
     }
 
-    public void ensureAlias(@NotNull AttributeType type, int rowId, @NotNull String aliasName, boolean allowCaseChangeAlias, boolean transact, boolean uncache)
+    public void ensureAlias(@NotNull AttributeType type, long rowId, @NotNull String aliasName, boolean allowCaseChangeAlias, boolean transact, boolean uncache)
     {
         ensureAlias(getAttributeEntryForAliasing(type, rowId), aliasName, allowCaseChangeAlias, transact, uncache);
     }
@@ -546,7 +546,7 @@ public class FlowManager
     private void ensureAlias(@NotNull FlowEntry entry, @NotNull String aliasName, boolean allowCaseChangeAlias, boolean transact, boolean uncache)
     {
         final AttributeType type = entry._type;
-        final int rowId = entry._rowId;
+        final long rowId = entry._rowId;
 
         Container c = ContainerManager.getForId(entry._containerId);
         if (c == null)
@@ -601,7 +601,7 @@ public class FlowManager
         }
     }
 
-    public void updateAttribute(@NotNull Container container, @NotNull AttributeType type, int rowId, @NotNull String name, int aliasId, boolean uncache)
+    public void updateAttribute(@NotNull Container container, @NotNull AttributeType type, long rowId, @NotNull String name, long aliasId, boolean uncache)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
         if (entry == null)
@@ -610,10 +610,10 @@ public class FlowManager
         updateAttribute(container, entry, name, aliasId, uncache);
     }
 
-    private void updateAttribute(@NotNull Container container, @NotNull FlowEntry entry, @NotNull String name, int aliasId, boolean uncache)
+    private void updateAttribute(@NotNull Container container, @NotNull FlowEntry entry, @NotNull String name, long aliasId, boolean uncache)
     {
         final AttributeType type = entry._type;
-        final int rowId = entry._rowId;
+        final long rowId = entry._rowId;
 
         // Validate the name
         if (name == null || name.isEmpty())
@@ -640,7 +640,7 @@ public class FlowManager
     }
 
     // Update any attribute usages of the current rowId to the new rowId, keeping the original id the same
-    private int updateAttributeValuesPreferredId(@NotNull String containerId, @NotNull AttributeType type, int currentRowId, int newRowId)
+    private int updateAttributeValuesPreferredId(@NotNull String containerId, @NotNull AttributeType type, long currentRowId, long newRowId)
     {
         TableInfo valueTable = valueTable(type);
         String valueTableAttrIdColumn = valueTableAttrIdColumn(type);
@@ -671,7 +671,7 @@ public class FlowManager
         return new SqlExecutor(getSchema()).execute(sql);
     }
 
-    public void deleteAttribute(@NotNull Container c, AttributeType type, int rowId, boolean uncache)
+    public void deleteAttribute(@NotNull Container c, AttributeType type, long rowId, boolean uncache)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
         if (entry == null)
@@ -716,7 +716,7 @@ public class FlowManager
      * Get aliases for the preferred/primary attribute rowId or empty collection if rowId is not a preferred attribute.
      * DOES NOT USE CACHE
      */
-    public Collection<FlowEntry> getAliases(final AttributeType type, int rowId)
+    public Collection<FlowEntry> getAliases(final AttributeType type, long rowId)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
         if (entry == null)
@@ -872,7 +872,7 @@ public class FlowManager
     /**
      * Get a usage count for an attribute and its aliases.
      */
-    public Map<Long, Number> getUsageCount(AttributeType type, int rowId)
+    public Map<Long, Number> getUsageCount(AttributeType type, long rowId)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
         if (entry == null)
@@ -883,13 +883,13 @@ public class FlowManager
         String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(type);
 
         SQLFragment sql = new SQLFragment()
-                .append("SELECT val.").append(valueTableOriginalAttrIdColumn).append(" AS OriginalAttrId, COUNT(fo.rowid) AS ObjectCount\n")
-                .append("FROM ")
-                .append(valueTable, "val").append(", ")
-                .append(getTinfoObject(), "fo").append("\n")
-                .append("WHERE fo.rowid = val.objectid\n")
-                .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").appendValue(entry._rowId).append("\n")
-                .append("GROUP BY val.").append(valueTableOriginalAttrIdColumn).append("\n");
+            .append("SELECT val.").append(valueTableOriginalAttrIdColumn).append(" AS OriginalAttrId, COUNT(fo.rowid) AS ObjectCount\n")
+            .append("FROM ")
+            .append(valueTable, "val").append(", ")
+            .append(getTinfoObject(), "fo").append("\n")
+            .append("WHERE fo.rowid = val.objectid\n")
+            .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").appendValue(entry._rowId).append("\n")
+            .append("GROUP BY val.").append(valueTableOriginalAttrIdColumn).append("\n");
 
         SqlSelector selector = new SqlSelector(getSchema(), sql);
         return selector.getValueMap(Long.class);
@@ -898,7 +898,7 @@ public class FlowManager
     /**
      * Get usages for an attribute, excluding its aliases.
      */
-    public Collection<FlowDataObject> getUsages(AttributeType type, int rowId)
+    public Collection<FlowDataObject> getUsages(AttributeType type, long rowId)
     {
         return getUsages(getAttributeEntry(type, rowId));
     }
@@ -940,7 +940,7 @@ public class FlowManager
     /**
      * Get usages for an attribute and its aliases.
      */
-    public Map<Integer, Collection<FlowDataObject>> getAllUsages(AttributeType type, int rowId)
+    public Map<Integer, Collection<FlowDataObject>> getAllUsages(AttributeType type, long rowId)
     {
         FlowEntry entry = getAttributeEntry(type, rowId);
         if (entry == null)
@@ -951,14 +951,14 @@ public class FlowManager
         String valueTableOriginalAttrIdColumn = valueTableOriginalAttrIdColumn(type);
 
         SQLFragment sql = new SQLFragment()
-                .append("SELECT fo.rowid, fo.dataid,")
-                .append(" val.").append(valueTableAttrIdColumn).append(" AS AttrId,")
-                .append(" val.").append(valueTableOriginalAttrIdColumn).append(" AS OriginalAttrId\n")
-                .append("FROM ")
-                .append(valueTable, "val").append(", ")
-                .append(getTinfoObject(), "fo").append("\n")
-                .append("WHERE fo.rowid = val.objectid\n")
-                .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").appendValue(rowId).append("\n");
+            .append("SELECT fo.rowid, fo.dataid,")
+            .append(" val.").append(valueTableAttrIdColumn).append(" AS AttrId,")
+            .append(" val.").append(valueTableOriginalAttrIdColumn).append(" AS OriginalAttrId\n")
+            .append("FROM ")
+            .append(valueTable, "val").append(", ")
+            .append(getTinfoObject(), "fo").append("\n")
+            .append("WHERE fo.rowid = val.objectid\n")
+            .append("  AND val.").append(valueTableAttrIdColumn).append(" = ").appendValue(rowId).append("\n");
 
         final Map<Integer, Collection<FlowDataObject>> usages = new IntHashMap<>();
         SqlSelector selector = new SqlSelector(getSchema(), sql);
@@ -1201,8 +1201,8 @@ public class FlowManager
 
         AttributeCache.Entry<?, ?> a = AttributeCache.KEYWORDS.byAttribute(c, keyword);
         assert a != null : "Expected to find keyword entry for '" + keyword + "'";
-        int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
-        int originalId = a.getRowId();
+        long preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
+        long originalId = a.getRowId();
 
         DbSchema schema = getSchema();
         try (DbScope.Transaction transaction = schema.getScope().ensureTransaction())

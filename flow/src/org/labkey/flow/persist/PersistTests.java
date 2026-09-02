@@ -697,7 +697,7 @@ public class PersistTests
         final String lower_name = "qq-keyword";
 
         // setup -- create a keyword
-        int upperId = FlowManager.get().ensureKeywordName(c, "sample", UPPER_NAME, true);
+        long upperId = FlowManager.get().ensureKeywordName(c, "sample", UPPER_NAME, true);
 
         // verify -- when case-sensitive, can't create keyword that only differs by case
         try
@@ -719,7 +719,7 @@ public class PersistTests
             protocol.setCaseSensitiveKeywords(user, false);
             assertFalse(protocol.isCaseSensitiveKeywords());
 
-            int rowId = FlowManager.get().ensureKeywordName(c, "TEST", lower_name, false);
+            long rowId = FlowManager.get().ensureKeywordName(c, "TEST", lower_name, false);
             assertEquals("Expected to get existing " + UPPER_NAME + " keyword when case-sensitivity is turned off", upperId, rowId);
         }
     }

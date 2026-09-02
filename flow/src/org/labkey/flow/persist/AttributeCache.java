@@ -22,11 +22,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 import org.labkey.api.cache.BlockingCache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
 import org.labkey.api.collections.CaseInsensitiveHashMap;
-import org.labkey.api.collections.IntHashMap;
+import org.labkey.api.collections.LongHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DbScope;
@@ -81,8 +82,8 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         private final String _containerId;
         private final Collection<Z> _entries;
         private final Map<String, Z> _byName;
-        private final Map<Integer, Z> _byRowId;
-        private final MultiValuedMap<Integer, Integer> _aliases;
+        private final Map<Long, Z> _byRowId;
+        private final MultiValuedMap<Long, Long> _aliases;
 
         private Attributes(String containerId, Collection<Z> all)
         {
@@ -90,8 +91,8 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
             _entries = all;
 
             Map<String, Z> byName = new CaseInsensitiveHashMap<>();
-            Map<Integer, Z> byRowId = new IntHashMap<>();
-            MultiValuedMap<Integer, Integer> aliases = new ArrayListValuedHashMap<>();
+            Map<Long, Z> byRowId = new LongHashMap<>();
+            MultiValuedMap<Long, Long> aliases = new ArrayListValuedHashMap<>();
             for (Z entry : all)
             {
                 byRowId.put(entry.getRowId(), entry);
@@ -112,13 +113,13 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
     public static abstract class Entry<Q extends Comparable<Q>, Z extends Entry<Q, Z>> implements Comparable<Entry<Q, Z>>
     {
         private final AttributeType _type;
-        private final int _rowId;
+        private final long _rowId;
         private final String _containerId;
         private final String _name;
         private final Q _attribute;
-        private final Integer _aliasedId;
+        private final Long _aliasedId;
 
-        protected Entry(@NotNull String containerId, @NotNull AttributeType type, int rowId, @NotNull String name, @NotNull Q attribute, @Nullable Integer aliasedId)
+        protected Entry(@NotNull String containerId, @NotNull AttributeType type, long rowId, @NotNull String name, @NotNull Q attribute, @Nullable Long aliasedId)
         {
             _containerId = containerId;
             _type = type;
@@ -134,7 +135,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
             return _type;
         }
 
-        public int getRowId()
+        public long getRowId()
         {
             return _rowId;
         }
@@ -166,7 +167,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         }
 
         /** Get the rowid of the aliased attribute or null if this is the preferred attribute. */
-        public Integer getAliasedId()
+        public Long getAliasedId()
         {
             return _aliasedId;
         }
@@ -189,12 +190,12 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
             AttributeCache<Q, Z> cache = (AttributeCache<Q, Z>) AttributeCache.forType(_type);
             Attributes<Q, Z> attributes = cache._cache.get(_containerId);
 
-            Collection<Integer> aliasIds = attributes._aliases.get(_rowId);
+            Collection<Long> aliasIds = attributes._aliases.get(_rowId);
             if (aliasIds.isEmpty())
                 return Collections.emptyList();
 
             ArrayList<Z> entries = new ArrayList<>(aliasIds.size());
-            for (Integer aliasId : aliasIds)
+            for (Long aliasId : aliasIds)
             {
                 Z entry = cache.byRowId(_containerId, aliasId);
                 if (entry != null)
@@ -237,7 +238,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
 
     public static class KeywordEntry extends Entry<String, KeywordEntry>
     {
-        protected KeywordEntry(@NotNull String containerId, int rowId, @NotNull String name, @Nullable Integer aliased)
+        protected KeywordEntry(@NotNull String containerId, long rowId, @NotNull String name, @Nullable Long aliased)
         {
             super(containerId, AttributeType.keyword, rowId, name, name, aliased);
         }
@@ -257,7 +258,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
 
     public static class StatisticEntry extends Entry<StatisticSpec, StatisticEntry>
     {
-        protected StatisticEntry(@NotNull String containerId, int rowId, @NotNull String name, @NotNull StatisticSpec spec, @Nullable Integer aliased)
+        protected StatisticEntry(@NotNull String containerId, long rowId, @NotNull String name, @NotNull StatisticSpec spec, @Nullable Long aliased)
         {
             super(containerId, AttributeType.statistic, rowId, name, spec, aliased);
         }
@@ -277,7 +278,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
 
     public static class GraphEntry extends Entry<GraphSpec, GraphEntry>
     {
-        protected GraphEntry(@NotNull String containerId, int rowId, @NotNull String name, @NotNull GraphSpec spec, @Nullable Integer aliased)
+        protected GraphEntry(@NotNull String containerId, long rowId, @NotNull String name, @NotNull GraphSpec spec, @Nullable Long aliased)
         {
             super(containerId, AttributeType.graph, rowId, name, spec, aliased);
         }
@@ -312,14 +313,14 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
 
         assert entry._type == _type;
 
-        Integer aliasId = entry.isAlias() ? entry._aliasId : null;
+        Long aliasId = entry.isAlias() ? entry._aliasId : null;
 
         A attribute = _createAttribute(entry._name);
 
         return _createEntry(entry._containerId, entry._rowId, entry._name, attribute, aliasId);
     }
 
-    protected abstract E _createEntry(@NotNull String containerId, int rowId, @NotNull String name, @NotNull A attribute, @Nullable Integer aliased);
+    protected abstract E _createEntry(@NotNull String containerId, long rowId, @NotNull String name, @NotNull A attribute, @Nullable Long aliased);
 
     protected abstract A _createAttribute(@NotNull String name);
 
@@ -477,12 +478,12 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
      * Get an AttributeEntry by rowid.
      */
     @Nullable
-    public E byRowId(@NotNull Container container, int rowId)
+    public E byRowId(@NotNull Container container, long rowId)
     {
         return byRowId(container.getId(), rowId);
     }
 
-    private E byRowId(@NotNull String containerId, int rowId)
+    private E byRowId(@NotNull String containerId, long rowId)
     {
         Attributes<A, E> attributes = _cache.get(containerId);
         if (attributes == null)
@@ -505,7 +506,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
     }
 
         @Override
-        protected KeywordEntry _createEntry(@NotNull String containerId, int rowId, @NotNull String name, @NotNull String attribute, @Nullable Integer aliased)
+        protected KeywordEntry _createEntry(@NotNull String containerId, long rowId, @NotNull String name, @NonNull String attribute, @Nullable Long aliased)
         {
             return new KeywordEntry(containerId, rowId, name, aliased);
         }
@@ -525,7 +526,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         }
 
         @Override
-        protected StatisticEntry _createEntry(@NotNull String containerId, int rowId, @NotNull String name, @NotNull StatisticSpec attribute, @Nullable Integer aliased)
+        protected StatisticEntry _createEntry(@NotNull String containerId, long rowId, @NotNull String name, @NonNull StatisticSpec attribute, @Nullable Long aliased)
         {
             return new StatisticEntry(containerId, rowId, name, attribute, aliased);
         }
@@ -545,7 +546,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         }
 
         @Override
-        protected GraphEntry _createEntry(@NotNull String containerId, int rowId, @NotNull String name, @NotNull GraphSpec attribute, @Nullable Integer aliased)
+        protected GraphEntry _createEntry(@NotNull String containerId, long rowId, @NotNull String name, @NonNull GraphSpec attribute, @Nullable Long aliased)
         {
             return new GraphEntry(containerId, rowId, name, attribute, aliased);
         }
