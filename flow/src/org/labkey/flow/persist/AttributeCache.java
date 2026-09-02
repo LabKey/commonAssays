@@ -22,7 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
 import org.labkey.api.cache.BlockingCache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
@@ -506,7 +505,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
     }
 
         @Override
-        protected KeywordEntry _createEntry(@NotNull String containerId, long rowId, @NotNull String name, @NonNull String attribute, @Nullable Long aliased)
+        protected KeywordEntry _createEntry(@NotNull String containerId, long rowId, @NotNull String name, @NotNull String attribute, @Nullable Long aliased)
         {
             return new KeywordEntry(containerId, rowId, name, aliased);
         }
@@ -526,7 +525,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         }
 
         @Override
-        protected StatisticEntry _createEntry(@NotNull String containerId, long rowId, @NotNull String name, @NonNull StatisticSpec attribute, @Nullable Long aliased)
+        protected StatisticEntry _createEntry(@NotNull String containerId, long rowId, @NotNull String name, @NotNull StatisticSpec attribute, @Nullable Long aliased)
         {
             return new StatisticEntry(containerId, rowId, name, attribute, aliased);
         }
@@ -546,7 +545,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
         }
 
         @Override
-        protected GraphEntry _createEntry(@NotNull String containerId, long rowId, @NotNull String name, @NonNull GraphSpec attribute, @Nullable Long aliased)
+        protected GraphEntry _createEntry(@NotNull String containerId, long rowId, @NotNull String name, @NotNull GraphSpec attribute, @Nullable Long aliased)
         {
             return new GraphEntry(containerId, rowId, name, attribute, aliased);
         }
