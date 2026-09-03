@@ -92,7 +92,7 @@ public class StatisticForeignKey extends AttributeForeignKey<StatisticSpec>
     }
 
     @Override
-    protected SQLFragment sqlValue(ColumnInfo objectIdColumn, StatisticSpec attrName, int attrId)
+    protected SQLFragment sqlValue(ColumnInfo objectIdColumn, StatisticSpec attrName, long attrId)
     {
         SQLFragment ret = new SQLFragment("(SELECT flow.Statistic.Value FROM flow.Statistic WHERE flow.Statistic.ObjectId = ");
         ret.append(objectIdColumn.getValueSql(ExprColumn.STR_TABLE_ALIAS));

@@ -19,7 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
-import org.labkey.api.collections.IntHashMap;
+import org.labkey.api.collections.LongHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SqlSelector;
@@ -42,9 +42,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * User: kevink
- * Date: Apr 15, 2011
- *
  * Static helper methods for reading and saving AttributeSet to/from the database.
  */
 public class AttributeSetHelper
@@ -155,8 +152,8 @@ public class AttributeSetHelper
                 {
                     AttributeCache.Entry<?, ?> a = AttributeCache.KEYWORDS.byAttribute(c, entry.getKey());
                     assert a != null : "parepareForSave should have created an entry";
-                    int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
-                    int originalId = a.getRowId();
+                    long preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
+                    long originalId = a.getRowId();
                     paramsList.add(Arrays.asList(obj.getRowId(), preferredId, originalId, entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);
@@ -168,7 +165,7 @@ public class AttributeSetHelper
                 // Issue 41225: flow: import failure for duplicate aliased statistics
                 // Track the list of statistics and values for each preferredId key.
                 // If there is a duplicate statistic (e.g., two stats that are aliased) verify they have the same value.
-                Map<Integer, List<Map.Entry<StatisticSpec, Double>>> valuesForPreferredId = new IntHashMap<>();
+                Map<Long, List<Map.Entry<StatisticSpec, Double>>> valuesForPreferredId = new LongHashMap<>();
 
                 String sql = "INSERT INTO " + mgr.getTinfoStatistic() + " (ObjectId, StatisticId, OriginalStatisticId, Value) VALUES (?,?,?,?)";
                 List<List<?>> paramsList = new ArrayList<>();
@@ -176,8 +173,8 @@ public class AttributeSetHelper
                 {
                     AttributeCache.Entry<?, ?> a = AttributeCache.STATS.byAttribute(c, entry.getKey());
                     assert a != null : "parepareForSave should have created an entry";
-                    int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
-                    int originalId = a.getRowId();
+                    long preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
+                    long originalId = a.getRowId();
 
                     var duplicateValues = valuesForPreferredId.computeIfAbsent(preferredId, (k) -> new ArrayList<>());
                     if (duplicateValues.isEmpty())
@@ -215,8 +212,8 @@ public class AttributeSetHelper
                 {
                     AttributeCache.Entry<?, ?> a = AttributeCache.GRAPHS.byAttribute(c, entry.getKey());
                     assert a != null : "parepareForSave should have created an entry";
-                    int preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
-                    int originalId = a.getRowId();
+                    long preferredId = a.getAliasedId() == null ? a.getRowId() : a.getAliasedId();
+                    long originalId = a.getRowId();
                     paramsList.add(Arrays.asList(obj.getRowId(), preferredId, originalId, entry.getValue()));
                 }
                 Table.batchExecute(mgr.getSchema(), sql, paramsList);

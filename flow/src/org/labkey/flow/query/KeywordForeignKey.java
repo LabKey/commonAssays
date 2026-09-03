@@ -69,7 +69,7 @@ public class KeywordForeignKey extends AttributeForeignKey<String>
     }
 
     @Override
-    protected SQLFragment sqlValue(ColumnInfo objectIdColumn, String attrName, int attrId)
+    protected SQLFragment sqlValue(ColumnInfo objectIdColumn, String attrName, long attrId)
     {
         // SQL server 2000 does not allow a TEXT column (i.e. flow.keyword.value) to appear in this subquery.
         // For this reason, we cast it to VARCHAR(4000).
