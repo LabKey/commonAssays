@@ -275,23 +275,19 @@ ALTER TABLE flow.Graph ADD CONSTRAINT FK_Graph_GraphAttr FOREIGN KEY (GraphId) R
 UPDATE flow.GraphAttr SET Id = RowId;
 
 -- Change 'PK_*' unique constraints to actually be primary key constraint.
-SELECT core.fn_dropifexists('Keyword', 'flow', 'constraint', 'PK_Keyword');
 ALTER TABLE flow.Keyword ADD CONSTRAINT PK_Keyword PRIMARY KEY (ObjectId, KeywordId);
 CLUSTER PK_Keyword ON flow.keyword;
 
-SELECT core.fn_dropifexists('Statistic', 'flow', 'constraint', 'PK_Statistic');
 ALTER TABLE flow.Statistic ADD CONSTRAINT PK_Statistic PRIMARY KEY (ObjectId, StatisticId);
 CLUSTER PK_Statistic ON flow.statistic;
 
 ALTER TABLE flow.Graph DROP COLUMN rowid;
-SELECT core.fn_dropifexists('Graph', 'flow', 'constraint', 'PK_Graph');
-SELECT core.fn_dropifexists('Graph', 'flow', 'constraint', 'UQ_Graph');
 ALTER TABLE flow.Graph ADD CONSTRAINT PK_Graph PRIMARY KEY (ObjectId, GraphId);
 CLUSTER PK_Graph ON flow.graph;
 
 
 -- flow.Attribute table no longer used
-SELECT core.fn_dropifexists('Attribute', 'flow', 'TABLE', NULL);
+DROP TABLE IF EXISTS flow.Attribute;
 
 /* flow-11.20-11.30.sql */
 

@@ -469,34 +469,33 @@ CREATE FUNCTION prot.create_go_indexes() RETURNS void AS $$
     END;
     $$ LANGUAGE plpgsql;
 
--- Use fn_dropifexists to increase reliability
 CREATE FUNCTION prot.drop_go_indexes() RETURNS void AS $$
     BEGIN
-        PERFORM core.fn_dropifexists('goterm', 'prot', 'Constraint', 'pk_goterm');
-        PERFORM core.fn_dropifexists('goterm', 'prot', 'Index', 'IX_GoTerm_Name');
-        PERFORM core.fn_dropifexists('goterm', 'prot', 'Index', 'IX_GoTerm_TermType');
-        PERFORM core.fn_dropifexists('goterm', 'prot', 'Index', 'UQ_GoTerm_Acc');
+        ALTER TABLE prot.goterm DROP CONSTRAINT IF EXISTS pk_goterm;
+        DROP INDEX IF EXISTS prot.IX_GoTerm_Name;
+        DROP INDEX IF EXISTS prot.IX_GoTerm_TermType;
+        DROP INDEX IF EXISTS prot.UQ_GoTerm_Acc;
 
-        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Constraint', 'pk_goterm2term');
-        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'IX_GoTerm2Term_term1Id');
-        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'IX_GoTerm2Term_term2Id');
-        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'IX_GoTerm2Term_term1_2_Id');
-        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'IX_GoTerm2Term_relationshipTypeId');
-        PERFORM core.fn_dropifexists('goterm2term', 'prot', 'Index', 'UQ_GoTerm2Term_1_2_R');
+        ALTER TABLE prot.goterm2term DROP CONSTRAINT IF EXISTS pk_goterm2term;
+        DROP INDEX IF EXISTS prot.IX_GoTerm2Term_term1Id;
+        DROP INDEX IF EXISTS prot.IX_GoTerm2Term_term2Id;
+        DROP INDEX IF EXISTS prot.IX_GoTerm2Term_term1_2_Id;
+        DROP INDEX IF EXISTS prot.IX_GoTerm2Term_relationshipTypeId;
+        DROP INDEX IF EXISTS prot.UQ_GoTerm2Term_1_2_R;
 
-        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Constraint', 'pk_gographpath');
-        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Index', 'IX_GoGraphPath_term1Id');
-        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Index', 'IX_GoGraphPath_term2Id');
-        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Index', 'IX_GoGraphPath_term1_2_Id');
-        PERFORM core.fn_dropifexists('gographpath', 'prot', 'Index', 'IX_GoGraphPath_t1_distance');
+        ALTER TABLE prot.gographpath DROP CONSTRAINT IF EXISTS pk_gographpath;
+        DROP INDEX IF EXISTS prot.IX_GoGraphPath_term1Id;
+        DROP INDEX IF EXISTS prot.IX_GoGraphPath_term2Id;
+        DROP INDEX IF EXISTS prot.IX_GoGraphPath_term1_2_Id;
+        DROP INDEX IF EXISTS prot.IX_GoGraphPath_t1_distance;
 
-        PERFORM core.fn_dropifexists('gotermdefinition', 'prot', 'Index', 'IX_GoTermDefinition_dbXrefId');
-        PERFORM core.fn_dropifexists('gotermdefinition', 'prot', 'Index', 'UQ_GoTermDefinition_termId');
+        DROP INDEX IF EXISTS prot.IX_GoTermDefinition_dbXrefId;
+        DROP INDEX IF EXISTS prot.UQ_GoTermDefinition_termId;
 
-        PERFORM core.fn_dropifexists('gotermsynonym', 'prot', 'Index', 'IX_GoTermSynonym_SynonymTypeId');
-        PERFORM core.fn_dropifexists('gotermsynonym', 'prot', 'Index', 'IX_GoTermSynonym_TermId');
-        PERFORM core.fn_dropifexists('gotermsynonym', 'prot', 'Index', 'IX_GoTermSynonym_termSynonym');
-        PERFORM core.fn_dropifexists('gotermsynonym', 'prot', 'Index', 'UQ_GoTermSynonym_termId_termSynonym');
+        DROP INDEX IF EXISTS prot.IX_GoTermSynonym_SynonymTypeId;
+        DROP INDEX IF EXISTS prot.IX_GoTermSynonym_TermId;
+        DROP INDEX IF EXISTS prot.IX_GoTermSynonym_termSynonym;
+        DROP INDEX IF EXISTS prot.UQ_GoTermSynonym_termId_termSynonym;
     END;
     $$ LANGUAGE plpgsql;
 
