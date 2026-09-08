@@ -16,8 +16,8 @@
 package org.labkey.flow.controllers.attribute;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.action.ConfirmAction;
 import org.labkey.api.action.FormViewAction;
@@ -255,15 +255,23 @@ public class AttributeController extends BaseFlowController
             String name = form.getName();
             if (name == null || name.isBlank())
             {
-                FlowManager.get().deleteAttribute(getContainer(),
-                        _entry.getType(), _entry.getRowId(), true);
+                FlowManager.get().deleteAttribute(
+                    getContainer(),
+                    _entry.getType(),
+                    _entry.getRowId(),
+                    true
+                );
             }
             else
             {
-                FlowManager.get().updateAttribute(getContainer(),
-                        _entry.getType(), _entry.getRowId(), form.getName(),
-                        _entry.getAliasedId() == null ? _entry.getRowId() : _entry.getAliasedId(),
-                        true);
+                FlowManager.get().updateAttribute(
+                    getContainer(),
+                    _entry.getType(),
+                    _entry.getRowId(),
+                    form.getName(),
+                    _entry.getAliasedId() == null ? _entry.getRowId() : _entry.getAliasedId(),
+                    true
+                );
             }
 
             return true;
