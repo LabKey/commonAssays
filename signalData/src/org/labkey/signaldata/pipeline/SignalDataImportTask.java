@@ -215,7 +215,8 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
                 URI uri = FileContentService.get().getWebDavUrl(destFile, container, FileContentService.PathType.full);
                 if (uri != null)
                 {
-                    WebdavResource resource = WebdavService.get().lookup(uri.getPath());
+                    // use lookupHref() as the WebDAV URL carries the context path
+                    WebdavResource resource = WebdavService.get().lookupHref(uri.toString());
                     if (resource != null)
                     {
                         ExpData data = FileContentService.get().getDataObject(resource, container);
@@ -239,7 +240,7 @@ public class SignalDataImportTask extends PipelineJob.Task<SignalDataImportTask.
                         row.replace(INPUT_DATA_FILE, dataFileUrl.replace("file:", ""));
                     }
                     else
-                        log.warn("Unable to locate the webdav resource at {}", uri.getPath());
+                        log.warn("Unable to locate the webdav resource at {}", uri);
                 }
                 else
                     log.warn("Unable to resolve a webdav URL for {}", destFile.getName());
