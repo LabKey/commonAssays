@@ -90,7 +90,7 @@ public class BackgroundForeignKey extends AttributeForeignKey<StatisticSpec>
     }
 
     @Override
-    protected SQLFragment sqlValue(ColumnInfo objectIdColumn, StatisticSpec attrName, int attrId)
+    protected SQLFragment sqlValue(ColumnInfo objectIdColumn, StatisticSpec attrName, long attrId)
     {
         ICSMetadata ics = _schema.getProtocol().getICSMetadata();
         if (ics == null)

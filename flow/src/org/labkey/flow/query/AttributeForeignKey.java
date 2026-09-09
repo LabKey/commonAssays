@@ -100,7 +100,7 @@ abstract public class AttributeForeignKey<T extends Comparable<T>> extends Abstr
         AttributeCache cache = AttributeCache.forType(type());
         AttributeCache.Entry entry = cache.byAttribute(_container, attr);
         AttributeCache.Entry preferred = entry == null ? null : entry.getAliasedEntry();
-        int rowId = entry == null ? 0 : entry.getRowId();
+        long rowId = entry == null ? 0 : entry.getRowId();
 
         SQLFragment sql = sqlValue(parent, attr, preferred != null ? preferred.getRowId() : rowId);
         ExprColumn ret = new ExprColumn(parent.getParentTable(), new FieldKey(parent.getFieldKey(), displayField), sql, JdbcType.NULL, parent);
@@ -111,7 +111,7 @@ abstract public class AttributeForeignKey<T extends Comparable<T>> extends Abstr
 
     abstract protected AttributeType type();
     abstract protected Collection<? extends AttributeCache.Entry<T, ? extends AttributeCache.Entry>> getAttributes();
-    abstract protected SQLFragment sqlValue(ColumnInfo objectIdColumn, T attrName, int attrId);
+    abstract protected SQLFragment sqlValue(ColumnInfo objectIdColumn, T attrName, long attrId);
     abstract protected void initColumn(T attrName, String preferredName, BaseColumnInfo column);
     abstract protected T attributeFromString(String field);
 }
