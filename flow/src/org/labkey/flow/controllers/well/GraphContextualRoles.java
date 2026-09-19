@@ -16,7 +16,7 @@
 package org.labkey.flow.controllers.well;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.Container;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.query.FieldKey;
@@ -34,9 +34,6 @@ import org.labkey.flow.data.FlowWell;
 import java.util.Set;
 
 /**
- * User: kevink
- * Date: 7/5/14
- *
  * Grants users read permission to see flow graph images in a flow dataset that
  * has been linked to study even if they don't have read permission to original
  * flow assay container.
@@ -50,9 +47,9 @@ public class GraphContextualRoles implements HasContextualRoles
      * <b>at least one of</b> the study datasets that the run results have
      * been linked to.
      *
-     * @return a singleton ReaderRole set or null
+     * @return a singleton ReaderRole set, or an empty set if no contextual role applies
      */
-    @Nullable
+    @NotNull
     @Override
     public Set<Role> getContextualRoles(ViewContext context)
     {
@@ -60,28 +57,28 @@ public class GraphContextualRoles implements HasContextualRoles
         Container container = context.getContainer();
         User user = context.getUser();
         if (container.hasPermission(user, ReadPermission.class))
-            return null;
+            return Set.of();
 
         String objectIdStr = context.getRequest().getParameter(FlowParam.objectId.toString());
         if (objectIdStr != null)
         {
             int objectId = NumberUtils.toInt(objectIdStr);
             if (objectId == 0)
-                return null;
+                return Set.of();
 
             FlowDataObject obj = FlowDataObject.fromAttrObjectId(objectId);
             if (!(obj instanceof FlowWell))
-                return null;
+                return Set.of();
 
             FlowRun run = obj.getRun();
             if (run == null)
-                return null;
+                return Set.of();
 
             ExpRun expRun = run.getExperimentRun();
             FieldKey runIdFieldKey = FieldKey.fromParts("run");
             return RunDatasetContextualRoles.getContextualRolesForRun(context.getContainer(), context.getUser(), expRun, runIdFieldKey);
         }
 
-        return null;
+        return Set.of();
     }
 }
