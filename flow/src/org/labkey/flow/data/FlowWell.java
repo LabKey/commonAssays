@@ -121,8 +121,8 @@ public class FlowWell extends FlowDataObject
             {
                 ExpRun expRun = run.getExperimentRun();
                 FieldKey runIdFieldKey = FieldKey.fromParts("run");
-                Set<Role> role = RunDatasetContextualRoles.getContextualRolesForRun(getContainer(), user, expRun, runIdFieldKey);
-                if (getContainer().hasPermission(user, ReadPermission.class, role))
+                Set<Role> contextualRoles = RunDatasetContextualRoles.getContextualRolesForRun(getContainer(), user, expRun, runIdFieldKey);
+                if (getContainer().hasPermission(user, ReadPermission.class, contextualRoles))
                     throw new RedirectException(actionURL.clone().setContainer(getContainer()));
             }
 
