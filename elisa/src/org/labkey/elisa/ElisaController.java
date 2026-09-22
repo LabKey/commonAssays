@@ -111,7 +111,7 @@ public class ElisaController extends SpringActionController
         public void validateForm(GetCurveFitXYPairsForm form, Errors errors)
         {
             // GitHub Kanban #1236: getExpRun() resolves by global rowId; ensure the run belongs to the current container
-            _run = ExperimentService.get().getExpRun(form.getRunId(), getContainer());
+            _run = ExperimentService.get().getExpRun(getContainer(), form.getRunId());
             if (_run == null)
                 throw new NotFoundException("Run " + form.getRunId() + " does not exist.");
             if (form.getNumberOfPoints() < 2)
