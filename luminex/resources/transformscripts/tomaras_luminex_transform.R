@@ -17,15 +17,16 @@
 #  - 2.0.20140718 : Changes for LabKey 14.3: FI-Bkgd-Neg instead of FI-Bkgd-Blank
 #  - 3.0.20160729 : Validate that analyte bead numbers are non-null
 #  - 3.1.20180903 : Use transform script helper functions from Rlabkey package
+#  - 3.2.20260919 : GH Issue 1489: Use apikey auth (labkey.setDefaults) instead of the deprecated LabKeyTransformSessionId cookie
 #
 # Author: Cory Nathe, LabKey
-labTransformVersion = "3.1.20180903";
+labTransformVersion = "3.2.20260919";
 
 # print the starting time for the transform script
 writeLines(paste("Processing start time:",Sys.time(),"\n",sep=" "));
 
-${rLabkeySessionId}
 suppressMessages(library(Rlabkey));
+labkey.setDefaults(apiKey = "${apikey}");
 
 ########################################## FUNCTIONS ##########################################
 
