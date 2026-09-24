@@ -554,8 +554,6 @@ ms2/resources/queries/protein/GOMolecularFunction.query.xml -text
 ms2/resources/queries/protein/GOMolecularFunction.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-create.sql -text
 ms2/resources/schemas/dbscripts/postgresql/ms2-drop.sql -text
-ms2/resources/schemas/dbscripts/sqlserver/ms2-create.sql -text
-ms2/resources/schemas/dbscripts/sqlserver/ms2-drop.sql -text
 ms2/resources/schemas/ms2.xml -text
 ms2/resources/views/runsOverview.html -text
 ms2/resources/views/runsOverview.view.xml -text
