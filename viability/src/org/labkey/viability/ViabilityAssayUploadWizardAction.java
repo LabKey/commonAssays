@@ -369,7 +369,7 @@ public class ViabilityAssayUploadWizardAction extends UploadWizardAction<Viabili
                 ExpExperiment experiment = null;
                 if (form.getReRunId() != null)
                 {
-                    ExpRun reRun = ExperimentService.get().getExpRun(form.getReRunId());
+                    ExpRun reRun = ExperimentService.get().getExpRun(getContainer(), form.getReRunId());
                     if (reRun != null)
                     {
                         experiment = findExperiment(reRun);

@@ -123,8 +123,8 @@ public class ElispotController extends SpringActionController
         @Override
         public ModelAndView getView(DetailsForm form, BindException errors)
         {
-            _run = ExperimentService.get().getExpRun(form.getRowId());
-            if (_run == null || !_run.getContainer().equals(getContainer()))
+            _run = ExperimentService.get().getExpRun(getContainer(), form.getRowId());
+            if (_run == null)
             {
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
             }
@@ -291,7 +291,7 @@ public class ElispotController extends SpringActionController
         public ActionURL getRedirectURL(DetailsForm form)
         {
             // GitHub Kanban #1236: getExpRun() resolves by rowId; ensure the run belongs to the current container
-            ExpRun run = ExperimentService.get().getExpRun(form.getRowId(), getContainer());
+            ExpRun run = ExperimentService.get().getExpRun(getContainer(), form.getRowId());
             if (run == null)
             {
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
@@ -313,8 +313,8 @@ public class ElispotController extends SpringActionController
         {
             ApiSimpleResponse response = new ApiSimpleResponse();
 
-            ExpRun run = ExperimentService.get().getExpRun(form.getRowId());
-            if (run == null || !run.getContainer().equals(getContainer()))
+            ExpRun run = ExperimentService.get().getExpRun(getContainer(), form.getRowId());
+            if (run == null)
             {
                 throw new NotFoundException("Run " + form.getRowId() + " does not exist.");
             }
@@ -558,7 +558,7 @@ public class ElispotController extends SpringActionController
                 for (String selection : selections)
                 {
                     int rowId = NumberUtils.toInt(selection, -1);
-                    ExpRun run = rowId != -1 ? ExperimentService.get().getExpRun(rowId, getContainer()) : null;
+                    ExpRun run = rowId != -1 ? ExperimentService.get().getExpRun(getContainer(), rowId) : null;
                     if (run == null)
                         throw new NotFoundException("Run " + selection + " does not exist.");
                 }
@@ -614,8 +614,8 @@ public class ElispotController extends SpringActionController
             // Control: the same run resolves through the container-scoped lookup from its own container but not from
             // folder A, demonstrating the mechanism the fix relies on (the run exists identically in both calls).
             ExperimentService exp = ExperimentService.get();
-            assertNotNull("Run should resolve within its own container", exp.getExpRun(runInB.getRowId(), _folderB));
-            assertNull("Run must not resolve from a foreign container", exp.getExpRun(runInB.getRowId(), _folderA));
+            assertNotNull("Run should resolve within its own container", exp.getExpRun(_folderB, runInB.getRowId()));
+            assertNull("Run must not resolve from a foreign container", exp.getExpRun(_folderA, runInB.getRowId()));
         }
 
         private ExpRun createRun(Container c) throws Exception

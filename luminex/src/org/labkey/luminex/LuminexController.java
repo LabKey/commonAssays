@@ -633,15 +633,10 @@ public class LuminexController extends SpringActionController
             }
 
             // verify that the runId is valid and matches an existing run
-            if (form.getRunId() == null || ExperimentService.get().getExpRun(form.getRunId()) == null)
+            ExpRun run = form.getRunId() != null ? ExperimentService.get().getExpRun(getContainer(), form.getRunId()) : null;
+            if (run == null)
             {
                 errors.reject(ERROR_MSG, "No run found for id " + form.getRunId());
-            }
-
-            ExpRun run = ExperimentService.get().getExpRun(form.getRunId());
-            if (!getContainer().equals(run.getContainer()))
-            {
-                errors.reject(ERROR_MSG, "The run for id " + form.getRunId() + " does not exist in the current container");
             }
 
             form.validate(errors);

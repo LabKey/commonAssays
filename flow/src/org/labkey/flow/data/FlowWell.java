@@ -65,26 +65,6 @@ public class FlowWell extends FlowDataObject
         return null;
     }
 
-    static public List<? extends FlowWell> fromWellIds(long... ids)
-    {
-        List<FlowWell> wells = new ArrayList<>(ids.length);
-        List<FlowDataObject> flowobjs = fromRowIds(ids);
-        for (FlowDataObject flowobj : flowobjs)
-            if (flowobj instanceof FlowWell)
-                wells.add((FlowWell)flowobj);
-        return wells;
-    }
-
-    static public List<FlowWell> fromWellIds(Collection<Long> ids)
-    {
-        List<FlowWell> wells = new ArrayList<>(ids.size());
-        List<FlowDataObject> flowobjs = fromRowIds(ids);
-        for (FlowDataObject flowobj : flowobjs)
-            if (flowobj instanceof FlowWell)
-                wells.add((FlowWell)flowobj);
-        return wells;
-    }
-
     static public FlowWell fromURL(ActionURL url, Container actionContainer, User user)
     {
         return fromURL(url, null, actionContainer, user);

@@ -102,7 +102,12 @@ public class BackgroundSubtractionJob extends PipelineJob
 
             if (rowId != -1)
             {
-                ExpRun run = ExperimentService.get().getExpRun(rowId);
+                ExpRun run = ExperimentService.get().getExpRun(getContainer(), rowId);
+                if (run == null)
+                {
+                    info("Skipping run " + runId + ": not found in this folder.");
+                    continue;
+                }
 
                 try (DbScope.Transaction transaction = ExperimentService.get().getSchema().getScope().ensureTransaction())
                 {
