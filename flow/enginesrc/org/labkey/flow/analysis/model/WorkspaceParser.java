@@ -23,6 +23,8 @@ import org.apache.xerces.xni.NamespaceContext;
 import org.apache.xerces.xni.QName;
 import org.apache.xerces.xni.XMLLocator;
 import org.apache.xerces.xni.XNIException;
+import org.junit.Assert;
+import org.junit.Test;
 import org.labkey.api.util.XmlBeansUtil;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -41,9 +43,13 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.SAXParser;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -147,7 +153,6 @@ public class WorkspaceParser
     }
 
 
-    /** For debugging. */
     static public Document parseXml(InputStream stream) throws Exception
     {
         DOMParser p = FJDOMParser.create();
@@ -464,6 +469,10 @@ public class WorkspaceParser
                 setFeature(INCLUDE_IGNORABLE_WHITESPACE, false);
                 setFeature(NAMESPACES, true);
                 setFeature(Constants.XERCES_FEATURE_PREFIX + Constants.CONTINUE_AFTER_FATAL_ERROR_FEATURE, true);
+
+                // GH Issue 1523: uploaded workspaces are untrusted.
+                XmlBeansUtil.hardenXercesParser(this);
+
                 setErrorHandler(new FJErrorHandler());
             }
             catch (SAXNotSupportedException | SAXNotRecognizedException x)
@@ -520,4 +529,70 @@ public class WorkspaceParser
         }
     }
 
+    /** GH Issue 1523: uploaded workspaces must not resolve anything beyond the uploaded bytes. */
+    public static class XxeTestCase extends Assert
+    {
+        private static Document parse(String xml) throws Exception
+        {
+            return parseXml(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
+        }
+
+        @Test
+        public void testExternalGeneralEntityNotResolved() throws Exception
+        {
+            Path secret = Files.createTempFile("wsp-xxe", ".txt");
+            try
+            {
+                Files.writeString(secret, "TOP-SECRET-CONTENTS");
+                Document doc = parse("<!DOCTYPE Workspace [<!ENTITY xx SYSTEM \"" + secret.toUri() + "\">]><Workspace>&xx;</Workspace>");
+                assertFalse("External entity resolved the local file", doc.getDocumentElement().getTextContent().contains("TOP-SECRET-CONTENTS"));
+            }
+            finally
+            {
+                Files.deleteIfExists(secret);
+            }
+        }
+
+        @Test
+        public void testExternalDtdNotFetched() throws Exception
+        {
+            // A fetch attempt would fail on this nonexistent path, so parsing cleanly means nothing was fetched
+            Path missing = Files.createTempDirectory("wsp-xxe").resolve("nope.dtd");
+            Document doc = parse("<!DOCTYPE Workspace SYSTEM \"" + missing.toUri() + "\"><Workspace>ok</Workspace>");
+            assertEquals("ok", doc.getDocumentElement().getTextContent());
+        }
+
+        @Test
+        public void testEntityExpansionIsBounded() throws Exception
+        {
+            // Deliberately just over the 100,000 expansion limit, not a real billion-laughs: an unguarded parser must
+            // finish this one and fail the assert below.
+            StringBuilder sb = new StringBuilder("<!DOCTYPE Workspace [<!ENTITY a0 \"A\">");
+            for (int i = 1; i <= 6; i++)
+            {
+                sb.append("<!ENTITY a").append(i).append(" \"");
+                sb.append(("&a" + (i - 1) + ";").repeat(10));
+                sb.append("\">");
+            }
+            sb.append("]><Workspace>&a6;</Workspace>");
+
+            try
+            {
+                parse(sb.toString());
+                fail("Expected the entity expansion limit to stop parsing");
+            }
+            catch (SAXParseException e)
+            {
+                assertTrue("Unexpected failure: " + e.getMessage(), e.getMessage().contains("entity expansions"));
+            }
+        }
+
+        @Test
+        public void testFlowJo7DoctypeStillParses() throws Exception
+        {
+            // FlowJo 7.x emits a bare DOCTYPE, so the declaration itself must stay legal
+            Document doc = parse("<!DOCTYPE Workspace><Workspace version=\"1.5\"/>");
+            assertEquals("Workspace", doc.getDocumentElement().getTagName());
+        }
+    }
 }
