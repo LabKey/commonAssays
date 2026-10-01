@@ -181,8 +181,7 @@ public abstract class FilterFlowReport extends FlowReport
                     sb.append("\"filter\"=\"").append(name).append("\"");
                     sb.append(", \"op\"=\"").append(filter.getOp()).append("\"");
                     if (filter.getValue() != null)
-                        sb.append(", \"value\"=\"").append(filter.getValue()).append("\"");
-
+                        sb.append(", \"value\"=").append(RReport.toR(filter.getValue())); // toR() properly quotes the value
                     sb.append(")");
                     comma = ", ";
                 }

@@ -48,6 +48,7 @@ import org.labkey.flow.analysis.model.CompensationMatrix;
 import org.labkey.flow.analysis.model.FCSHeader;
 import org.labkey.flow.analysis.model.FlowJoWorkspace;
 import org.labkey.flow.analysis.model.PopulationName;
+import org.labkey.flow.analysis.model.WorkspaceParser;
 import org.labkey.flow.analysis.util.LogicleRangeFunction;
 import org.labkey.flow.analysis.web.StatisticSpec;
 import org.labkey.flow.analysis.web.SubsetParser;
@@ -324,7 +325,8 @@ public class FlowModule extends SpringModule
             SubsetParser.TestLexer.class,
             SubsetTests.class,
             LogicleRangeFunction.TestCase.class,
-            FlowPropertySet.TestCase.class
+            FlowPropertySet.TestCase.class,
+            WorkspaceParser.XxeTestCase.class
         );
     }
 
