@@ -441,8 +441,6 @@
         <columnTitle>NegativeHits</columnTitle>
         <formatString>#,##0</formatString>
       </column>
-      <column columnName="MascotFile"/>
-      <column columnName="DistillerRawFile"/>
     </columns>
     <tableTitle>MS2Runs</tableTitle>
     <versionColumnName>_ts</versionColumnName>
@@ -557,8 +555,6 @@
       <column columnName="PeptideCount"/>
       <column columnName="SpectrumCount"/>
       <column columnName="NegativeHitCount"/>
-      <column columnName="MascotFile"/>
-      <column columnName="DistillerRawFile"/>
     </columns>
     <tableTitle>MS2Runs</tableTitle>
     <pkColumnName>Run</pkColumnName>

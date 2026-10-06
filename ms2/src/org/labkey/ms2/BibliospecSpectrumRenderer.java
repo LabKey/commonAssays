@@ -166,7 +166,7 @@ public class BibliospecSpectrumRenderer implements SpectrumRenderer
                                 File spectraSource;
                                 if (fraction.getMzXmlURL() == null)
                                 {
-                                    // Likely a direct Mascot .dat import, with no .mzXML available. The .dat
+                                    // No .mzXML available, so point at the run instead
                                     spectraSource = new File(run.getPath());
                                 }
                                 else

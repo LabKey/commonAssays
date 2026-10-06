@@ -21,7 +21,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fhcrc.cpas.exp.xml.ExperimentArchiveDocument;
-import org.jetbrains.annotations.NotNull;
 import org.labkey.api.cache.Cache;
 import org.labkey.api.cache.CacheLoader;
 import org.labkey.api.cache.CacheManager;
@@ -67,7 +66,6 @@ import org.labkey.api.util.Formats;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
-import org.labkey.api.util.PepXMLFileType;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.view.ViewBackgroundInfo;
@@ -76,13 +74,11 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
-import org.labkey.ms2.pipeline.mascot.MascotImportPipelineJob;
 import org.labkey.api.protein.CoverageProtein;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.ITraqProteinQuantitation;
 import org.labkey.ms2.reader.LibraQuantResult;
-import org.labkey.ms2.reader.MascotDatLoader;
 import org.labkey.ms2.reader.PeptideProphetSummary;
 import org.labkey.ms2.reader.RandomAccessMzxmlIterator;
 import org.labkey.ms2.reader.RandomAccessMzxmlIteratorFactory;
@@ -529,7 +525,7 @@ public class MS2Manager
         List<MS2Run> runs = new ArrayList<>();
 
         try (ResultSet rs = new SqlSelector(getSchema(),
-                    "SELECT Container, Run, Description, Path, runs.FileName, Type, SearchEngine, MassSpecType, SearchEnzyme, Status, StatusId, Deleted, HasPeptideProphet, ExperimentRunLSID, PeptideCount, SpectrumCount, NegativeHitCount, MascotFile, DistillerRawFile FROM " + getTableInfoRuns() + " runs WHERE " + whereClause,
+                    "SELECT Container, Run, Description, Path, runs.FileName, Type, SearchEngine, MassSpecType, SearchEnzyme, Status, StatusId, Deleted, HasPeptideProphet, ExperimentRunLSID, PeptideCount, SpectrumCount, NegativeHitCount FROM " + getTableInfoRuns() + " runs WHERE " + whereClause,
                     params).getResultSet())
         {
             while (rs.next())
@@ -556,24 +552,6 @@ public class MS2Manager
         }
 
         return runs.toArray(new MS2Run[0]);
-    }
-
-    public static MS2Importer.RunInfo addMascotRunToQueue(ViewBackgroundInfo info,
-                                                          FileLike file,
-                                                          String description, PipeRoot root) throws IOException
-    {
-        MS2Importer importer = createImporter(file, info, description, null, new XarContext(description, info.getContainer(), info.getUser()));
-        MS2Importer.RunInfo runInfo = importer.prepareRun(false);
-        MascotImportPipelineJob job = new MascotImportPipelineJob(info, file, description, runInfo, root);
-        try
-        {
-            PipelineService.get().queueJob(job);
-        }
-        catch (PipelineValidationException e)
-        {
-            throw new IOException(e);
-        }
-        return runInfo;
     }
 
     public static MS2Importer.RunInfo addRunToQueue(ViewBackgroundInfo info,
@@ -626,8 +604,6 @@ public class MS2Manager
         String fileName = file.toNioPathForRead().toFile().getPath();
         if (endsWithExtOrExtDotGZ(fileName,".xml") || fileName.endsWith(".pepXML"))
             return new PepXmlImporter(info.getUser(), c, description, fileName, log, context);
-        else if (fileName.toLowerCase().endsWith(".dat"))
-            return new MascotDatImporter(info.getUser(), c, description, fileName, log, context);
         else
             throw new IOException("Unable to import file type '" + file + "'.");
     }
@@ -839,19 +815,6 @@ public class MS2Manager
             }
             if (endsWithExtOrExtDotGZ(name2,rawSuffix) && !endsWithExtOrExtDotGZ(name1,rawSuffix))
             {
-                return runs[0];
-            }
-
-            // Check if we have both an dat file and pepXML file
-            PepXMLFileType ft = new PepXMLFileType();
-            if (name1.endsWith(".dat") && ft.isType(runs[1].getFileName()))
-            {
-                // Prefer the pepXML
-                return runs[1];
-            }
-            if (name2.endsWith(".dat") && ft.isType(runs[0].getFileName()))
-            {
-                // Prefer the pepXML
                 return runs[0];
             }
         }
@@ -1075,10 +1038,7 @@ public class MS2Manager
         MS2Fraction fraction = MS2Manager.getFraction(fractionId);
         if (null == fraction)
             throw new SpectrumException("Can't locate fraction.");
-        if (StringUtils.endsWithIgnoreCase(fraction.getFileName(), ".dat"))
-            return getSpectrumFromDat(fraction, scan);
-        else
-            return getSpectrumFromMzXML(fraction, scan);
+        return getSpectrumFromMzXML(fraction, scan);
     }
 
     public static Pair<float[], float[]> getSpectrumFromMzXML(MS2Fraction fraction, int scan) throws SpectrumException
@@ -1131,20 +1091,6 @@ public class MS2Manager
         catch (IOException e)
         {
             throw new SpectrumException("Error reading mzXML file " + f.getName(), e);
-        }
-    }
-
-    private static Pair<float[], float[]> getSpectrumFromDat(@NotNull MS2Fraction fraction, int scan) throws SpectrumException
-    {
-        final FileLike f = FileSystemLike.wrapFile(new File(getRun(fraction.getRun()).getPath())).resolveChild(fraction.getFileName());
-        NetworkDrive.ensureDrive(f);
-        try (MascotDatLoader loader = new MascotDatLoader(f, LOG))
-        {
-            return loader.loadSpectrum(scan);
-        }
-        catch (IOException | XMLStreamException e)
-        {
-            throw new SpectrumException("Can't read .dat file", e);
         }
     }
 
