@@ -2940,7 +2940,7 @@ public class MS2Controller extends SpringActionController
     {
         int days = 14;
 
-        String daysParam = (String)getViewContext().get("days");
+        String daysParam = getViewContext().getString("days");
 
         if (null != daysParam)
         {
