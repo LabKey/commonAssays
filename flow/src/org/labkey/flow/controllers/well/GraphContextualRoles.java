@@ -59,6 +59,10 @@ public class GraphContextualRoles implements HasContextualRoles
         if (container.hasPermission(user, ReadPermission.class))
             return Set.of();
 
+        // GH Issue 1455: ShowGraphAction serves the wellId well over the objectId well, so the role must not be earned by one and spent on the other
+        if (context.getRequest().getParameter(FlowParam.wellId.toString()) != null)
+            return Set.of();
+
         String objectIdStr = context.getRequest().getParameter(FlowParam.objectId.toString());
         if (objectIdStr != null)
         {
