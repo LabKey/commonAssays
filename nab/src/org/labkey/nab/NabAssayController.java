@@ -319,10 +319,11 @@ public class NabAssayController extends SpringActionController
         ASSAY_CACHE.put(getCacheKey(run, fit), new NAbRunWrapper(assay, new Date()));
     }
 
-    private void clearCachedRuns()
+    // Evict the run for every session, since QC changes affect what all viewers see
+    private void clearCachedRuns(long runId)
     {
-        String prefix = getCacheKeyPrefix();
-        ASSAY_CACHE.removeUsingFilter(key -> key.startsWith(prefix));
+        String runSegment = ":" + runId + ":";
+        ASSAY_CACHE.removeUsingFilter(key -> key.contains(runSegment));
     }
 
     private DilutionAssayRun _getNabAssayRun(ExpRun run, StatsService.CurveFitType fit, User elevatedUser) throws ExperimentException
@@ -1229,7 +1230,7 @@ public class NabAssayController extends SpringActionController
                             }
                             transaction.commit();
                             // clear the nab run cache
-                            clearCachedRuns();
+                            clearCachedRuns(run.getRowId());
                             NabProtocolSchema.clearProtocolFromCutoffCache(protocol.getRowId());
                             response.put("success", true);
                         }
