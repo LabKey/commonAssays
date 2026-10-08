@@ -348,11 +348,6 @@ function setQueryOptions()
             filterArray     : runsFilterArray
         };
 
-        if ("MASCOT" == Ext.getCmp('filter-engine').value)
-        {
-            _storeConfig.columns += ", MS2Details/MascotFile, MS2Details/DistillerRawFile";
-        }
-
         var _store = new LABKEY.ext.Store(_storeConfig);
         
         var runsGrid = new LABKEY.ext.EditorGridPanel({
@@ -426,12 +421,6 @@ function showResultFilters(formChoice)
         }}});
         colItems.push({boxLabel: 'Peptide', name: 'Peptide'});
         colItems.push({boxLabel: 'Protein', name: 'Protein'});
-        if ("MASCOT" == Ext.getCmp('filter-engine').value)
-        {
-            colItems.push({boxLabel: 'Query Number', name: 'QueryNumber'});
-            colItems.push({boxLabel: 'Hit Rank', name: 'HitRank'});
-            colItems.push({boxLabel: 'Decoy', name: 'Decoy'});
-        }
         formItems = [{
             xtype   : 'checkboxgroup',
             columns : 3,

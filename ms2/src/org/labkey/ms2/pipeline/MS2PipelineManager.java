@@ -23,7 +23,6 @@ import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.api.util.Path;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
 import org.labkey.vfs.FileLike;
 import org.labkey.vfs.FileSystemLike;
 
@@ -60,9 +59,6 @@ public class MS2PipelineManager
         @Override
         public boolean accept(File file)
         {
-            if (MascotSearchTask.isNativeOutputFile(FileSystemLike.wrapFile(file)))
-                return true;
-
             if (TPPTask.isPepXMLFile(file))
             {
                 FileLike parent = FileSystemLike.wrapFile(file.getParentFile());
@@ -152,16 +148,6 @@ public class MS2PipelineManager
     private static FileLike getSequenceDatabaseRoot(PipeRoot root)
     {
         return root.resolvePathToFileLike(DEFAULT_FASTA_DIR);
-    }
-
-    public static FileLike getLocalMascotFile(FileLike sequenceRoot, String db, String release)
-    {
-        return sequenceRoot.resolveFile(Path.parse("mascot/" + db + "/" + release));
-    }
-
-    public static FileLike getLocalMascotFileHash(FileLike sequenceRoot, String db, String release)
-    {
-        return sequenceRoot.resolveFile(Path.parse("mascot/" + db + "/" + release+".hash"));
     }
 
     public static boolean exists(File file, Set<File> knownFiles, Set<File> checkedDirectories)

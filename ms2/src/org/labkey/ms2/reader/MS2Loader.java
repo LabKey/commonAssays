@@ -77,8 +77,6 @@ public abstract class MS2Loader
         protected Float _importSpectraMinProbability = null;
         protected boolean _loadSpectra = false;
         protected MS2ModificationList _modifications = new MS2ModificationList();
-        protected String _mascotFile = null;
-        protected String _distillerRawFile = null;
 
         public String getMassSpecType()
         {
@@ -178,26 +176,6 @@ public abstract class MS2Loader
         public void  addModification(MS2Modification modification)
         {
             _modifications.add(modification);
-        }
-
-        public String getMascotFile()
-        {
-            return _mascotFile;
-        }
-
-        public void setMascotFile(String mascotFile)
-        {
-            _mascotFile = mascotFile;
-        }
-
-        public String getDistillerRawFile()
-        {
-            return _distillerRawFile;
-        }
-
-        public void setDistillerRawFile(String distillerRawFile)
-        {
-            _distillerRawFile = distillerRawFile;
         }
     }
 

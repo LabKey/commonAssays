@@ -29,7 +29,7 @@ import org.labkey.api.view.ViewContext;
 import java.io.File;
 
 /**
- * Common base class for pipeline providers that map to MS2 searches (XTandem, Mascot, etc)
+ * Common base class for pipeline providers that map to MS2 searches (XTandem, Comet, etc)
  */
 abstract public class AbstractMS2SearchPipelineProvider<FactoryType extends AbstractMS2SearchTaskFactory>
         extends AbstractMS2PipelineProvider<AbstractMS2SearchProtocolFactory>

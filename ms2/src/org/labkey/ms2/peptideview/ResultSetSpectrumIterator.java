@@ -39,7 +39,7 @@ public class ResultSetSpectrumIterator implements SpectrumIterator
 {
     protected ResultSet _rs;
 
-    /** Cache the last 100 spectra loaded, especially useful for Mascot where there many be multiple hits per spectra */
+    /** Cache the last 100 spectra loaded, especially useful when there are multiple hits per spectrum */
     private final Map<Pair<Integer, Integer>, Pair<float[], float[]>> _lruCache = new LinkedHashMap<>()
     {
         /**
