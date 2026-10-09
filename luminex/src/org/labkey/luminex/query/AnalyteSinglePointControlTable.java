@@ -28,7 +28,6 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableSelector;
-import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.query.ExprColumn;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.InvalidKeyException;
@@ -81,18 +80,13 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         SQLFragment avgFiSQL = new SQLFragment("(SELECT AVG(dr.FIBackground) FROM (");
         // TODO ContainerFilter -- Do we really want a non-permission checking container filter here?
         LuminexDataTable dataTable = schema.createDataTable(ContainerFilter.getUnsafeEverythingFilter(), false);
-        List<ColumnInfo> dataColumns = Arrays.asList(dataTable.getColumn("FlaggedAsExcluded"), dataTable.getColumn("FIBackground"), dataTable.getColumn("Description"), dataTable.getColumn("Data"), dataTable.getColumn("Analyte"));
+        List<ColumnInfo> dataColumns = Arrays.asList(dataTable.getColumn("FlaggedAsExcluded"), dataTable.getColumn("FIBackground"), dataTable.getColumn("SinglePointControl"), dataTable.getColumn("Analyte"));
         avgFiSQL.append(QueryService.get().getSelectBuilder(dataTable).columns(dataColumns).buildSqlFragment());
-        avgFiSQL.append(") dr, ");
-        avgFiSQL.append(ExperimentService.get().getTinfoData(), "d");
-        avgFiSQL.append(", ");
-        avgFiSQL.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "spc");
-        avgFiSQL.append(" WHERE dr.Description = spc.Name AND dr.Data = d.RowId AND d.RunId = spc.RunId ");
-        avgFiSQL.append(" AND dr.Analyte = ");
+        avgFiSQL.append(") dr WHERE dr.SinglePointControl = ");
         avgFiSQL.append(ExprColumn.STR_TABLE_ALIAS);
-        avgFiSQL.append(".AnalyteId AND spc.RowId = ");
+        avgFiSQL.append(".SinglePointControlId AND dr.Analyte = ");
         avgFiSQL.append(ExprColumn.STR_TABLE_ALIAS);
-        avgFiSQL.append(".SinglePointControlId AND dr.FlaggedAsExcluded = ?)");
+        avgFiSQL.append(".AnalyteId AND dr.FlaggedAsExcluded = ?)");
         avgFiSQL.add(false);
 
         ExprColumn avgFiColumn = new ExprColumn(this, "AverageFiBkgd", avgFiSQL, JdbcType.DOUBLE);
