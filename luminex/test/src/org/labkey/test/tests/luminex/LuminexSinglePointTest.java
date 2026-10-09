@@ -18,11 +18,17 @@ package org.labkey.test.tests.luminex;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.api.query.QueryKey;
+import org.labkey.remoteapi.CommandResponse;
 import org.labkey.remoteapi.Connection;
 import org.labkey.remoteapi.assay.GetProtocolCommand;
 import org.labkey.remoteapi.assay.Protocol;
 import org.labkey.remoteapi.assay.ProtocolResponse;
 import org.labkey.remoteapi.assay.SaveProtocolCommand;
+import org.labkey.remoteapi.query.Filter;
+import org.labkey.remoteapi.query.Row;
+import org.labkey.remoteapi.query.SelectRowsCommand;
+import org.labkey.remoteapi.query.SelectRowsResponse;
 import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.SortDirection;
@@ -32,11 +38,14 @@ import org.labkey.test.categories.Daily;
 import org.labkey.test.components.html.BootstrapMenu;
 import org.labkey.test.pages.ReactAssayDesignerPage;
 import org.labkey.test.pages.luminex.LeveyJenningsPlotWindow;
+import org.labkey.test.util.APIAssayHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.luminex.LuminexGuideSetHelper;
+import org.labkey.test.util.luminex.LuminexSaveExclusionCommand;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -92,7 +101,7 @@ public class LuminexSinglePointTest extends LuminexTest
     }
 
     @Test
-    public void testSinglePoint()
+    public void testSinglePoint() throws Exception
     {
         importRun(file1, 1);
         importRun(file2, 2);
@@ -146,6 +155,43 @@ public class LuminexSinglePointTest extends LuminexTest
         assertTextNotPresent(file4);
 
         verifyValueBasedGuideSet();
+
+        verifyWellExclusionRemovedFromAverage();
+    }
+
+    private void verifyWellExclusionRemovedFromAverage() throws Exception
+    {
+        String controlName = "IH5672";
+        String analyteName = "ENV1";
+        String excludedWell = "H11";
+
+        log("Exclude well " + excludedWell + " of single point control " + controlName + " for " + analyteName + " in " + file1);
+        Connection connection = createDefaultConnection();
+        SelectRowsCommand select = new SelectRowsCommand("assay.Luminex." + QueryKey.encodePart(TEST_ASSAY_LUM), "Data");
+        select.setColumns(List.of("Data", "Analyte", "Type", "SinglePointControl/Run/RowId"));
+        select.addFilter(new Filter("Data/Name", file1, Filter.Operator.EQUAL));
+        select.addFilter(new Filter("Description", controlName, Filter.Operator.EQUAL));
+        select.addFilter(new Filter("Analyte/Name", analyteName, Filter.Operator.EQUAL));
+        select.addFilter(new Filter("Well", excludedWell, Filter.Operator.EQUAL));
+        SelectRowsResponse selectResponse = select.execute(connection, getProjectName());
+        assertEquals("Expected one data row for the well to exclude", 1, selectResponse.getRowCount().intValue());
+        Row well = selectResponse.getRowset().iterator().next();
+
+        int assayId = new APIAssayHelper(this).getIdFromAssayName(TEST_ASSAY_LUM, getProjectName());
+        CommandResponse exclusionResponse = new LuminexSaveExclusionCommand(assayId, ((Number) well.getValue("SinglePointControl/Run/RowId")).longValue())
+                .addWellExclusion(((Number) well.getValue("Data")).longValue(), controlName, (String) well.getValue("Type"),
+                        excludedWell, ((Number) well.getValue("Analyte")).longValue(), "Exclude one single point control well")
+                .execute(connection, getProjectName());
+        beginAt((String) exclusionResponse.getParsedData().get("returnUrl"));
+        waitForPipelineJobsToComplete(6, false);
+
+        goToTestAssayHome();
+        BootstrapMenu.find(getDriver(), "view qc report").clickSubMenu(true, "view single point control qc report");
+        DataRegionTable tbl = new DataRegionTable("AnalyteSinglePointControl", getDriver());
+        tbl.setFilter("Analyte", "Equals", analyteName);
+        tbl.setSort("SinglePointControl/Run/Name", SortDirection.ASC);
+        assertEquals("Excluded well should be dropped from the average", "25.0", tbl.getDataAsText(0, "Average Fi Bkgd"));
+        assertEquals("Run without exclusions should be unchanged", "30.0", tbl.getDataAsText(1, "Average Fi Bkgd"));
     }
 
     private void verifyValueBasedGuideSet()
