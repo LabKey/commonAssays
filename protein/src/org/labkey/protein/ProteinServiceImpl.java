@@ -240,7 +240,7 @@ public class ProteinServiceImpl implements ProteinService
     }
 
     private static final Cache<String, List<ProteinFeature>> FEATURE_CACHE =
-            CacheManager.getBlockingCache(100, CacheManager.DAY, "Uniprot protein features", new FeatureLoader());
+            CacheManager.getBlockingCache(String.class, 100, CacheManager.DAY, "Uniprot protein features", new FeatureLoader());
 
     @Override
     public List<ProteinFeature> getProteinFeatures(String accession)

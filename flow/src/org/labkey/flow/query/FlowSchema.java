@@ -18,8 +18,8 @@ package org.labkey.flow.query;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AbstractAssayProvider;
 import org.labkey.api.assay.AssayProtocolSchema;
 import org.labkey.api.assay.AssayProvider;
@@ -1964,7 +1964,7 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
     }
 
 
-    private static final Cache<String, MaterializedQueryHelper> fastflowCache = CacheManager.getStringKeyCache(100_000, CacheManager.HOUR, "Fast flow objects");
+    private static final Cache<String, MaterializedQueryHelper> fastflowCache = CacheManager.getCache(String.class, 100_000, CacheManager.HOUR, "Fast flow objects");
 
     private static final ContainerManager.ContainerListener containerListener = new ContainerManager.ContainerListener()
     {

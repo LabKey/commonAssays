@@ -39,7 +39,7 @@ public class FCSCache
 
         private FCSHeaderCache()
         {
-            super(CacheManager.getCache(CACHE_SIZE, CacheManager.DAY, "FCS header cache"), new CacheLoader<>()
+            super(CacheManager.getCache(URI.class, CACHE_SIZE, CacheManager.DAY, "FCS header cache"), new CacheLoader<>()
             {
                 @Override
                 public FCSHeader load(@NotNull URI uri, Object argument)
@@ -80,7 +80,7 @@ public class FCSCache
 
         private FCSCacheMap()
         {
-            super(CacheManager.getCache(CACHE_SIZE, CacheManager.DAY, "FCS cache"), new CacheLoader<>()
+            super(CacheManager.getCache(URI.class, CACHE_SIZE, CacheManager.DAY, "FCS cache"), new CacheLoader<>()
             {
                 @Override
                 public FCS load(@NotNull URI uri, Object argument)
