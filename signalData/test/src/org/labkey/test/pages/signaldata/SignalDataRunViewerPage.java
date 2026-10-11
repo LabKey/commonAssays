@@ -82,9 +82,10 @@ public class SignalDataRunViewerPage extends LabKeyPage
         return Ext4Helper.elementIfEnabled(button) != null;
     }
 
-    public WebElement showPlot()
+    // The plot re-renders after first appearing, so callers should locate plot elements fresh
+    public void showPlot()
     {
-        return doAndWaitForElementToRefresh(() -> {
+        doAndWaitForElementToRefresh(() -> {
             clickButton("Overlay Selected", 0);
             waitForElementToDisappear(Locator.id("sampleinputs").notHidden());
         }, Locator.tag("svg"), shortWait());

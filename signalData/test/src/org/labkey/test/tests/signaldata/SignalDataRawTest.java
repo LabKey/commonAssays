@@ -192,11 +192,11 @@ public class SignalDataRawTest extends BaseWebDriverTest
         assertFalse("'Overlay Selected' should be disabled after deselecting all inputs", runsPage.isOverlaySelectedEnabled());
     }
 
-    // The spectrum plot re-renders after first appearing, so locate from the page rather than holding the svg
     private void assertPlotElementCount(String message, Locator loc, int expected)
     {
-        waitFor(() -> loc.findElements(getDriver()).size() == expected, WAIT_FOR_JAVASCRIPT);
-        assertEquals(message, expected, loc.findElements(getDriver()).size());
+        int[] lastCount = {-1};
+        waitFor(() -> (lastCount[0] = loc.findElements(getDriver()).size()) == expected, WAIT_FOR_JAVASCRIPT);
+        assertEquals(message, expected, lastCount[0]);
     }
 
     private String resultNameFromFilename(String filename)
