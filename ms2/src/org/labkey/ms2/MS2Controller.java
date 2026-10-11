@@ -73,7 +73,6 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipelineService;
-import org.labkey.api.pipeline.PipelineUrls;
 import org.labkey.api.pipeline.browse.PipelinePathForm;
 import org.labkey.api.portal.ProjectUrls;
 import org.labkey.api.protein.CoverageProtein.ModificationHandler;
@@ -165,8 +164,6 @@ import org.labkey.ms2.peptideview.QueryPeptideMS2RunView;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.ProteinProphetPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
-import org.labkey.ms2.pipeline.mascot.MascotClientImpl;
-import org.labkey.ms2.pipeline.mascot.MascotConfig;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinViewBean;
 import org.labkey.ms2.protein.tools.GoHelpers;
@@ -231,7 +228,6 @@ public class MS2Controller extends SpringActionController
     public static void registerAdminConsoleLinks()
     {
         AdminConsole.addLink(SettingsLinkType.Premium, "ms2", getShowMS2AdminURL(null), AdminOperationsPermission.class);
-        AdminConsole.addLink(SettingsLinkType.Premium, "mascot server", new ActionURL(MS2Controller.MascotConfigAction.class, ContainerManager.getRoot()), AdminOperationsPermission.class);
     }
 
     private void addRootNavTrail(NavTree root, String title, PageConfig page, String helpTopic)
@@ -3186,131 +3182,6 @@ public class MS2Controller extends SpringActionController
         }
     }
 
-    public static class MascotSettingsForm
-    {
-        private boolean _reset;
-
-        private String _mascotServer;
-        private String _mascotUserAccount;
-        private String _mascotUserPassword;
-        private String _mascotHTTPProxy;
-
-        public boolean isReset()
-        {
-            return _reset;
-        }
-
-        @SuppressWarnings("unused")
-        public void setReset(boolean reset)
-        {
-            _reset = reset;
-        }
-
-        public String getMascotServer()
-        {
-            return (null == _mascotServer) ? "" : _mascotServer;
-        }
-
-        @SuppressWarnings("unused")
-        public void setMascotServer(String mascotServer)
-        {
-            _mascotServer = mascotServer;
-        }
-
-        public String getMascotUserAccount()
-        {
-            return (null == _mascotUserAccount) ? "" : _mascotUserAccount;
-        }
-
-        @SuppressWarnings("unused")
-        public void setMascotUserAccount(String mascotUserAccount)
-        {
-            _mascotUserAccount = mascotUserAccount;
-        }
-
-        public String getMascotUserPassword()
-        {
-            return (null == _mascotUserPassword) ? "" : _mascotUserPassword;
-        }
-
-        @SuppressWarnings("unused")
-        public void setMascotUserPassword(String mascotUserPassword)
-        {
-            _mascotUserPassword = mascotUserPassword;
-        }
-
-        public String getMascotHTTPProxy()
-        {
-            return (null == _mascotHTTPProxy) ? "" : _mascotHTTPProxy;
-        }
-
-        @SuppressWarnings("unused")
-        public void setMascotHTTPProxy(String mascotHTTPProxy)
-        {
-            _mascotHTTPProxy = mascotHTTPProxy;
-        }
-    }
-
-    @RequiresPermission(AdminOperationsPermission.class)
-    public static class MascotConfigAction extends FormViewAction<MascotSettingsForm>
-    {
-        @Override
-        public void validateCommand(MascotSettingsForm target, Errors errors)
-        {
-        }
-
-        @Override
-        public ModelAndView getView(MascotSettingsForm mascotSettingsForm, boolean reshow, BindException errors)
-        {
-            return new JspView<>("/org/labkey/ms2/mascotConfig.jsp", mascotSettingsForm);
-        }
-
-        @Override
-        public boolean handlePost(MascotSettingsForm form, BindException errors)
-        {
-            if (form.isReset())
-            {
-                MascotConfig.reset(getContainer());
-            }
-            else
-            {
-                MascotConfig config = MascotConfig.getWriteableMascotConfig(getContainer());
-                config.setMascotServer(form.getMascotServer());
-                config.setMascotUserAccount(form.getMascotUserAccount());
-                config.setMascotUserPassword(form.getMascotUserPassword());
-                config.setMascotHTTPProxy(form.getMascotHTTPProxy());
-                config.save();
-
-                //write an audit log event
-                config.writeAuditLogEvent(getContainer(), getViewContext().getUser());
-            }
-
-            return true;
-        }
-
-        @Override
-        public URLHelper getSuccessURL(MascotSettingsForm mascotSettingsForm)
-        {
-            return getContainer().isRoot() ?
-                    urlProvider(AdminUrls.class).getAdminConsoleURL() :
-                    urlProvider(PipelineUrls.class).urlSetup(getViewContext().getContainer());
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            if (getViewContext().getContainer().isRoot())
-            {
-                urlProvider(AdminUrls.class).addAdminNavTrail(root, "Mascot Server Configuration", getClass(), getContainer());
-            }
-            else
-            {
-                root.addChild("Pipeline Settings", urlProvider(PipelineUrls.class).urlSetup(getViewContext().getContainer()));
-                root.addChild("Mascot Server Configuration");
-            }
-        }
-    }
-
     @RequiresPermission(ReadPermission.class)
     public static class ShowProteinAction extends SimpleViewAction<DetailsForm>
     {
@@ -4134,136 +4005,6 @@ public class MS2Controller extends SpringActionController
         public void export(DetailsForm form, HttpServletResponse response, BindException errors) throws Exception
         {
             showElutionGraph(response, form, true, true);
-        }
-    }
-
-    @RequiresPermission(AdminOperationsPermission.class)
-    public static class MascotTestAction extends SimpleViewAction<TestMascotForm>
-    {
-        @Override
-        public ModelAndView getView(TestMascotForm form, BindException errors)
-        {
-            String originalMascotServer = form.getMascotServer();
-            MascotClientImpl mascotClient = new MascotClientImpl(form.getMascotServer(), null,
-                form.getMascotUserAccount(), form.getMascotUserPassword());
-            mascotClient.setProxyURL(form.getMascotHTTPProxy());
-            mascotClient.findWorkableSettings(true);
-            form.setStatus(mascotClient.getErrorCode());
-
-            String message;
-            if (0 == mascotClient.getErrorCode())
-            {
-                if ("".equals(mascotClient.getErrorString()))
-                {
-                    message = "Test passed.";
-                }
-                else
-                {
-                    message = mascotClient.getErrorString();
-                }
-                form.setParameters(mascotClient.getParameters());
-            }
-            else
-            {
-                message = "Test failed. " + mascotClient.getErrorString();
-            }
-
-            form.setMessage(message);
-            form.setMascotServer(originalMascotServer);
-            form.setMascotUserPassword(("".equals(form.getMascotUserPassword())) ? "" : "***");  // do not show password in clear
-
-            getPageConfig().setTemplate(PageConfig.Template.Dialog);
-            return new JspView<>("/org/labkey/ms2/testMascot.jsp", form);
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            root.addChild("Admin Console", urlProvider(AdminUrls.class).getAdminConsoleURL());
-            root.addChild("Test Mascot Settings");
-        }
-    }
-
-    public static class TestMascotForm
-    {
-        private String _mascotServer = "";
-        private String _mascotUserAccount = "";
-        private String _mascotUserPassword = "";
-        private String _mascotHTTPProxy = "";
-        private int _status;
-        private String _parameters = "";
-        private String _message;
-
-        public String getMascotUserAccount()
-        {
-            return _mascotUserAccount;
-        }
-
-        @SuppressWarnings("unused")
-        public void setMascotUserAccount(String mascotUserAccount)
-        {
-            _mascotUserAccount = mascotUserAccount;
-        }
-
-        public String getMascotUserPassword()
-        {
-            return _mascotUserPassword;
-        }
-
-        public void setMascotUserPassword(String mascotUserPassword)
-        {
-            _mascotUserPassword = mascotUserPassword;
-        }
-
-        public String getMascotServer()
-        {
-            return _mascotServer;
-        }
-
-        public void setMascotServer(String mascotServer)
-        {
-            _mascotServer = mascotServer;
-        }
-
-        public String getMascotHTTPProxy()
-        {
-            return _mascotHTTPProxy;
-        }
-
-        @SuppressWarnings("unused")
-        public void setMascotHTTPProxy(String mascotHTTPProxy)
-        {
-            _mascotHTTPProxy = mascotHTTPProxy;
-        }
-
-        public String getMessage()
-        {
-            return _message;
-        }
-
-        public void setMessage(String message)
-        {
-            _message = message;
-        }
-
-        public int getStatus()
-        {
-            return _status;
-        }
-
-        public void setStatus(int status)
-        {
-            _status = status;
-        }
-
-        public String getParameters()
-        {
-            return _parameters;
-        }
-
-        public void setParameters(String parameters)
-        {
-            _parameters = parameters;
         }
     }
 
@@ -5288,12 +5029,6 @@ public class MS2Controller extends SpringActionController
                 controller.new RenameRunAction(),
                 controller.new ToggleValidQuantitationAction(),
                 controller.new EditElutionGraphAction()
-            );
-
-            // @RequiresPermission(AdminOperationsPermission.class)
-            assertForAdminOperationsPermission(user,
-                new MascotConfigAction(),
-                new MascotTestAction()
             );
 
             // @RequiresSiteAdmin

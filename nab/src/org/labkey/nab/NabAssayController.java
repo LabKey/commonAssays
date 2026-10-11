@@ -281,11 +281,22 @@ public class NabAssayController extends SpringActionController
         return d1.compareTo(d2) > 0 ? d1 : d2;
     }
 
-    static Cache<String,NAbRunWrapper> ASSAY_CACHE = CacheManager.getCache(10, TimeUnit.MINUTES.toMillis(5), "NabAssayCache");
+    // Keyed by session, run, and fit, so the details page and each of its graph images share one built run
+    static Cache<String, NAbRunWrapper> ASSAY_CACHE = CacheManager.getCache(50, TimeUnit.MINUTES.toMillis(5), "NabAssayCache");
 
-    private DilutionAssayRun getCachedRun(ExpRun run)
+    private String getCacheKeyPrefix()
     {
-        NAbRunWrapper cache = ASSAY_CACHE.get(getViewContext().getSession().getId());
+        return getViewContext().getSession().getId() + ":";
+    }
+
+    private String getCacheKey(ExpRun run, @Nullable StatsService.CurveFitType fit)
+    {
+        return getCacheKeyPrefix() + run.getRowId() + ":" + (fit == null ? "" : fit.name());
+    }
+
+    private DilutionAssayRun getCachedRun(ExpRun run, @Nullable StatsService.CurveFitType fit)
+    {
+        NAbRunWrapper cache = ASSAY_CACHE.get(getCacheKey(run, fit));
         if (cache == null || cache.getRun() == null)
             return null;
         DilutionAssayRun assay = cache.getRun();
@@ -301,32 +312,34 @@ public class NabAssayController extends SpringActionController
         return null;
     }
 
-    private void putCachedRun(DilutionAssayRun assay)
+    private void putCachedRun(ExpRun run, @Nullable StatsService.CurveFitType fit, DilutionAssayRun assay)
     {
         if (PageFlowUtil.isRobotUserAgent(getViewContext().getRequest().getHeader("User-Agent")))
             return;
-        ASSAY_CACHE.put(getViewContext().getSession().getId(), new NAbRunWrapper(assay, new Date()));
+        ASSAY_CACHE.put(getCacheKey(run, fit), new NAbRunWrapper(assay, new Date()));
     }
 
-    private void clearCachedRun()
+    // Evict the run for every session, since QC changes affect what all viewers see
+    private void clearCachedRuns(long runId)
     {
-        ASSAY_CACHE.remove(getViewContext().getSession().getId());
+        String runSegment = ":" + runId + ":";
+        ASSAY_CACHE.removeUsingFilter(key -> key.contains(runSegment));
     }
 
     private DilutionAssayRun _getNabAssayRun(ExpRun run, StatsService.CurveFitType fit, User elevatedUser) throws ExperimentException
     {
         // cache last NAb assay run in session.  This speeds up the case where users bring up details view and
         // then immediately hit the 'print' button.
-        DilutionAssayRun assay = getCachedRun(run);
-        if (fit != null || assay == null ||
+        DilutionAssayRun assay = getCachedRun(run, fit);
+        if (assay == null ||
                 (assay.getRunRowId() != null && run.getRowId() != assay.getRunRowId().intValue()) ||
                 (assay.getRun() != null && run.getRowId() != assay.getRun().getRowId()))
         {
             try
             {
                 assay = getDataHandler(run).getAssayResults(run, elevatedUser, fit);
-                if (assay != null && fit == null)
-                    putCachedRun(assay);
+                if (assay != null)
+                    putCachedRun(run, fit, assay);
             }
             catch (DilutionDataHandler.MissingDataFileException e)
             {
@@ -1217,7 +1230,7 @@ public class NabAssayController extends SpringActionController
                             }
                             transaction.commit();
                             // clear the nab run cache
-                            clearCachedRun();
+                            clearCachedRuns(run.getRowId());
                             NabProtocolSchema.clearProtocolFromCutoffCache(protocol.getRowId());
                             response.put("success", true);
                         }

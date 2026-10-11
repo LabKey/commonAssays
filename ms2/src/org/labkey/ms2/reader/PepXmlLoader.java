@@ -33,7 +33,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 
 public class PepXmlLoader extends MS2XmlLoader
 {
@@ -529,18 +528,6 @@ public class PepXmlLoader extends MS2XmlLoader
                     String retentionTime = _parser.getAttributeValue(null, "retention_time_sec");
                     _retentionTime = (null != retentionTime ? Double.parseDouble(retentionTime) : null);
 
-                    // Mascot exported pepXML can have start_scan="0" and end_scan="0"
-                    if (0 == _scan)
-                    {
-                        Matcher m = MascotDatLoader.QUERY_TITLE_SCAN_REGEX.matcher(_dtaFileName);
-                        if (m.find())
-                        {
-                            // endScan=m.group(2), charge=m.group(3)
-                            setScan(Integer.parseInt(m.group(MascotDatLoader.START_SCAN_GROUP_NUM)));
-                            setEndScan(Integer.parseInt(m.group(MascotDatLoader.END_SCAN_GROUP_NUM)));
-                        }
-                    }
-
                     break;
                 case(SEARCH_RESULT):
                     // Start over again within each spectrum_query block
@@ -570,7 +557,7 @@ public class PepXmlLoader extends MS2XmlLoader
                         else
                             _totalIons = 0;
 
-                        // Mascot exported pepXML may not report "tot_num_ions"
+                        // Some pepXML exporters omit "tot_num_ions"
                         if (0 == _totalIons && _matchedIons > 0)
                         {
                             // let's attempt to guess the total ions as per sashimi

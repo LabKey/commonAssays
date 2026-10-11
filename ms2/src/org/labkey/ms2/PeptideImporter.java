@@ -65,7 +65,7 @@ public abstract class PeptideImporter extends MS2Importer
     /**
      * ProteomeDiscoverer does not write out pepXML file with full fraction information, even for fraction searches
      * Thus, we end up importing data as if it was all from a single fraction, which can cause errors when multiple fractions
-     * have IDs on the same scan numbers. Thus, as a hack, assign a "queryNumber" (ala Mascot) to make each ID unique.
+     * have IDs on the same scan numbers. Thus, as a hack, assign a "queryNumber" to make each ID unique.
      */
     private int _proteomeDiscovererOffset = 0;
 
@@ -119,8 +119,6 @@ public abstract class PeptideImporter extends MS2Importer
         m.put("SearchEngine", fraction.getSearchEngine());
         m.put("MassSpecType", fraction.getMassSpecType());
         m.put("SearchEnzyme", fraction.getSearchEnzyme());
-        m.put("MascotFile", fraction.getMascotFile());
-        m.put("DistillerRawFile", fraction.getDistillerRawFile());
 
         List<String> dbPaths = new ArrayList<>();
 

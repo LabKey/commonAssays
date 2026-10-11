@@ -23,7 +23,6 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.MS2Controller" %>
 <%@ page import="org.labkey.ms2.MS2Run" %>
-<%@ page import="org.labkey.ms2.pipeline.mascot.MascotRun" %>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
@@ -51,12 +50,6 @@
     <td class="labkey-form-label">Mass Spec Type</td><td><%=h(MS2Controller.defaultIfNull(run.getMassSpecType(), "n/a"))%></td>
     <td class="labkey-form-label">Fasta File<%= h(fastas.size() > 1 ? "s" : "") %></td><td><%=h(StringUtils.join(fastas, ", "))%></td>
     </tr>
-    <% if (run instanceof MascotRun) { %>
-    <tr>
-        <td class="labkey-form-label">Mascot File</td><td><%=h(MS2Controller.defaultIfNull(((MascotRun)run).getMascotFile(), "n/a"))%></td>
-        <td class="labkey-form-label">Distiller Raw File</td><td><%=h(MS2Controller.defaultIfNull(((MascotRun)run).getDistillerRawFile(), "n/a"))%></td>
-    </tr>
-    <% } %>
 
     <%
 

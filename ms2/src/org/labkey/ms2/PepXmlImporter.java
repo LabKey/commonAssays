@@ -122,8 +122,7 @@ public class PepXmlImporter extends PeptideImporter
                     if (null != peptide.getRetentionTime())
                         retentionTimesInPepXml = true;
 
-                    // Mascot exported pepXML may contain unassigned spectrum
-                    // we omit them for import
+                    // Omit unassigned spectra
                     if (null != peptide.getTrimmedPeptide())
                     {
 	                    write(peptide, summary);
@@ -176,7 +175,7 @@ public class PepXmlImporter extends PeptideImporter
         {
             _gzFileName = switchSuffix(_fileName, dataSuffix);
         }
-       // No spectrumPath in a sequest or Mascot pepXML file.
+       // No spectrumPath in a sequest pepXML file.
         if (fraction.getSpectrumPath() == null)
         {
             // First, check two directories up from the MS2 results. This is where searches done through the CPAS
@@ -227,12 +226,10 @@ public class PepXmlImporter extends PeptideImporter
     protected void processSpectrumFile(PepXmlFraction fraction, Set<Integer> scans, MS2Progress progress, boolean shouldLoadSpectra, boolean shouldLoadRetentionTimes)
     {
         FileLike mzXmlFile = FileSystemLike.wrapFile(getMzXMLFile(fraction));
-        if ((_run.getType().equalsIgnoreCase(MS2RunType.Mascot.name())||_run.getType().equalsIgnoreCase(MS2RunType.Sequest.name()))   // TODO: Move this check (perhaps all the code) into the appropriate run classes
+        if (_run.getType().equalsIgnoreCase(MS2RunType.Sequest.name())   // TODO: Move this check (perhaps all the code) into the appropriate run classes
                 && null == mzXmlFile)
         {
             // we attempt to load spectra from .mzXML rather than .pep.tgz
-            // (that is, the faked-up .out and .dta files from Mascot2XML)
-            // generation of .pep.tgz can be turned off via (Mascot2XML -notgz)
             String baseName = _gzFileName;
             baseName = baseName.replaceAll("\\.pep\\.tgz$", "");
             massSpecDataFileType FT_MZXML = new massSpecDataFileType();

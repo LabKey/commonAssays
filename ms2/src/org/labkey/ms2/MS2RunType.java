@@ -25,14 +25,12 @@ import org.labkey.api.query.FieldKey;
 import org.labkey.ms2.pipeline.UnknownMS2Run;
 import org.labkey.ms2.pipeline.comet.CometRun;
 import org.labkey.ms2.pipeline.comet.LegacyCometRun;
-import org.labkey.ms2.pipeline.mascot.MascotRun;
 import org.labkey.ms2.pipeline.peaks.PeaksRun;
 import org.labkey.ms2.pipeline.phenyx.PhenyxRun;
 import org.labkey.ms2.pipeline.sequest.SequestRun;
 import org.labkey.ms2.pipeline.tandem.XCometRun;
 import org.labkey.ms2.pipeline.tandem.XTandemRun;
 import org.labkey.ms2.pipeline.tandem.XTandemcometRun;
-import org.labkey.ms2.query.PeptidesTableInfo;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,13 +52,6 @@ public enum MS2RunType implements Handler<MS2RunType.SearchEngineInfo>
             new ScoreInfo("XCorr", "xcorr", "COMET XCORR"),
             new ScoreInfo("SpRank", "sprank"),
             new ScoreInfo("DeltaCnStar", "deltacnstar"),
-            new ScoreInfo("Expect", "expect")),
-    Mascot(MascotRun.class,
-            new ScoreInfo("Ion", "ionscore", "MASCOT IONS SCORE"),
-            new ScoreInfo("Identity", "identityscore"),
-            new ScoreInfo("Homology", "homologyscore"),
-            // Dummy score column so that Expect aligns at the same index for the score4 column with some of the other run types
-            new ScoreInfo(PeptidesTableInfo.DUMMY_SCORE_COLUMN_NAME, "null"),
             new ScoreInfo("Expect", "expect")),
     Phenyx(PhenyxRun.class,
            new ScoreInfo("OrigScore", "origScore"),

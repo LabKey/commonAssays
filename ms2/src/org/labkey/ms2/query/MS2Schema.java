@@ -113,7 +113,6 @@ public class MS2Schema extends UserSchema
 
     private static final String PROTOCOL_PATTERN_PREFIX = "urn:lsid:%:Protocol.%:";
 
-    public static final String MASCOT_PROTOCOL_OBJECT_PREFIX = "MS2.Mascot";
     public static final String COMET_PROTOCOL_OBJECT_PREFIX = "MS2.Comet";
     public static final String SEQUEST_PROTOCOL_OBJECT_PREFIX = "MS2.Sequest";
     public static final String XTANDEM_PROTOCOL_OBJECT_PREFIX = "MS2.XTandem";
@@ -192,16 +191,6 @@ public class MS2Schema extends UserSchema
                 return searchTable;
             }
         },
-        MascotSearchRuns
-        {
-            @Override
-            public ExpRunTable createTable(MS2Schema ms2Schema, ContainerFilter cf)
-            {
-                ExpRunTable searchTable = ms2Schema.createSearchTable(MascotSearchRuns.toString(), cf, MASCOT_PROTOCOL_OBJECT_PREFIX);
-                searchTable.setDescription("Contains one row per Mascot search results loaded in this folder.");
-                return searchTable;
-            }
-        },
         CometSearchRuns
         {
             @Override
@@ -271,8 +260,6 @@ public class MS2Schema extends UserSchema
                 result.addWrapColumn(result.getRealTable().getColumn("Status"));
                 result.addWrapColumn(result.getRealTable().getColumn("StatusId")).setHidden(true);
                 result.addWrapColumn(result.getRealTable().getColumn("Type"));
-                result.addWrapColumn(result.getRealTable().getColumn("MascotFile"));
-                result.addWrapColumn(result.getRealTable().getColumn("DistillerRawFile"));
 
                 var iconColumn = result.wrapColumn("Links", result.getRealTable().getColumn("Run"));
                 iconColumn.setDisplayColumnFactory(colInfo -> {
@@ -500,7 +487,7 @@ public class MS2Schema extends UserSchema
 
     public ExpRunTable createRunsTable(String name, ContainerFilter filter)
     {
-        return createSearchTable(name, filter, XTANDEM_PROTOCOL_OBJECT_PREFIX, MASCOT_PROTOCOL_OBJECT_PREFIX, COMET_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX , IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
+        return createSearchTable(name, filter, XTANDEM_PROTOCOL_OBJECT_PREFIX, COMET_PROTOCOL_OBJECT_PREFIX, SEQUEST_PROTOCOL_OBJECT_PREFIX , IMPORTED_SEARCH_PROTOCOL_OBJECT_PREFIX);
     }
 
     public SpectraCountTableInfo createSpectraCountTable(SpectraCountConfiguration config, ViewContext context, MS2Controller.SpectraCountForm form)

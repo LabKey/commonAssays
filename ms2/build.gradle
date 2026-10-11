@@ -18,9 +18,6 @@ dependencies {
          "SQLite JDBC Driver"
       )
    )
-   implementation "net.sf.opencsv:opencsv:${opencsvVersion}"
-   compileOnly "org.projectlombok:lombok:${lombokVersion}"
-   annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: BuildUtils.getPlatformModuleProjectPath(project.gradle, "assay"), depProjectConfig: "apiJarFile")
    BuildUtils.addLabKeyDependency(project: project, config: "implementation", depProjectPath: BuildUtils.getCommonAssayModuleProjectPath(project.gradle, "protein"), depProjectConfig: "apiJarFile")
    BuildUtils.addLabKeyDependency(project: project, config: "jspImplementation", depProjectPath: BuildUtils.getCommonAssayModuleProjectPath(project.gradle, "protein"), depProjectConfig: "apiJarFile")

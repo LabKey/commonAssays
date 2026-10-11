@@ -43,8 +43,6 @@ import org.labkey.api.view.template.PageConfig;
 import org.labkey.ms2.MS2Controller;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.pipeline.comet.CometPipelineProvider;
-import org.labkey.ms2.pipeline.mascot.MascotCPipelineProvider;
-import org.labkey.ms2.pipeline.mascot.MascotSearchTask;
 import org.labkey.ms2.pipeline.sequest.SequestPipelineProvider;
 import org.labkey.ms2.pipeline.tandem.XTandemPipelineProvider;
 import org.labkey.ms2.pipeline.tandem.XTandemSearchProtocolFactory;
@@ -112,31 +110,15 @@ public class PipelineController extends SpringActionController
                 String baseName = FileUtil.getBaseName(file, extParts);
                 // If the data was created by our pipeline, try to get the name
                 // to look like the normal generated name.
-
-                String protocolName;
-                FileLike dirDataOriginal;
-                String description;
-                if (MascotSearchTask.isNativeOutputFile(file))
+                String protocolName = file.getParent().getName();
+                FileLike dirDataOriginal = file.getParent().getParent();
+                if (dirDataOriginal != null &&
+                        dirDataOriginal.getName().equals(XTandemSearchProtocolFactory.get().getName()))
                 {
-                    //TODO: wch: use an appropriate protocol
-                    //      after all, this is what the Mascot search processing is doing
-                    // mascot .dat result file does not follow that of pipeline
-                    description = file.getName();
+                    dirDataOriginal = dirDataOriginal.getParent();
                 }
-                else
-                {
-                    // If the data was created by our pipeline, try to get the name
-                    // to look like the normal generated name.
-                    protocolName = file.getParent().getName();
-                    dirDataOriginal = file.getParent().getParent();
-                    if (dirDataOriginal != null &&
-                            dirDataOriginal.getName().equals(XTandemSearchProtocolFactory.get().getName()))
-                    {
-                        dirDataOriginal = dirDataOriginal.getParent();
-                    }
-                    description = AbstractFileAnalysisJob.
-                            getDataDescription(dirDataOriginal, baseName, AbstractFileAnalysisProtocol.LEGACY_JOINED_BASENAME, protocolName, Collections.emptyList());
-                }
+                String description = AbstractFileAnalysisJob.
+                        getDataDescription(dirDataOriginal, baseName, AbstractFileAnalysisProtocol.LEGACY_JOINED_BASENAME, protocolName, Collections.emptyList());
 
                 ViewBackgroundInfo info = getViewBackgroundInfo();
                 try
@@ -148,10 +130,6 @@ public class PipelineController extends SpringActionController
                     else if (TPPTask.isPepXMLFile(file))
                     {
                         MS2Manager.addRunToQueue(info, file, description, form.getPipeRoot(getContainer()));
-                    }
-                    else if (MascotSearchTask.isNativeOutputFile(file))
-                    {
-                        MS2Manager.addMascotRunToQueue(info, file, description, form.getPipeRoot(getContainer()));
                     }
                 }
                 catch (IOException e)
@@ -279,34 +257,6 @@ public class PipelineController extends SpringActionController
         public void addNavTrail(NavTree root)
         {
             root.addChild("Set X! Tandem Defaults");
-        }
-    }
-
-    @RequiresPermission(AdminPermission.class)
-    public static class SetMascotDefaultsAction extends SetDefaultsActionBase
-    {
-        @Override
-        public String getProviderName()
-        {
-            return MascotCPipelineProvider.name;
-        }
-
-        @Override
-        public ModelAndView getJspView(SetDefaultsForm form, BindException errors)
-        {
-            return new JspView<>("/org/labkey/ms2/pipeline/mascot/setMascotDefaults.jsp", form, errors);
-        }
-
-        @Override
-        public String getHelpTopic()
-        {
-            return "pipelineMascot";
-        }
-
-        @Override
-        public void addNavTrail(NavTree root)
-        {
-            root.addChild("Set Mascot Defaults");
         }
     }
 

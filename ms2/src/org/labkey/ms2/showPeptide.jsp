@@ -26,7 +26,6 @@
 <%@ page import="org.labkey.ms2.MS2GZFileRenderer" %>
 <%@ page import="org.labkey.ms2.MS2Manager" %>
 <%@ page import="org.labkey.ms2.MS2Peptide" %>
-<%@ page import="org.labkey.ms2.MS2RunType" %>
 <%@ page import="org.labkey.ms2.ShowPeptideContext" %>
 <%@ page import="org.labkey.ms2.reader.LibraQuantResult" %>
 <%@ page import="java.util.ArrayList" %>
@@ -119,15 +118,6 @@
                         <td class="labkey-form-label"><%= h(run.getRunType().getScoreColumnList().get(2)) %></td><td><%= h(p.getZScore() == null ? "" : Formats.f3.format(p.getZScore())) %></td>
                     <% } %>
                 </tr>
-                <% if (MS2RunType.Mascot.equals(run.getRunType())) { %>
-                    <tr>
-                        <td class="labkey-form-label">Query Number</td><td><%=h(p.getQueryNumber())%></td>
-                        <td class="labkey-form-label">Hit Rank</td><td><%= p.getHitRank() %></td>
-                    </tr>
-                    <tr>
-                        <td class="labkey-form-label">Is Decoy</td><td><%= p.isDecoy() %></td>
-                    </tr>
-                <% } %>
             </table>
 
 <%
