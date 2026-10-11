@@ -153,11 +153,14 @@ public class SignalDataRawTest extends BaseWebDriverTest
         assertPlotElementCount("Wrong number of legend items in spectrum plot", Locator.tagWithClass("g", "legend-item"), filenames.size());
 
         log("Verify legend labels match run names");
+        // XPath can't match SVG elements by tag name, so stick to the CSS-backed Locator.tag
         List<String> legendLabels = shortWait().ignoring(StaleElementReferenceException.class)
-                .until(wd -> getTexts(Locator.tag("svg").descendant("tspan").findElements(getDriver())))
-                .stream()
-                .filter(t -> !t.isBlank())
-                .toList();
+                .until(_ -> {
+                    List<String> texts = getTexts(Locator.tag("tspan").findElements(getDriver())).stream()
+                            .filter(t -> !t.isBlank())
+                            .toList();
+                    return texts.isEmpty() ? null : texts;
+                });
         assertTrue("Legend labels " + legendLabels + " do not contain all expected run names " + expectedRunNames,
                 legendLabels.containsAll(expectedRunNames));
     }
