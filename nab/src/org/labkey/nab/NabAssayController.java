@@ -282,7 +282,7 @@ public class NabAssayController extends SpringActionController
     }
 
     // Keyed by session, run, and fit, so the details page and each of its graph images share one built run
-    static Cache<String, NAbRunWrapper> ASSAY_CACHE = CacheManager.getCache(50, TimeUnit.MINUTES.toMillis(5), "NabAssayCache");
+    static Cache<String, NAbRunWrapper> ASSAY_CACHE = CacheManager.getCache(String.class, 50, TimeUnit.MINUTES.toMillis(5), "NabAssayCache");
 
     private String getCacheKeyPrefix()
     {

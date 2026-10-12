@@ -301,7 +301,7 @@ abstract public class AttributeCache<A extends Comparable<A>, E extends Attribut
     public AttributeCache(AttributeType type)
     {
         _type = type;
-        _cache = CacheManager.getBlockingStringKeyCache(CacheManager.UNLIMITED, CacheManager.DAY, "Flow " + _type + " cache", BY_CONTAINER_LOADER);
+        _cache = CacheManager.getBlockingCache(String.class, CacheManager.UNLIMITED, CacheManager.DAY, "Flow " + _type + " cache", BY_CONTAINER_LOADER);
     }
 
     @Nullable

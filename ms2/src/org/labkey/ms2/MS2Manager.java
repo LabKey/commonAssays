@@ -54,6 +54,7 @@ import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineValidationException;
+import org.labkey.api.protein.CoverageProtein;
 import org.labkey.api.protein.ProteinManager;
 import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.SimpleProtein;
@@ -74,7 +75,6 @@ import org.labkey.ms2.pipeline.AbstractMS2SearchPipelineJob;
 import org.labkey.ms2.pipeline.AbstractMS2SearchTask;
 import org.labkey.ms2.pipeline.MS2ImportPipelineJob;
 import org.labkey.ms2.pipeline.TPPTask;
-import org.labkey.api.protein.CoverageProtein;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.query.MS2Schema;
 import org.labkey.ms2.reader.ITraqProteinQuantitation;
@@ -113,7 +113,7 @@ public class MS2Manager
 {
     private static final Logger LOG = LogManager.getLogger(MS2Manager.class);
     private static final int CACHE_SIZE = 10;
-    private static final Cache<String, ImmutableLongArray> PEPTIDE_INDEX_CACHE = CacheManager.getBlockingCache(CACHE_SIZE, CacheManager.HOUR, "Peptide index", null);
+    private static final Cache<String, ImmutableLongArray> PEPTIDE_INDEX_CACHE = CacheManager.getBlockingCache(String.class, CACHE_SIZE, CacheManager.HOUR, "Peptide index", null);
     private static final String FRACTION_CACHE_PREFIX = "MS2Fraction/";
     private static final Cache<String, MS2Fraction> FRACTION_CACHE = CacheManager.getSharedCache();
     private static final String PEPTIDE_PROPHET_SUMMARY_CACHE_PREFIX = "PeptideProphetSummary/";
