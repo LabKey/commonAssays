@@ -35,7 +35,7 @@ import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.Ext4Helper;
 import org.labkey.test.util.data.TestDataUtils;
 import org.labkey.test.util.signaldata.SignalDataInitializer;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.StaleElementReferenceException;
 
 import java.io.File;
 import java.io.IOException;
@@ -53,6 +53,7 @@ import static org.junit.Assert.assertTrue;
 public class SignalDataRawTest extends BaseWebDriverTest
 {
     private static final String PROJECT_NAME = "SignalDataRawTest";
+    private static final Locator PLOT_LINE = Locator.tagWithClass("path", "line");
     private static final String DEFAULT_RUN = "TestRun001";
     private static final String ASSAY_DATA_LOC = "SignalDataAssayData/" + DEFAULT_RUN;
     private static final String RESULT_FILENAME_1 = "LGC12392.TXT";
@@ -124,9 +125,8 @@ public class SignalDataRawTest extends BaseWebDriverTest
 
         runsPage.checkRunViewerCheckbox(resultNameFromFilename(RESULT_FILENAME_1));
         runsPage.checkRunViewerCheckbox(resultNameFromFilename(RESULT_FILENAME_2));
-        WebElement plotEl = runsPage.showPlot();
-        List<WebElement> plotLines = Locator.tagWithClass("path", "line").findElements(plotEl);
-        assertEquals("Wrong number of lines in plot", 2, plotLines.size());
+        runsPage.showPlot();
+        assertPlotElementCount("Wrong number of lines in plot", PLOT_LINE, 2);
     }
 
     @Test
@@ -144,21 +144,23 @@ public class SignalDataRawTest extends BaseWebDriverTest
         for (String runName : expectedRunNames)
             runsPage.checkRunViewerCheckbox(runName);
 
-        WebElement plotEl = runsPage.showPlot();
+        runsPage.showPlot();
 
         log("Verify one plotted line per run");
-        List<WebElement> plotLines = Locator.tagWithClass("path", "line").findElements(plotEl);
-        assertEquals("Wrong number of lines in spectrum plot", filenames.size(), plotLines.size());
+        assertPlotElementCount("Wrong number of lines in spectrum plot", PLOT_LINE, filenames.size());
 
         log("Verify legend renders with one item per run");
-        List<WebElement> legendItems = Locator.tagWithClass("g", "legend-item").findElements(plotEl);
-        assertEquals("Wrong number of legend items in spectrum plot", filenames.size(), legendItems.size());
+        assertPlotElementCount("Wrong number of legend items in spectrum plot", Locator.tagWithClass("g", "legend-item"), filenames.size());
 
         log("Verify legend labels match run names");
-        List<String> legendLabels = Locator.tag("tspan").findElements(plotEl).stream()
-                .map(WebElement::getText)
-                .filter(t -> !t.isBlank())
-                .toList();
+        // XPath can't match SVG elements by tag name, so stick to the CSS-backed Locator.tag
+        List<String> legendLabels = shortWait().ignoring(StaleElementReferenceException.class)
+                .until(_ -> {
+                    List<String> texts = getTexts(Locator.tag("tspan").findElements(getDriver())).stream()
+                            .filter(t -> !t.isBlank())
+                            .toList();
+                    return texts.isEmpty() ? null : texts;
+                });
         assertTrue("Legend labels " + legendLabels + " do not contain all expected run names " + expectedRunNames,
                 legendLabels.containsAll(expectedRunNames));
     }
@@ -191,6 +193,13 @@ public class SignalDataRawTest extends BaseWebDriverTest
         for (String runName : expectedRunNames)
             assertFalse("Input '" + runName + "' should be deselected after Select All is unchecked", runsPage.isInputSelected(runName));
         assertFalse("'Overlay Selected' should be disabled after deselecting all inputs", runsPage.isOverlaySelectedEnabled());
+    }
+
+    private void assertPlotElementCount(String message, Locator loc, int expected)
+    {
+        int[] lastCount = {-1};
+        waitFor(() -> (lastCount[0] = loc.findElements(getDriver()).size()) == expected, WAIT_FOR_JAVASCRIPT);
+        assertEquals(message, expected, lastCount[0]);
     }
 
     private String resultNameFromFilename(String filename)
