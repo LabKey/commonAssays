@@ -15,7 +15,7 @@
  */
 package org.labkey.elisa.plate;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
@@ -43,7 +43,7 @@ public class BioTekPlateReader extends ExcelPlateReader
             {
                 for (Cell cell : sheetRow)
                 {
-                    if (cell.getCellType() == CellType.STRING && StringUtils.equalsIgnoreCase(cell.getStringCellValue(), "A"))
+                    if (cell.getCellType() == CellType.STRING && Strings.CI.equals(cell.getStringCellValue(), "A"))
                         continue;
                     else if (cell.getCellType() != CellType.NUMERIC)
                         return false;
