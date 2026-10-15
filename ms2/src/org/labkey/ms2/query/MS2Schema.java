@@ -586,7 +586,7 @@ public class MS2Schema extends UserSchema
         {
             SQLFragment sql = new SQLFragment("ProteinGroupId IN (SELECT pg.RowId FROM ");
             sql.append(MS2Manager.getTableInfoProteinGroups() + " pg, " + MS2Manager.getTableInfoProteinProphetFiles() + " ppf ");
-            sql.append(" WHERE pg.ProteinProphetFileId = ppf.RowId AND ppf.Run IN ");
+            sql.append(" WHERE pg.ProteinProphetFileId = ppf.RowId AND ppf.Run");
             appendRunInClause(sql);
             sql.append(")");
             result.addCondition(sql, FieldKey.fromParts("ProteinGroupId"));
@@ -644,22 +644,8 @@ public class MS2Schema extends UserSchema
 
     public void appendRunInClause(SQLFragment sql)
     {
-        sql.append("(");
-        if (_runs == null || _runs.isEmpty())
-        {
-            sql.append("-1");
-        }
-        else
-        {
-            String separator = "";
-            for (MS2Run run : _runs)
-            {
-                sql.append(separator);
-                separator = ", ";
-                sql.appendValue(run.getRun());
-            }
-        }
-        sql.append(")");
+        List<Long> runIds = _runs == null ? List.of() : _runs.stream().map(MS2Run::getRun).toList();
+        sql.appendInClause(runIds, MS2Manager.getSqlDialect());
     }
 
     protected TableInfo createPeptideMembershipsTable(ContainerFilter cf)
@@ -1189,15 +1175,9 @@ public class MS2Schema extends UserSchema
                 // Populate the temp table with all of the protein groups from the selected runs
                 SQLFragment insertSQL = new SQLFragment("SELECT x.RowId AS ProteinGroupId, x.RowId as NormalizedId INTO " + tempTableName +
                         " FROM (SELECT pg.RowId FROM " + MS2Manager.getTableInfoProteinGroups() + " pg, " +
-                        MS2Manager.getTableInfoProteinProphetFiles() + " ppf WHERE pg.ProteinProphetFileId = ppf.RowId AND ppf.Run IN (");
-                String separator = "";
-                for (MS2Run run : getRuns())
-                {
-                    insertSQL.append(separator);
-                    separator = ", ";
-                    insertSQL.appendValue(run.getRun());
-                }
-                insertSQL.append(") ) AS x");
+                        MS2Manager.getTableInfoProteinProphetFiles() + " ppf WHERE pg.ProteinProphetFileId = ppf.RowId AND ppf.Run");
+                insertSQL.appendInClause(getRuns().stream().map(MS2Run::getRun).toList(), MS2Manager.getSqlDialect());
+                insertSQL.append(" ) AS x");
 
                 executor.execute(insertSQL);
 

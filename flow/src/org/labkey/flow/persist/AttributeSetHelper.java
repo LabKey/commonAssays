@@ -15,13 +15,13 @@
  */
 package org.labkey.flow.persist;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.collections.LongHashMap;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.exp.api.ExpData;
@@ -254,12 +254,12 @@ public class AttributeSetHelper
 
         if (!keywordIDs.isEmpty())
         {
-            String sqlKeywordAliaes = "SELECT A.name AS PreferredName, B.Name AS AliasName\n" +
+            SQLFragment sqlKeywordAliaes = new SQLFragment("SELECT A.name AS PreferredName, B.Name AS AliasName\n" +
                     "FROM flow.KeywordAttr A\n" +
                     "INNER JOIN flow.KeywordAttr B\n" +
                     "ON A.RowId = B.Id\n" +
                     "AND B.RowId != B.Id\n" +
-                    "AND A.RowId IN (" + StringUtils.join(keywordIDs, ", ") + ")";
+                    "AND A.RowId").appendInClause(keywordIDs, mgr.getSchema().getSqlDialect());
 
             new SqlSelector(mgr.getSchema(), sqlKeywordAliaes).forEach(rs -> attrs.addKeywordAlias(rs.getString(1), rs.getString(2)));
         }
@@ -282,12 +282,12 @@ public class AttributeSetHelper
 
         if (!statisticIDs.isEmpty())
         {
-            String sqlStatisticAliaes = "SELECT A.name AS PreferredName, B.Name AS AliasName\n" +
+            SQLFragment sqlStatisticAliaes = new SQLFragment("SELECT A.name AS PreferredName, B.Name AS AliasName\n" +
                     "FROM flow.StatisticAttr A\n" +
                     "INNER JOIN flow.StatisticAttr B\n" +
                     "ON A.RowId = B.Id\n" +
                     "AND B.RowId != B.Id\n" +
-                    "AND A.RowId IN (" + StringUtils.join(statisticIDs, ", ") + ")";
+                    "AND A.RowId").appendInClause(statisticIDs, mgr.getSchema().getSqlDialect());
 
             new SqlSelector(mgr.getSchema(), sqlStatisticAliaes).forEach(rs -> attrs.addStatisticAlias(new StatisticSpec(rs.getString(1)), new StatisticSpec(rs.getString(2))));
         }
@@ -330,12 +330,12 @@ public class AttributeSetHelper
 
         if (!graphIDs.isEmpty())
         {
-            String sqlGraphAliaes = "SELECT A.name AS PreferredName, B.Name AS AliasName\n" +
+            SQLFragment sqlGraphAliaes = new SQLFragment("SELECT A.name AS PreferredName, B.Name AS AliasName\n" +
                     "FROM flow.GraphAttr A\n" +
                     "INNER JOIN flow.GraphAttr B\n" +
                     "ON A.RowId = B.Id\n" +
                     "AND B.RowId != B.Id\n" +
-                    "AND A.RowId IN (" + StringUtils.join(graphIDs, ", ") + ")";
+                    "AND A.RowId").appendInClause(graphIDs, mgr.getSchema().getSqlDialect());
 
             new SqlSelector(mgr.getSchema(), sqlGraphAliaes).forEach(rs -> attrs.addGraphAlias(new GraphSpec(rs.getString(1)), new GraphSpec(rs.getString(2))));
         }

@@ -16,7 +16,6 @@
 package org.labkey.ms2;
 
 import org.apache.commons.beanutils.ConversionException;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.action.SpringActionController;
@@ -214,15 +213,11 @@ public class PeptideManager
             sql.append(ProteinSchema.getTableInfoSequences(), "s");
             sql.append(", ");
             sql.append(ProteinSchema.getTableInfoFastaSequences(), "fs");
-            sql.append(" WHERE fs.SeqId = s.SeqId AND fs.FastaId IN (");
-            sql.append(StringUtils.repeat("?", ", ", fastaIds.length));
-            sql.append(") AND ProtSequence ");
+            sql.append(" WHERE fs.SeqId = s.SeqId AND fs.FastaId");
+            sql.appendInClause(Arrays.stream(fastaIds).boxed().toList(), ProteinSchema.getSqlDialect());
+            sql.append(" AND ProtSequence ");
             sql.append(ProteinSchema.getSqlDialect().getCharClassLikeOperator());
             sql.append(" ?" );
-            for (int fastaId : fastaIds)
-            {
-                sql.add(fastaId);
-            }
             sql.add("%" + peptide.getTrimmedPeptide() + "%");
 
             sql = ProteinSchema.getSchema().getSqlDialect().limitRows(sql, Math.max(20, hits));
@@ -241,15 +236,7 @@ public class PeptideManager
         String columnName = (runTableName == null ? "Run" : runTableName + ".Run");
         SQLFragment sql = new SQLFragment();
         sql.append(columnName);
-        sql.append(" IN (");
-        String separator = "";
-        for (MS2Run run : runs)
-        {
-            sql.append(separator);
-            separator = ", ";
-            sql.appendValue(run.getRun());
-        }
-        sql.append(")");
+        sql.appendInClause(Arrays.stream(runs).map(MS2Run::getRun).toList(), MS2Manager.getSqlDialect());
         filter.addWhereClause(sql, FieldKey.fromString("Run"));
     }
 

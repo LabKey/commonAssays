@@ -49,7 +49,6 @@ import org.labkey.ms2.ProteinListDisplayColumn;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -340,19 +339,10 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         sql.append(MS2Manager.getTableInfoProteinProphetFiles(), "ppf");
         sql.append(", ");
         sql.append(MS2Manager.getTableInfoRuns(), "r");
-        sql.append(" WHERE ppf.run = r.run AND r.Deleted = ? AND r.Container IN ");
+        sql.append(" WHERE ppf.run = r.run AND r.Deleted = ? AND r.Container");
         sql.add(Boolean.FALSE);
-        if (includeSubfolders)
-        {
-            List<Container> containers = ContainerManager.getAllChildren(c, u);
-            sql.append(ContainerManager.getIdsAsCsvList(new HashSet<>(containers),d));
-        }
-        else
-        {
-            sql.append("(");
-            sql.appendValue(c,d);
-            sql.append(")");
-        }
+        List<Container> containers = includeSubfolders ? ContainerManager.getAllChildren(c, u) : List.of(c);
+        sql.appendInClause(containers, d);
         sql.append(")");
         addCondition(sql);
     }
@@ -363,22 +353,9 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         sql.append("RowId IN (\n");
         sql.append("SELECT ProteinGroupId FROM ");
         sql.append(MS2Manager.getTableInfoProteinGroupMemberships(), "pgm");
-        sql.append(" WHERE pgm.SeqId IN (\n");
-        if (seqIds.length == 0)
-        {
-            sql.append("NULL");
-        }
-        else
-        {
-            String separator = "";
-            for (long seqId : seqIds)
-            {
-                sql.append(separator);
-                separator = ", ";
-                sql.appendValue(seqId);
-            }
-        }
-        sql.append("))");
+        sql.append(" WHERE pgm.SeqId");
+        sql.appendInClause(Arrays.stream(seqIds).boxed().toList(), MS2Manager.getSqlDialect());
+        sql.append(")");
 
         addCondition(sql);
     }
@@ -427,15 +404,8 @@ public class ProteinGroupTableInfo extends FilteredTable<MS2Schema>
         if (runs != null)
         {
             assert !runs.isEmpty() : "Doesn't make sense to filter to no runs";
-            sql.append(" AND Run IN (");
-            String separator = "";
-            for (MS2Run run : runs)
-            {
-                sql.append(separator);
-                sql.appendValue(run.getRun());
-                separator = ", ";
-            }
-            sql.append(")");
+            sql.append(" AND Run");
+            sql.appendInClause(runs.stream().map(MS2Run::getRun).toList(), MS2Manager.getSqlDialect());
         }
         sql.append("))");
         addCondition(sql);

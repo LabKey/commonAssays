@@ -17,7 +17,6 @@
 package org.labkey.flow.persist;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.collections4.iterators.ArrayIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,6 +43,7 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.TableInfo;
 import org.labkey.api.data.TableSelector;
+import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.dataiterator.DataIteratorContext;
 import org.labkey.api.dataiterator.MapDataIterator;
 import org.labkey.api.exp.Handler;
@@ -96,8 +96,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -953,14 +951,8 @@ public class FlowManager
     {
         if (datas.isEmpty())
             return Collections.emptyList();
-        SQLFragment sql = new SQLFragment ("SELECT * FROM " + getTinfoObject().toString() + " WHERE DataId IN (");
-        String comma = "";
-        for (ExpData data : datas)
-        {
-            sql.append(comma).appendValue(data.getRowId());
-            comma = ",";
-        }
-        sql.append(")");
+        SQLFragment sql = new SQLFragment ("SELECT * FROM " + getTinfoObject().toString() + " WHERE DataId");
+        sql.appendInClause(datas.stream().map(ExpData::getRowId).toList(), getSchema().getSqlDialect());
         AttrObject[] array = new SqlSelector(getSchema(), sql).getArray(AttrObject.class);
         return Arrays.asList(array);
     }
@@ -1023,18 +1015,13 @@ public class FlowManager
 
     int MAX_BATCH = 1000;
 
-    private String join(Integer[] oids, int from, int to)
-    {
-        Iterator<Integer> i = new ArrayIterator<>(oids, from, to);
-        return StringUtils.join(i, ',');
-    }
-
     private void deleteAttributes(Integer[] oids)
     {
         if (oids.length == 0)
             return;
 
         SqlExecutor executor = new SqlExecutor(getSchema());
+        SqlDialect dialect = getSchema().getSqlDialect();
 
         for (int from = 0, to; from < oids.length; from = to)
         {
@@ -1042,12 +1029,12 @@ public class FlowManager
             if (to > oids.length)
                 to = oids.length;
 
-            String list = join(oids, from, to);
+            List<Integer> list = Arrays.asList(oids).subList(from, to);
             // XXX: delete no longer referenced statattr afterwards?
-            executor.execute("DELETE FROM flow.Statistic WHERE ObjectId IN (" + list + ")");
-            executor.execute("DELETE FROM flow.Keyword WHERE ObjectId IN (" + list + ")");
-            executor.execute("DELETE FROM flow.Graph WHERE ObjectId IN (" + list + ")");
-            executor.execute("DELETE FROM flow.Script WHERE ObjectId IN (" + list + ")");
+            executor.execute(new SQLFragment("DELETE FROM flow.Statistic WHERE ObjectId").appendInClause(list, dialect));
+            executor.execute(new SQLFragment("DELETE FROM flow.Keyword WHERE ObjectId").appendInClause(list, dialect));
+            executor.execute(new SQLFragment("DELETE FROM flow.Graph WHERE ObjectId").appendInClause(list, dialect));
+            executor.execute(new SQLFragment("DELETE FROM flow.Script WHERE ObjectId").appendInClause(list, dialect));
         }
     }
 
@@ -1069,9 +1056,8 @@ public class FlowManager
         try (DbScope.Transaction transaction = scope.ensureTransaction())
         {
             deleteAttributes(oids);
-            SQLFragment sqlf = new SQLFragment("DELETE FROM flow.Object WHERE RowId IN (" );
-            sqlf.append(StringUtils.join(oids,','));
-            sqlf.append(")");
+            SQLFragment sqlf = new SQLFragment("DELETE FROM flow.Object WHERE RowId");
+            sqlf.appendInClause(Arrays.asList(oids), getSchema().getSqlDialect());
             new SqlExecutor(getSchema()).execute(sqlf);
             transaction.commit();
         }
@@ -1109,17 +1095,9 @@ public class FlowManager
     {
         if (datas.isEmpty())
             return;
-        StringBuilder sqlGetOIDs = new StringBuilder("SELECT flow.Object.RowId FROM flow.Object WHERE flow.Object.DataId IN (");
-        String comma = "";
-        Set<Container> containers = new HashSet<>();
-        for (ExpData data : datas)
-        {
-            sqlGetOIDs.append(comma);
-            comma = ", ";
-            sqlGetOIDs.append(data.getRowId());
-            containers.add(data.getContainer());
-        }
-        sqlGetOIDs.append(")");
+        SQLFragment sqlGetOIDs = new SQLFragment("SELECT flow.Object.RowId FROM flow.Object WHERE flow.Object.DataId");
+        sqlGetOIDs.appendInClause(datas.stream().map(ExpData::getRowId).toList(), getSchema().getSqlDialect());
+        Set<Container> containers = datas.stream().map(ExpData::getContainer).collect(Collectors.toSet());
         Integer[] objectIds = new SqlSelector(getSchema(), sqlGetOIDs).getArray(Integer.class);
         if (objectIds.length == 0)
             return;

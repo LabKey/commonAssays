@@ -176,15 +176,9 @@ public class ComparePeptideTableInfo extends VirtualTable<MS2Schema>
         );
         result.append(_userSchema.getPeptideSelectSQL(_request, _peptideViewName, fieldKeys, null));
         result.append(") ");
-        result.append(" p WHERE f.Run IN(");
-        String separator = "";
-        for (MS2Run run : _runs)
-        {
-            result.append(separator);
-            separator = ", ";
-            result.appendValue(run.getRun());
-        }
-        result.append(") AND p.Fraction = f.Fraction GROUP BY f.Run, p.Peptide, p.RowId) x GROUP BY InnerPeptide");
+        result.append(" p WHERE f.Run");
+        result.appendInClause(_runs.stream().map(MS2Run::getRun).toList(), MS2Manager.getSqlDialect());
+        result.append(" AND p.Fraction = f.Fraction GROUP BY f.Run, p.Peptide, p.RowId) x GROUP BY InnerPeptide");
         return result;
     }
 }
