@@ -270,7 +270,7 @@ public class ViabilityManager
         // Create temp table with specimen aggregate results
         String shortName = "ViabilitySpecimenAgg_" + protocol.getRowId() + "_" + tempTableCounter.incrementAndGet();
         SpecimenAggregateTempTableToken tok = new SpecimenAggregateTempTableToken(shortName);
-        SQLFragment tempTableName = new SQLFragment(schema.getSqlDialect().getGlobalTempTablePrefix() + shortName);
+        SQLFragment tempTableName = new SQLFragment(schema.getSqlDialect().getGlobalTempTablePrefix()).append(shortName);
         tempTableName.addTempToken(tok);
         TempTableTracker tracker = TempTableTracker.track(shortName, tok);
 
@@ -292,7 +292,7 @@ public class ViabilityManager
 
             if (LOG.isDebugEnabled())
             {
-                long count = executor.executeWithResults(new SQLFragment("SELECT COUNT(*) FROM " + tempTableName), (rs, conn) -> {
+                long count = executor.executeWithResults(new SQLFragment("SELECT COUNT(*) FROM ").append(tempTableName), (rs, conn) -> {
                     rs.next();
                     return rs.getLong(1);
                 });
