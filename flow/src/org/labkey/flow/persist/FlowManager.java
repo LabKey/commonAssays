@@ -1030,11 +1030,12 @@ public class FlowManager
                 to = oids.length;
 
             List<Integer> list = Arrays.asList(oids).subList(from, to);
-            // XXX: delete no longer referenced statattr afterwards?
-            executor.execute(new SQLFragment("DELETE FROM flow.Statistic WHERE ObjectId").appendInClause(list, dialect));
-            executor.execute(new SQLFragment("DELETE FROM flow.Keyword WHERE ObjectId").appendInClause(list, dialect));
-            executor.execute(new SQLFragment("DELETE FROM flow.Graph WHERE ObjectId").appendInClause(list, dialect));
-            executor.execute(new SQLFragment("DELETE FROM flow.Script WHERE ObjectId").appendInClause(list, dialect));
+            var inList = new SQLFragment().appendInClause(list, dialect);
+            // XXX: delete no longer referenced statattr afterward?
+            executor.execute(new SQLFragment("DELETE FROM flow.Statistic WHERE ObjectId").append(inList));
+            executor.execute(new SQLFragment("DELETE FROM flow.Keyword WHERE ObjectId").append(inList));
+            executor.execute(new SQLFragment("DELETE FROM flow.Graph WHERE ObjectId").append(inList));
+            executor.execute(new SQLFragment("DELETE FROM flow.Script WHERE ObjectId").append(inList));
         }
     }
 
