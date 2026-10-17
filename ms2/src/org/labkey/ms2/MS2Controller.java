@@ -1725,16 +1725,7 @@ public class MS2Controller extends SpringActionController
 
         public void appendTargetSeqIdsClause(SQLFragment sql)
         {
-            sql.append("(");
-            if (_targetSeqIds == null || _targetSeqIds.isEmpty())
-            {
-                sql.append("-1");
-            }
-            else
-            {
-                sql.append(StringUtils.join(_targetSeqIds, ", "));
-            }
-            sql.append(")");
+            sql.appendInClause(_targetSeqIds == null ? List.of() : _targetSeqIds, ProteinSchema.getSqlDialect());
         }
 
         public boolean hasTargetSeqIds()
@@ -2500,9 +2491,9 @@ public class MS2Controller extends SpringActionController
         sql.append(MS2Manager.getTableInfoRuns(), "r");
         sql.append(", ");
         sql.append(MS2Manager.getTableInfoFastaRunMapping(), "frm");
-        sql.append(" WHERE fs.FastaId = frm.FastaId AND frm.Run = r.Run AND r.Deleted = ? AND r.Container IN ");
+        sql.append(" WHERE fs.FastaId = frm.FastaId AND frm.Run = r.Run AND r.Deleted = ? AND r.Container");
         sql.add(Boolean.FALSE);
-        sql.append(ContainerManager.getIdsAsCsvList(new HashSet<>(containers), d));
+        sql.appendInClause(containers, d);
         sql.append(")");
 
         return sql;
@@ -3686,14 +3677,9 @@ public class MS2Controller extends SpringActionController
                 SQLFragment sql = new SQLFragment();
                 sql.append("SELECT x.SeqId, x.Run FROM ");
                 sql.append(MS2Manager.getTableInfoPeptides(), "x");
-                sql.append(" WHERE x.SeqId IS NOT NULL AND x.Run IN (");
-                String sep = "";
-                for (MS2Run run : runs)
-                {
-                    sql.append(sep).appendValue(run.getRun());
-                    sep = ",";
-                }
-                sql.append(") ");
+                sql.append(" WHERE x.SeqId IS NOT NULL AND x.Run");
+                sql.appendInClause(runs.stream().map(MS2Run::getRun).toList(), MS2Manager.getSqlDialect());
+                sql.append(" ");
                 if (form.isCustomViewPeptideFilter() && form.getPeptideCustomViewName(context) != null)
                 {
                     // add the custom view filters from the viewName provided

@@ -226,26 +226,17 @@ public class ChooseRunsToAnalyzeForm extends FlowQueryForm implements DataRegion
             SimpleFilter ret = new SimpleFilter(filter);
 
             List<FlowRun> runs = FlowRun.getRunsForContainer(getContainer(), FlowProtocolStep.keywords);
-            int runCount = 0;
-            SQLFragment sql = new SQLFragment("RowId IN (");
-            String comma = "";
-            for (FlowRun run : runs)
-            {
-                if (run.getPath() == null)
-                    continue;
-                sql.append(comma);
-                comma = ",";
-                sql.appendValue(run.getRunId());
-                runCount ++;
-            }
-            sql.append(")");
-            if (runCount == 0)
+            List<Long> runIds = runs.stream()
+                    .filter(run -> run.getPath() != null)
+                    .map(FlowRun::getRunId)
+                    .toList();
+            if (runIds.isEmpty())
             {
                 ret.addWhereClause(new SQLFragment("1 = 0"));
             }
             else
             {
-                ret.addWhereClause(sql, FieldKey.fromParts("RowId"));
+                ret.addInClause(FieldKey.fromParts("RowId"), runIds);
             }
             return ret;
         }

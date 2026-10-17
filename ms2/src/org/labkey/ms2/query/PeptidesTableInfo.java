@@ -300,15 +300,8 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             }
             else
             {
-                sql.append("AND Type IN (");
-                String separator = "";
-                for (MS2RunType runType : runTypes)
-                {
-                    sql.append(separator);
-                    separator = ", ";
-                    sql.appendValue(runType.toString());
-                }
-                sql.append(")");
+                sql.append("AND Type");
+                sql.appendInClause(runTypes.stream().map(MS2RunType::toString).toList(), MS2Manager.getSqlDialect());
             }
         }
         sql.append(" AND ");
@@ -316,7 +309,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
         sql.append(getContainerFilter().getSQLFragment(getSchema(), new SQLFragment("Container"), true));
         if (_userSchema.getRuns() != null)
         {
-            sql.append(" AND Run IN ");
+            sql.append(" AND Run");
             _userSchema.appendRunInClause(sql);
         }
         sql.append("))");
@@ -367,7 +360,7 @@ public class PeptidesTableInfo extends FilteredTable<MS2Schema>
             sql.append(MS2Manager.getTableInfoPeptidesData(), "pep");
             sql.append(" JOIN ");
             sql.append(MS2Manager.getTableInfoFractions(), "fra");
-            sql.append(" ON pep.Fraction = fra.Fraction WHERE fra.Run IN ");
+            sql.append(" ON pep.Fraction = fra.Fraction WHERE fra.Run");
             _userSchema.appendRunInClause(sql);
             sql.append(" )x\n");
             sql.append(" WHERE RowNum = 1)");

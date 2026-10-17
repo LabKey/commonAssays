@@ -16,8 +16,11 @@
 package org.labkey.ms2.protein.tools;
 
 import org.jetbrains.annotations.Nullable;
+import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.protein.ProteinSchema;
+
+import java.util.List;
 
 public class GoHelpers
 {
@@ -126,7 +129,7 @@ public class GoHelpers
         }
     }
 
-    public static String getAnnotTypeWhereClause(GoTypes kind)
+    public static SQLFragment getAnnotTypeWhereClause(GoTypes kind)
     {
         if (kind == null)
         {
@@ -134,10 +137,10 @@ public class GoHelpers
         }
         return switch (kind)
         {
-            case CELL_LOCATION -> "AnnotTypeId=" + getgTypeC();
-            case FUNCTION -> "AnnotTypeId=" + getgTypeF();
-            case PROCESS -> "AnnotTypeId=" + getgTypeP();
-            case ALL -> "AnnotTypeId IN (" + getgTypeC() + "," + getgTypeF() + "," + getgTypeC() + ")";
+            case CELL_LOCATION -> new SQLFragment("AnnotTypeId = ?", getgTypeC());
+            case FUNCTION -> new SQLFragment("AnnotTypeId = ?", getgTypeF());
+            case PROCESS -> new SQLFragment("AnnotTypeId = ?", getgTypeP());
+            case ALL -> new SQLFragment("AnnotTypeId").appendInClause(List.of(getgTypeC(), getgTypeF(), getgTypeP()), ProteinSchema.getSqlDialect());
         };
     }
 }

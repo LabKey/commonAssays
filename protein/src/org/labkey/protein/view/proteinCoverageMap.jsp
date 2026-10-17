@@ -16,6 +16,7 @@
  */
 %>
 <%@ page import="org.apache.commons.lang3.StringUtils" %>
+<%@ page import="org.apache.commons.lang3.Strings" %>
 <%@ page import="org.labkey.api.protein.CoverageViewBean" %>
 <%@ page import="org.labkey.api.protein.PeptideCharacteristic" %>
 <%@ page import="org.labkey.api.protein.ProteinFeature" %>
@@ -337,7 +338,7 @@
             </div>
             <% for (String uniqueFeature : uniqueFeatures)
             {
-                String id = "feature-" + StringUtils.replace(uniqueFeature, " ", "");
+                String id = "feature-" + Strings.CS.replace(uniqueFeature, " ", "");
                 String color = colors.length > colorIndex ? colors[colorIndex++] : "#808080";
                 addHandler(id, "change", "LABKEY.ms2.ProteinCoverageMap.toggleStyleColor(" + q(id) + ", " + q(color) + ")");
             %>

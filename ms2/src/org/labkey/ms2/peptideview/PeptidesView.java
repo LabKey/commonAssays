@@ -29,6 +29,7 @@ import org.labkey.api.query.QueryView;
 import org.labkey.api.query.UserSchema;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.view.DataView;
+import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.query.MS2Schema;
 
 import java.util.ArrayList;
@@ -81,17 +82,9 @@ public class PeptidesView extends QueryView
                 ContainerManager.getAllChildren(getViewContext().getContainer(), getViewContext().getUser())
                 : Collections.singleton(getViewContext().getContainer());
 
-        SQLFragment sql = new SQLFragment("Fraction IN (SELECT Fraction FROM ms2.Fractions WHERE Run IN (SELECT Run FROM ms2.Runs WHERE Container IN (");
-        String sep = "";
-        for(Container container : containers)
-        {
-            sql.append(sep);
-            sql.append("'");
-            sql.append(container.getId());
-            sql.append("'");
-            sep = ",";
-        }
-        sql.append(")))");
+        SQLFragment sql = new SQLFragment("Fraction IN (SELECT Fraction FROM ms2.Fractions WHERE Run IN (SELECT Run FROM ms2.Runs WHERE Container");
+        sql.appendInClause(containers, MS2Manager.getSqlDialect());
+        sql.append("))");
         filter.addWhereClause(sql, null, FieldKey.fromParts("Fraction"));
 
         List<FieldKey> defCols = new ArrayList<>();

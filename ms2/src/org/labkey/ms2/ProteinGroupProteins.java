@@ -79,24 +79,17 @@ public class ProteinGroupProteins
             throw new RuntimeSQLException(e);
         }
 
-        StringBuilder whereClause = new StringBuilder();
+        SQLFragment whereClause = new SQLFragment();
 
         whereClause.append(" pg.RowId >= ");
-        whereClause.append(firstGroupId);
+        whereClause.appendValue(firstGroupId);
         whereClause.append(" AND pg.RowId <= ");
-        whereClause.append(lastGroupId);
+        whereClause.appendValue(lastGroupId);
 
         if (_runs != null && !_runs.isEmpty())
         {
-            whereClause.append(" AND ppf.Run IN (");
-            whereClause.append(_runs.getFirst().getRun());
-            for (int i = 1; i < _runs.size(); i++)
-            {
-                whereClause.append(", ");
-                whereClause.append(_runs.get(i).getRun());
-            }
-
-            whereClause.append(")");
+            whereClause.append(" AND ppf.Run");
+            whereClause.appendInClause(_runs.stream().map(MS2Run::getRun).toList(), MS2Manager.getSqlDialect());
         }
 
         addGroupsToList(whereClause, result);
@@ -104,9 +97,9 @@ public class ProteinGroupProteins
         return result;
     }
 
-    private void addGroupsToList(StringBuilder extraWhereClause, Map<Integer, List<ProteinSummary>> result)
+    private void addGroupsToList(SQLFragment extraWhereClause, Map<Integer, List<ProteinSummary>> result)
     {
-        String sql = "SELECT pg.RowId, protseq.SeqId, proteinseq.LookupString AS Protein, protseq.Description, protseq.BestGeneName, protSeq.BestName, protseq.Mass " +
+        SQLFragment sql = new SQLFragment("SELECT pg.RowId, protseq.SeqId, proteinseq.LookupString AS Protein, protseq.Description, protseq.BestGeneName, protSeq.BestName, protseq.Mass " +
                 "FROM " + ProteinSchema.getTableInfoSequences() + " protseq, " +
                 "   " + MS2Manager.getTableInfoProteinGroupMemberships() + " pgm, " +
                 "   " + MS2Manager.getTableInfoProteinGroups() + " pg, " +
@@ -116,15 +109,16 @@ public class ProteinGroupProteins
                 "   " + MS2Manager.getTableInfoProteinProphetFiles() + " ppf\n" +
                 "WHERE pgm.ProteinGroupId = pg.RowId " +
                 "   AND pgm.SeqId = protseq.SeqId " +
-                "   AND " + extraWhereClause +
-                "   AND pg.ProteinProphetFileId = ppf.RowId" +
+                "   AND ");
+        sql.append(extraWhereClause);
+        sql.append("   AND pg.ProteinProphetFileId = ppf.RowId" +
                 "   AND ppf.Run = r.Run" +
                 "   AND r.Run = frm.Run" +
                 "   AND frm.FastaId = proteinseq.FastaId" +
                 "   AND proteinseq.SeqId = pgm.SeqId" +
-                "\nORDER BY pg.GroupNumber, pg.IndistinguishableCollectionId, protseq.Length, proteinseq.LookupString";
+                "\nORDER BY pg.GroupNumber, pg.IndistinguishableCollectionId, protseq.Length, proteinseq.LookupString");
 
-        Map<String, Object>[] rows = new SqlSelector(MS2Manager.getSchema(), new SQLFragment(sql)).getMapArray();
+        Map<String, Object>[] rows = new SqlSelector(MS2Manager.getSchema(), sql).getMapArray();
 
         for (Map<String, Object> row : rows)
         {

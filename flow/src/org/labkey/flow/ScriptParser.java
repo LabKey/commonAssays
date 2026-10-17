@@ -15,7 +15,7 @@
  */
 package org.labkey.flow;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.xmlbeans.XmlError;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlOptions;
@@ -83,7 +83,7 @@ public class ScriptParser
             XmlOptions options = new XmlOptions();
             List<XmlError> errors = new ArrayList<>();
             options.setDocumentType(ScriptDocument.type);
-            script = StringUtils.replace(script, "<script>", "<script xmlns=\"" + ScriptDocument.type.getContentModel().getName().getNamespaceURI() + "\">");
+            script = Strings.CS.replace(script, "<script>", "<script xmlns=\"" + ScriptDocument.type.getContentModel().getName().getNamespaceURI() + "\">");
             ScriptDocument doc = ScriptDocument.Factory.parse(new StringReader(script), options);
             options.setErrorListener(errors);
 
@@ -92,7 +92,7 @@ public class ScriptParser
                 for (XmlError xmlError : errors)
                 {
                     String message = xmlError.getMessage();
-                    message = StringUtils.replace(message, "@" + ScriptDocument.type.getContentModel().getName().getNamespaceURI(), "");
+                    message = Strings.CS.replace(message, "@" + ScriptDocument.type.getContentModel().getName().getNamespaceURI(), "");
                     String location = xmlError.getCursorLocation().xmlText();
                     if (location.length() > 100)
                         location = StringUtilsLabKey.leftSurrogatePairFriendly(location, 100);
