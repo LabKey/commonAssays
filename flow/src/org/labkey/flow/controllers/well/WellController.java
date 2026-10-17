@@ -105,11 +105,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -756,18 +758,8 @@ public class WellController extends BaseFlowController
             update.add(getContainer());
             update.add(ObjectType.fcsKeywords.getTypeId());
             update.add(_keywordid);
-            update.append(" AND value IN (");
-            String param = "?";
-            for (int i=0 ; i<form.from.length ; i++)
-            {
-                if (null != form.from[i])
-                {
-                    update.append(param);
-                    update.add(form.from[i]);
-                    param = ",?";
-                }
-            }
-            update.append(")");
+            update.append(" AND value");
+            update.appendInClause(Arrays.stream(form.from).filter(Objects::nonNull).toList(), FlowManager.get().getSchema().getSqlDialect());
 
             int updated = new SqlExecutor(FlowManager.get().getSchema()).execute(update);
 

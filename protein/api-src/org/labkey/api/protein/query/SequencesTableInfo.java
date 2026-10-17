@@ -38,6 +38,7 @@ import org.labkey.api.query.UserSchema;
 import org.labkey.api.util.StringExpression;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
@@ -227,22 +228,8 @@ public class SequencesTableInfo<SchemaType extends UserSchema> extends FilteredT
 
     public void addSeqIdFilter(int[] seqIds)
     {
-        SQLFragment sql = new SQLFragment("SeqId IN (");
-        if (seqIds.length == 0)
-        {
-            sql.append("NULL");
-        }
-        else
-        {
-            String separator = "";
-            for (long seqId : seqIds)
-            {
-                sql.append(separator);
-                separator = ", ";
-                sql.append(Long.toString(seqId));
-            }
-        }
-        sql.append(")");
+        SQLFragment sql = new SQLFragment("SeqId");
+        sql.appendInClause(Arrays.stream(seqIds).boxed().toList(), ProteinSchema.getSqlDialect());
 
         addCondition(sql, FieldKey.fromParts("SeqId"));
     }

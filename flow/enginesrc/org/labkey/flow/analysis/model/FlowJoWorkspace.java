@@ -17,6 +17,7 @@
 package org.labkey.flow.analysis.model;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
@@ -392,8 +393,8 @@ abstract public class FlowJoWorkspace extends Workspace
 
     static public String ___cleanName(String name)
     {
-        name = StringUtils.replace(name, "<", CompensationMatrix.PREFIX);
-        name = StringUtils.replace(name, ">", CompensationMatrix.SUFFIX);
+        name = Strings.CS.replace(name, "<", CompensationMatrix.PREFIX);
+        name = Strings.CS.replace(name, ">", CompensationMatrix.SUFFIX);
         name = StringUtils.replaceChars(name, ',', ';');
         // replace MacRoman em-dash and en-dash
         name = StringUtils.replaceChars(name, PopulationName.MAC_EMDASH, '-');

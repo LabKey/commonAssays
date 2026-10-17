@@ -17,7 +17,6 @@
 package org.labkey.flow.query;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.assay.AbstractAssayProvider;
@@ -1927,9 +1926,8 @@ public class FlowSchema extends UserSchema implements UserSchema.HasContextualRo
         }
         else
         {
-            SQLFragment sqlCondition = new SQLFragment("RowId IN (");
-            sqlCondition.append(StringUtils.join(map.values().iterator(), ","));
-            sqlCondition.append(")");
+            SQLFragment sqlCondition = new SQLFragment("RowId");
+            sqlCondition.appendInClause(map.values(), table.getSqlDialect());
             table.addCondition(sqlCondition);
         }
     }

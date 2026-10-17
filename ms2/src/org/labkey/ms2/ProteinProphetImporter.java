@@ -16,12 +16,12 @@
 
 package org.labkey.ms2;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbScope;
 import org.labkey.api.data.SQLFragment;
+import org.labkey.api.data.SqlExecutor;
 import org.labkey.api.data.Table;
 import org.labkey.api.data.dialect.SqlDialect;
 import org.labkey.api.exp.ExperimentException;
@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -117,7 +118,6 @@ public class ProteinProphetImporter
 
         Statement stmt = null;
         PreparedStatement mergePeptideStmt = null;
-        PreparedStatement mergeProteinStmt = null;
         PreparedStatement peptideStmt = null;
         PreparedStatement groupStmt = null;
         PreparedStatement proteinStmt = null;
@@ -243,19 +243,15 @@ public class ProteinProphetImporter
 
                 int[] fastaIds = run.getFastaIds();
 
-                String mergeProteinSQL = "INSERT INTO " + MS2Manager.getTableInfoProteinGroupMemberships() + " " +
+                SQLFragment mergeProteinSQL = new SQLFragment("INSERT INTO " + MS2Manager.getTableInfoProteinGroupMemberships() + " " +
                         "(ProteinGroupId, Probability, SeqId) " +
                         "SELECT p.ProteinGroupId, p.Probability, s.SeqId " +
                         "   FROM " + ProteinSchema.getTableInfoFastaSequences() + " s, " + proteinsTempTableName + " p" +
-                        "   WHERE s.FastaId IN(" + StringUtils.repeat("?", ", ", fastaIds.length) + ") AND s.LookupString = p.LookupString GROUP BY p.ProteinGroupId, p.Probability, s.SeqId";
+                        "   WHERE s.FastaId");
+                mergeProteinSQL.appendInClause(Arrays.stream(fastaIds).boxed().toList(), _dialect);
+                mergeProteinSQL.append(" AND s.LookupString = p.LookupString GROUP BY p.ProteinGroupId, p.Probability, s.SeqId");
 
-                mergeProteinStmt = connection.prepareStatement(mergeProteinSQL);
-                int index = 1;
-                for (int fastaId : fastaIds)
-                {
-                    mergeProteinStmt.setInt(index++, fastaId);
-                }
-                mergeProteinStmt.executeUpdate();
+                new SqlExecutor(MS2Manager.getSchema().getScope(), connection).execute(mergeProteinSQL);
                 log.info("Finished with moving data into ms2.ProteinGroupMemberships after {} ms", System.currentTimeMillis() - insertStartTime);
 
                 file.setUploadCompleted(true);
@@ -294,7 +290,6 @@ public class ProteinProphetImporter
                     try { stmt.close(); } catch (SQLException ignored) {}
                 }
                 if (mergePeptideStmt != null) { try { mergePeptideStmt.close(); } catch (SQLException ignored) {} }
-                if (mergeProteinStmt != null) { try { mergeProteinStmt.close(); } catch (SQLException ignored) {} }
                 if (peptideStmt != null) { try { peptideStmt.close(); } catch (SQLException ignored) {} }
                 if (groupStmt != null) { try { groupStmt.close(); } catch (SQLException ignored) {} }
                 if (proteinStmt != null) { try { proteinStmt.close(); } catch (SQLException ignored) {} }

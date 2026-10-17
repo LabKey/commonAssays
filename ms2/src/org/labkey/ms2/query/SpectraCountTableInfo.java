@@ -369,14 +369,14 @@ public class SpectraCountTableInfo extends VirtualTable<MS2Schema>
         {
             sql.append("INNER JOIN ");
             sql.append(ProteinSchema.getTableInfoSequences(), "s");
-            sql.append(" ON (s.SeqId IN ");
+            sql.append(" ON (s.SeqId");
             _form.appendTargetSeqIdsClause(sql);
             sql.append(")\n");
         }
 
         if (_userSchema.getRuns() != null)
         {
-            sql.append("AND r.Run IN ");
+            sql.append("AND r.Run");
             _userSchema.appendRunInClause(sql);
             sql.append("\n");
         }

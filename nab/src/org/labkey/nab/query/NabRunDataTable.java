@@ -16,7 +16,7 @@
 
 package org.labkey.nab.query;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.labkey.api.assay.plate.AbstractPlateBasedAssayProvider;
 import org.labkey.api.assay.dilution.DilutionManager;
 import org.labkey.api.assay.dilution.query.DilutionProviderSchema;
@@ -205,7 +205,7 @@ public class NabRunDataTable extends NabBaseTable
         {
             result = getColumn("WellGroupName");
         }
-        else if (StringUtils.startsWithIgnoreCase(name, "curve") || StringUtils.startsWithIgnoreCase(name, "point"))
+        else if (Strings.CI.startsWith(name, "curve") || Strings.CI.startsWith(name, "point"))
         {
             DilutionManager.PropDescCategory pdCat = NabManager.getPropDescCategory(name);
             FieldKey fieldKey = DilutionManager.getCalculatedColumn(pdCat);

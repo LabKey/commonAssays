@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.apache.commons.beanutils.ConversionException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.labkey.api.data.CachedResultSet;
 import org.labkey.api.data.CachedResultSetBuilder;
 import org.labkey.api.data.ColumnInfo;
@@ -437,7 +438,7 @@ public abstract class FilterFlowReport extends FlowReport
 
     public String toSQL(String s)
     {
-        return null == s ? "''" : "'" + StringUtils.replace(s, "'", "\'\'") + "'";
+        return null == s ? "''" : "'" + Strings.CS.replace(s, "'", "\'\'") + "'";
     }
 
     public String toSQL(FieldKey fieldKey)

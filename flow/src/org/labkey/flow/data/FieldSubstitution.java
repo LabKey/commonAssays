@@ -16,7 +16,7 @@
 
 package org.labkey.flow.data;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.labkey.api.query.FieldKey;
@@ -38,10 +38,10 @@ public class FieldSubstitution
         int ichCur = 0;
         while (true)
         {
-            int ichExprStart = StringUtils.indexOf(s, "${", ichCur);
+            int ichExprStart = Strings.CS.indexOf(s, "${", ichCur);
             if (ichExprStart < 0)
                 break;
-            int ichExprEnd = StringUtils.indexOf(s, "}", ichExprStart);
+            int ichExprEnd = Strings.CS.indexOf(s, "}", ichExprStart);
             if (ichExprEnd < 0)
                 break;
             if (ichExprStart > ichCur)
