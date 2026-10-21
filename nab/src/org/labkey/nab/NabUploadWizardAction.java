@@ -88,6 +88,11 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
             super.validateStep(form, errors);
             NabAssayProvider provider = form.getProvider();
 
+            // GH Issue 1687: validate that the replaced run is deletable.
+            ExpRun reRun = form.getReRun();
+            if (reRun != null && (!reRun.getContainer().equals(getContainer()) || reRun.getProtocol().getRowId() != form.getProtocol().getRowId() || !reRun.canDelete(getUser())))
+                errors.reject(SpringActionController.ERROR_MSG, "You do not have permission to replace run " + reRun.getRowId() + ".");
+
             try
             {
                 PlateSamplePropertyHelper helper = provider.getSamplePropertyHelper(form, getSelectedParticipantVisitResolverType(provider, form));
@@ -122,17 +127,9 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
             execute(form, errors, _postedSampleProperties);
             boolean success = !errors.hasErrors() && super.executeStep(form, errors);
 
-            if (success && _run != null)
-            {
-                User elevatedUser = getUser();
-                if (_run.getCreatedBy().equals(getUser()) && !getContainer().hasPermission(getUser(), DeletePermission.class))
-                {
-                    elevatedUser = ElevatedUser.ensureContextualRoles(getContainer(), getUser(), Pair.of(DeletePermission.class, EditorRole.class));
-                }
+            if (success && _run != null && form.getReRun() != null)
+                form.getReRun().delete(getUser());
 
-                if (form.getReRun() != null)
-                    form.getReRun().delete(elevatedUser);
-            }
             return success;
         }
 
