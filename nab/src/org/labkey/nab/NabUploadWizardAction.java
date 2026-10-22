@@ -32,6 +32,7 @@ import org.labkey.api.study.assay.ParticipantVisitResolverType;
 import org.labkey.api.util.Pair;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.InsertView;
+import org.labkey.api.view.UnauthorizedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ObjectError;
@@ -91,7 +92,7 @@ public class NabUploadWizardAction extends UploadWizardAction<NabRunUploadForm, 
             // GH Issue 1687: validate that the replaced run is deletable.
             ExpRun reRun = form.getReRun();
             if (reRun != null && (!reRun.getContainer().equals(getContainer()) || reRun.getProtocol().getRowId() != form.getProtocol().getRowId() || !reRun.canDelete(getUser())))
-                errors.reject(SpringActionController.ERROR_MSG, "You do not have permission to replace run " + reRun.getRowId() + ".");
+                throw new UnauthorizedException("You do not have permission to replace run " + reRun.getRowId() + ".");
 
             try
             {
