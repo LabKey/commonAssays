@@ -32,6 +32,7 @@ import org.labkey.api.assay.AssayFileWriter;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerManager;
 import org.labkey.api.data.DataRegionSelection;
+import org.labkey.api.data.TableSelector;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.jsp.JspBase;
 import org.labkey.api.pipeline.PipeRoot;
@@ -51,6 +52,7 @@ import org.labkey.api.study.StudyService;
 import org.labkey.api.test.TestWhen;
 import org.labkey.api.usageMetrics.SimpleMetricsService;
 import org.labkey.api.util.FileUtil;
+import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.URIUtil;
@@ -1577,6 +1579,26 @@ public class AnalysisScriptController extends BaseFlowController
             // valid case: the script in its own container is accepted (renders the choose-runs wizard).
             assertStatus(HttpServletResponse.SC_OK,
                     get(new ActionURL(ChooseRunsToAnalyzeAction.class, _folderB).addParameter("scriptId", _scriptIdB), _admin));
+        }
+    }
+
+    // GH Issue 1299: a GET renders the confirmation page and must never queue the import job
+    public static class ImportRunsRequiresPostTestCase extends AbstractContainerScopingTest
+    {
+        @Test
+        public void testGetDoesNotImport() throws Exception
+        {
+            User admin = getAdmin();
+            Container c = createContainer("Import");
+            PipelineService.get().setPipelineRoot(admin, c, PipelineService.PRIMARY_ROOT, false, JunitUtil.getSampleData(null, "flow").toURI());
+
+            ActionURL url = new ActionURL(ImportRunsAction.class, c)
+                    .addParameter("path", "flowjoquery")
+                    .addParameter("current", false)
+                    .addParameter("confirm", true)
+                    .addParameter("file", "miniFCS");
+            assertStatus(HttpServletResponse.SC_OK, get(url, admin));
+            assertEquals("GET must not queue an import job", 0, new TableSelector(PipelineService.get().getJobsTable(admin, c)).getRowCount());
         }
     }
 }

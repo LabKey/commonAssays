@@ -293,7 +293,7 @@ public class AnalysisSerializer
                 throw new IOException("Could not delete the directory \"" + importDir + "\"");
 
             ZipUtil.unzipToDirectory(file.toPath(), importDir.toNioPathForWrite());
-            FileLike statisticsFileLike = importDir.resolveChild(zipEntry.getName());
+            FileLike statisticsFileLike = importDir.resolveFile(org.labkey.api.util.Path.parse(zipEntry.getName()));
             if (statisticsFileLike.exists())
                 statisticsFile = statisticsFileLike.toNioPathForRead().toFile();
         }
