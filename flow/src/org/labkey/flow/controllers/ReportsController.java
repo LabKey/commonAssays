@@ -30,7 +30,6 @@ import org.labkey.api.action.MutatingApiAction;
 import org.labkey.api.action.ReturnUrlForm;
 import org.labkey.api.action.SimpleErrorView;
 import org.labkey.api.action.SimpleViewAction;
-import org.labkey.api.action.SpringActionController;
 import org.labkey.api.pipeline.PipeRoot;
 import org.labkey.api.pipeline.PipelineService;
 import org.labkey.api.pipeline.PipelineStatusUrls;
@@ -55,7 +54,6 @@ import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
 import org.labkey.api.view.NotFoundException;
-import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.VBox;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.ViewContext;
@@ -380,15 +378,53 @@ public class ReportsController extends BaseFlowController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public class ExecuteAction extends SimpleViewAction<ExecuteForm>
+    public class ExecuteAction extends FormViewAction<ExecuteForm>
     {
         FlowReport r;
+        ActionURL _jobStatusURL;
+
+        private void initReport(ExecuteForm form, BindException errors)
+        {
+            if (r == null)
+            {
+                r = getReport(getViewContext(), form);
+                r.updateProperties(getViewContext(), getPropertyValues(), errors, true);
+            }
+        }
 
         @Override
-        public ModelAndView getView(ExecuteForm form, BindException errors) throws Exception
+        public void validateCommand(ExecuteForm form, Errors errors)
         {
-            r = getReport(getViewContext(), form);
-            r.updateProperties(getViewContext(), getPropertyValues(), errors, true);
+        }
+
+        @Override
+        public boolean handlePost(ExecuteForm form, BindException errors) throws Exception
+        {
+            initReport(form, errors);
+            if (errors.hasErrors() || !r.saveToDomain() || !form.isConfirm())
+                return false;
+
+            // Run report in background, redirect to pipeline status page
+            ViewBackgroundInfo info = getViewBackgroundInfo();
+            PipeRoot pipeRoot = PipelineService.get().getPipelineRootSetting(getContainer());
+            FlowReportJob job = new FlowReportJob((FilterFlowReport)r, info, pipeRoot);
+            PipelineService.get().queueJob(job);
+
+            long jobId = PipelineService.get().getJobId(getUser(), getContainer(), job.getJobGUID());
+            _jobStatusURL = urlProvider(PipelineStatusUrls.class).urlDetails(getContainer(), jobId);
+            return true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(ExecuteForm form)
+        {
+            return _jobStatusURL;
+        }
+
+        @Override
+        public ModelAndView getView(ExecuteForm form, boolean reshow, BindException errors)
+        {
+            initReport(form, errors);
 
             ModelAndView view;
             if (errors.hasErrors())
@@ -397,26 +433,8 @@ public class ReportsController extends BaseFlowController
             }
             else if (r.saveToDomain())
             {
-                if (form.isConfirm())
-                {
-                    try (var ignore = SpringActionController.ignoreSqlUpdates())
-                    {
-                        // Run report in background, redirect to pipeline status page
-                        ViewBackgroundInfo info = getViewBackgroundInfo();
-                        PipeRoot pipeRoot = PipelineService.get().getPipelineRootSetting(getContainer());
-                        FlowReportJob job = new FlowReportJob((FilterFlowReport)r, info, pipeRoot);
-                        PipelineService.get().queueJob(job);
-
-                        // navigate to the job status page
-                        long jobId = PipelineService.get().getJobId(getUser(), getContainer(), job.getJobGUID());
-                        throw new RedirectException(urlProvider(PipelineStatusUrls.class).urlDetails(getContainer(), jobId));
-                    }
-                }
-                else
-                {
-                    // Prompt for confirmation
-                    view = new JspView<>("/org/labkey/flow/controllers/confirmExecuteReport.jsp", Pair.of(form, r), errors);
-                }
+                // Prompt for confirmation
+                view = new JspView<>("/org/labkey/flow/controllers/confirmExecuteReport.jsp", Pair.of(form, r), errors);
             }
             else
             {

@@ -340,7 +340,8 @@ public class FlowModule extends SpringModule
             FlowManager.TestCase.class,
             FlowManager.ContainerScopingTestCase.class,
             WellController.WellContainerScopingTestCase.class,
-            AnalysisScriptController.AnalysisScriptContainerScopingTestCase.class
+            AnalysisScriptController.AnalysisScriptContainerScopingTestCase.class,
+            AnalysisScriptController.ImportRunsRequiresPostTestCase.class
         );
     }
 
