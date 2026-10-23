@@ -54,7 +54,6 @@ import org.labkey.protein.ProteinController.ProteinSearchViewProvider;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class ProteinModule extends DefaultModule
@@ -122,7 +121,7 @@ public class ProteinModule extends DefaultModule
         ContainerManager.addContainerListener(new ProteinContainerListener());
         PipelineService service = PipelineService.get();
         service.registerPipelineProvider(new ProteinAnnotationPipelineProvider(this));
-        UsageMetricsService.get().registerUsageMetrics(getName(), () -> Map.of("hasGeneOntologyData", new TableSelector(ProteinSchema.getTableInfoGoTerm()).exists()));
+        UsageMetricsService.get().registerUsageMetrics(getName(), metrics -> metrics.put("hasGeneOntologyData", new TableSelector(ProteinSchema.getTableInfoGoTerm()).exists(), "Whether Gene Ontology terms have been loaded (server-wide)"));
         ProteinController.registerAdminConsoleLinks();
 
         FileContentService fcs = FileContentService.get();
