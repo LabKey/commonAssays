@@ -37,8 +37,8 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
-import org.labkey.api.security.permissions.AdminOperationsPermission;
 import org.labkey.api.security.permissions.Permission;
+import org.labkey.api.security.permissions.PlatformDeveloperPermission;
 import org.labkey.api.usageMetrics.UsageMetricsService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.DefaultWebPartFactory;
@@ -164,8 +164,8 @@ public class FlowModule extends SpringModule
         FlowServiceImpl flowService = new FlowServiceImpl(this);
         FlowService.setInstance(flowService);
 
-        // GH Issue 1648: require AdminOperationsPermission for script specific module properties
-        List<Class<? extends Permission>> hostAccessPermissions = List.of(AdminOperationsPermission.class);
+        // GH Issue 1648: require PlatformDeveloperPermission for script specific module properties
+        List<Class<? extends Permission>> hostAccessPermissions = List.of(PlatformDeveloperPermission.class);
         registerModuleProperty(EXPORT_TO_SCRIPT_PATH, "Set the path of the script that will be invoked when exporting FCS files", "Export To Script - Path", ModuleProperty.InputType.text)
                 .setEditPermissions(hostAccessPermissions);
         registerModuleProperty(EXPORT_TO_SCRIPT_COMMAND_LINE, "Set the export to script command line with token replacements", "Export To Script - Command Line", ModuleProperty.InputType.text,
