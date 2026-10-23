@@ -45,11 +45,13 @@ import org.labkey.flow.analysis.web.SubsetSpec;
 import org.labkey.vfs.FileLike;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -63,6 +65,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Reads/writes a directory of stats and graphs suitable for interchange with R and LabKey.
@@ -1689,6 +1692,42 @@ public class AnalysisSerializer
             AttributeSet attrs = attrsList.getFirst();
             assertEquals("Expected 117 statistics for 119043.fcs", 117, attrs.getStatisticNames().size());
             assertEquals("Expected 12 statistics for 119043.fcs", 13, attrs.getGraphNames().size());
+        }
+
+        @Test
+        public void testExtractArchive() throws Exception
+        {
+            FileLike tempDir = FileUtil.createTempDirectoryFileLike("flow");
+            try
+            {
+                File zipDir = tempDir.resolveChild("zips").toNioPathForWrite().toFile();
+                FileUtil.mkdir(zipDir);
+
+                File flat = writeZip(new File(zipDir, "flat.zip"), STATISTICS_FILENAME);
+                File flatDir = extractArchive(flat, tempDir.resolveChild("flatOut"));
+                assertTrue(new File(flatDir, STATISTICS_FILENAME).isFile());
+
+                File nested = writeZip(new File(zipDir, "nested.zip"), "nested/" + STATISTICS_FILENAME);
+                File nestedDir = extractArchive(nested, tempDir.resolveChild("nestedOut"));
+                assertNotNull(nestedDir);
+                assertEquals("nested", nestedDir.getName());
+                assertTrue(new File(nestedDir, STATISTICS_FILENAME).isFile());
+            }
+            finally
+            {
+                FileUtil.deleteDir(tempDir);
+            }
+        }
+
+        private static File writeZip(File zip, String entryName) throws IOException
+        {
+            try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zip)))
+            {
+                out.putNextEntry(new ZipEntry(entryName));
+                out.write("Sample\n".getBytes(StandardCharsets.UTF_8));
+                out.closeEntry();
+            }
+            return zip;
         }
     }
 }

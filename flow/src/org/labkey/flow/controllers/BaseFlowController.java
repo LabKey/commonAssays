@@ -76,16 +76,13 @@ public abstract class BaseFlowController extends SpringActionController
 
     protected ActionURL executeScript(FlowJob job) throws Exception
     {
-        try (var ignore = SpringActionController.ignoreSqlUpdates())
-        {
-            FlowProtocol.ensureForContainer(getUser(), job.getContainer());
-            PipelineService service = PipelineService.get();
-            service.queueJob(job);
+        FlowProtocol.ensureForContainer(getUser(), job.getContainer());
+        PipelineService service = PipelineService.get();
+        service.queueJob(job);
 
-            ActionURL forward = job.urlStatus();
-            putParam(forward, FlowParam.redirect, 1);
-            return forward;
-        }
+        ActionURL forward = job.urlStatus();
+        putParam(forward, FlowParam.redirect, 1);
+        return forward;
     }
 
     public String getHelpTopic()

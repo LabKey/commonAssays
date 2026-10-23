@@ -56,6 +56,7 @@ import org.labkey.api.util.JunitUtil;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.util.Pair;
 import org.labkey.api.util.URIUtil;
+import org.labkey.api.util.URLHelper;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.BadRequestException;
@@ -170,10 +171,21 @@ public class AnalysisScriptController extends BaseFlowController
         }
     }
 
-    public abstract class BaseAnalyzeRunsAction extends SimpleViewAction<ChooseRunsToAnalyzeForm>
+    public abstract class BaseAnalyzeRunsAction extends FormViewAction<ChooseRunsToAnalyzeForm>
     {
         FlowScript script;
         Pair<String, Action> nav;
+
+        @Override
+        public void validateCommand(ChooseRunsToAnalyzeForm form, Errors errors)
+        {
+        }
+
+        @Override
+        public URLHelper getSuccessURL(ChooseRunsToAnalyzeForm form)
+        {
+            return null;
+        }
 
         protected ModelAndView chooseRunsToAnalyze(ChooseRunsToAnalyzeForm form, BindException errors)
         {
@@ -192,7 +204,7 @@ public class AnalysisScriptController extends BaseFlowController
             return new JspView<>("/org/labkey/flow/controllers/executescript/chooseAnalysisName.jsp", form, errors);
         }
 
-        protected ModelAndView analyzeRuns(ChooseRunsToAnalyzeForm form, int[] runIds, String experimentLSID)
+        protected ActionURL analyzeRuns(ChooseRunsToAnalyzeForm form, int[] runIds, String experimentLSID)
                 throws Exception
         {
             nav = new Pair<>(null, Action.analyzeSelectedRuns);
@@ -215,7 +227,7 @@ public class AnalysisScriptController extends BaseFlowController
                 job.setCompensationMatrix(comp);
             }
             job.setCompensationExperimentLSID(form.getCompensationExperimentLSID());
-            return HttpView.redirect(executeScript(job));
+            return executeScript(job);
         }
 
         @Override
@@ -231,19 +243,37 @@ public class AnalysisScriptController extends BaseFlowController
         FlowScript script;
 
         @Override
-        public ModelAndView getView(ChooseRunsToAnalyzeForm form, BindException errors)
+        public ModelAndView getView(ChooseRunsToAnalyzeForm form, boolean reshow, BindException errors)
         {
             script = form.getProtocol();
             checkContainer(script);
             return chooseRunsToAnalyze(form, errors);
+        }
+
+        // chooseRunsToAnalyze.jsp posts back here to re-render with new filters
+        @Override
+        public boolean handlePost(ChooseRunsToAnalyzeForm form, BindException errors)
+        {
+            return false;
         }
     }
 
     @RequiresPermission(InsertPermission.class)
     public class AnalyzeSelectedRunsAction extends BaseAnalyzeRunsAction
     {
+        private boolean _chooseAnalysisName;
+        private ActionURL _jobStatusURL;
+
         @Override
-        public ModelAndView getView(ChooseRunsToAnalyzeForm form, BindException errors) throws Exception
+        public ModelAndView getView(ChooseRunsToAnalyzeForm form, boolean reshow, BindException errors)
+        {
+            script = form.getProtocol();
+            checkContainer(script);
+            return _chooseAnalysisName ? chooseAnalysisName(form, errors) : chooseRunsToAnalyze(form, errors);
+        }
+
+        @Override
+        public boolean handlePost(ChooseRunsToAnalyzeForm form, BindException errors) throws Exception
         {
             script = form.getProtocol();
             checkContainer(script);
@@ -251,7 +281,7 @@ public class AnalysisScriptController extends BaseFlowController
             if (runIds.length == 0)
             {
                 errors.reject(ERROR_MSG, "Please select at least one run to analyze.");
-                return chooseRunsToAnalyze(form, errors);
+                return false;
             }
             for (int runId : runIds)
             {
@@ -262,9 +292,17 @@ public class AnalysisScriptController extends BaseFlowController
             String experimentLSID = form.getAnalysisLSID();
             if (experimentLSID == null)
             {
-                return chooseAnalysisName(form, errors);
+                _chooseAnalysisName = true;
+                return false;
             }
-            return analyzeRuns(form, runIds, experimentLSID);
+            _jobStatusURL = analyzeRuns(form, runIds, experimentLSID);
+            return true;
+        }
+
+        @Override
+        public URLHelper getSuccessURL(ChooseRunsToAnalyzeForm form)
+        {
+            return _jobStatusURL;
         }
     }
 
@@ -384,8 +422,25 @@ public class AnalysisScriptController extends BaseFlowController
         form.setNewPaths(ret);
     }
 
-    public abstract class ImportRunsBaseAction extends SimpleViewAction<ImportRunsForm>
+    public abstract class ImportRunsBaseAction extends FormViewAction<ImportRunsForm>
     {
+        @Override
+        public void validateCommand(ImportRunsForm form, Errors errors)
+        {
+        }
+
+        @Override
+        public URLHelper getSuccessURL(ImportRunsForm form)
+        {
+            return null;
+        }
+
+        @Override
+        public ModelAndView getView(ImportRunsForm form, boolean reshow, BindException errors)
+        {
+            return confirmRuns(form, errors);
+        }
+
         protected void validatePipeline()
         {
             PipeRoot root = Objects.requireNonNull(PipelineService.get().findPipelineRoot(getContainer()));
@@ -407,14 +462,36 @@ public class AnalysisScriptController extends BaseFlowController
             }
         }
 
-        protected ModelAndView uploadRuns(ImportRunsForm form, BindException errors) throws Exception
+        @Override
+        public void addNavTrail(NavTree root)
+        {
+            addFlowNavTrail(getPageConfig(), root, null, "Import Flow FCS Files");
+        }
+    }
+
+    @RequiresPermission(InsertPermission.class)
+    public class ConfirmImportRunsAction extends ImportRunsBaseAction
+    {
+        @Override
+        public boolean handlePost(ImportRunsForm form, BindException errors)
+        {
+            return false;
+        }
+    }
+
+    @RequiresPermission(InsertPermission.class)
+    public class ImportRunsAction extends ImportRunsBaseAction
+    {
+        private ActionURL _successURL;
+
+        @Override
+        public boolean handlePost(ImportRunsForm form, BindException errors) throws Exception
         {
             if (!form.isConfirm())
             {
                 ActionURL url = form.getReturnActionURL();
-                if (url == null)
-                    url = new ActionURL(BeginAction.class, getContainer());
-                return HttpView.redirect(url);
+                _successURL = url != null ? url : new ActionURL(BeginAction.class, getContainer());
+                return true;
             }
 
             validatePipeline();
@@ -428,37 +505,18 @@ public class AnalysisScriptController extends BaseFlowController
             // validate target study
             Container targetStudy = getTargetStudy(form.getTargetStudy(), errors);
             if (errors.hasErrors())
-                return confirmRuns(form, errors);
+                return false;
 
             ViewBackgroundInfo vbi = getViewBackgroundInfo();
             KeywordsJob job = new KeywordsJob(vbi, FlowProtocol.ensureForContainer(getUser(), vbi.getContainer()), files, targetStudy, pr);
-            return HttpView.redirect(executeScript(job));
+            _successURL = executeScript(job);
+            return true;
         }
 
         @Override
-        public void addNavTrail(NavTree root)
+        public URLHelper getSuccessURL(ImportRunsForm form)
         {
-            addFlowNavTrail(getPageConfig(), root, null, "Import Flow FCS Files");
-        }
-    }
-
-    @RequiresPermission(InsertPermission.class)
-    public class ConfirmImportRunsAction extends ImportRunsBaseAction
-    {
-        @Override
-        public ModelAndView getView(ImportRunsForm form, BindException errors)
-        {
-            return confirmRuns(form, errors);
-        }
-    }
-
-    @RequiresPermission(InsertPermission.class)
-    public class ImportRunsAction extends ImportRunsBaseAction
-    {
-        @Override
-        public ModelAndView getView(ImportRunsForm form, BindException errors) throws Exception
-        {
-            return uploadRuns(form, errors);
+            return _successURL;
         }
     }
 
