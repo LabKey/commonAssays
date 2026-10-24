@@ -68,7 +68,7 @@ import org.labkey.api.view.NotFoundException;
 import org.labkey.api.view.RedirectException;
 import org.labkey.api.view.ViewBackgroundInfo;
 import org.labkey.api.view.template.PageConfig;
-import org.labkey.flow.FlowModule;
+import org.labkey.flow.FlowMetricArea;
 import org.labkey.flow.FlowPreference;
 import org.labkey.flow.analysis.model.ExternalAnalysis;
 import org.labkey.flow.analysis.model.FCS;
@@ -1459,7 +1459,7 @@ public class AnalysisScriptController extends BaseFlowController
             if (form.getStudyChanged())
             {
                 // Estabilish & increment a metric to measure usage of the Study Linkage feature of the Flow data import process
-                SimpleMetricsService.get().increment(FlowModule.NAME, "SampleImport", "StudyLinkChanged");
+                SimpleMetricsService.get().increment(FlowMetricArea.SAMPLE_IMPORT, "StudyLinkChanged");
             }
 
             if (errors.hasErrors())

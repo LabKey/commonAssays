@@ -37,6 +37,7 @@ import org.labkey.api.query.DefaultSchema;
 import org.labkey.api.query.QuerySchema;
 import org.labkey.api.reports.ReportService;
 import org.labkey.api.search.SearchService;
+import org.labkey.api.usageMetrics.SimpleMetricsService;
 import org.labkey.api.usageMetrics.UsageMetricsService;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.DefaultWebPartFactory;
@@ -297,8 +298,9 @@ public class FlowModule extends SpringModule
         if (null != svc)
         {
             FlowManager mgr = FlowManager.get();
-            svc.registerUsageMetrics(NAME, mgr::getUsageMetrics);
+            svc.registerUsageMetrics(NAME, mgr::addUsageMetrics);
         }
+        SimpleMetricsService.get().describeFeatureAreas(FlowMetricArea.values());
 
         FlowSchema.registerContainerListener();
     }

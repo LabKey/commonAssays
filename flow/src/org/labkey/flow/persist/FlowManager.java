@@ -63,6 +63,7 @@ import org.labkey.api.security.User;
 import org.labkey.api.security.permissions.AbstractContainerScopingTest;
 import org.labkey.api.security.roles.EditorRole;
 import org.labkey.api.security.roles.ReaderRole;
+import org.labkey.api.usageMetrics.UsageMetrics;
 import org.labkey.api.util.DateUtil;
 import org.labkey.api.util.FileUtil;
 import org.labkey.api.util.IntegerUtils;
@@ -1262,6 +1263,30 @@ public class FlowManager
             _log.debug("Collected flow usage metrics:\n{}", allMetrics);
             return allMetrics;
         });
+    }
+
+    private static final Map<String, String> USAGE_METRIC_DESCRIPTIONS = Map.ofEntries(
+        Map.entry("flowTempTableCount", "Flow temp tables (ffo* and fbg*) currently in the database's temp schema"),
+        Map.entry("keyword", "Keyword attributes across the server: total, aliases, distinct names, and distinct names ignoring case; aliascount is null when the table is empty"),
+        Map.entry("statistic", "Statistic attributes across the server: total, aliases, distinct names, and distinct names ignoring case; aliascount is null when the table is empty"),
+        Map.entry("graph", "Graph attributes across the server: total, aliases, distinct names, and distinct names ignoring case; aliascount is null when the table is empty"),
+        Map.entry("scriptRuns", "Runs created by an analysis script, summed across Flow-enabled folders: run count, latest created date, and FCS analysis, compensation control, and FCS file counts"),
+        Map.entry("workspaceRuns", "Runs imported from a FlowJo workspace, summed across Flow-enabled folders: run count, latest created date, and FCS analysis, compensation control, and FCS file counts"),
+        Map.entry("externalRuns", "Runs imported from an external analysis archive, summed across Flow-enabled folders: run count, latest created date, and FCS analysis, compensation control, and FCS file counts"),
+        Map.entry("fcsFileRuns", "Keywords (FCS file import) runs, summed across Flow-enabled folders: run count, latest created date, and FCS analysis, compensation control, and FCS file counts"),
+        Map.entry("analysisFolderCount", "Flow analysis folders, summed across Flow-enabled folders"),
+        Map.entry("analysisScriptCount", "Flow analysis scripts, summed across Flow-enabled folders"),
+        Map.entry("protocol", "Flow-enabled folders whose protocol has each setting: ICS metadata, complete study metadata, complete background, sample join fields, case-sensitive keywords, case-sensitive stats and graphs"),
+        Map.entry("sampleCount", "Samples in flow protocol sample types, summed across Flow-enabled folders; absent when no protocol has a sample type")
+    );
+
+    public UsageMetrics addUsageMetrics(UsageMetrics metrics)
+    {
+        // Per-folder keys are absent when no folder has Flow enabled
+        Map<String, Object> values = getUsageMetrics();
+        USAGE_METRIC_DESCRIPTIONS.forEach((key, description) ->
+            metrics.reportedIf(values.containsKey(key)).put(key, values.get(key), description));
+        return metrics;
     }
 
     /**
