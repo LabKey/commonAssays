@@ -19,7 +19,7 @@ import org.labkey.api.usageMetrics.SimpleMetricArea;
 
 public enum FlowMetricArea implements SimpleMetricArea
 {
-    SAMPLE_IMPORT("SampleImport", "Analysis import wizard submissions after the user changed the target study (StudyLinkChanged)");
+    SAMPLE_IMPORT("SampleImport", "Analysis import wizard events, by metric name: StudyLinkChanged (submitted after the user changed the target study)");
 
     private final Definition _definition;
 

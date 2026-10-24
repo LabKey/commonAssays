@@ -1282,13 +1282,10 @@ public class FlowManager
 
     public UsageMetrics addUsageMetrics(UsageMetrics metrics)
     {
-        // Describe every key, including per-folder ones that are absent when no folder has Flow enabled
-        USAGE_METRIC_DESCRIPTIONS.forEach(metrics::describe);
-        getUsageMetrics().forEach((key, value) -> {
-            String description = USAGE_METRIC_DESCRIPTIONS.get(key);
-            assert description != null : "No usage metric description for Flow key " + key;
-            metrics.put(key, value, description);
-        });
+        // Per-folder keys are absent when no folder has Flow enabled
+        Map<String, Object> values = getUsageMetrics();
+        USAGE_METRIC_DESCRIPTIONS.forEach((key, description) ->
+            metrics.reportedIf(values.containsKey(key)).put(key, values.get(key), description));
         return metrics;
     }
 
