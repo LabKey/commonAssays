@@ -94,7 +94,7 @@ table.reports td {
                 navtree.addChild("Edit", editURL);
                 navtree.addChild("Copy", copyURL);
                 navtree.addChild("Delete", deleteURL);
-                navtree.addChild("Execute", r.getRunReportURL(context).addParameter("confirm", true).addReturnUrl(currentURL));
+                navtree.addChild("Execute", r.getRunReportURL(context).addParameter("confirm", true).addReturnUrl(currentURL)).usePost();
                 PopupMenu menu = new PopupMenu(navtree, PopupMenu.Align.LEFT, PopupMenu.ButtonStyle.TEXT);
             %><td><% menu.render(out); %></td>
             <%}%>

@@ -412,7 +412,7 @@ public class Main
                 tmpDirFilePath.toFile().deleteOnExit();
 
                 ZipUtil.unzipToDirectory(analysisResultsFile.toPath(), tmpDirFilePath);
-                statisticsFile = tmpDirFileLike.resolveChild(zipEntry.getName());
+                statisticsFile = tmpDirFileLike.resolveFile(org.labkey.api.util.Path.parse(zipEntry.getName()));
                 rootDir = new FileSystemFile(statisticsFile.getParent().toNioPathForRead());
             }
             catch (IOException ioe)

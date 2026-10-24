@@ -153,7 +153,9 @@ public class SequestSearchTask extends AbstractMS2SearchTask<SequestSearchTask.F
             indexFileName = fastaFile.getName() + "_" + crc.getValue();
         }
 
-        String relativeDirPath = FileUtil.relativePath(fastaFile.getParent().toNioPathForRead().toFile().getPath(), fastaRoot.toNioPathForRead().toFile().getPath());
+        String relativeDirPath = FileUtil.relativePath(fastaRoot.toNioPathForRead().toFile().getPath(), fastaFile.getParent().toNioPathForRead().toFile().getPath());
+        if (relativeDirPath == null)
+            throw new PipelineJobException("FASTA file " + fastaFile + " is not under the sequence root " + fastaRoot);
         FileLike indexDir;
         if (_factory.getIndexRootDir() == null)
         {
