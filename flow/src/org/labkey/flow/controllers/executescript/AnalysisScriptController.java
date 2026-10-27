@@ -1458,7 +1458,7 @@ public class AnalysisScriptController extends BaseFlowController
             Container targetStudy = getTargetStudy(form.getTargetStudy(), errors);
             if (form.getStudyChanged())
             {
-                // Estabilish & increment a metric to measure usage of the Study Linkage feature of the Flow data import process
+                // Establish & increment a metric to measure usage of the Study Linkage feature of the Flow data import process
                 SimpleMetricsService.get().increment(FlowMetricArea.SAMPLE_IMPORT, "StudyLinkChanged");
             }
 

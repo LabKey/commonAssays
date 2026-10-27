@@ -121,7 +121,7 @@ public class ProteinModule extends DefaultModule
         ContainerManager.addContainerListener(new ProteinContainerListener());
         PipelineService service = PipelineService.get();
         service.registerPipelineProvider(new ProteinAnnotationPipelineProvider(this));
-        UsageMetricsService.get().registerUsageMetrics(getName(), metrics -> metrics.put("hasGeneOntologyData", new TableSelector(ProteinSchema.getTableInfoGoTerm()).exists(), "Whether Gene Ontology terms have been loaded (server-wide)"));
+        UsageMetricsService.get().registerUsageMetrics(getName(), metrics -> metrics.put("hasGeneOntologyData", () -> new TableSelector(ProteinSchema.getTableInfoGoTerm()).exists(), "Whether Gene Ontology terms have been loaded (server-wide)"));
         ProteinController.registerAdminConsoleLinks();
 
         FileContentService fcs = FileContentService.get();
