@@ -19,9 +19,9 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.labkey.api.arrays.FloatArray;
 import org.labkey.ms2.FloatParser;
 import org.labkey.ms2.MS2Importer;
+import org.labkey.ms2.arrays.FloatArray;
 import org.labkey.vfs.FileLike;
 
 import java.io.BufferedInputStream;

@@ -17,7 +17,6 @@ package org.labkey.ms2.reader;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
-import org.labkey.api.reader.SimpleXMLStreamReader;
 
 import javax.xml.stream.XMLStreamException;
 import java.sql.PreparedStatement;

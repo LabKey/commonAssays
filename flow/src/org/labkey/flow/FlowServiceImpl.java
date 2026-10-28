@@ -22,8 +22,8 @@ import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExperimentService;
-import org.labkey.api.flow.api.FlowService;
 import org.labkey.api.util.FileUtil;
+import org.labkey.flow.api.FlowService;
 import org.labkey.flow.persist.FlowManager;
 
 import java.nio.file.Path;

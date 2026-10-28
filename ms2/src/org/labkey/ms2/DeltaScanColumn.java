@@ -24,7 +24,7 @@ import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SqlSelector;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.query.QueryService;
-import org.labkey.api.util.MatrixUtil;
+import org.labkey.ms2.util.MatrixUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;

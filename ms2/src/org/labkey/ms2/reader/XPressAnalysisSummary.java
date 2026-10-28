@@ -17,7 +17,6 @@ package org.labkey.ms2.reader;
 
 import net.systemsbiology.regisWeb.pepXML.XpressratioSummaryDocument;
 import org.apache.xmlbeans.XmlException;
-import org.labkey.api.reader.SimpleXMLStreamReader;
 
 import javax.xml.stream.XMLStreamException;
 

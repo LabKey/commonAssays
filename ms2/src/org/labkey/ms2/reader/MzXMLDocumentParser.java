@@ -15,8 +15,8 @@
  */
 package org.labkey.ms2.reader;
 
-import org.labkey.api.search.AbstractXMLDocumentParser;
 import org.labkey.api.webdav.WebdavResource;
+import org.labkey.ms2.search.AbstractXMLDocumentParser;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.DefaultHandler;
 

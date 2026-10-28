@@ -16,12 +16,11 @@
 
 package org.labkey.ms2.reader;
 
-import org.labkey.api.util.NetworkDrive;
-import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
-import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.xmlbeans.GDuration;
+import org.labkey.api.util.NetworkDrive;
+import org.labkey.ms2.util.PossiblyGZIPpedFileInputStreamFactory;
 import org.labkey.vfs.FileLike;
 import org.systemsbiology.jrap.Scan;
 

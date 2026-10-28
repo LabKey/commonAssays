@@ -30,12 +30,12 @@ import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
-import org.labkey.api.settings.PreferenceService;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
 import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinViewBean;
+import org.labkey.ms2.settings.PreferenceService;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

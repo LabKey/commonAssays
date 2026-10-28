@@ -16,11 +16,10 @@
 
 package org.labkey.ms2.reader;
 
-import org.labkey.api.reader.SimpleXMLStreamReader;
-import org.labkey.api.util.PossiblyGZIPpedFileInputStreamFactory;
 import org.labkey.ms2.IcatProteinQuantitation;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.pipeline.sequest.SequestRun;
+import org.labkey.ms2.util.PossiblyGZIPpedFileInputStreamFactory;
 import org.labkey.vfs.FileLike;
 
 import javax.xml.stream.XMLStreamException;

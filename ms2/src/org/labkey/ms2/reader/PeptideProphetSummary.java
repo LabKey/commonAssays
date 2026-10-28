@@ -22,8 +22,7 @@ import org.apache.xmlbeans.impl.values.XmlValueOutOfRangeException;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Test;
-import org.labkey.api.reader.SimpleXMLStreamReader;
-import org.labkey.api.util.MatrixUtil;
+import org.labkey.ms2.util.MatrixUtil;
 
 import javax.xml.stream.XMLStreamException;
 import java.nio.ByteBuffer;

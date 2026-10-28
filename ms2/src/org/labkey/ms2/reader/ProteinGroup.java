@@ -15,7 +15,6 @@
  */
 package org.labkey.ms2.reader;
 
-import org.labkey.api.reader.SimpleXMLStreamReader;
 import org.labkey.ms2.MS2Manager;
 import org.labkey.ms2.MS2Run;
 import org.labkey.ms2.reader.ProtXmlReader;

@@ -15,7 +15,6 @@
  */
 package org.labkey.ms2.reader;
 
-import org.labkey.api.reader.SimpleXMLStreamReader;
 
 import javax.xml.stream.XMLStreamException;
 import java.util.Map;
