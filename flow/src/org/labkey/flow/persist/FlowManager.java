@@ -16,6 +16,7 @@
 
 package org.labkey.flow.persist;
 
+import com.google.common.base.Suppliers;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -104,6 +105,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertNotNull;
@@ -1283,9 +1285,9 @@ public class FlowManager
     public UsageMetrics addUsageMetrics(UsageMetrics metrics)
     {
         // Per-folder keys are absent when no folder has Flow enabled
-        Map<String, Object> values = getUsageMetrics();
+        Supplier<Map<String, Object>> values = Suppliers.memoize(this::getUsageMetrics);
         USAGE_METRIC_DESCRIPTIONS.forEach((key, description) ->
-            metrics.reportedIf(values.containsKey(key)).put(key, values.get(key), description));
+            metrics.reportedIf(() -> values.get().containsKey(key)).put(key, () -> values.get().get(key), description));
         return metrics;
     }
 
