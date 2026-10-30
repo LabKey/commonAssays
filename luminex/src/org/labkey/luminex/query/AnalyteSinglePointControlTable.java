@@ -69,7 +69,7 @@ public class AnalyteSinglePointControlTable extends AbstractLuminexTable
         singlePointControlCol.setFk(QueryForeignKey.from(schema, cf).to("SinglePointControl", "RowId", "Name"));
 
         var runColumn = addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
-        runColumn.setFk(QueryForeignKey.from(schema, cf).to("Analyte", "RowId", "Name"));
+        runColumn.setFk(new LuminexProtocolSchema.AnalyteForeignKey(schema, cf));
 
         var guideSetCol = addColumn(wrapColumn("GuideSet", getRealTable().getColumn("GuideSetId")));
         guideSetCol.setFk(QueryForeignKey.from(schema, cf).to("GuideSet", "RowId", "AnalyteName"));
