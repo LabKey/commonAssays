@@ -19,6 +19,7 @@ package org.labkey.flow.webparts;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.view.*;
 import org.labkey.flow.controllers.FlowController;
+import org.labkey.flow.view.Overview;
 
 public class OverviewWebPart extends HtmlView
 {

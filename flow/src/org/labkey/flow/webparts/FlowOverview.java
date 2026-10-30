@@ -32,7 +32,6 @@ import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.HtmlStringBuilder;
 import org.labkey.api.util.PageFlowUtil;
 import org.labkey.api.view.ActionURL;
-import org.labkey.api.view.Overview;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.controllers.run.RunController;
@@ -42,6 +41,7 @@ import org.labkey.flow.data.FlowScript;
 import org.labkey.flow.persist.FlowManager;
 import org.labkey.flow.persist.ObjectType;
 import org.labkey.flow.query.FlowTableType;
+import org.labkey.flow.view.Overview;
 
 public class FlowOverview extends Overview
 {
