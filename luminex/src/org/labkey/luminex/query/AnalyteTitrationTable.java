@@ -67,24 +67,10 @@ public class AnalyteTitrationTable extends AbstractCurveFitPivotTable
         setName(LuminexProtocolSchema.ANALYTE_TITRATION_TABLE_NAME);
 
         var analyteCol = addColumn(wrapColumn("Analyte", getRealTable().getColumn("AnalyteId")));
-        analyteCol.setFk(new LookupForeignKey(cf, "RowId", null)
-        {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                return _userSchema.createAnalyteTable(getLookupContainerFilter(),false);
-            }
-        });
+        analyteCol.setFk(new LuminexProtocolSchema.AnalyteForeignKey(schema, cf));
         setTitleColumn(analyteCol.getName());
         var titrationCol = addColumn(wrapColumn("Titration", getRealTable().getColumn("TitrationId")));
-        LookupForeignKey titrationFk = new LookupForeignKey(cf,"RowId", null)
-        {
-            @Override
-            public TableInfo getLookupTableInfo()
-            {
-                return _userSchema.createTitrationTable(getLookupContainerFilter(),false);
-            }
-        };
+        LookupForeignKey titrationFk = new LuminexProtocolSchema.TitrationForeignKey(schema, cf);
         titrationFk.setPrefixColumnCaption(false);
         titrationCol.setFk(titrationFk);
 
