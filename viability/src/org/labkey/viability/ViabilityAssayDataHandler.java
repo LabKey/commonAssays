@@ -38,6 +38,7 @@ import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.property.Domain;
 import org.labkey.api.exp.property.DomainProperty;
+import org.labkey.api.exp.property.ValidatorContext;
 import org.labkey.api.query.BatchValidationException;
 import org.labkey.api.query.ValidationException;
 import org.labkey.api.security.User;
@@ -320,7 +321,8 @@ public abstract class ViabilityAssayDataHandler extends AbstractAssayTsvDataHand
             TableInfo tableInfo,
             boolean autoFillDefaultColumns,
             OntologyManager.RowCallback rowCallback,
-            @Nullable AssayRunUploadContext<?> context
+            @Nullable AssayRunUploadContext<?> context,
+            ValidatorContext validatorContext
     ) throws BatchValidationException
     {
         MapDataIterator mapData = DataIteratorUtil.wrapMap(fileData, false);
