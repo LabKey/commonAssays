@@ -133,7 +133,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
 
                         if (sampleGroupName) {
 
-                            var sampleCls = 'labkey-sampleGroup-' + sampleGroupName.replace(/\s/g, '-');
+                            var sampleCls = 'labkey-sampleGroup-' + sampleGroupName.replace(/[^A-Za-z0-9_-]/g, '-');
 
                             this.sampleGroups[sampleGroupName] = {
                                 label : sampleGroupName,
@@ -149,7 +149,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
                                 antigenLabel = antigenGroupName + ' (' + antigenName + ')';
                             var antigenCls = '';
                             if (antigenGroupName && antigenGroupName.length > 0)
-                                antigenCls = 'labkey-antigenGroup-' + antigenGroupName.replace(/\s/g, '-');
+                                antigenCls = 'labkey-antigenGroup-' + antigenGroupName.replace(/[^A-Za-z0-9_-]/g, '-');
 
                             this.antigenGroups[antigenGroupName] = {
                                 label : antigenLabel,
@@ -207,7 +207,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
         for (var s in this.sampleGroups) {
             if (this.sampleGroups.hasOwnProperty(s)) {
                 sampleItems.push({
-                    boxLabel    : this.sampleGroups[s].label,
+                    boxLabel    : Ext4.htmlEncode(this.sampleGroups[s].label),
                     wellCls     : this.sampleGroups[s].cls,
                     name        : 'sampleGroup',
                     handler     : function(cmp, checked){this.showSample(cmp.initialConfig.wellCls, checked);},
@@ -229,7 +229,7 @@ Ext4.define('LABKEY.ext4.PlateSummary', {
         for (var a in this.antigenGroups) {
             if (this.antigenGroups.hasOwnProperty(a)) {
                 antigenItems.push({
-                    boxLabel    : this.antigenGroups[a].label,
+                    boxLabel    : Ext4.htmlEncode(this.antigenGroups[a].label),
                     wellCls     : this.antigenGroups[a].cls,
                     name        : 'sampleGroup',
                     handler     : function(cmp, checked){this.showSample(cmp.initialConfig.wellCls, checked);},
@@ -335,8 +335,8 @@ Ext4.define('LABKEY.ext4.PlatePanel', {
 
         if (this.isFluorospot){
             plateTemplate.push(
-                '<div><span>Analyte: {analyte}</span></div>',
-                '<div><span>Cytokine: {cytokine}</span></div>');
+                '<div><span>Analyte: {analyte:htmlEncode}</span></div>',
+                '<div><span>Cytokine: {cytokine:htmlEncode}</span></div>');
         }
 
         plateTemplate.push(
@@ -372,7 +372,7 @@ Ext4.define('LABKEY.ext4.PlatePanel', {
                 var template = [
                     '<table>',
                     '<tpl for=".">',
-                    '<tr><td>{name}</td><td>&nbsp;</td><td>{value}</td></tr>',
+                    '<tr><td>{name:htmlEncode}</td><td>&nbsp;</td><td>{value}</td></tr>',
                     '</tpl>',
                     '</table>'
                 ];
@@ -406,7 +406,7 @@ Ext4.define('LABKEY.ext4.PlatePanel', {
                                 }
                                 if (0 == tipData.length) {
                                     tipData.push({name: 'SpotCount', value: 'N/A'});
-                                    tipData.push({name: 'WellgroupLocation', value: Ext4.htmlEncode(pos)});
+                                    tipData.push({name: 'WellgroupLocation', value: Ext4.htmlEncode(rec.data.position)});
                                 }
                                 tip.update(tipData);
                                 return true;
