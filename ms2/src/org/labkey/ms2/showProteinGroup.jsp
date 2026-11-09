@@ -28,7 +28,7 @@
     JspView<ProteinGroupWithQuantitation> view = HttpView.currentView();
     ProteinGroupWithQuantitation group = view.getModelBean();
     ITraqProteinQuantitation libra = group.getITraqProteinQuantitation();
-    Format floatFormat = Formats.f2;
+    Format floatFormat = Formats.f2.get();
 %>
 <table>
     <tr>

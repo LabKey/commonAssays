@@ -29,8 +29,8 @@
 <%
     JspView<ProteinViewBean> view = HttpView.currentView();
     ProteinViewBean bean = view.getModelBean();
-    Format intFormat = Formats.commaf0;
-    Format percentFormat = Formats.percent;
+    Format intFormat = Formats.commaf0.get();
+    Format percentFormat = Formats.percent.get();
 %>
 <table class="lk-fields-table">
     <% if (bean.run != null) { %>
