@@ -17,11 +17,11 @@
 package org.labkey.ms2;
 
 import org.labkey.api.util.DateUtil;
+import org.labkey.api.util.Formats.SafeDecimalFormat;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.DecimalFormat;
 import java.util.Date;
 
 /**
@@ -29,8 +29,8 @@ import java.util.Date;
  */
 public abstract class AbstractTextSpectrumRenderer implements SpectrumRenderer
 {
-    protected static DecimalFormat df1 = new DecimalFormat("0.0");
-    protected static DecimalFormat df4 = new DecimalFormat("0.0000");
+    protected static final SafeDecimalFormat df1 = new SafeDecimalFormat("0.0");
+    protected static final SafeDecimalFormat df4 = new SafeDecimalFormat("0.0000");
 
     HttpServletResponse _response;
     PrintWriter _out;

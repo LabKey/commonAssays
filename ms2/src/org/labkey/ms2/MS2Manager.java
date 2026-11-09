@@ -96,7 +96,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -1124,7 +1123,7 @@ public class MS2Manager
     }
 
 
-    private static final DecimalFormat df = new DecimalFormat("#,##0");
+    private static final Formats.SafeDecimalFormat df = Formats.commaf0;
 
     public static Map<String, String> getStats(int days)
     {

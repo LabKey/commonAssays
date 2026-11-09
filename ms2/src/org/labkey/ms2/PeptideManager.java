@@ -30,6 +30,7 @@ import org.labkey.api.protein.ProteinSchema;
 import org.labkey.api.protein.SimpleProtein;
 import org.labkey.api.query.FieldKey;
 import org.labkey.api.security.User;
+import org.labkey.api.util.Formats.SafeDecimalFormat;
 import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.NotFoundException;
@@ -37,8 +38,6 @@ import org.labkey.ms2.protein.Protein;
 import org.labkey.ms2.protein.ProteinViewBean;
 import org.labkey.ms2.settings.PreferenceService;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -189,7 +188,7 @@ public class PeptideManager
         return filter;
     }
 
-    private static final NumberFormat generalFormat = new DecimalFormat("0.0#");
+    private static final SafeDecimalFormat generalFormat = new SafeDecimalFormat("0.0#");
 
     public static List<Protein> getProteinsContainingPeptide(MS2Peptide peptide, int... fastaIds)
     {

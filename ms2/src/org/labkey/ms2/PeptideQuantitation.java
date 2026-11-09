@@ -16,6 +16,7 @@
 
 package org.labkey.ms2;
 
+import org.labkey.api.util.Formats.SafeDecimalFormat;
 import org.labkey.api.util.NetworkDrive;
 import org.labkey.ms2.reader.RelativeQuantAnalysisSummary;
 import org.labkey.ms2.reader.RandomAccessMzxmlIteratorFactory;
@@ -26,7 +27,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,14 +40,7 @@ public class PeptideQuantitation
     public static final int SCAN_RANGE = 25;
     public static final float DEFAULT_MASS_TOLERANCE = 1.0f;
     private static final float PROTON_MASS = (float)MS2Peptide.pMass;
-    private static final DecimalFormat RATIO_FORMAT = new DecimalFormat();
-
-    static
-    {
-        RATIO_FORMAT.setGroupingUsed(false);
-        RATIO_FORMAT.setMaximumFractionDigits(2);
-        RATIO_FORMAT.setMinimumFractionDigits(2);
-    }
+    private static final SafeDecimalFormat RATIO_FORMAT = new SafeDecimalFormat("0.00");
 
     private long _peptideId;
     private int _quantId;
