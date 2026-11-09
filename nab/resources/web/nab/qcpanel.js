@@ -241,7 +241,7 @@ Ext4.define('LABKEY.ext4.NabQCPanel', {
                 '<div class=" panel-body">',
                     '<table class="run-summary">',
                     '<tpl for="runProperties">',
-                        '<td class="prop-name">{name}</td>',
+                        '<td class="prop-name">{name:htmlEncode}</td>',
                         '<td class="prop-value">{value}</td>',
                         '<tpl if="xindex % 2 === 0"></tr><tr></tpl>',
                     '</tpl>',
