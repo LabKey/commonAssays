@@ -21,14 +21,18 @@
 <%@ page import="org.labkey.ms2.ProteinGroupWithQuantitation" %>
 <%@ page import="org.labkey.ms2.protein.Protein" %>
 <%@ page import="org.labkey.ms2.reader.ITraqProteinQuantitation" %>
-<%@ page import="java.text.Format" %>
 <%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
+<%!
+    private static String formatNullable(Double d)
+    {
+        return d == null ? "" : Formats.f2.format(d);
+    }
+%>
 <%
     JspView<ProteinGroupWithQuantitation> view = HttpView.currentView();
     ProteinGroupWithQuantitation group = view.getModelBean();
     ITraqProteinQuantitation libra = group.getITraqProteinQuantitation();
-    Format floatFormat = Formats.f2.get();
 %>
 <table>
     <tr>
@@ -36,10 +40,10 @@
         <td><%= group.getGroupNumber() %><% if (group.getIndistinguishableCollectionId() != 0) { %>-<%= group.getIndistinguishableCollectionId() %><% } %></td>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
         <td class="labkey-form-label">Group probability</td>
-        <td><%= h(floatFormat.format(group.getGroupProbability())) %></td>
+        <td><%= h(Formats.f2.format(group.getGroupProbability())) %></td>
         <td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
         <td class="labkey-form-label">Protein probability</td>
-        <td><%= h(floatFormat.format(group.getProteinProbability())) %></td>
+        <td><%= h(Formats.f2.format(group.getProteinProbability())) %></td>
     </tr>
     <tr>
         <td class="labkey-form-label">Total number of peptides</td>
@@ -63,20 +67,20 @@
     <% if (group.getRatioMean() != null) { %>
         <tr>
             <td class="labkey-form-label">Ratio mean</td>
-            <td><%= h(floatFormat.format(group.getRatioMean())) %></td>
+            <td><%= h(Formats.f2.format(group.getRatioMean())) %></td>
             <td />
             <td class="labkey-form-label">Ratio standard dev</td>
-            <td><%= h(floatFormat.format(group.getRatioStandardDev())) %></td>
+            <td><%= h(Formats.f2.format(group.getRatioStandardDev())) %></td>
             <td />
             <td class="labkey-form-label">Number of quantitation peptides</td>
             <td><%= group.getRatioNumberPeptides() %></td>
         </tr>
         <tr>
             <td class="labkey-form-label">Heavy to light ratio mean</td>
-            <td><%= h(floatFormat.format(group.getHeavy2LightRatioMean())) %></td>
+            <td><%= h(Formats.f2.format(group.getHeavy2LightRatioMean())) %></td>
             <td />
             <td class="labkey-form-label">Heavy to light standard dev</td>
-            <td><%= h(floatFormat.format(group.getHeavy2LightRatioStandardDev())) %></td>
+            <td><%= h(Formats.f2.format(group.getHeavy2LightRatioStandardDev())) %></td>
         </tr>
     <% } %>
     <tr>
@@ -110,71 +114,71 @@ if (libra != null)
     <% if (libra.getRatio1() != null) { %>
         <tr>
             <td align="right">1</td>
-            <td align="right"><%= h(floatFormat.format(libra.getRatio1())) %></td>
-            <td align="right"><%= h(floatFormat.format(libra.getError1())) %></td>
+            <td align="right"><%= h(Formats.f2.format(libra.getRatio1())) %></td>
+            <td align="right"><%= h(formatNullable(libra.getError1())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio2() != null) { %>
         <tr>
             <td align="right">2</td>
-            <td align="right"><%= h(floatFormat.format(libra.getRatio2())) %></td>
-            <td align="right"><%= h(floatFormat.format(libra.getError2())) %></td>
+            <td align="right"><%= h(Formats.f2.format(libra.getRatio2())) %></td>
+            <td align="right"><%= h(formatNullable(libra.getError2())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio3() != null) { %>
         <tr>
             <td align="right">3</td>
-            <td align="right"><%= h(floatFormat.format(libra.getRatio3())) %></td>
-            <td align="right"><%= h(floatFormat.format(libra.getError3())) %></td>
+            <td align="right"><%= h(Formats.f2.format(libra.getRatio3())) %></td>
+            <td align="right"><%= h(formatNullable(libra.getError3())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio4() != null) { %>
         <tr>
             <td align="right">4</td>
-            <td align="right"><%= h(floatFormat.format(libra.getRatio4())) %></td>
-            <td align="right"><%= h(floatFormat.format(libra.getError4())) %></td>
+            <td align="right"><%= h(Formats.f2.format(libra.getRatio4())) %></td>
+            <td align="right"><%= h(formatNullable(libra.getError4())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio5() != null) { %>
         <tr>
             <td align="right">5</td>
-            <td align="right"><%= h(floatFormat.format(libra.getRatio5())) %></td>
-            <td align="right"><%= h(floatFormat.format(libra.getError5())) %></td>
+            <td align="right"><%= h(Formats.f2.format(libra.getRatio5())) %></td>
+            <td align="right"><%= h(formatNullable(libra.getError5())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio6() != null) { %>
         <tr>
             <td align="right">6</td>
-            <td align="right"><%= h(floatFormat.format(libra.getRatio6())) %></td>
-            <td align="right"><%= h(floatFormat.format(libra.getError6())) %></td>
+            <td align="right"><%= h(Formats.f2.format(libra.getRatio6())) %></td>
+            <td align="right"><%= h(formatNullable(libra.getError6())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio7() != null) { %>
         <tr>
             <td align="right">7</td>
-            <td align="right"><%= h(floatFormat.format(libra.getRatio7())) %></td>
-            <td align="right"><%= h(floatFormat.format(libra.getError7())) %></td>
+            <td align="right"><%= h(Formats.f2.format(libra.getRatio7())) %></td>
+            <td align="right"><%= h(formatNullable(libra.getError7())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio8() != null) { %>
         <tr>
             <td align="right">8</td>
-            <td align="right"><%= h(floatFormat.format(libra.getRatio8())) %></td>
-            <td align="right"><%= h(floatFormat.format(libra.getError8())) %></td>
+            <td align="right"><%= h(Formats.f2.format(libra.getRatio8())) %></td>
+            <td align="right"><%= h(formatNullable(libra.getError8())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio9() != null) { %>
         <tr>
             <td align="right">9</td>
-            <td align="right"><%= h(floatFormat.format(libra.getRatio9())) %></td>
-            <td align="right"><%= h(floatFormat.format(libra.getError9())) %></td>
+            <td align="right"><%= h(Formats.f2.format(libra.getRatio9())) %></td>
+            <td align="right"><%= h(formatNullable(libra.getError9())) %></td>
         </tr>
     <% } %>
     <% if (libra.getRatio10() != null) { %>
         <tr>
             <td align="right">10</td>
-            <td align="right"><%= h(floatFormat.format(libra.getRatio10())) %></td>
-            <td align="right"><%= h(floatFormat.format(libra.getError10())) %></td>
+            <td align="right"><%= h(Formats.f2.format(libra.getRatio10())) %></td>
+            <td align="right"><%= h(formatNullable(libra.getError10())) %></td>
         </tr>
     <% } %>
 </table>

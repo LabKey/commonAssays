@@ -23,24 +23,21 @@
 <%@ page import="org.labkey.api.view.JspView" %>
 <%@ page import="org.labkey.ms2.PeptideManager" %>
 <%@ page import="org.labkey.ms2.protein.ProteinViewBean" %>
-<%@ page import="java.text.Format" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 <%
     JspView<ProteinViewBean> view = HttpView.currentView();
     ProteinViewBean bean = view.getModelBean();
-    Format intFormat = Formats.commaf0.get();
-    Format percentFormat = Formats.percent.get();
 %>
 <table class="lk-fields-table">
     <% if (bean.run != null) { %>
         <tr><td class="labkey-form-label">Run</td><td><%= h(bean.run.getDescription()) %></td></tr>
     <% } %>
-    <tr><td class="labkey-form-label">Sequence Mass</td><td><%=h(intFormat.format(bean.protein.getMass()))%></td><td>&nbsp;</td></tr><%
+    <tr><td class="labkey-form-label">Sequence Mass</td><td><%=h(Formats.commaf0.format(bean.protein.getMass()))%></td><td>&nbsp;</td></tr><%
     if (bean.showPeptides)
     { %>
-        <tr><td class="labkey-form-label">AA Coverage</td><td><%=h(percentFormat.format(bean.protein.getAAPercent(bean.run)))%> (<%=h(intFormat.format(bean.protein.getAACoverage(bean.run)))%> / <%=h(intFormat.format(bean.protein.getSequence().length()))%>)</td></tr>
-        <tr><td class="labkey-form-label">Mass Coverage</td><td><%=h(percentFormat.format(bean.protein.getMassPercent(bean.run)))%> (<%=h(intFormat.format(bean.protein.getMassCoverage(bean.run)))%> / <%=h(intFormat.format(bean.protein.getMass()))%>)</td></tr><%
+        <tr><td class="labkey-form-label">AA Coverage</td><td><%=h(Formats.percent.format(bean.protein.getAAPercent(bean.run)))%> (<%=h(Formats.commaf0.format(bean.protein.getAACoverage(bean.run)))%> / <%=h(Formats.commaf0.format(bean.protein.getSequence().length()))%>)</td></tr>
+        <tr><td class="labkey-form-label">Mass Coverage</td><td><%=h(Formats.percent.format(bean.protein.getMassPercent(bean.run)))%> (<%=h(Formats.commaf0.format(bean.protein.getMassCoverage(bean.run)))%> / <%=h(Formats.commaf0.format(bean.protein.getMass()))%>)</td></tr><%
     }
 
     if (bean.enableAllPeptidesFeature)
