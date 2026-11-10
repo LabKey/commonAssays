@@ -21,12 +21,12 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.RenderContext;
 import org.labkey.api.data.SimpleDisplayColumn;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.util.Formats.SafeDecimalFormat;
 import org.labkey.api.util.HtmlString;
 import org.labkey.api.util.LinkBuilder;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.writer.HtmlWriter;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,7 +38,7 @@ public class ProteinListDisplayColumn extends SimpleDisplayColumn
     private final SequenceColumnType _sequenceColumn;
     private final ProteinGroupProteins _proteins;
 
-    private static final DecimalFormat MASS_FORMAT = new DecimalFormat("0.0000");
+    private static final SafeDecimalFormat MASS_FORMAT = new SafeDecimalFormat("0.0000");
     private ColumnInfo _columnInfo;
     private String _columnName = "ProteinGroupId";
 

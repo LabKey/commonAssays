@@ -4158,13 +4158,14 @@ public class MS2Controller extends SpringActionController
             float charge1 = parseChargeScore(String.valueOf(ctx.get("charge1")));
             float charge2 = parseChargeScore(String.valueOf(ctx.get("charge2")));
             float charge3 = parseChargeScore(String.valueOf(ctx.get("charge3")));
+            DecimalFormat chargeFilter = new DecimalFormat("0.#");
 
             if (charge1 != 0.0)
-                url.addParameter(paramName + "1", Formats.chargeFilter.format(charge1));
+                url.addParameter(paramName + "1", chargeFilter.format(charge1));
             if (charge2 != 0.0)
-                url.addParameter(paramName + "2", Formats.chargeFilter.format(charge2));
+                url.addParameter(paramName + "2", chargeFilter.format(charge2));
             if (charge3 != 0.0)
-                url.addParameter(paramName + "3", Formats.chargeFilter.format(charge3));
+                url.addParameter(paramName + "3", chargeFilter.format(charge3));
 
             try
             {
