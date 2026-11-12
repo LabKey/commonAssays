@@ -194,8 +194,10 @@ public class ElispotManager
                     if (null != run)
                     {
                         ExpProtocol protocol = run.getProtocol();
-                        if (null != protocol)
-                            Table.delete(getTableInfoElispotAntigen(protocol), new SimpleFilter(FieldKey.fromString("RunId"), runId));
+                        // GH Issue 1612: the antigen domain is gone if the module was removed and later restored
+                        Domain antigenDomain = null != protocol ? AbstractAssayProvider.getDomainByPrefix(protocol, ElispotAssayProvider.ASSAY_DOMAIN_ANTIGEN_WELLGROUP, false) : null;
+                        if (null != antigenDomain)
+                            Table.delete(StorageProvisioner.createTableInfo(antigenDomain), new SimpleFilter(FieldKey.fromString("RunId"), runId));
                     }
                 }
             }
