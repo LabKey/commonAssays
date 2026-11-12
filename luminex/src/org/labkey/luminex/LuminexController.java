@@ -740,25 +740,25 @@ public class LuminexController extends SpringActionController
                 int rowId = gs.getRowId();
 
                 SQLFragment sql = new SQLFragment("SELECT r.name, a.includeInGuideSetCalculation FROM ");
-                sql.append(ExperimentService.get().getTinfoExperimentRun(), "r ");
-                sql.append("JOIN ");
+                sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
+                sql.unsafeAppend(" JOIN ");
                 if (gs.getIsTitration())
                 {
-                    sql.append(LuminexProtocolSchema.getTableInfoTitration(), "t ");
-                    sql.append("ON r.RowId = t.RunId ");
+                    sql.append(LuminexProtocolSchema.getTableInfoTitration(), "t");
+                    sql.unsafeAppend(" ON r.RowId = t.RunId ");
                     sql.append("JOIN ");
-                    sql.append(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "a ");
-                    sql.append("ON t.RowId = a.TitrationId ");
+                    sql.append(LuminexProtocolSchema.getTableInfoAnalyteTitration(), "a");
+                    sql.unsafeAppend(" ON t.RowId = a.TitrationId ");
                     sql.append("WHERE a.GuideSetId = ?");
                     sql.add(rowId);
                 }
                 else
                 {
-                    sql.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "spc ");
-                    sql.append("ON r.RowId = spc.RunId ");
+                    sql.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "spc");
+                    sql.unsafeAppend(" ON r.RowId = spc.RunId ");
                     sql.append("JOIN ");
-                    sql.append(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), "a ");
-                    sql.append("ON spc.RowId = a.SinglePointControlId ");
+                    sql.append(LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), "a");
+                    sql.unsafeAppend(" ON spc.RowId = a.SinglePointControlId ");
                     sql.append("WHERE a.GuideSetId = ?");
                     sql.add(rowId);
                 }
