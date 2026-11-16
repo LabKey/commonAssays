@@ -16,6 +16,7 @@
 package org.labkey.api.protein.search;
 
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.LabKeySQLFragment;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
 import org.labkey.api.data.dialect.SqlDialect;
@@ -106,7 +107,7 @@ public class PeptideSequenceFilter extends SimpleFilter.FilterClause
     }
 
     @Override
-    public String getLabKeySQLWhereClause(Map<FieldKey, ? extends ColumnInfo> columnMap)
+    public LabKeySQLFragment getLabKeySQLWhereClause(Map<FieldKey, ? extends ColumnInfo> columnMap)
     {
         throw new UnsupportedOperationException();
     }
