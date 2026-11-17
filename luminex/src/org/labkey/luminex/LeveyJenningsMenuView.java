@@ -15,9 +15,11 @@
  */
 package org.labkey.luminex;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SqlSelector;
+import org.labkey.api.data.TableInfo;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExperimentService;
 import org.labkey.api.view.JspView;
@@ -35,14 +37,23 @@ public class LeveyJenningsMenuView extends JspView<LeveyJenningsMenuView.Bean>
     {
 
         private final ExpProtocol _protocol;
+        private final String _analyte;
         private final List<String> _titrations;
         private final List<String> _singlePointControls;
+        private final List<String> _antigens;
 
-        public Bean(ExpProtocol protocol, List<String> titrations, List<String> singlePointControls)
+        public Bean(ExpProtocol protocol, @Nullable String analyte, List<String> titrations, List<String> singlePointControls, List<String> antigens)
         {
             _protocol = protocol;
+            _analyte = analyte;
             _titrations = titrations;
             _singlePointControls = singlePointControls;
+            _antigens = antigens;
+        }
+
+        public @Nullable String getAnalyte()
+        {
+            return _analyte;
         }
 
         public List<String> getTitrations()
@@ -55,40 +66,94 @@ public class LeveyJenningsMenuView extends JspView<LeveyJenningsMenuView.Bean>
             return _singlePointControls;
         }
 
+        public List<String> getAntigens()
+        {
+            return _antigens;
+        }
+
         public ExpProtocol getProtocol()
         {
             return _protocol;
         }
     }
 
-    public LeveyJenningsMenuView(ExpProtocol protocol)
+    public LeveyJenningsMenuView(ExpProtocol protocol, @Nullable String analyte)
     {
         super("/org/labkey/luminex/view/leveyJenningsMenu.jsp");
         ContainerFilter.AllFolders containerFilter = new ContainerFilter.AllFolders(getViewContext().getUser());
-        SQLFragment containerSQL = containerFilter.getSQLFragment(LuminexProtocolSchema.getSchema(), new SQLFragment("r.Container"));
+        SQLFragment containerSQL = containerFilter.getSQLFragment(LuminexProtocolSchema.getSchema(), SQLFragment.unsafe("r.Container"));
 
-        SQLFragment titrationSQL = new SQLFragment("SELECT DISTINCT t.Name FROM ");
-        titrationSQL.append(LuminexProtocolSchema.getTableInfoTitration(), "t");
-        titrationSQL.append(", ");
-        titrationSQL.append(ExperimentService.get().getTinfoExperimentRun(), "r");
-        titrationSQL.append(" WHERE r.RowId = t.RunId AND r.ProtocolLSID = ? AND (t.Standard = ? OR t.QCControl = ?) AND ");
-        titrationSQL.add(protocol.getLSID());
-        titrationSQL.add(true);
-        titrationSQL.add(true);
-        titrationSQL.append(containerSQL);
-        titrationSQL.append(" ORDER BY t.Name");
-        List<String> titrations = new SqlSelector(LuminexProtocolSchema.getTableInfoTitration().getSchema(), titrationSQL).getArrayList(String.class);
+        ControlSource titrationSource = new ControlSource(LuminexProtocolSchema.getTableInfoTitration(),
+                SQLFragment.unsafe(" AND (c.Standard = ? OR c.QCControl = ?)", true, true),
+                LuminexProtocolSchema.getTableInfoAnalyteTitration(), "TitrationId");
+        ControlSource singlePointControlSource = new ControlSource(LuminexProtocolSchema.getTableInfoSinglePointControl(), null,
+                LuminexProtocolSchema.getTableInfoAnalyteSinglePointControl(), "SinglePointControlId");
 
-        SQLFragment singlePointControlSQL = new SQLFragment("SELECT DISTINCT s.Name FROM ");
-        singlePointControlSQL.append(LuminexProtocolSchema.getTableInfoSinglePointControl(), "s");
-        singlePointControlSQL.append(", ");
-        singlePointControlSQL.append(ExperimentService.get().getTinfoExperimentRun(), "r");
-        singlePointControlSQL.append(" WHERE s.RunId = r.RowId AND r.ProtocolLSID = ? AND ");
-        singlePointControlSQL.add(protocol.getLSID());
-        singlePointControlSQL.append(containerSQL);
-        singlePointControlSQL.append(" ORDER BY s.Name");
-        List<String> singlePointControls = new SqlSelector(LuminexProtocolSchema.getTableInfoTitration().getSchema(), singlePointControlSQL).getArrayList(String.class);
+        List<String> titrations = getControlNames(titrationSource, protocol, containerSQL, analyte);
+        List<String> singlePointControls = getControlNames(singlePointControlSource, protocol, containerSQL, analyte);
 
-        setModelBean(new Bean(protocol, titrations, singlePointControls));
+        List<String> antigens = List.of();
+        if (analyte == null)
+        {
+            SQLFragment antigenSQL = getAntigenNamesSQL(titrationSource, protocol, containerSQL);
+            antigenSQL.append(SQLFragment.unsafe(" UNION "));
+            antigenSQL.append(getAntigenNamesSQL(singlePointControlSource, protocol, containerSQL));
+            antigenSQL.append(SQLFragment.unsafe(" ORDER BY Name"));
+            antigens = new SqlSelector(LuminexProtocolSchema.getSchema(), antigenSQL).getArrayList(String.class);
+        }
+
+        setModelBean(new Bean(protocol, analyte, titrations, singlePointControls, antigens));
+    }
+
+    private record ControlSource(TableInfo controlTable, @Nullable SQLFragment controlFilter, TableInfo analyteJunctionTable, String junctionControlColumn) {}
+
+    private static List<String> getControlNames(ControlSource source, ExpProtocol protocol, SQLFragment containerSQL, @Nullable String analyte)
+    {
+        SQLFragment sql = SQLFragment.unsafe("SELECT DISTINCT c.Name");
+        sql.append(getControlsFromSQL(source, protocol, containerSQL));
+        if (analyte != null)
+        {
+            sql.append(SQLFragment.unsafe(" AND EXISTS (SELECT 1"));
+            sql.append(getAnalyteJunctionFromSQL(source));
+            sql.append(SQLFragment.unsafe(" = c.RowId AND a.Name = ?)", analyte));
+        }
+        sql.append(SQLFragment.unsafe(" ORDER BY c.Name"));
+        return new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getArrayList(String.class);
+    }
+
+    private static SQLFragment getAntigenNamesSQL(ControlSource source, ExpProtocol protocol, SQLFragment containerSQL)
+    {
+        SQLFragment sql = SQLFragment.unsafe("SELECT a.Name");
+        sql.append(getAnalyteJunctionFromSQL(source));
+        sql.append(SQLFragment.unsafe(" IN (SELECT c.RowId"));
+        sql.append(getControlsFromSQL(source, protocol, containerSQL));
+        sql.append(SQLFragment.unsafe(")"));
+        return sql;
+    }
+
+    /** FROM/WHERE for the protocol's controls (alias c) and their runs (alias r) in the container scope */
+    private static SQLFragment getControlsFromSQL(ControlSource source, ExpProtocol protocol, SQLFragment containerSQL)
+    {
+        SQLFragment sql = SQLFragment.unsafe(" FROM ");
+        sql.append(source.controlTable(), "c");
+        sql.append(SQLFragment.unsafe(" JOIN "));
+        sql.append(ExperimentService.get().getTinfoExperimentRun(), "r");
+        sql.append(SQLFragment.unsafe(" ON r.RowId = c.RunId WHERE r.ProtocolLSID = ? AND ", protocol.getLSID()));
+        sql.append(containerSQL);
+        if (source.controlFilter() != null)
+            sql.append(source.controlFilter());
+        return sql;
+    }
+
+    /** FROM the analyte junction (alias j) and analytes (alias a), ending with the junction's control column so the caller adds the comparison */
+    private static SQLFragment getAnalyteJunctionFromSQL(ControlSource source)
+    {
+        SQLFragment sql = SQLFragment.unsafe(" FROM ");
+        sql.append(source.analyteJunctionTable(), "j");
+        sql.append(SQLFragment.unsafe(" JOIN "));
+        sql.append(LuminexProtocolSchema.getTableInfoAnalytes(), "a");
+        sql.append(SQLFragment.unsafe(" ON a.RowId = j.AnalyteId WHERE "));
+        sql.append(source.analyteJunctionTable().getColumn(source.junctionControlColumn()).getValueSql("j"));
+        return sql;
     }
 }

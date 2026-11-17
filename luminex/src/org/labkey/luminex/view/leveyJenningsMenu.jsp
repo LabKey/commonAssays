@@ -20,6 +20,7 @@
 <%@ page import="org.labkey.luminex.LeveyJenningsForm" %>
 <%@ page import="org.labkey.luminex.LeveyJenningsMenuView" %>
 <%@ page import="org.labkey.luminex.LuminexController" %>
+<%@ page import="java.util.List" %>
 <%@ page extends="org.labkey.api.jsp.JspBase" %>
 
 <%
@@ -27,6 +28,50 @@
     LeveyJenningsMenuView.Bean bean = me.getModelBean();
 %>
 
+<p style="padding-top: 10px">
+    Click on an antigen to filter the Titrations and Single Point Controls lists below to those used with that antigen.
+</p>
+<%
+    List<String> antigens = bean.getAntigens();
+    int antigensPerColumn = 8;
+    int antigenColumnCount = Math.max(1, (antigens.size() + antigensPerColumn - 1) / antigensPerColumn);
+%>
+<table class="labkey-data-region-legacy labkey-show-borders">
+    <tr>
+        <th scope="col" colspan="<%=antigenColumnCount%>" style="padding: 5px; vertical-align: top; text-align: left" class="labkey-column-header">
+            <strong>Antigens</strong>
+        </th>
+    </tr>
+    <tr>
+        <% if (bean.getAnalyte() != null) {
+            ActionURL clearUrl = new ActionURL(LuminexController.LeveyJenningsMenuAction.class, getContainer());
+            clearUrl.addParameter("rowId", bean.getProtocol().getRowId());
+        %>
+        <td style="padding: 5px; vertical-align: top">
+            Selected: <strong><%=h(bean.getAnalyte())%></strong> <%=iconLink("fa fa-times", "Clear selection", clearUrl)%>
+        </td>
+        <% } else if (antigens.isEmpty()) { %>
+        <td style="padding: 5px; vertical-align: top"><em>No antigens</em></td>
+        <% } else {
+            for (int col = 0; col < antigens.size(); col += antigensPerColumn)
+            { %>
+        <td style="padding: 5px; vertical-align: top"><%
+                for (String antigen : antigens.subList(col, Math.min(col + antigensPerColumn, antigens.size())))
+                {
+                    ActionURL url = new ActionURL(LuminexController.LeveyJenningsMenuAction.class, getContainer());
+                    url.addParameter("rowId", bean.getProtocol().getRowId());
+                    url.addParameter("analyte", antigen);
+                    %><%= link(antigen, url) %><br/><%
+                }%>
+        </td>
+            <% }
+        } %>
+    </tr>
+</table>
+
+<p style="padding-top: 10px">
+    Click on a titration or single point control to view its Levey-Jennings report.
+</p>
 <table class="labkey-data-region-legacy labkey-show-borders">
     <tr>
         <td valign="top" style="padding: 5px" class="labkey-column-header">
@@ -47,6 +92,8 @@
                 url.addParameter("rowId", bean.getProtocol().getRowId());
                 url.addParameter("controlName", titrationName);
                 url.addParameter("controlType", LeveyJenningsForm.ControlType.Titration.toString());
+                if (bean.getAnalyte() != null)
+                    url.addParameter("analyte", bean.getAnalyte());
                 %><%= link(titrationName, url) %><br/><%
             }%>
         </td>
@@ -60,6 +107,8 @@
                 url.addParameter("rowId", bean.getProtocol().getRowId());
                 url.addParameter("controlName", singlePointControl);
                 url.addParameter("controlType", LeveyJenningsForm.ControlType.SinglePoint.toString());
+                if (bean.getAnalyte() != null)
+                    url.addParameter("analyte", bean.getAnalyte());
                 %><%= link(singlePointControl, url) %><br/><%
             }%>
         </td>
