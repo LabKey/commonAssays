@@ -22,7 +22,9 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.categories.MS2;
+import org.labkey.test.params.FieldKey;
 import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.EscapeUtil;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.PortalHelper;
 
@@ -54,6 +56,7 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
         cleanPipeline();
         super.setupMS2();
         importMS2Run("DRT2", 2);
+        _containerHelper.enableModule(getProjectName() + "/" + FOLDER_NAME, MS2EXTENSIONS_MODULE);
     }
 
     @Override
@@ -66,7 +69,8 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
     // Issue 52659: lookups from module query XML must resolve in the run's peptide grid and on the protein page
     private void verifyChargeFilterLookup()
     {
-        String chargeTwoFilter = "MS2Peptides.XTandemChgFilt%2FHyperChgFilt2~lt=999999";
+        // HyperChgFilt2 is 999999 for charges other than 2+ (XTandemChargeQueryColumns.sql)
+        String chargeTwoFilter = EscapeUtil.encode(REGION_NAME_PEPTIDES + "." + FieldKey.fromParts("XTandemChgFilt", "HyperChgFilt2") + "~lt") + "=999999";
 
         navigateToFolder(FOLDER_NAME);
         clickAndWait(Locator.linkWithText("drt/CAexample_mini (DRT2)"));
@@ -86,7 +90,7 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
 
     private void verifyMultiProteinsSearch()
     {
-        _containerHelper.enableModule(MS2EXTENSIONS_MODULE);
+        navigateToFolder(FOLDER_NAME);
         PortalHelper _portalHelper = new PortalHelper(this);
         _portalHelper.addWebPart(MS2EXTENSIONS_WEBPART);
 
