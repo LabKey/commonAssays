@@ -40,15 +40,15 @@ public class LeveyJenningsMenuView extends JspView<LeveyJenningsMenuView.Bean>
         private final String _analyte;
         private final List<String> _titrations;
         private final List<String> _singlePointControls;
-        private final List<String> _antigens;
+        private final List<String> _analytes;
 
-        public Bean(ExpProtocol protocol, @Nullable String analyte, List<String> titrations, List<String> singlePointControls, List<String> antigens)
+        public Bean(ExpProtocol protocol, @Nullable String analyte, List<String> titrations, List<String> singlePointControls, List<String> analytes)
         {
             _protocol = protocol;
             _analyte = analyte;
             _titrations = titrations;
             _singlePointControls = singlePointControls;
-            _antigens = antigens;
+            _analytes = analytes;
         }
 
         public @Nullable String getAnalyte()
@@ -66,9 +66,9 @@ public class LeveyJenningsMenuView extends JspView<LeveyJenningsMenuView.Bean>
             return _singlePointControls;
         }
 
-        public List<String> getAntigens()
+        public List<String> getAnalytes()
         {
-            return _antigens;
+            return _analytes;
         }
 
         public ExpProtocol getProtocol()
@@ -92,17 +92,17 @@ public class LeveyJenningsMenuView extends JspView<LeveyJenningsMenuView.Bean>
         List<String> titrations = getControlNames(titrationSource, protocol, containerSQL, analyte);
         List<String> singlePointControls = getControlNames(singlePointControlSource, protocol, containerSQL, analyte);
 
-        List<String> antigens = List.of();
+        List<String> analytes = List.of();
         if (analyte == null)
         {
-            SQLFragment antigenSQL = getAntigenNamesSQL(titrationSource, protocol, containerSQL);
-            antigenSQL.append(SQLFragment.unsafe(" UNION "));
-            antigenSQL.append(getAntigenNamesSQL(singlePointControlSource, protocol, containerSQL));
-            antigenSQL.append(SQLFragment.unsafe(" ORDER BY Name"));
-            antigens = new SqlSelector(LuminexProtocolSchema.getSchema(), antigenSQL).getArrayList(String.class);
+            SQLFragment analyteSQL = getAnalyteNamesSQL(titrationSource, protocol, containerSQL);
+            analyteSQL.append(SQLFragment.unsafe(" UNION "));
+            analyteSQL.append(getAnalyteNamesSQL(singlePointControlSource, protocol, containerSQL));
+            analyteSQL.append(SQLFragment.unsafe(" ORDER BY Name"));
+            analytes = new SqlSelector(LuminexProtocolSchema.getSchema(), analyteSQL).getArrayList(String.class);
         }
 
-        setModelBean(new Bean(protocol, analyte, titrations, singlePointControls, antigens));
+        setModelBean(new Bean(protocol, analyte, titrations, singlePointControls, analytes));
     }
 
     private record ControlSource(TableInfo controlTable, @Nullable SQLFragment controlFilter, TableInfo analyteJunctionTable, String junctionControlColumn) {}
@@ -121,7 +121,7 @@ public class LeveyJenningsMenuView extends JspView<LeveyJenningsMenuView.Bean>
         return new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getArrayList(String.class);
     }
 
-    private static SQLFragment getAntigenNamesSQL(ControlSource source, ExpProtocol protocol, SQLFragment containerSQL)
+    private static SQLFragment getAnalyteNamesSQL(ControlSource source, ExpProtocol protocol, SQLFragment containerSQL)
     {
         SQLFragment sql = SQLFragment.unsafe("SELECT a.Name");
         sql.append(getAnalyteJunctionFromSQL(source));

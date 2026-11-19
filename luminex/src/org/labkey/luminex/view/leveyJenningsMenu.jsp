@@ -32,13 +32,13 @@
     Click on an antigen to filter the Titrations and Single Point Controls lists below to those used with that antigen.
 </p>
 <%
-    List<String> antigens = bean.getAntigens();
-    int antigensPerColumn = 8;
-    int antigenColumnCount = Math.max(1, (antigens.size() + antigensPerColumn - 1) / antigensPerColumn);
+    List<String> analytes = bean.getAnalytes();
+    int analytesPerColumn = 8;
+    int analyteColumnCount = Math.max(1, (analytes.size() + analytesPerColumn - 1) / analytesPerColumn);
 %>
 <table class="labkey-data-region-legacy labkey-show-borders">
     <tr>
-        <th scope="col" colspan="<%=antigenColumnCount%>" style="padding: 5px; vertical-align: top; text-align: left" class="labkey-column-header">
+        <th scope="col" colspan="<%=analyteColumnCount%>" style="padding: 5px; vertical-align: top; text-align: left" class="labkey-column-header">
             <strong>Antigens</strong>
         </th>
     </tr>
@@ -50,18 +50,18 @@
         <td style="padding: 5px; vertical-align: top">
             Selected: <strong><%=h(bean.getAnalyte())%></strong> <%=iconLink("fa fa-times", "Clear selection", clearUrl)%>
         </td>
-        <% } else if (antigens.isEmpty()) { %>
+        <% } else if (analytes.isEmpty()) { %>
         <td style="padding: 5px; vertical-align: top"><em>No antigens</em></td>
         <% } else {
-            for (int col = 0; col < antigens.size(); col += antigensPerColumn)
+            for (int col = 0; col < analytes.size(); col += analytesPerColumn)
             { %>
         <td style="padding: 5px; vertical-align: top"><%
-                for (String antigen : antigens.subList(col, Math.min(col + antigensPerColumn, antigens.size())))
+                for (String analyte : analytes.subList(col, Math.min(col + analytesPerColumn, analytes.size())))
                 {
                     ActionURL url = new ActionURL(LuminexController.LeveyJenningsMenuAction.class, getContainer());
                     url.addParameter("rowId", bean.getProtocol().getRowId());
-                    url.addParameter("analyte", antigen);
-                    %><%= link(antigen, url) %><br/><%
+                    url.addParameter("analyte", analyte);
+                    %><%= link(analyte, url) %><br/><%
                 }%>
         </td>
             <% }
