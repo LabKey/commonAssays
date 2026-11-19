@@ -16,8 +16,8 @@
  */
 %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
+<%@ page import="org.labkey.api.util.DOM" %>
 <%@ page import="org.labkey.api.util.HtmlString" %>
-<%@ page import="org.labkey.api.util.HtmlStringBuilder" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
 <%@ page import="org.labkey.flow.analysis.model.CompensationMatrix" %>
@@ -34,6 +34,12 @@
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="static org.labkey.api.util.DOM.Attribute.src" %>
+<%@ page import="static org.labkey.api.util.DOM.Attribute.style" %>
+<%@ page import="static org.labkey.api.util.DOM.IMG" %>
+<%@ page import="static org.labkey.api.util.DOM.SPAN" %>
+<%@ page import="static org.labkey.api.util.DOM.WBR" %>
+<%@ page import="static org.labkey.api.util.DOM.at" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
@@ -47,16 +53,12 @@
             return HtmlString.of("N/A");
         ActionURL urlGraph = well.urlFor(WellController.ShowGraphAction.class);
         urlGraph.addParameter(FlowParam.graph.toString(), spec.toString());
-        String id = makeId("img_");
-        addHandler(id, "error", "flowImgError(this);");
-        return HtmlStringBuilder.of()
-            .unsafeAppend("<span style=\"display:inline-block; vertical-align:top; height:").append(graphSize)
-            .unsafeAppend("; width:").append(graphSize).unsafeAppend("\">\n")
-            .unsafeAppend("<img id=\"").append(id)
-            .unsafeAppend("\" style=\"width:").append(graphSize).unsafeAppend(";height:").append(graphSize)
-            .unsafeAppend(";\" class='labkey-flow-graph' src=\"").append(h(urlGraph)).unsafeAppend("\">\n")
-            .unsafeAppend("</span><wbr>")
-            .getHtmlString();
+        String imgId = makeId("img_");
+        addHandler(imgId, "error", "flowImgError(this);");
+        return DOM.createHtmlFragment(
+            SPAN(at(style, "display:inline-block; vertical-align:top; height:" + graphSize + "; width:" + graphSize),
+                IMG(DOM.id(imgId).cl("labkey-flow-graph").at(style, "width:" + graphSize + ";height:" + graphSize + ";").at(src, urlGraph))),
+            WBR());
     }
 %>
 <%=getScriptTag("Flow/util.js")%>
