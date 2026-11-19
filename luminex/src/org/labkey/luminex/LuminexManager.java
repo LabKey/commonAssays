@@ -24,6 +24,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -592,53 +593,65 @@ public class LuminexManager
                 Map<Enum, Object> options = new HashMap<>();
                 options.put(QueryUpdateService.ConfigParameters.Logger, logger);
 
-                Map<String, Object> additionalContext = Collections.singletonMap(RERUN_TRANSFORM, rerunTransform);
-
-                for (LuminexSingleExclusionCommand command : commands)
+                // One transaction for all commands so a failed transform rerun rolls back every exclusion in the batch
+                synchronized (LuminexRunCreator.LOCK_OBJECT)
                 {
-                    List<Map<String, Object>> rows = new ArrayList<>();
-                    List<Map<String, Object>> keys = new ArrayList<>();
-                    BatchValidationException errors = new BatchValidationException();
-                    List<Map<String, Object>> results;
-
-                    // if the baseExclusionType is null, determine the type based on the command details
-                    ExclusionType exclusionType = baseExclusionType;
-                    if (exclusionType == null)
-                        exclusionType = command.getExclusionType();
-
-                    logger.info("Starting {} {}", command.getCommand(), exclusionType.getDescription(command).toLowerCase());
-
-                    rows.add(exclusionType.getRowMap(command, runId, false));
-                    keys.add(exclusionType.getRowMap(command, runId, true));
-
-                    String logVerb = switch (command.getCommand())
+                    try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
                     {
-                        case "insert" ->
+                        int remaining = commands.size();
+                        for (LuminexSingleExclusionCommand command : commands)
                         {
-                            results = qus.insertRows(user, c, rows, errors, options, additionalContext);
-                            yield " inserted into ";
-                        }
-                        case "update" ->
-                        {
-                            results = qus.updateRows(user, c, rows, keys, errors, options, additionalContext);
-                            yield " updated in ";
-                        }
-                        case "delete" ->
-                        {
-                            results = qus.deleteRows(user, c, keys, options, additionalContext);
-                            yield " deleted from ";
-                        }
-                        default -> throw new IllegalArgumentException("Invalid command type: " + command.getCommand());
-                    };
+                            // The update service accumulates the runs to refresh, so rerun the transform once after the last command
+                            boolean isLast = --remaining == 0;
+                            Map<String, Object> additionalContext = Collections.singletonMap(RERUN_TRANSFORM, rerunTransform && isLast);
 
-                    logger.info("{}{}{}", StringUtilsLabKey.pluralize(results.size(), "record"), logVerb, tableInfo.getName());
+                            List<Map<String, Object>> rows = new ArrayList<>();
+                            List<Map<String, Object>> keys = new ArrayList<>();
+                            BatchValidationException errors = new BatchValidationException();
+                            List<Map<String, Object>> results;
 
-                    if (errors.hasErrors())
-                    {
-                        throw errors;
+                            // if the baseExclusionType is null, determine the type based on the command details
+                            ExclusionType exclusionType = baseExclusionType;
+                            if (exclusionType == null)
+                                exclusionType = command.getExclusionType();
+
+                            logger.info("Starting {} {}", command.getCommand(), exclusionType.getDescription(command).toLowerCase());
+
+                            rows.add(exclusionType.getRowMap(command, runId, false));
+                            keys.add(exclusionType.getRowMap(command, runId, true));
+
+                            String logVerb = switch (command.getCommand())
+                            {
+                                case "insert" ->
+                                {
+                                    results = qus.insertRows(user, c, rows, errors, options, additionalContext);
+                                    yield " inserted into ";
+                                }
+                                case "update" ->
+                                {
+                                    results = qus.updateRows(user, c, rows, keys, errors, options, additionalContext);
+                                    yield " updated in ";
+                                }
+                                case "delete" ->
+                                {
+                                    results = qus.deleteRows(user, c, keys, options, additionalContext);
+                                    yield " deleted from ";
+                                }
+                                default -> throw new IllegalArgumentException("Invalid command type: " + command.getCommand());
+                            };
+
+                            logger.info("{}{}{}", StringUtilsLabKey.pluralize(results.size(), "record"), logVerb, tableInfo.getName());
+
+                            if (errors.hasErrors())
+                            {
+                                throw errors;
+                            }
+
+                            logger.info("Finished {} {}", command.getCommand(), exclusionType.getDescription(command).toLowerCase());
+                        }
+
+                        transaction.commit();
                     }
-
-                    logger.info("Finished {} {}", command.getCommand(), exclusionType.getDescription(command).toLowerCase());
                 }
             }
         }
