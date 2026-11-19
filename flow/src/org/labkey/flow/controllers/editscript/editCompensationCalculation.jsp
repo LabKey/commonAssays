@@ -51,12 +51,12 @@ var AutoComp = {};
 
         %>'params' : {<%
         // params : { 'param name' : [ searchKeyword, searchValue, positiveSubset, negativeSubset ] }
-        String and = "\n";
+        boolean firstParam = true;
         for (AutoCompensationScript.ParameterDefinition param : autoComp.getParameters().values())
         {
-            %><%=unsafe(and)%><%=q(param.getParameterName())%> : <%=javascriptArray(
+            %><%=unsafe(firstParam ? "\n" : ",\n")%><%=q(param.getParameterName())%> : <%=javascriptArray(
                 param.getSearchKeyword(), param.getSearchValue(), param.getPositiveGate(), param.getNegativeGate())%><%
-            and = ",\n";
+            firstParam = false;
         }
         %>}
         };<%
@@ -75,7 +75,7 @@ var SS = []; // SUBSETS
             if (!hashToIndexMap.containsKey(subsetHash))
             {
                 hashToIndexMap.put(subsetHash, index++);
-                %>SS.push(<%=unsafe(javascriptArray(subsets))%>);<%
+                %>SS.push(<%=javascriptArray(subsets)%>);<%
                 out.println();
             }
         }
@@ -87,13 +87,13 @@ var KV = {}; // KEYWORD->VALUE->SUBSET
     {
         String keyword = keywordEntry.getKey();
         %>KV[<%=q(keyword)%>]=o(<%
-        String and="";
+        boolean firstValue = true;
         for (Map.Entry<String, List<String>> valueEntry : keywordEntry.getValue().entrySet())
         {
             String value = valueEntry.getKey();
             int subsetHash = valueEntry.getValue().hashCode();
-            %><%=unsafe(and)%><%=q(value)%>, SS[<%=hashToIndexMap.get(subsetHash)%>]<%
-            and = ",";
+            %><%=unsafe(firstValue ? "" : ",")%><%=q(value)%>, SS[<%=hashToIndexMap.get(subsetHash)%>]<%
+            firstValue = false;
         }
         %>);<%
         out.println();
@@ -195,11 +195,11 @@ var keywordValueSubsetListMap = KV;
                     <td><%=h(parameter)%></td>
                     <td><%=selectKeywordNames(Sign.positive, i)%></td>
                     <td><%=selectKeywordValues(Sign.positive, i)%></td>
-                    <td><%=unsafe(selectSubsets(Sign.positive, i))%></td>
+                    <td><%=selectSubsets(Sign.positive, i)%></td>
                     <td><%=selectKeywordNames(Sign.negative, i)%></td>
                     <td><%=selectKeywordValues(Sign.negative, i)%></td>
                     <td>
-                        <%=unsafe(selectSubsets(Sign.negative, i))%>
+                        <%=selectSubsets(Sign.negative, i)%>
                         <% if (i == 0) {
                             addHandler("universalNegative", "click", "universalNegative()");
                         %>

@@ -98,18 +98,16 @@ var report =
     subset:<%=q(d.getProperty("subset"))%>,
     filter :
     [<%
-    String comma = "";
     for (int i=0 ; true ; i++)
     {
         FilterFlowReport.Filter f = new FilterFlowReport.Filter(d,i);
         if (f.type == null)
             break;
-        %><%=unsafe(comma)%>{
+        %><%=unsafe(i == 0 ? "" : ",")%>{
              property:<%=q(f.property)%>,
              value:<%=q(f.value)%>,
              type:<%=q(f.type)%>,
              op:<%=(null==f.op?q("eq"):q(f.op))%>}<%
-        comma =",";
     }
     %>]
 };
