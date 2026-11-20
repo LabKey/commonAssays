@@ -107,37 +107,43 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             }));
         }
 
-        this.add(new Ext.grid.GridPanel({
+        this.add(new Ext.BoxComponent({
             id: 'selectedrowsexclusions',
-            store: new Ext.data.JsonStore({
-                fields: ['runName', 'dataFileName', 'description', 'type', 'wells', 'analyteNames', 'action'],
-                data: this.getGridRecords()
-            }),
-            colModel: new Ext.grid.ColumnModel({
-                defaults: {sortable: false, menuDisabled: true, renderer: Ext.util.Format.htmlEncode},
-                columns: [
-                    {header: 'Run', dataIndex: 'runName'},
-                    {header: 'Data File', dataIndex: 'dataFileName'},
-                    {header: 'Description', dataIndex: 'description'},
-                    {header: 'Type', dataIndex: 'type', width: 50},
-                    {header: 'Well(s)', dataIndex: 'wells', width: 70},
-                    {header: this.removeMode ? 'Analytes to Remove' : 'Analytes to Exclude', dataIndex: 'analyteNames'},
-                    {header: 'Action', dataIndex: 'action', width: 60}
-                ]
-            }),
-            viewConfig: {
-                forceFit: true
-            },
-            anchor: '100%',
-            height: 250,
-            frame: false
+            autoEl: {
+                tag: 'div',
+                style: 'max-height: 250px; overflow-y: auto; padding: 1px;',
+                html: this.getTableHtml()
+            }
         }));
 
         this.addCommentPanel();
         this.addStandardButtons();
     },
 
-    getGridRecords : function()
+    getTableHtml : function()
+    {
+        var headers = ['Run', 'Data File', 'Description', 'Type', 'Well(s)', this.removeMode ? 'Analytes to Remove' : 'Analytes to Exclude', 'Action'];
+        var html = '<table class="labkey-data-region-legacy labkey-show-borders" style="width: 100%;"><tr>';
+        Ext.each(headers, function(header)
+        {
+            html += '<td class="labkey-column-header">' + Ext.util.Format.htmlEncode(header) + '</td>';
+        });
+        html += '</tr>';
+
+        Ext.each(this.getTableRecords(), function(record, index)
+        {
+            html += '<tr class="' + (index % 2 === 0 ? 'labkey-alternate-row' : 'labkey-row') + '">';
+            Ext.each([record.runName, record.dataFileName, record.description, record.type, record.wells, record.analyteNames, record.action], function(value)
+            {
+                html += '<td>' + (value != null ? Ext.util.Format.htmlEncode(value) : '') + '</td>';
+            });
+            html += '</tr>';
+        });
+
+        return html + '</table>';
+    },
+
+    getTableRecords : function()
     {
         var records = [];
         Ext.each(this.runs, function(run)

@@ -32,12 +32,12 @@ public class SelectedRowsExclusionDialog extends BaseExclusionDialog
     public static final String EXCLUDE_TITLE = "Exclude Selected Rows from Analysis";
     public static final String REMOVE_TITLE = "Remove Selected Exclusions";
 
-    private static final Locator GRID_ROW = Locator.css("#selectedrowsexclusions .x-grid3-row");
+    private static final Locator TABLE_ROW = Locator.css("#selectedrowsexclusions tr.labkey-row, #selectedrowsexclusions tr.labkey-alternate-row");
     private static final Locator SAVE_ENABLED = Locator.xpath("//table[@id='saveBtn' and not(contains(@class, 'disabled'))]");
 
     private final boolean _remove;
 
-    /** One row of the dialog's grid. wells is "Replicate Group" for a replicate group exclusion. */
+    /** One row of the dialog's table. wells is "Replicate Group" for a replicate group exclusion. */
     public record ExclusionRow(String run, String dataFile, String description, String type, String wells, String analytes, String action)
     {
     }
@@ -53,7 +53,7 @@ public class SelectedRowsExclusionDialog extends BaseExclusionDialog
     {
         clickMenuItem(getDriver(), _remove);
         _extHelper.waitForExtDialog(_remove ? REMOVE_TITLE : EXCLUDE_TITLE);
-        waitForElement(GRID_ROW);
+        waitForElement(TABLE_ROW);
         waitForElement(SAVE_ENABLED);
     }
 
@@ -83,8 +83,8 @@ public class SelectedRowsExclusionDialog extends BaseExclusionDialog
 
     public List<ExclusionRow> getRows()
     {
-        return GRID_ROW.findElements(getDriver()).stream().map(row -> {
-            List<String> cells = Locator.css(".x-grid3-cell-inner").findElements(row).stream().map(WebElement::getText).toList();
+        return TABLE_ROW.findElements(getDriver()).stream().map(row -> {
+            List<String> cells = Locator.tag("td").findElements(row).stream().map(WebElement::getText).toList();
             return new ExclusionRow(cells.get(0), cells.get(1), cells.get(2), cells.get(3), cells.get(4), cells.get(5), cells.get(6));
         }).toList();
     }
