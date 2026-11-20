@@ -201,6 +201,7 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
                 panel.add(items);
                 panel.doLayout();
+                this.setExcludeRadioValue();
             }
         };
 
@@ -243,33 +244,10 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                 autoLoad: true,
                 listeners: {
                     scope: this,
-                    load: function(store, records, options)
+                    load: function()
                     {
-                        if (this.analytes)
-                        {
-                            // determine if all of the analytes are excluded for this replicate group
-                            if (this.analytes.length == store.getTotalCount())
-                            {
-                                this.findById('excluderadiogroup').onSetValue('excludeall', 1);
-                            }
-                            else
-                            {
-                                this.findById('excluderadiogroup').onSetValue('excludeselected', 2);
-
-                                // preselect any previously excluded analytes
-                                availableAnalytesGrid.getSelectionModel().suspendEvents(false);
-                                Ext.each(this.analytes, function(analyte)
-                                {
-                                    var index = store.find('RowId', analyte);
-                                    availableAnalytesGrid.getSelectionModel().selectRow(index, true);
-                                });
-                                availableAnalytesGrid.getSelectionModel().resumeEvents();
-                            }
-                        }
-                        else
-                        {
-                            this.findById('excluderadiogroup').onSetValue('excludeall', 1);
-                        }
+                        this.analyteStoreLoaded = true;
+                        this.setExcludeRadioValue();
                     }
                 },
                 sortInfo: {
@@ -316,6 +294,41 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         this.doLayout();
 
         this.queryForRunLevelExclusions();
+    },
+
+    setExcludeRadioValue: function()
+    {
+        var radioGroup = this.findById('excluderadiogroup');
+        if (!radioGroup || !this.analyteStoreLoaded)
+            return;
+
+        var availableAnalytesGrid = this.findById('availableanalytes');
+        var store = availableAnalytesGrid.getStore();
+        if (this.analytes)
+        {
+            // determine if all of the analytes are excluded for this replicate group
+            if (this.analytes.length == store.getTotalCount())
+            {
+                radioGroup.onSetValue('excludeall', 1);
+            }
+            else
+            {
+                radioGroup.onSetValue('excludeselected', 2);
+
+                // preselect any previously excluded analytes
+                availableAnalytesGrid.getSelectionModel().suspendEvents(false);
+                Ext.each(this.analytes, function(analyte)
+                {
+                    var index = store.find('RowId', analyte);
+                    availableAnalytesGrid.getSelectionModel().selectRow(index, true);
+                });
+                availableAnalytesGrid.getSelectionModel().resumeEvents();
+            }
+        }
+        else
+        {
+            radioGroup.onSetValue('excludeall', 1);
+        }
     },
 
     queryForReplicateGroupWellsAndFileName: function(callback, scope)
