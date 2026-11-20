@@ -37,7 +37,6 @@ function openExclusionsSelectedRowsWindow(assayId, dataRegionName, remove)
                     protocolSchemaName: 'n/a',
                     runId: response.runs[0].runId,
                     assayId: assayId,
-                    dataRegionName: dataRegionName,
                     removeMode: remove,
                     runs: response.runs,
                     skippedRowCount: response.skippedRowCount,
@@ -67,7 +66,6 @@ function openExclusionsSelectedRowsWindow(assayId, dataRegionName, remove)
 /**
  * Class to display and save the well and replicate group exclusions proposed for the rows selected in a results grid
  * @params assayId = the assay design RowId
- * @params dataRegionName = the results grid whose selection is used
  * @params removeMode = true to remove the selected rows' exclusions, false to exclude them
  * @params runs = the proposed exclusions grouped by run, from luminex-getSelectedRowsExclusions.api
  * @params skippedRowCount = the number of selected rows that will not change
@@ -197,11 +195,5 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             runId: run.runId,
             commands: commands
         }, 'well');
-    },
-
-    showJobQueuedSuccess : function(type, url)
-    {
-        LABKEY.DataRegions[this.dataRegionName].clearSelected();
-        LABKEY.Exclusions.SelectedRowsPanel.superclass.showJobQueuedSuccess.call(this, type, url);
     }
 });
