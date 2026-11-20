@@ -380,7 +380,7 @@ public abstract class FilterFlowReport extends FlowReport
         for (SimpleFilter.FilterClause clause : filter.getClauses())
         {
             query.append(and);
-            query.append(clause.getLabKeySQLWhereClause(prefixedColumnMap));
+            query.append(clause.getLabKeySQLWhereClause(prefixedColumnMap).getText());
             and = " AND\n";
         }
 
