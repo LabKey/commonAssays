@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex.query;
 
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
@@ -262,7 +263,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                         List<Map<String, Object>> result = super.insertRows(user, container, rows, errors, configParameters, extraScriptContext);
 
                         if (extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
-                            rerunTransformScripts(errors);
+                            rerunTransformScripts(errors, configParameters);
 
                         if (errors.hasErrors())
                             throw errors;
@@ -290,7 +291,7 @@ public class WellExclusionTable extends AbstractExclusionTable
 
                         BatchValidationException errors = new BatchValidationException();
                         if (extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
-                            rerunTransformScripts(errors);
+                            rerunTransformScripts(errors, configParameters);
 
                         if (errors.hasErrors())
                             throw errors;
@@ -313,7 +314,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                         List<Map<String, Object>> result = super.updateRows(user, container, rows, oldKeys, errors, configParameters, extraScriptContext);
 
                         if (extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
-                            rerunTransformScripts(errors);
+                            rerunTransformScripts(errors, configParameters);
 
                         if (errors.hasErrors())
                             throw errors;
@@ -324,12 +325,14 @@ public class WellExclusionTable extends AbstractExclusionTable
                 }
             }
 
-            private void rerunTransformScripts(BatchValidationException errors) throws QueryUpdateServiceException
+            private void rerunTransformScripts(BatchValidationException errors, Map<Enum, Object> configParameters) throws QueryUpdateServiceException
             {
+                Logger logger = (Logger) configParameters.get(QueryUpdateService.ConfigParameters.Logger);
                 try
                 {
                     for (ExpRun run : _runsToRefresh)
                     {
+                        logger.info("Rerunning the transform script for run: {} (RowId {})", run.getName(), run.getRowId());
                         AssayProvider provider = AssayService.get().getProvider(run);
                         AssayRunDatabaseContext<?> context = provider.createRunDatabaseContext(run, _userSchema.getUser(), null);
                         provider.getRunCreator().saveExperimentRun(context, AssayService.get().findBatch(run), run, false, null);
