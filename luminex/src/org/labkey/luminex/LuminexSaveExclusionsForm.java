@@ -16,6 +16,7 @@
 package org.labkey.luminex;
 
 import org.apache.commons.lang3.EnumUtils;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -124,22 +125,32 @@ public class LuminexSaveExclusionsForm implements ApiJsonForm
     public ExpProtocol getProtocol(Container c)
     {
         if (_protocol == null)
+            _protocol = getProtocol(c, getAssayId());
+
+        return _protocol;
+    }
+
+    /** Finds the in-scope Luminex assay protocol with the given RowId. */
+    public static @Nullable ExpProtocol getProtocol(Container c, @Nullable Integer assayId)
+    {
+        if (assayId == null)
+            return null;
+
+        ExpProtocol protocol = null;
+        List<ExpProtocol> protocols =  AssayService.get().getAssayProtocols(c, AssayService.get().getProvider(LuminexAssayProvider.NAME));
+        for (ExpProtocol possibleMatch : protocols)
         {
-            List<ExpProtocol> protocols =  AssayService.get().getAssayProtocols(c, AssayService.get().getProvider(LuminexAssayProvider.NAME));
-            for (ExpProtocol possibleMatch : protocols)
+            if (possibleMatch.getRowId() == assayId)
             {
-                if (possibleMatch.getRowId() == getAssayId())
+                if (protocol != null)
                 {
-                    if (_protocol != null)
-                    {
-                        throw new NotFoundException("More than one assay definition with the id \"" + getAssayId() + "\" is in scope");
-                    }
-                    _protocol = possibleMatch;
+                    throw new NotFoundException("More than one assay definition with the id \"" + assayId + "\" is in scope");
                 }
+                protocol = possibleMatch;
             }
         }
 
-        return _protocol;
+        return protocol;
     }
 
     public void validate(Errors errors)

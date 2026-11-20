@@ -773,6 +773,17 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                     excludeSinglepointUnknowns.setScript("openExclusionsSinglepointUnknownWindow(" + getProtocol().getRowId() + ", " + runId + ");");
                     exclusionsMenu.addMenuItem(excludeSinglepointUnknowns);
 
+                    exclusionsMenu.addSeparator();
+                    String dataRegionName = PageFlowUtil.jsString(result.getDataRegion().getName());
+
+                    NavTree excludeSelectedRows = new NavTree("Exclude Selected Rows");
+                    excludeSelectedRows.setScript("openExclusionsSelectedRowsWindow(" + getProtocol().getRowId() + ", " + dataRegionName + ", false);");
+                    exclusionsMenu.addMenuItem(excludeSelectedRows);
+
+                    NavTree removeSelectedExclusions = new NavTree("Remove Selected Exclusions");
+                    removeSelectedExclusions.setScript("openExclusionsSelectedRowsWindow(" + getProtocol().getRowId() + ", " + dataRegionName + ", true);");
+                    exclusionsMenu.addMenuItem(removeSelectedExclusions);
+
                     ButtonBar buttonBar = new ButtonBar(result.getDataRegion().getButtonBar(DataRegion.MODE_GRID));
                     buttonBar.add(exclusionsMenu);
                     result.getDataRegion().setButtonBar(buttonBar, DataRegion.MODE_GRID);

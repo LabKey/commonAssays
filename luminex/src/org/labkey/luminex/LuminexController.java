@@ -24,6 +24,7 @@ import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.assay.AssayProvider;
@@ -77,6 +78,7 @@ import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
+import org.labkey.api.view.DataViewSelectionForm;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
@@ -97,9 +99,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Actions for Luminex specific features (Levey-Jennings, QC Report, Excluded Data)
@@ -617,6 +621,199 @@ public class LuminexController extends SpringActionController
                 writer.setFilenamePrefix("LuminexDefaultValues");
                 writer.write(response);
             }
+        }
+    }
+
+    public static class GetSelectedRowsExclusionsForm extends DataViewSelectionForm
+    {
+        private Integer _assayId;
+        private boolean _remove;
+
+        public Integer getAssayId()
+        {
+            return _assayId;
+        }
+
+        public void setAssayId(Integer assayId)
+        {
+            _assayId = assayId;
+        }
+
+        public boolean isRemove()
+        {
+            return _remove;
+        }
+
+        public void setRemove(boolean remove)
+        {
+            _remove = remove;
+        }
+    }
+
+    private record SelectedDataRow(long runId, String runName, String runContainerId, String protocolLsid, String dataFileName,
+                                   long dataId, @Nullable String description, @Nullable String type, String well, boolean summary, long analyteId, String analyteName)
+    {
+    }
+
+    /**
+     * Proposes the well and replicate group exclusions to insert, update or delete for the selected results grid rows,
+     * grouped by run, for the client to confirm and pass to SaveExclusionAction.
+     */
+    @RequiresPermission(UpdatePermission.class)
+    public class GetSelectedRowsExclusionsAction extends ReadOnlyApiAction<GetSelectedRowsExclusionsForm>
+    {
+        private static final int MAX_SELECTED_ROWS = 10_000;
+
+        private ExpProtocol _protocol;
+
+        @Override
+        public void validateForm(GetSelectedRowsExclusionsForm form, Errors errors)
+        {
+            _protocol = LuminexSaveExclusionsForm.getProtocol(getContainer(), form.getAssayId());
+            if (_protocol == null)
+                errors.reject(ERROR_MSG, "Luminex assay protocol not found: " + form.getAssayId());
+            if (form.getDataRegionSelectionKey() == null && form.getRowIds() == null)
+                errors.reject(ERROR_REQUIRED, "You must provide either a set of rowIds or a dataRegionSelectionKey.");
+        }
+
+        @Override
+        public Object execute(GetSelectedRowsExclusionsForm form, BindException errors)
+        {
+            Set<Long> dataRowIds = form.getIds(false);
+            if (dataRowIds.isEmpty())
+            {
+                errors.reject(ERROR_MSG, "No rows are selected.");
+                return null;
+            }
+            if (dataRowIds.size() > MAX_SELECTED_ROWS)
+            {
+                errors.reject(ERROR_MSG, String.format("At most %,d rows can be selected; %,d are selected. Filter the grid to narrow the selection.", MAX_SELECTED_ROWS, dataRowIds.size()));
+                return null;
+            }
+
+            List<SelectedDataRow> dataRows = getSelectedDataRows(dataRowIds);
+            if (dataRows.size() < dataRowIds.size())
+            {
+                errors.reject(ERROR_MSG, "Some of the selected rows no longer exist. Refresh the grid and select them again.");
+                return null;
+            }
+            if (dataRows.stream().anyMatch(r -> !getContainer().getId().equals(r.runContainerId())))
+            {
+                errors.reject(ERROR_MSG, "The selection includes rows from another folder. Select rows from runs in this folder only.");
+                return null;
+            }
+            if (dataRows.stream().anyMatch(r -> !_protocol.getLSID().equals(r.protocolLsid())))
+            {
+                errors.reject(ERROR_MSG, "The selection includes rows from another assay.");
+                return null;
+            }
+            if (dataRows.stream().map(SelectedDataRow::runId).distinct().count() > 1)
+            {
+                errors.reject(ERROR_MSG, "The selection includes rows from more than one run. Select rows from a single run.");
+                return null;
+            }
+
+            List<SelectedRowsExclusions.SelectedRow> rows = dataRows.stream()
+                    .filter(r -> r.type() != null) // Rows without a type aren't part of a replicate group
+                    .map(r -> new SelectedRowsExclusions.SelectedRow(r.runId(), new SelectedRowsExclusions.ReplicateGroup(r.dataId(), r.description(), r.type()),
+                            r.well(), r.summary(), r.analyteId(), r.analyteName()))
+                    .toList();
+            Set<Long> dataIds = rows.stream().map(r -> r.group().dataId()).collect(Collectors.toSet());
+            List<SelectedRowsExclusions.ExistingExclusion> existing = getExistingWellExclusions(dataIds);
+
+            SelectedRowsExclusions.Result result = form.isRemove()
+                    ? SelectedRowsExclusions.remove(rows, existing)
+                    : SelectedRowsExclusions.exclude(rows, existing);
+
+            if (result.exclusions().isEmpty())
+            {
+                errors.reject(ERROR_MSG, form.isRemove()
+                        ? "None of the selected rows have a well or replicate group exclusion to remove."
+                        : "The selected rows are already excluded.");
+                return null;
+            }
+
+            Map<Long, String> runNames = new HashMap<>();
+            Map<Long, String> dataFileNames = new HashMap<>();
+            dataRows.forEach(r -> {
+                runNames.put(r.runId(), r.runName());
+                dataFileNames.put(r.dataId(), r.dataFileName());
+            });
+
+            Map<Long, List<Map<String, Object>>> exclusionsByRun = new LinkedHashMap<>();
+            for (SelectedRowsExclusions.ProposedExclusion exclusion : result.exclusions())
+            {
+                LuminexSingleExclusionCommand command = exclusion.toCommand();
+                Map<String, Object> props = new HashMap<>();
+                props.put("command", command.getCommand());
+                props.put("key", command.getKey());
+                props.put("dataId", command.getDataId());
+                props.put("dataFileName", dataFileNames.get(command.getDataId()));
+                props.put("description", command.getDescription());
+                props.put("type", command.getType());
+                props.put("well", command.getWell());
+                props.put("analyteRowIds", command.getAnalyteRowIds());
+                props.put("analyteNames", command.getAnalyteNames());
+                props.put("changedAnalyteNames", String.join(",", exclusion.changedAnalytes().values()));
+                exclusionsByRun.computeIfAbsent(exclusion.runId(), _ -> new ArrayList<>()).add(props);
+            }
+
+            List<Map<String, Object>> runs = new ArrayList<>();
+            exclusionsByRun.forEach((runId, exclusions) -> {
+                Map<String, Object> run = new HashMap<>();
+                run.put("runId", runId);
+                run.put("runName", runNames.get(runId));
+                run.put("exclusions", exclusions);
+                runs.add(run);
+            });
+
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            response.put("success", true);
+            response.put("runs", runs);
+            response.put("skippedRowCount", result.skippedRowCount() + (dataRows.size() - rows.size()));
+            return response;
+        }
+
+        private List<SelectedDataRow> getSelectedDataRows(Set<Long> dataRowIds)
+        {
+            SQLFragment sql = SQLFragment.unsafe("SELECT r.RowId AS RunId, r.Name AS RunName, r.Container, r.ProtocolLSID, d.Name AS DataFileName,"
+                    + " dr.DataId, dr.Description, dr.Type, dr.Well, dr.Summary, dr.AnalyteId, a.Name AS AnalyteName FROM ")
+                    .append(LuminexProtocolSchema.getTableInfoDataRow(), "dr")
+                    .append(SQLFragment.unsafe(" JOIN ")).append(ExperimentService.get().getTinfoData(), "d").append(SQLFragment.unsafe(" ON d.RowId = dr.DataId JOIN "))
+                    .append(ExperimentService.get().getTinfoExperimentRun(), "r").append(SQLFragment.unsafe(" ON r.RowId = d.RunId JOIN "))
+                    .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a").append(SQLFragment.unsafe(" ON a.RowId = dr.AnalyteId WHERE dr.RowId "))
+                    .appendInClause(dataRowIds, LuminexProtocolSchema.getSchema().getSqlDialect());
+
+            List<SelectedDataRow> rows = new ArrayList<>();
+            new SqlSelector(LuminexProtocolSchema.getSchema(), sql).forEach(rs -> rows.add(new SelectedDataRow(
+                    rs.getLong("RunId"), rs.getString("RunName"), rs.getString("Container"), rs.getString("ProtocolLSID"),
+                    rs.getString("DataFileName"), rs.getLong("DataId"), rs.getString("Description"), rs.getString("Type"),
+                    rs.getString("Well"), rs.getBoolean("Summary"), rs.getLong("AnalyteId"), rs.getString("AnalyteName"))));
+            return rows;
+        }
+
+        private List<SelectedRowsExclusions.ExistingExclusion> getExistingWellExclusions(Set<Long> dataIds)
+        {
+            // Titration and singlepoint unknown exclusions share the table but have no Type or have a Dilution
+            SQLFragment sql = SQLFragment.unsafe("SELECT we.RowId, we.DataId, we.Description, we.Type, we.Well, wea.AnalyteId, a.Name AS AnalyteName FROM ")
+                    .append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we")
+                    .append(SQLFragment.unsafe(" LEFT JOIN ")).append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "wea").append(SQLFragment.unsafe(" ON wea.WellExclusionId = we.RowId LEFT JOIN "))
+                    .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a")
+                    .append(SQLFragment.unsafe(" ON a.RowId = wea.AnalyteId WHERE we.Type IS NOT NULL AND we.Dilution IS NULL AND we.DataId "))
+                    .appendInClause(dataIds, LuminexProtocolSchema.getSchema().getSqlDialect());
+
+            Map<Integer, SelectedRowsExclusions.ExistingExclusion> exclusions = new LinkedHashMap<>();
+            new SqlSelector(LuminexProtocolSchema.getSchema(), sql).forEach(rs -> {
+                int rowId = rs.getInt("RowId");
+                SelectedRowsExclusions.ReplicateGroup group = new SelectedRowsExclusions.ReplicateGroup(rs.getLong("DataId"), rs.getString("Description"), rs.getString("Type"));
+                String well = rs.getString("Well");
+                SelectedRowsExclusions.ExistingExclusion exclusion = exclusions.computeIfAbsent(rowId,
+                        _ -> new SelectedRowsExclusions.ExistingExclusion(rowId, group, well, new HashMap<>()));
+                long analyteId = rs.getLong("AnalyteId");
+                if (!rs.wasNull())
+                    exclusion.analytes().put(analyteId, rs.getString("AnalyteName"));
+            });
+            return new ArrayList<>(exclusions.values());
         }
     }
 
