@@ -16,7 +16,6 @@
  */
 %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
-<%@ page import="org.apache.commons.lang3.StringUtils" %>
 <%@ page import="org.labkey.api.data.Container" %>
 <%@ page import="org.labkey.api.security.permissions.ReadPermission" %>
 <%@ page import="org.labkey.api.study.Study" %>
@@ -89,9 +88,12 @@
             </p>
             <p class="labkey-indented">
                 <label for="<%= h(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)%>">Optionally, choose a target study folder:</label><br>
-                <select id="<%= h(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)%>" name="<%= h(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)%>">
-                    <labkey:options value="<%=StringUtils.defaultString(form.getTargetStudy())%>" map="<%=targetStudies%>"/>
-                </select>
+                <%=select()
+                    .id(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)
+                    .name(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)
+                    .addOptions(targetStudies)
+                    .selected(form.getTargetStudy())
+                    .className(null)%>
             </p>
         <% } %>
 
