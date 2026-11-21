@@ -32,11 +32,11 @@
 %>
 
 <span>The run you are replacing has
-    <%=unsafe(StringUtilsLabKey.pluralize(exclusionCount, "exclusion", "exclusions"))%><%
+    <%=h(StringUtilsLabKey.pluralize(exclusionCount, "exclusion", "exclusions"))%><%
         if (lostExclusions > 0)
     {
     %>, <span class="labkey-error">
-        <%=unsafe(StringUtilsLabKey.pluralize(lostExclusions, "exclusion was", "exclusions were") + " not matched and will be lost")%></span><%
+        <%=h(StringUtilsLabKey.pluralize(lostExclusions, "exclusion was", "exclusions were") + " not matched and will be lost")%></span><%
         }
     %>. Would you like to?
 

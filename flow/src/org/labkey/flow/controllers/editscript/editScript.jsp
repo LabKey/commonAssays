@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 %>
-<%@ page import="org.labkey.api.util.PageFlowUtil"%>
 <%@ page import="org.labkey.flow.ScriptParser"%>
 <%@ page import="org.labkey.flow.controllers.editscript.ScriptController.EditScriptAction"%>
 <%@ page import="org.labkey.flow.data.FlowScript" %>
@@ -27,7 +26,7 @@
 %>
 <labkey:form method="POST" action="<%=formAction(EditScriptAction.class)%>">
 <% if (error != null) { %>
-<p class="labkey-error"><%=unsafe(PageFlowUtil.filter(error.getMessage(), true).replaceAll("\\n", "<br>"))%></p>
+<p class="labkey-error"><%=h(error.getMessage(), true)%></p>
 <% if (error.getLine() != 0) { %>
 <script type="text/javascript" nonce="<%=getScriptNonce()%>">
     function findOffset(text, line, column)

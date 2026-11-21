@@ -36,7 +36,7 @@
     {
         for (Pair<String, String> sqlSummary : bean.sqlSummaries)
         { %>
-    <tr><td><%=unsafe(h(sqlSummary.getKey()).toString().replaceAll(" ", "&nbsp;"))%>:</td><td><%=h(sqlSummary.getValue())%></td></tr><%
+    <tr><td style="white-space: nowrap"><%=h(sqlSummary.getKey())%>:</td><td><%=h(sqlSummary.getValue())%></td></tr><%
         }
     } %>
   </table>

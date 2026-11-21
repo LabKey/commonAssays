@@ -16,6 +16,7 @@
  */
 %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
+<%@ page import="org.labkey.api.util.DOM" %>
 <%@ page import="org.labkey.api.util.HtmlString" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.flow.FlowPreference" %>
@@ -33,24 +34,31 @@
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="static org.labkey.api.util.DOM.Attribute.src" %>
+<%@ page import="static org.labkey.api.util.DOM.Attribute.style" %>
+<%@ page import="static org.labkey.api.util.DOM.IMG" %>
+<%@ page import="static org.labkey.api.util.DOM.SPAN" %>
+<%@ page import="static org.labkey.api.util.DOM.WBR" %>
+<%@ page import="static org.labkey.api.util.DOM.at" %>
 <%@ page extends="org.labkey.api.jsp.FormPage" %>
 <%@ taglib prefix="labkey" uri="http://www.labkey.org/taglib" %>
 <%!
-    String compImg(FlowWell well, String param, String graphSize)
+    HtmlString compImg(FlowWell well, String param, String graphSize)
     {
         if (well == null)
-            return "N/A";
+            return HtmlString.of("N/A");
 
         GraphSpec spec = new GraphSpec(null, param);
         if (well.getGraphBytes(spec) == null)
-            return "N/A";
+            return HtmlString.of("N/A");
         ActionURL urlGraph = well.urlFor(WellController.ShowGraphAction.class);
         urlGraph.addParameter(FlowParam.graph.toString(), spec.toString());
-        String id = makeId("img_");
-        addHandler(id, "error", "flowImgError(this);");
-        return "<span style=\"display:inline-block; vertical-align:top; height:" + graphSize + "; width:" + graphSize + "\">\n" +
-                "<img id=\"" + id + "\" style=\"width:" + graphSize + ";height:" + graphSize + ";\" class='labkey-flow-graph' src=\"" + h(urlGraph) + "\">\n" +
-                "</span><wbr>";
+        String imgId = makeId("img_");
+        addHandler(imgId, "error", "flowImgError(this);");
+        return DOM.createHtmlFragment(
+            SPAN(at(style, "display:inline-block; vertical-align:top; height:" + graphSize + "; width:" + graphSize),
+                IMG(DOM.id(imgId).cl("labkey-flow-graph").at(style, "width:" + graphSize + ";height:" + graphSize + ";").at(src, urlGraph))),
+            WBR());
     }
 %>
 <%=getScriptTag("Flow/util.js")%>
@@ -105,7 +113,7 @@
         <td class="labkey-column-header <%=className%>" style="text-align:right;"><%=h(channelNames[iChannel])%></td>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         {
-        %><td class="<%=className%>" style="text-align:right;"><%=unsafe(format.format(comp.getRow(iChannel)[iChannelValue]))%></td><%
+        %><td class="<%=className%>" style="text-align:right;"><%=h(format.format(comp.getRow(iChannel)[iChannelValue]))%></td><%
         }%>
     </tr>
     <%}%>
@@ -136,7 +144,7 @@
             this.title = title;
         }
 
-        abstract String render(int iChannel, int iChannelValue);
+        abstract HtmlString render(int iChannel, int iChannelValue);
     }
 
     final String graphSize = FlowPreference.graphSize.getValue(request);
@@ -145,7 +153,7 @@
         new Callback("Uncompensated Graphs")
         {
             @Override
-            String render(int iChannel, int iChannelValue)
+            HtmlString render(int iChannel, int iChannelValue)
             {
                 return compImg(wellMap.get(channelNames[iChannel] + "+"), channelNames[iChannelValue], graphSize);
             }
@@ -153,7 +161,7 @@
         new Callback("Compensated Graphs")
         {
             @Override
-            String render(int iChannel, int iChannelValue)
+            HtmlString render(int iChannel, int iChannelValue)
             {
                 return compImg(wellMap.get(channelNames[iChannel] + "+"), "<" + channelNames[iChannelValue] + ">", graphSize);
             }
@@ -184,7 +192,7 @@
         <% } %>
         <% for (int iChannelValue = 0; iChannelValue < channelCount; iChannelValue ++)
         { %>
-        <td><%=unsafe(callback.render(iChannel, iChannelValue))%></td>
+        <td><%=callback.render(iChannel, iChannelValue)%></td>
         <%}%>
     </tr>
     <%}%>

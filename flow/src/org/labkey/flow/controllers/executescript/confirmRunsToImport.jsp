@@ -88,9 +88,12 @@
             </p>
             <p class="labkey-indented">
                 <label for="<%= h(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)%>">Optionally, choose a target study folder:</label><br>
-                <select id="<%= h(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)%>" name="<%= h(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)%>">
-                    <labkey:options value="<%=unsafe(form.getTargetStudy())%>" map="<%=targetStudies%>"/>
-                </select>
+                <%=select()
+                    .id(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)
+                    .name(AbstractAssayProvider.TARGET_STUDY_PROPERTY_NAME)
+                    .addOptions(targetStudies)
+                    .selected(form.getTargetStudy())
+                    .className(null)%>
             </p>
         <% } %>
 
