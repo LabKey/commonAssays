@@ -49,8 +49,12 @@ public class SelectedRowsExclusions
     }
 
     /** An existing well (well != null) or replicate group (well == null) exclusion. */
-    public record ExistingExclusion(int rowId, @NotNull ReplicateGroup group, @Nullable String well, @NotNull Map<Long, String> analytes)
+    public record ExistingExclusion(int rowId, @NotNull ReplicateGroup group, @Nullable String well, @NotNull Map<Long, String> analytes, @Nullable String comment)
     {
+        public ExistingExclusion(int rowId, @NotNull ReplicateGroup group, @Nullable String well, @NotNull Map<Long, String> analytes)
+        {
+            this(rowId, group, well, analytes, null);
+        }
     }
 
     /**

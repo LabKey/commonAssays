@@ -173,6 +173,18 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         return 'Update';
     },
 
+    // A blank comment keeps an updated exclusion's own comment, since an update rewrites it
+    getCommandComment : function(exclusion, comment)
+    {
+        if (comment)
+            return comment;
+        if (exclusion.command === 'delete')
+            return 'Deleting exclusion';
+        if (exclusion.command === 'update')
+            return exclusion.existingComment;
+        return comment;
+    },
+
     insertUpdateExclusions: function()
     {
         this.mask(this.removeMode ? 'Removing exclusions...' : 'Saving exclusions...');
@@ -191,9 +203,9 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                 well: exclusion.well,
                 analyteRowIds: exclusion.analyteRowIds,
                 analyteNames: exclusion.analyteNames, // for logging purposes only
-                comment: !comment && exclusion.command === 'delete' ? 'Deleting exclusion' : comment
+                comment: this.getCommandComment(exclusion, comment)
             });
-        });
+        }, this);
 
         this.saveExclusions({
             assayId: this.assayId,

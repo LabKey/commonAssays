@@ -720,6 +720,8 @@ public class LuminexController extends SpringActionController
                     .toList();
             Set<Long> dataIds = rows.stream().map(r -> r.group().dataId()).collect(Collectors.toSet());
             List<SelectedRowsExclusions.ExistingExclusion> existing = getExistingWellExclusions(dataIds);
+            Map<Integer, String> existingComments = new HashMap<>();
+            existing.forEach(e -> existingComments.put(e.rowId(), e.comment()));
 
             SelectedRowsExclusions.Result result = form.isRemove()
                     ? SelectedRowsExclusions.remove(rows, existing)
@@ -755,6 +757,7 @@ public class LuminexController extends SpringActionController
                 props.put("analyteRowIds", command.getAnalyteRowIds());
                 props.put("analyteNames", command.getAnalyteNames());
                 props.put("changedAnalyteNames", String.join(",", exclusion.changedAnalytes().values()));
+                props.put("existingComment", exclusion.key() != null ? existingComments.get(exclusion.key()) : null);
                 exclusionsByRun.computeIfAbsent(exclusion.runId(), _ -> new ArrayList<>()).add(props);
             }
 
@@ -795,7 +798,7 @@ public class LuminexController extends SpringActionController
         private List<SelectedRowsExclusions.ExistingExclusion> getExistingWellExclusions(Set<Long> dataIds)
         {
             // Titration and singlepoint unknown exclusions share the table but have no Type or have a Dilution
-            SQLFragment sql = SQLFragment.unsafe("SELECT we.RowId, we.DataId, we.Description, we.Type, we.Well, wea.AnalyteId, a.Name AS AnalyteName FROM ")
+            SQLFragment sql = SQLFragment.unsafe("SELECT we.RowId, we.DataId, we.Description, we.Type, we.Well, we.Comment, wea.AnalyteId, a.Name AS AnalyteName FROM ")
                     .append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we")
                     .append(SQLFragment.unsafe(" LEFT JOIN ")).append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "wea").append(SQLFragment.unsafe(" ON wea.WellExclusionId = we.RowId LEFT JOIN "))
                     .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a")
@@ -807,8 +810,9 @@ public class LuminexController extends SpringActionController
                 int rowId = rs.getInt("RowId");
                 SelectedRowsExclusions.ReplicateGroup group = new SelectedRowsExclusions.ReplicateGroup(rs.getLong("DataId"), rs.getString("Description"), rs.getString("Type"));
                 String well = rs.getString("Well");
+                String comment = rs.getString("Comment");
                 SelectedRowsExclusions.ExistingExclusion exclusion = exclusions.computeIfAbsent(rowId,
-                        _ -> new SelectedRowsExclusions.ExistingExclusion(rowId, group, well, new HashMap<>()));
+                        _ -> new SelectedRowsExclusions.ExistingExclusion(rowId, group, well, new HashMap<>(), comment));
                 long analyteId = rs.getLong("AnalyteId");
                 if (!rs.wasNull())
                     exclusion.analytes().put(analyteId, rs.getString("AnalyteName"));

@@ -102,6 +102,8 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
         dialog.saveAndGoToPipeline();
         waitForPipelineJobsToComplete(2, false);
         assertWellExclusions("S2", Map.of("H2", "Analyte2, Analyte3"));
+        assertEquals("Saving with a blank comment should keep the updated exclusion's comment", List.of("exclude selected rows"),
+                new DataRegionTable("WellExclusion", getDriver()).getColumnDataAsText("Comment"));
 
         log("Select only rows that are already excluded");
         results = goToRunResultsWithoutSelection();
