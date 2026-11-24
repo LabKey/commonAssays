@@ -18,6 +18,7 @@ package org.labkey.ms2.query;
 
 import org.jetbrains.annotations.NotNull;
 import org.labkey.api.data.ColumnInfo;
+import org.labkey.api.data.ContainerFilter;
 import org.labkey.api.data.JdbcType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.TableInfo;
@@ -74,7 +75,7 @@ public class ComparePeptideTableInfo extends VirtualTable<MS2Schema>
                     @Override
                     public TableInfo getLookupTableInfo()
                     {
-                        return new PeptidesTableInfo(_userSchema);
+                        return _userSchema.getTable(MS2Schema.TableType.Peptides.name(), ContainerFilter.current(_userSchema));
                     }
                 };
                 if (!forExport)
@@ -96,7 +97,7 @@ public class ComparePeptideTableInfo extends VirtualTable<MS2Schema>
             @Override
             public TableInfo getLookupTableInfo()
             {
-                return new PeptidesTableInfo(_userSchema);
+                return _userSchema.getTable(MS2Schema.TableType.Peptides.name(), ContainerFilter.current(_userSchema));
             }
         });
         addColumn(peptideIdColumn);

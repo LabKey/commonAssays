@@ -25,6 +25,7 @@ import org.fhcrc.cpas.flow.script.xml.ScriptDef;
 import org.fhcrc.cpas.flow.script.xml.ScriptDocument;
 import org.json.JSONArray;
 import org.labkey.api.query.FieldKey;
+import org.labkey.api.util.OptionBuilder;
 import org.labkey.api.util.SelectBuilder;
 import org.labkey.flow.analysis.model.Analysis;
 import org.labkey.flow.analysis.model.AutoCompensationScript;
@@ -202,26 +203,14 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         return keywordValueSubsetListMap;
     }
 
-    public String javascriptArray(List<String> strings)
+    public JSONArray javascriptArray(List<String> strings)
     {
-        if (strings == null || strings.isEmpty())
-            return "[]";
-        return "['" + StringUtils.join(strings, "',\n'") + "']";
+        return strings == null ? new JSONArray() : new JSONArray(strings);
     }
 
     public JSONArray javascriptArray(String... strings)
     {
         return new JSONArray(strings);
-    }
-
-    public String option(String value, String display, String currentValue)
-    {
-        boolean selected = currentValue != null && currentValue.equals(value);
-        StringBuilder ret = new StringBuilder("<option value=\"" + h(value) + "\"");
-        if (selected)
-            ret.append(" selected");
-        ret.append(">").append(h(display)).append("</option>\n");
-        return ret.toString();
     }
 
     public String getKeywordName(Sign sign, int index)
@@ -300,9 +289,8 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
         return true;
     }
 
-    public String selectSubsets(Sign sign, int index)
+    public SelectBuilder selectSubsets(Sign sign, int index)
     {
-        StringBuilder ret = new StringBuilder();
         String keywordName = getKeywordName(sign, index);
         Map<String, List<String>> valueSubsetMap = keywordName == null ? null : keywordValueSampleMap.get(keywordName);
         List<String> subsets = Collections.emptyList();
@@ -317,21 +305,17 @@ abstract public class CompensationCalculationPage extends ScriptController.Page<
 
         SubsetSpec current = SubsetSpec.fromEscapedString(getSubset(sign, index));
 
-        ret.append("<select name=\"").append(sign).append("Subset[").append(index).append("]\">");
-        ret.append(option("", "Ungated", ""));
+        SelectBuilder select = new SelectBuilder()
+            .name(sign + "Subset[" + index + "]")
+            .className(null)
+            .addOption("Ungated", "");
         for (String subset : subsets)
         {
             SubsetSpec workspaceSubset = SubsetSpec.fromEscapedString(subset);
-            boolean selected = subsetMatches(current, workspaceSubset, sign, index);
-            ret.append("\n<option value=\"").append(h(workspaceSubset.toString())).append("\"");
-            if (selected)
-            {
-                ret.append(" selected");
-            }
-            ret.append(">").append(h(subset)).append("</option>");
+            select.addOption(new OptionBuilder(subset, workspaceSubset.toString())
+                .selected(subsetMatches(current, workspaceSubset, sign, index)));
         }
-        ret.append("</select>");
-        return ret.toString();
+        return select;
     }
 
     public String[] getGroupAnalysisDisplayNames()
