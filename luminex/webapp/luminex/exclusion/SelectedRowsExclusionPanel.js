@@ -135,12 +135,22 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             html += '<tr class="' + (index % 2 === 0 ? 'labkey-alternate-row' : 'labkey-row') + '">';
             Ext.each([record.runName, record.dataFileName, record.description, record.type, record.wells, record.analyteNames, record.action], function(value)
             {
-                html += '<td>' + (value != null ? Ext.util.Format.htmlEncode(value) : '') + '</td>';
-            });
+                html += '<td style="vertical-align: top;">' + this.getCellHtml(value) + '</td>';
+            }, this);
             html += '</tr>';
-        });
+        }, this);
 
         return html + '</table>';
+    },
+
+    // An array value, such as the analyte names, gets one line per item
+    getCellHtml : function(value)
+    {
+        if (value == null)
+            return '';
+        if (Ext.isArray(value))
+            return value.map(function(item) { return Ext.util.Format.htmlEncode(item); }).join('<br>');
+        return Ext.util.Format.htmlEncode(value);
     },
 
     getTableRecords : function()
@@ -156,7 +166,7 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                     description: exclusion.description,
                     type: exclusion.type,
                     wells: exclusion.well != null ? exclusion.well : 'Replicate Group',
-                    analyteNames: exclusion.changedAnalyteNames.split(',').join(', '),
+                    analyteNames: exclusion.changedAnalyteNames,
                     action: this.getActionText(exclusion.command)
                 });
             }, this);

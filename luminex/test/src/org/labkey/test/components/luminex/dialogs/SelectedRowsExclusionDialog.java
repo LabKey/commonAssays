@@ -37,7 +37,7 @@ public class SelectedRowsExclusionDialog extends BaseExclusionDialog
 
     private final boolean _remove;
 
-    /** One row of the dialog's table. wells is "Replicate Group" for a replicate group exclusion. */
+    /** One row of the dialog's table. wells is "Replicate Group" for a replicate group exclusion; analytes is comma separated. */
     public record ExclusionRow(String run, String dataFile, String description, String type, String wells, String analytes, String action)
     {
     }
@@ -85,7 +85,8 @@ public class SelectedRowsExclusionDialog extends BaseExclusionDialog
     {
         return TABLE_ROW.findElements(getDriver()).stream().map(row -> {
             List<String> cells = Locator.tag("td").findElements(row).stream().map(WebElement::getText).toList();
-            return new ExclusionRow(cells.get(0), cells.get(1), cells.get(2), cells.get(3), cells.get(4), cells.get(5), cells.get(6));
+            String analytes = String.join(", ", cells.get(5).split("\n")); // one analyte per line
+            return new ExclusionRow(cells.get(0), cells.get(1), cells.get(2), cells.get(3), cells.get(4), analytes, cells.get(6));
         }).toList();
     }
 

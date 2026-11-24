@@ -756,7 +756,7 @@ public class LuminexController extends SpringActionController
                 props.put("well", command.getWell());
                 props.put("analyteRowIds", command.getAnalyteRowIds());
                 props.put("analyteNames", command.getAnalyteNames());
-                props.put("changedAnalyteNames", String.join(",", exclusion.changedAnalytes().values()));
+                props.put("changedAnalyteNames", List.copyOf(exclusion.changedAnalytes().values()));
                 props.put("existingComment", exclusion.key() != null ? existingComments.get(exclusion.key()) : null);
                 exclusionsByRun.computeIfAbsent(exclusion.runId(), _ -> new ArrayList<>()).add(props);
             }
