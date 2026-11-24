@@ -142,7 +142,7 @@
     <br>
     The sample's keywords stored in the <%=h(workspace.getKindName())%> will be used instead of those from the FCS files.
     <br/><br/>
-    <input type="hidden" id="<%=unsafe(inputId)%>" name="<%=unsafe(inputId)%>" value="<%=h(keywordDir)%>"/>
+    <input type="hidden" id="<%=h(inputId)%>" name="<%=h(inputId)%>" value="<%=h(keywordDir)%>"/>
 
 
     <div id="treeDiv"></div>

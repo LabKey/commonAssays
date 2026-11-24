@@ -234,6 +234,8 @@ public class QueryPeptideMS2RunView extends AbstractMS2RunView
             _peptidesTable =  new PeptidesTableInfo(schema, _url.clone(), ContainerFilter.current(schema), runTypes.toArray(new MS2RunType[0]), highestScoreFlag);
             // Manually apply the metadata
             _peptidesTable.overlayMetadata(_peptidesTable.getPublicName(), schema, new ArrayList<>());
+            // Wrapped columns from XML metadata only get their lookups here, as UserSchema.getTable() would do
+            _peptidesTable.afterConstruct();
         }
         return _peptidesTable;
     }

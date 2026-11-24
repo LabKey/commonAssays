@@ -30,6 +30,7 @@
 <%@ page import="org.labkey.api.security.permissions.AdminPermission" %>
 <%@ page import="org.labkey.api.security.permissions.UpdatePermission" %>
 <%@ page import="org.labkey.api.util.HtmlString" %>
+<%@ page import="org.labkey.api.util.HtmlStringBuilder" %>
 <%@ page import="org.labkey.api.view.ActionURL" %>
 <%@ page import="org.labkey.api.view.template.ClientDependencies" %>
 <%@ page import="org.labkey.flow.controllers.FlowController" %>
@@ -233,7 +234,7 @@
                             ExpMaterial sample = _sampleTypeSamples.get(sampleIndex);
                             String name = sample.getName();
                             ActionURL url = sample.detailsURL();
-                            HtmlString comment = sample.getComment() != null ? unsafe(" title='" + h(sample.getComment()) + "'") : HtmlString.EMPTY_STRING;
+                            HtmlString comment = sample.getComment() != null ? HtmlStringBuilder.of().unsafeAppend(" title='").append(sample.getComment()).unsafeAppend("'").getHtmlString() : HtmlString.EMPTY_STRING;
                             String iconCls = StringUtils.isNotEmpty(sample.getComment()) ? FlagColumnRenderer.flagEnabledCls() : "";
                       %>
                           "<tr>" +

@@ -50,7 +50,7 @@
 <% if (bean.getGuideSets() == null || bean.getGuideSets().isEmpty()) { %>
 
     <p>There are no selected guide sets to delete.</p>
-    <%= unsafe(button("OK").href(successUrl).toString())%>
+    <%= button("OK").href(successUrl) %>
 
 <% } else { %>
     <%--NOTE: here is where we need to display all the information about what is being deleted--%>
@@ -135,6 +135,6 @@
         <% } %>
         <input type="hidden" name="forceDelete" value="true"/>
         <%= button("Confirm Delete").submit(true) %>
-        <%= unsafe(button("Cancel").href(cancelUrl).toString())%>
+        <%= button("Cancel").href(cancelUrl) %>
     </labkey:form>
 <% } %>
