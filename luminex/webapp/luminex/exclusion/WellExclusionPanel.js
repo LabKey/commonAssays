@@ -363,7 +363,8 @@ LABKEY.Exclusions.WellPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                         }, this);
                     }
                     else {
-                        wells.push(wellValue);
+                        if (wells.indexOf(wellValue) === -1)
+                            wells.push(wellValue);
                         this.selectedWells[wellValue] = (this.existingExclusions[wellValue] || (this.wellId == wellValue)) ? true : false;
                     }
 
