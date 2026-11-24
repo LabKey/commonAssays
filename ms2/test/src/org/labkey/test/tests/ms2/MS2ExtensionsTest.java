@@ -22,11 +22,15 @@ import org.labkey.test.BaseWebDriverTest;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.categories.MS2;
+import org.labkey.test.params.FieldKey;
 import org.labkey.test.util.DataRegionTable;
+import org.labkey.test.util.EscapeUtil;
 import org.labkey.test.util.LogMethod;
 import org.labkey.test.util.PortalHelper;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -52,17 +56,41 @@ public class MS2ExtensionsTest extends AbstractMS2ImportTest
         cleanPipeline();
         super.setupMS2();
         importMS2Run("DRT2", 2);
+        _containerHelper.enableModule(getProjectName() + "/" + FOLDER_NAME, MS2EXTENSIONS_MODULE);
     }
 
     @Override
     protected void verifyMS2()
     {
         verifyMultiProteinsSearch();
+        verifyChargeFilterLookup();
+    }
+
+    // Issue 52659: lookups from module query XML must resolve in the run's peptide grid and on the protein page
+    private void verifyChargeFilterLookup()
+    {
+        // HyperChgFilt2 is 999999 for charges other than 2+ (XTandemChargeQueryColumns.sql)
+        String chargeTwoFilter = EscapeUtil.encode(REGION_NAME_PEPTIDES + "." + FieldKey.fromParts("XTandemChgFilt", "HyperChgFilt2") + "~lt") + "=999999";
+
+        navigateToFolder(FOLDER_NAME);
+        clickAndWait(Locator.linkWithText("drt/CAexample_mini (DRT2)"));
+        selectOptionByText(Locator.name("viewParams"), "<Standard View>");
+        clickButton("Go");
+        beginAt(getCurrentRelativeURL() + "&" + chargeTwoFilter);
+
+        assertTextNotPresent("Ignoring filter");
+        DataRegionTable peptides = new DataRegionTable(REGION_NAME_PEPTIDES, this);
+        assertEquals("Peptide rows filtered on a module-defined lookup", 21, peptides.getDataRowCount());
+        assertEquals("Charges after filtering on HyperChgFilt2", Set.of("2+"), new HashSet<>(peptides.getColumnDataAsText("Charge")));
+
+        beginAt(getAttribute(Locator.linkWithText("gi|15645924|ribosomal_protein"), "href") + "&allPeps=true");
+        assertTextPresent("1 total, 1 distinct", "R.VKLKAMQLSNPNEIKKAR.N");
+        assertTextNotPresent("K.YTELK.D");
     }
 
     private void verifyMultiProteinsSearch()
     {
-        _containerHelper.enableModule(MS2EXTENSIONS_MODULE);
+        navigateToFolder(FOLDER_NAME);
         PortalHelper _portalHelper = new PortalHelper(this);
         _portalHelper.addWebPart(MS2EXTENSIONS_WEBPART);
 
