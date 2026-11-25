@@ -75,7 +75,6 @@ public final class LuminexLeveyJenningsMenuTest extends LuminexTest
         LeveyJenningsMenuPage menuPage = goToMenuPage();
 
         assertEquals("Wrong antigens", ALL_ANTIGENS, menuPage.getAntigens());
-        assertEquals("Antigens should wrap into a second column after 8", 2, menuPage.getAntigenColumnCount());
         assertEquals("Wrong titrations", List.of(STANDARD1, STANDARD2), menuPage.getTitrations());
         assertEquals("Wrong single point controls", List.of(SINGLE_POINT_CONTROL), menuPage.getSinglePointControls());
         assertFalse("Report links should not include an antigen", menuPage.getTitrationHref(STANDARD1).contains("analyte="));

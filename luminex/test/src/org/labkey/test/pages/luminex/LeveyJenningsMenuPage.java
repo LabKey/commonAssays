@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The Levey-Jennings Reports menu page (luminex-leveyJenningsMenu.view): the Antigens filter
- * and the Titrations / Single Point Controls lists that link to the Levey-Jennings report.
+ * The Levey-Jennings Reports menu page (luminex-leveyJenningsMenu.view): the Titrations / Single Point Controls
+ * lists that link to the Levey-Jennings report, and the Antigens filter beside them.
  */
 public class LeveyJenningsMenuPage extends LabKeyPage<LeveyJenningsMenuPage.ElementCache>
 {
@@ -57,28 +57,23 @@ public class LeveyJenningsMenuPage extends LabKeyPage<LeveyJenningsMenuPage.Elem
 
     public List<String> getAntigens()
     {
-        return getLinkTexts(elementCache().antigensRow);
-    }
-
-    public int getAntigenColumnCount()
-    {
-        return Locator.xpath("./td").findElements(elementCache().antigensRow).size();
+        return getLinkTexts(elementCache().antigensCell);
     }
 
     public String getAntigensText()
     {
-        return elementCache().antigensRow.getText().trim();
+        return elementCache().antigensCell.getText().trim();
     }
 
     public LeveyJenningsMenuPage selectAntigen(String antigen)
     {
-        clickAndWait(Locator.linkWithText(antigen).findElement(elementCache().antigensRow));
+        clickAndWait(Locator.linkWithText(antigen).findElement(elementCache().antigensCell));
         return new LeveyJenningsMenuPage(getDriver());
     }
 
     public LeveyJenningsMenuPage clearAntigen()
     {
-        clickAndWait(Locator.tagWithAttribute("a", "aria-label", "Clear selection").findElement(elementCache().antigensRow));
+        clickAndWait(Locator.tagWithAttribute("a", "aria-label", "Clear selection").findElement(elementCache().antigensCell));
         return new LeveyJenningsMenuPage(getDriver());
     }
 
@@ -128,7 +123,7 @@ public class LeveyJenningsMenuPage extends LabKeyPage<LeveyJenningsMenuPage.Elem
 
     protected class ElementCache extends LabKeyPage<ElementCache>.ElementCache
     {
-        final WebElement antigensRow = Locator.xpath(".//tr[2]").findWhenNeeded(Locators.antigensTable.findWhenNeeded(this));
+        final WebElement antigensCell = Locator.xpath(".//tr[2]/td").findWhenNeeded(Locators.antigensTable.findWhenNeeded(this));
         final WebElement controlsTable = Locators.controlsTable.findWhenNeeded(this);
         final WebElement titrationsCell = Locator.xpath(".//tr[2]/td[1]").findWhenNeeded(controlsTable);
         final WebElement singlePointControlsCell = Locator.xpath(".//tr[2]/td[2]").findWhenNeeded(controlsTable);
@@ -137,6 +132,6 @@ public class LeveyJenningsMenuPage extends LabKeyPage<LeveyJenningsMenuPage.Elem
     private static class Locators
     {
         static final Locator.XPathLocator antigensTable = Locator.xpath("//table[.//th[normalize-space()='Antigens']]");
-        static final Locator.XPathLocator controlsTable = Locator.xpath("//table[.//td[normalize-space()='Titrations']]");
+        static final Locator.XPathLocator controlsTable = Locator.xpath("//table[.//th[normalize-space()='Titrations']]");
     }
 }
