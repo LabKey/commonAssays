@@ -213,6 +213,14 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
         assertWellExclusions(SUMMARY_RUN, "S6", Map.of(REPLICATE_GROUP, "Analyte2"));
         assertWellExclusions(OTHER_RUN, "S6", Map.of(REPLICATE_GROUP, "Analyte2, Analyte3"));
 
+        log("View excluded data from the results for all runs");
+        goToAllRunsResults(Map.of());
+        clickAndWait(Locator.linkWithText("view excluded data"));
+        DataRegionTable exclusions = new DataRegionTable("WellExclusion", getDriver());
+        exclusions.setFilter("Type", "Equals", "S6");
+        assertEquals("Both runs' exclusions should be listed", List.of("Analyte2", "Analyte2, Analyte3"),
+                exclusions.getColumnDataAsText("Analytes").stream().map(LuminexExcludeSelectedRowsTest::sortedAnalytes).sorted().toList());
+
         log("Remove an analyte from both runs' exclusions");
         goToAllRunsResultsWithoutSelection();
         selectRowsInAllRunsResults(SUMMARY_RUN, wellAnalytes("S6", "G6", ANALYTE_2));
@@ -357,8 +365,13 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
         for (int i = 0; i < wells.size(); i++)
         {
             String well = wells.get(i).isBlank() ? REPLICATE_GROUP : wells.get(i).trim();
-            actual.put(well, Arrays.stream(analytes.get(i).split(",")).map(String::trim).sorted().collect(Collectors.joining(", ")));
+            actual.put(well, sortedAnalytes(analytes.get(i)));
         }
         assertEquals("Wrong exclusions for type " + type, new TreeMap<>(expected), actual);
+    }
+
+    private static String sortedAnalytes(String analytes)
+    {
+        return Arrays.stream(analytes.split(",")).map(String::trim).sorted().collect(Collectors.joining(", "));
     }
 }
