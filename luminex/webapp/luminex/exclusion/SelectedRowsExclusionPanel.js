@@ -84,7 +84,7 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
     {
         var descText = this.removeMode
             ? 'The analytes of the selected rows will be removed from these well and replicate group exclusions. An exclusion with no analytes left is removed.'
-            : 'The analytes of the selected rows will be excluded for these wells. A selected summary row excludes its whole replicate group.';
+            : 'The analytes of the selected rows will be excluded for these wells. A row in a replicate group with summary rows excludes the whole group.';
         this.add(new Ext.form.DisplayField({
             hideLabel: true,
             style: 'padding-bottom: 10px;',
