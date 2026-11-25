@@ -15,6 +15,7 @@
  */
 package org.labkey.test.tests.luminex;
 
+import org.jetbrains.annotations.Nullable;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,6 +44,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -52,9 +54,9 @@ import static org.junit.Assert.assertThrows;
 @Category({Daily.class, Assays.class})
 public final class LuminexExcludeSelectedRowsTest extends LuminexTest
 {
-    private static final TestRun SUMMARY_RUN = new TestRun("SelectedRowsRun", TEST_ASSAY_LUM_FILE10, "Standard1");
-    private static final TestRun RAW_RUN = new TestRun("SelectedRowsRawRun", TEST_ASSAY_MULTIPLE_STANDARDS_1_XLSX, "Standard2");
-    private static final TestRun OTHER_RUN = new TestRun("SelectedRowsOtherRun", TEST_ASSAY_LUM_FILE10, "Standard1");
+    private static final TestRun SUMMARY_RUN = new TestRun("SelectedRowsRun", TEST_ASSAY_LUM_FILE10, "Standard1", "NB-101");
+    private static final TestRun RAW_RUN = new TestRun("SelectedRowsRawRun", TEST_ASSAY_MULTIPLE_STANDARDS_1_XLSX, "Standard2", "NB-102");
+    private static final TestRun OTHER_RUN = new TestRun("SelectedRowsOtherRun", TEST_ASSAY_LUM_FILE10, "Standard1", null);
     private static final String ANALYTE_2 = "Analyte2";
     private static final String ANALYTE_3 = "Analyte3";
     private static final String ENV6 = "ENV6";
@@ -75,9 +77,9 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
             assayDesigner.clickFinish();
         }
 
-        init.importRun(SUMMARY_RUN.name(), SUMMARY_RUN.file());
-        init.importRun(RAW_RUN.name(), RAW_RUN.file());
-        init.importRun(OTHER_RUN.name(), OTHER_RUN.file());
+        init.importRun(SUMMARY_RUN);
+        init.importRun(RAW_RUN);
+        init.importRun(OTHER_RUN);
     }
 
     @Before
@@ -265,10 +267,12 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
         return response.getRowset().iterator().next();
     }
 
-    private void importRun(String runName, File file)
+    private void importRun(TestRun run)
     {
-        createNewAssayRun(TEST_ASSAY_LUM, runName);
-        addFilesToAssayRun(file);
+        createNewAssayRun(TEST_ASSAY_LUM, run.name());
+        if (run.notebookNo() != null)
+            setFormElement(Locator.name("NotebookNo"), run.notebookNo());
+        addFilesToAssayRun(run.file());
         clickButton("Next", longWaitForPage);
         clickButton("Save and Finish", longWaitForPage);
     }
@@ -314,7 +318,7 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
         return results;
     }
 
-    private record TestRun(String name, File file, String description) {}
+    private record TestRun(String name, File file, String description, @Nullable String notebookNo) {}
 
     private record WellAnalytes(String type, String well, List<String> analytes) {}
 
@@ -348,7 +352,8 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
 
     private static ExclusionRow row(TestRun run, String type, String wells, String analytes, String exclusionType)
     {
-        return new ExclusionRow(run.name(), run.file().getName(), run.description(), type, wells, analytes, exclusionType);
+        // Each test run has one data file, so the dialog hides the Data File column
+        return new ExclusionRow(run.name(), Objects.toString(run.notebookNo(), ""), null, run.description(), type, wells, analytes, exclusionType);
     }
 
     /** Checks the run's well and replicate group exclusions for the type, keyed by well ("Replicate Group" for a group exclusion). */

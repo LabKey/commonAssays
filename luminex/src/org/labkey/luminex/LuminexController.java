@@ -28,6 +28,7 @@ import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.assay.AssayView;
@@ -53,6 +54,8 @@ import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.DeleteForm;
 import org.labkey.api.gwt.client.AuditBehaviorType;
 import org.labkey.api.pipeline.PipeRoot;
@@ -781,20 +784,36 @@ public class LuminexController extends SpringActionController
                 exclusionsByRun.computeIfAbsent(exclusion.runId(), _ -> new ArrayList<>()).add(props);
             }
 
+            DomainProperty notebookNoProperty = getNotebookNoProperty();
             List<Map<String, Object>> runs = new ArrayList<>();
             exclusionsByRun.forEach((runId, exclusions) -> {
                 Map<String, Object> run = new HashMap<>();
                 run.put("runId", runId);
                 run.put("runName", runNames.get(runId));
+                if (notebookNoProperty != null)
+                {
+                    ExpRun expRun = ExperimentService.get().getExpRun(runId);
+                    Object notebookNo = expRun != null ? expRun.getProperty(notebookNoProperty) : null;
+                    run.put("notebookNo", notebookNo != null ? notebookNo.toString() : null);
+                }
                 run.put("exclusions", exclusions);
                 runs.add(run);
             });
 
             ApiSimpleResponse response = new ApiSimpleResponse();
             response.put("success", true);
+            response.put("hasNotebookNo", notebookNoProperty != null);
             response.put("runs", runs);
             response.put("skippedRowCount", result.skippedRowCount() + (dataRows.size() - rows.size()));
             return response;
+        }
+
+        // The optional run field the Levey-Jennings report also shows
+        private @Nullable DomainProperty getNotebookNoProperty()
+        {
+            AssayProvider provider = AssayService.get().getProvider(_protocol);
+            Domain runDomain = provider != null ? provider.getRunDomain(_protocol) : null;
+            return runDomain != null ? runDomain.getPropertyByName("NotebookNo") : null;
         }
 
         private List<SelectedDataRow> getSelectedDataRows(Set<Long> dataRowIds)

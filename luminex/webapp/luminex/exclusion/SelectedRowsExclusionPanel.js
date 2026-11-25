@@ -38,6 +38,7 @@ function openExclusionsSelectedRowsWindow(assayId, dataRegionName, remove)
                     assayId: assayId,
                     removeMode: remove,
                     runs: response.runs,
+                    hasNotebookNo: response.hasNotebookNo,
                     skippedRowCount: response.skippedRowCount,
                     listeners: {
                         closeWindow: function()
@@ -123,25 +124,48 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
     getTableHtml : function()
     {
-        var headers = ['Assay ID', 'Data File', 'Description', 'Type', 'Well(s)', 'Selected Analyte(s)', 'Exclusion Type'];
+        var columns = [
+            {header: 'Assay ID', field: 'runName'},
+            {header: 'Notebook No.', field: 'notebookNo'},
+            {header: 'Data File', field: 'dataFileName'},
+            {header: 'Description', field: 'description'},
+            {header: 'Type', field: 'type'},
+            {header: 'Well(s)', field: 'wells'},
+            {header: 'Selected Analyte(s)', field: 'analyteNames'},
+            {header: 'Exclusion Type', field: 'exclusionType'}
+        ];
+        if (!this.hasRunWithSeveralDataFiles())
+            columns = columns.filter(function(column) { return column.field !== 'dataFileName'; });
+        if (!this.hasNotebookNo)
+            columns = columns.filter(function(column) { return column.field !== 'notebookNo'; });
+
         var html = '<table class="labkey-data-region-legacy labkey-show-borders" style="width: 100%;"><tr>';
-        Ext.each(headers, function(header)
+        Ext.each(columns, function(column)
         {
-            html += '<td class="labkey-column-header">' + Ext.util.Format.htmlEncode(header) + '</td>';
+            html += '<td class="labkey-column-header">' + Ext.util.Format.htmlEncode(column.header) + '</td>';
         });
         html += '</tr>';
 
         Ext.each(this.getTableRecords(), function(record, index)
         {
             html += '<tr class="' + (index % 2 === 0 ? 'labkey-alternate-row' : 'labkey-row') + '">';
-            Ext.each([record.runName, record.dataFileName, record.description, record.type, record.wells, record.analyteNames, record.exclusionType], function(value)
+            Ext.each(columns, function(column)
             {
-                html += '<td style="vertical-align: top; overflow-wrap: anywhere;">' + this.getCellHtml(value) + '</td>';
+                html += '<td style="vertical-align: top; overflow-wrap: anywhere;">' + this.getCellHtml(record[column.field]) + '</td>';
             }, this);
             html += '</tr>';
         }, this);
 
         return html + '</table>';
+    },
+
+    hasRunWithSeveralDataFiles : function()
+    {
+        return this.runs.some(function(run)
+        {
+            var dataIds = run.exclusions.map(function(exclusion) { return exclusion.dataId; });
+            return dataIds.some(function(dataId) { return dataId !== dataIds[0]; });
+        });
     },
 
     // An array value, such as the analyte names, gets one line per item
@@ -163,6 +187,7 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             {
                 records.push({
                     runName: run.runName,
+                    notebookNo: run.notebookNo,
                     dataFileName: exclusion.dataFileName,
                     description: exclusion.description,
                     type: exclusion.type,

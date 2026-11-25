@@ -15,12 +15,15 @@
  */
 package org.labkey.test.components.luminex.dialogs;
 
+import org.jetbrains.annotations.Nullable;
 import org.labkey.test.Locator;
 import org.labkey.test.util.DataRegionTable;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The dialog opened by the results grid's "Exclude Selected Rows" and "Remove Selected Exclusions" menu items.
@@ -31,14 +34,19 @@ public class SelectedRowsExclusionDialog extends BaseExclusionDialog
     public static final String REMOVE_MENU_ITEM = "Remove Selected Exclusions";
     public static final String EXCLUDE_TITLE = "Exclude Selected Rows from Analysis";
     public static final String REMOVE_TITLE = "Remove Selected Exclusions";
+    private static final String DATA_FILE_HEADER = "Data File";
 
+    private static final Locator TABLE_HEADER = Locator.css("#selectedrowsexclusions td.labkey-column-header");
     private static final Locator TABLE_ROW = Locator.css("#selectedrowsexclusions tr.labkey-row, #selectedrowsexclusions tr.labkey-alternate-row");
     private static final Locator SAVE_ENABLED = Locator.xpath("//table[@id='saveBtn' and not(contains(@class, 'disabled'))]");
 
     private final boolean _remove;
 
-    /** One row of the dialog's table. wells is "Replicate Group" for a replicate group exclusion; analytes is comma separated. */
-    public record ExclusionRow(String run, String dataFile, String description, String type, String wells, String analytes, String exclusionType)
+    /**
+     * One row of the dialog's table; analytes is comma separated. notebookNo is null when the assay design has no NotebookNo run field,
+     * and dataFile is null when the dialog hides that column, as it does unless a run's rows span data files.
+     */
+    public record ExclusionRow(String run, @Nullable String notebookNo, @Nullable String dataFile, String description, String type, String wells, String analytes, String exclusionType)
     {
     }
 
@@ -84,11 +92,21 @@ public class SelectedRowsExclusionDialog extends BaseExclusionDialog
 
     public List<ExclusionRow> getRows()
     {
+        List<String> headers = getHeaders();
         return TABLE_ROW.findElements(getDriver()).stream().map(row -> {
             List<String> cells = Locator.tag("td").findElements(row).stream().map(WebElement::getText).toList();
-            String analytes = String.join(", ", cells.get(5).split("\n")); // one analyte per line
-            return new ExclusionRow(cells.get(0), cells.get(1), cells.get(2), cells.get(3), cells.get(4), analytes, cells.get(6));
+            Map<String, String> values = new HashMap<>();
+            for (int i = 0; i < headers.size(); i++)
+                values.put(headers.get(i), cells.get(i));
+            String analytes = String.join(", ", values.get("Selected Analyte(s)").split("\n")); // one analyte per line
+            return new ExclusionRow(values.get("Assay ID"), values.get("Notebook No."), values.get(DATA_FILE_HEADER), values.get("Description"), values.get("Type"),
+                    values.get("Well(s)"), analytes, values.get("Exclusion Type"));
         }).toList();
+    }
+
+    private List<String> getHeaders()
+    {
+        return TABLE_HEADER.findElements(getDriver()).stream().map(WebElement::getText).toList();
     }
 
     public SelectedRowsExclusionDialog setComment(String comment)
