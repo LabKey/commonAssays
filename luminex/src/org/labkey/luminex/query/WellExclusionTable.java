@@ -50,6 +50,7 @@ import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayRunDatabaseContext;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexManager;
@@ -70,6 +71,8 @@ import java.util.TreeSet;
  */
 public class WellExclusionTable extends AbstractExclusionTable
 {
+    private static final Logger LOG = LogHelper.getLogger(WellExclusionTable.class, "Luminex well exclusion transform reruns");
+
     public WellExclusionTable(LuminexProtocolSchema schema, ContainerFilter cf, boolean filter)
     {
         super(LuminexProtocolSchema.getTableInfoWellExclusion(), schema, cf, filter);
@@ -327,7 +330,7 @@ public class WellExclusionTable extends AbstractExclusionTable
 
             private void rerunTransformScripts(BatchValidationException errors, Map<Enum, Object> configParameters) throws QueryUpdateServiceException
             {
-                Logger logger = (Logger) configParameters.get(QueryUpdateService.ConfigParameters.Logger);
+                Logger logger = configParameters != null && configParameters.get(QueryUpdateService.ConfigParameters.Logger) instanceof Logger l ? l : LOG;
                 try
                 {
                     for (ExpRun run : _runsToRefresh)

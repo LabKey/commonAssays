@@ -451,7 +451,12 @@ public class LuminexManager
                 else if (isSinglepointUnknownExclusion)
                     hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileHeaderKey, analyteName, description)) && k.endsWith("|" + dilution + "|null"));
                 else if (isWellReplicateGroupTypeExclusion)
-                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getReplicateGroupKey(dataFileHeaderKey, analyteName, description, type)));
+                {
+                    String groupKey = getReplicateGroupKey(dataFileHeaderKey, analyteName, description, type);
+                    String well = (String)exclusion.get("well");
+                    // A single-well exclusion needs its well in the new file, as the re-import warning counts it
+                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(groupKey) && (well == null || k.endsWith("|" + well)));
+                }
 
                 if (hasWellKeyMatch)
                     command = generateExclusionCommands(exclusion, file.getRowId());
@@ -712,9 +717,12 @@ public class LuminexManager
             String type = (String)cols.get(typeFK).getValue(row);
             Object dilutionObj = cols.get(dilutionFK).getValue(row);
             Double dilution = dilutionObj != null ? Double.parseDouble(dilutionObj.toString()) : null;
-            String well = onlyExcludedWells ? (String)cols.get(wellFK).getValue(row) : null;
+            String well = (String)cols.get(wellFK).getValue(row);
 
-            excludedWellKeys.add(createWellKey(dataFileHeaderKey, analyteName, description, type, dilution, well));
+            excludedWellKeys.add(createWellKey(dataFileHeaderKey, analyteName, description, type, dilution, onlyExcludedWells ? well : null));
+            // Re-import also matches single-well exclusions to their well; the well-less key stays for the other exclusion types
+            if (!onlyExcludedWells && well != null)
+                excludedWellKeys.add(createWellKey(dataFileHeaderKey, analyteName, description, type, dilution, well));
         });
 
         return excludedWellKeys;

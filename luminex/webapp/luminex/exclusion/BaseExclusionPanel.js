@@ -232,7 +232,10 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
     saveExclusions : function(config, type)
     {
         if (!Ext.isArray(config.commands) && !Ext.isArray(config.runs))
+        {
             Ext.Msg.alert('Error', 'SaveExclusion API expects an array of commands or runs.');
+            return;
+        }
 
         config.scope = this;
 

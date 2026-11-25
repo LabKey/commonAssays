@@ -727,7 +727,7 @@ public class LuminexController extends SpringActionController
             }
 
             List<SelectedRowsExclusions.SelectedRow> rows = dataRows.stream()
-                    .filter(r -> r.type() != null) // Rows without a type aren't part of a replicate group
+                    .filter(r -> r.type() != null && r.well() != null) // Rows without a type or well aren't part of a replicate group
                     .map(r -> new SelectedRowsExclusions.SelectedRow(r.runId(), new SelectedRowsExclusions.ReplicateGroup(r.dataId(), r.description(), r.type()),
                             r.well(), r.summary(), r.analyteId(), r.analyteName()))
                     .toList();
@@ -907,6 +907,7 @@ public class LuminexController extends SpringActionController
                     if (protocol != null && !protocol.getLSID().equals(run.getProtocol().getLSID()))
                         errors.reject(ERROR_MSG, "Run " + run.getRowId() + " is not a run of assay " + protocol.getName() + ".");
                     validateDataIds(runForm, run, errors);
+                    validateKeys(runForm, run, errors);
                 }
             }
 
@@ -931,6 +932,37 @@ public class LuminexController extends SpringActionController
                     .filter(dataId -> !runDataIds.contains(dataId))
                     .sorted()
                     .forEach(dataId -> errors.reject(ERROR_MSG, "Data file " + dataId + " does not belong to run " + run.getRowId() + "."));
+        }
+
+        // An update or delete must change one of the form's run's exclusions
+        private void validateKeys(LuminexSaveExclusionsForm form, ExpRun run, Errors errors)
+        {
+            Set<Integer> keys = form.getCommands().stream()
+                    .filter(command -> !"insert".equals(command.getCommand()))
+                    .map(LuminexSingleExclusionCommand::getKey)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            if (keys.isEmpty())
+                return;
+
+            Set<Integer> runKeys;
+            if (LuminexManager.ExclusionType.RunExclusion.name().equals(form.getTableName()))
+            {
+                // An analyte exclusion is keyed by its RunId
+                runKeys = keys.stream().filter(key -> key == run.getRowId()).collect(Collectors.toSet());
+            }
+            else
+            {
+                SQLFragment sql = SQLFragment.unsafe("SELECT we.RowId FROM ").append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we")
+                        .append(SQLFragment.unsafe(" JOIN ")).append(ExperimentService.get().getTinfoData(), "d")
+                        .append(SQLFragment.unsafe(" ON d.RowId = we.DataId WHERE d.RunId = ? AND we.RowId ", run.getRowId()))
+                        .appendInClause(keys, LuminexProtocolSchema.getSchema().getSqlDialect());
+                runKeys = new HashSet<>(new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getArrayList(Integer.class));
+            }
+            keys.stream()
+                    .filter(key -> !runKeys.contains(key))
+                    .sorted()
+                    .forEach(key -> errors.reject(ERROR_MSG, "Exclusion " + key + " does not belong to run " + run.getRowId() + "."));
         }
 
         @Override
