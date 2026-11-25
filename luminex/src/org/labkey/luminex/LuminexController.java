@@ -39,6 +39,7 @@ import org.labkey.api.audit.TransactionAuditProvider;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleDisplayColumn;
@@ -48,6 +49,7 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TSVWriter;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.UrlColumn;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
@@ -104,6 +106,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -865,19 +868,49 @@ public class LuminexController extends SpringActionController
         public void validateForm(LuminexSaveExclusionsForm form, Errors errors)
         {
             // verify the assayName provided is valid and of type LuminexAssayProvider
-            if (form.getProtocol(getContainer()) == null)
+            ExpProtocol protocol = form.getProtocol(getContainer());
+            if (protocol == null)
             {
                 errors.reject(ERROR_MSG, "Luminex assay protocol not found: " + form.getAssayId());
             }
 
-            // verify that the runId is valid and matches an existing run
-            ExpRun run = form.getRunId() != null ? ExperimentService.get().getExpRun(getContainer(), form.getRunId()) : null;
-            if (run == null)
+            // verify that each runId is valid and matches an existing run, before any job is queued
+            for (LuminexSaveExclusionsForm runForm : form.getRunForms())
             {
-                errors.reject(ERROR_MSG, "No run found for id " + form.getRunId());
+                ExpRun run = runForm.getRunId() != null ? ExperimentService.get().getExpRun(getContainer(), runForm.getRunId()) : null;
+                if (run == null)
+                {
+                    errors.reject(ERROR_MSG, "No run found for id " + runForm.getRunId());
+                }
+                else
+                {
+                    if (protocol != null && !protocol.getLSID().equals(run.getProtocol().getLSID()))
+                        errors.reject(ERROR_MSG, "Run " + run.getRowId() + " is not a run of assay " + protocol.getName() + ".");
+                    validateDataIds(runForm, run, errors);
+                }
             }
 
             form.validate(errors);
+        }
+
+        // The job is logged against the form's run, so each command's data file must be one of that run's
+        private void validateDataIds(LuminexSaveExclusionsForm form, ExpRun run, Errors errors)
+        {
+            Set<Long> dataIds = form.getCommands().stream()
+                    .map(LuminexSingleExclusionCommand::getDataId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            if (dataIds.isEmpty())
+                return;
+
+            Set<Long> runDataIds = ExperimentService.get().getExpDatas(dataIds).stream()
+                    .filter(data -> Objects.equals(data.getRunId(), run.getRowId()))
+                    .map(ExpData::getRowId)
+                    .collect(Collectors.toSet());
+            dataIds.stream()
+                    .filter(dataId -> !runDataIds.contains(dataId))
+                    .sorted()
+                    .forEach(dataId -> errors.reject(ERROR_MSG, "Data file " + dataId + " does not belong to run " + run.getRowId() + "."));
         }
 
         @Override
@@ -886,10 +919,19 @@ public class LuminexController extends SpringActionController
             ApiSimpleResponse response = new ApiSimpleResponse();
 
             PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-            PipelineJob job = new LuminexExclusionPipelineJob(getViewBackgroundInfo(), root, form);
-            PipelineService.get().queueJob(job);
+            List<LuminexSaveExclusionsForm> runForms = form.getRunForms();
+            try (DbScope.Transaction transaction = ExperimentService.get().ensureTransaction())
+            {
+                for (LuminexSaveExclusionsForm runForm : runForms)
+                {
+                    PipelineJob job = new LuminexExclusionPipelineJob(getViewBackgroundInfo(), root, runForm);
+                    PipelineService.get().queueJob(job);
+                }
+                transaction.commit();
+            }
 
             response.put("success", true);
+            response.put("jobCount", runForms.size());
             response.put(ActionURL.Param.returnUrl.name(), urlProvider(AssayUrls.class).getShowUploadJobsURL(getContainer(), form.getProtocol(getContainer()), ContainerFilter.current(this)));
             return response;
         }

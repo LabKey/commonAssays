@@ -19,14 +19,23 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.labkey.api.query.QueryKey;
+import org.labkey.remoteapi.CommandException;
+import org.labkey.remoteapi.Connection;
+import org.labkey.remoteapi.query.Filter;
+import org.labkey.remoteapi.query.Row;
+import org.labkey.remoteapi.query.SelectRowsCommand;
+import org.labkey.remoteapi.query.SelectRowsResponse;
 import org.labkey.test.Locator;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.components.luminex.dialogs.SelectedRowsExclusionDialog;
 import org.labkey.test.components.luminex.dialogs.SelectedRowsExclusionDialog.ExclusionRow;
 import org.labkey.test.pages.ReactAssayDesignerPage;
+import org.labkey.test.util.APIAssayHelper;
 import org.labkey.test.util.DataRegionTable;
 import org.labkey.test.util.TestDataGenerator;
+import org.labkey.test.util.luminex.LuminexSaveExclusionCommand;
 
 import java.io.File;
 import java.util.Arrays;
@@ -36,6 +45,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 @Category({Daily.class, Assays.class})
 public final class LuminexExcludeSelectedRowsTest extends LuminexTest
@@ -65,6 +75,7 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
 
         init.importRun(SUMMARY_RUN.name(), SUMMARY_RUN.file());
         init.importRun(RAW_RUN.name(), RAW_RUN.file());
+        init.importRun(OTHER_RUN_NAME, SUMMARY_RUN.file());
     }
 
     @Before
@@ -180,11 +191,39 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
         assertEquals("No rows are selected.", SelectedRowsExclusionDialog.getSelectionError(getDriver(), false));
 
         log("Select rows from two runs; the selection is kept across the runs' results grids");
-        importRun(OTHER_RUN_NAME, SUMMARY_RUN.file());
         selectRowsInRun(SUMMARY_RUN.name(), wellAnalytes("S6", "G6", ANALYTE_2));
         selectRowsInRun(OTHER_RUN_NAME, wellAnalytes("S6", "G6", ANALYTE_2));
         assertEquals("The selection includes rows from more than one run. Select rows from a single run.",
                 SelectedRowsExclusionDialog.getSelectionError(getDriver(), false));
+    }
+
+    @Test
+    public void testSaveRejectsDataFileFromAnotherRun() throws Exception
+    {
+        Connection connection = createDefaultConnection();
+        Row dataRow = getS6G6DataRow(connection, SUMMARY_RUN.name());
+        long dataId = ((Number) dataRow.getValue("Data")).longValue();
+        long otherRunId = ((Number) getS6G6DataRow(connection, OTHER_RUN_NAME).getValue("Data/Run/RowId")).longValue();
+
+        int assayId = new APIAssayHelper(this).getIdFromAssayName(TEST_ASSAY_LUM, getProjectName());
+        LuminexSaveExclusionCommand save = new LuminexSaveExclusionCommand(assayId, otherRunId)
+                .addWellExclusion(dataId, SUMMARY_RUN.description(), "S6", "G6", ((Number) dataRow.getValue("Analyte")).longValue(), "wrong run");
+        CommandException e = assertThrows(CommandException.class, () -> save.execute(connection, getProjectName()));
+        assertEquals("Data file " + dataId + " does not belong to run " + otherRunId + ".", e.getMessage());
+    }
+
+    /** The run's raw data row for well G6 of S6 and Analyte2. */
+    private Row getS6G6DataRow(Connection connection, String runName) throws Exception
+    {
+        SelectRowsCommand select = new SelectRowsCommand("assay.Luminex." + QueryKey.encodePart(TEST_ASSAY_LUM), "Data");
+        select.setColumns(List.of("Data", "Data/Run/RowId", "Analyte"));
+        select.addFilter(new Filter("Data/Run/Name", runName));
+        select.addFilter(new Filter("Type", "S6"));
+        select.addFilter(new Filter("Well", "G6"));
+        select.addFilter(new Filter("Analyte/Name", ANALYTE_2));
+        SelectRowsResponse response = select.execute(connection, getProjectName());
+        assertEquals("Expected one S6 G6 " + ANALYTE_2 + " data row in " + runName, 1, response.getRowCount().intValue());
+        return response.getRowset().iterator().next();
     }
 
     private void importRun(String runName, File file)
