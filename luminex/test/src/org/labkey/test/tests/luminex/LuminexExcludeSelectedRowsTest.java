@@ -270,8 +270,7 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
     private void importRun(TestRun run)
     {
         createNewAssayRun(TEST_ASSAY_LUM, run.name());
-        if (run.notebookNo() != null)
-            setFormElement(Locator.name("NotebookNo"), run.notebookNo());
+        setFormElement(Locator.name("NotebookNo"), Objects.toString(run.notebookNo(), ""));
         addFilesToAssayRun(run.file());
         clickButton("Next", longWaitForPage);
         clickButton("Save and Finish", longWaitForPage);
