@@ -229,15 +229,15 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
 
     saveExclusions : function(config, type)
     {
-        if (!config.commands || !Ext.isArray(config.commands))
-            Ext.Msg.alert('Error', 'SaveExclusion API expects an array on commands.');
+        if (!Ext.isArray(config.commands) && !Ext.isArray(config.runs))
+            Ext.Msg.alert('Error', 'SaveExclusion API expects an array of commands or runs.');
 
         config.scope = this;
 
         config.success = function(response)
         {
             this.fireEvent('closeWindow');
-            this.showJobQueuedSuccess(type, response.returnUrl);
+            this.showJobQueuedSuccess(type, response.returnUrl, response.jobCount);
         };
 
         config.failure = function(response)
@@ -249,13 +249,15 @@ LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
         LABKEY.Luminex.saveExclusion(config);
     },
 
-    showJobQueuedSuccess : function(type, url)
+    showJobQueuedSuccess : function(type, url, jobCount)
     {
+        var queued = jobCount > 1
+                ? jobCount + ' ' + type + ' exclusion jobs, one per run, have been added to the pipeline.'
+                : 'The ' + type + ' exclusion job has been added to the pipeline.';
         Ext.Msg.show({
             width: 400,
             title:'Success',
-            msg: 'The ' + type + ' exclusion job(s) has been added to the pipeline.'
-                    + ' Would you like to go to the pipeline job status page now to review this exclusion?',
+            msg: queued + ' Would you like to go to the pipeline job status page now to review this exclusion?',
             icon: Ext.MessageBox.INFO,
             buttons: Ext.Msg.YESNO,
             fn: function(btnId)
@@ -299,7 +301,7 @@ LABKEY.Luminex = new function()
          * @param {Object} config An object which contains the following configuration properties.
          * @param {String} [config.assayId] Required. Assay design RowId of the Luminex assay design
          * @param {String} [config.tableName] Required. Either WellExclusion (i.e. replicate group), TitrationExclusion, or RunExclusion (i.e. anaalyte)
-         * @param {String} [config.runId] Required. RowId for the assay run
+         * @param {String} [config.runId] Required, unless runs is given. RowId for the assay run
          * @param {Array}  [config.commands] Required. Array of exclusion commeands to be executed
          * @param {String} [config.commands[].command] Required. Either insert, update, or delete
          * @param {String} [config.commands[].key] If update or delete, the RowId key for the record to be modified
@@ -309,6 +311,7 @@ LABKEY.Luminex = new function()
          * @param {String} [config.commands[].analyteRowIds] A comma separated list of analyte RowIds
          * @param {String} [config.commands[].analyteNames] A comma separated list of analyte Names
          * @param {String} [config.commands[].comment] The comment to save with the exclusion
+         * @param {Array}  [config.runs] In place of runId and commands, an array of {runId, commands} to save several runs, each as its own job
          * @param {Function} config.success Function called when the "saveExclusion" function executes successfully.
          * @param {Function} [config.failure] Function called if execution of the "saveExclusion" function fails.
          * a save.
@@ -319,7 +322,8 @@ LABKEY.Luminex = new function()
                 assayId: config.assayId,
                 tableName: config.tableName,
                 runId: config.runId,
-                commands: config.commands
+                commands: config.commands,
+                runs: config.runs
             };
 
             var requestConfig = {

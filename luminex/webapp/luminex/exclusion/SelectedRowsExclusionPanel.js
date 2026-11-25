@@ -200,28 +200,31 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         this.mask(this.removeMode ? 'Removing exclusions...' : 'Saving exclusions...');
 
         var comment = this.findById('comment').getValue();
-        var run = this.runs[0];
-        var commands = [];
-        Ext.each(run.exclusions, function(exclusion)
+        var runs = this.runs.map(function(run)
         {
-            commands.push({
-                command: exclusion.command,
-                key: exclusion.key != null ? exclusion.key : undefined, // the save form can't bind a null key
-                dataId: exclusion.dataId,
-                description: exclusion.description,
-                type: exclusion.type,
-                well: exclusion.well,
-                analyteRowIds: exclusion.analyteRowIds,
-                analyteNames: exclusion.analyteNames, // for logging purposes only
-                comment: this.getCommandComment(exclusion, comment)
-            });
+            return {
+                runId: run.runId,
+                commands: run.exclusions.map(function(exclusion)
+                {
+                    return {
+                        command: exclusion.command,
+                        key: exclusion.key != null ? exclusion.key : undefined, // the save form can't bind a null key
+                        dataId: exclusion.dataId,
+                        description: exclusion.description,
+                        type: exclusion.type,
+                        well: exclusion.well,
+                        analyteRowIds: exclusion.analyteRowIds,
+                        analyteNames: exclusion.analyteNames, // for logging purposes only
+                        comment: this.getCommandComment(exclusion, comment)
+                    };
+                }, this)
+            };
         }, this);
 
         this.saveExclusions({
             assayId: this.assayId,
             tableName: 'WellExclusion',
-            runId: run.runId,
-            commands: commands
+            runs: runs
         }, 'well');
     }
 });

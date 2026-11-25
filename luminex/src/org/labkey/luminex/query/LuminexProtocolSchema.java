@@ -746,34 +746,38 @@ public class LuminexProtocolSchema extends AssayProtocolSchema
                 DataView result = super.createDataView();
                 String runId = context.getRequest().getParameter(result.getDataRegion().getName() + ".Data/Run/RowId~eq");
 
-                // if showing controls and user is viewing data results for a single run, add the Exclusions menu button to button bar
-                if (showControls() && NumberUtils.isDigits(runId))
+                // if showing controls, add the Exclusions menu button to button bar; the run level exclusions need a single run's results
+                if (showControls())
                 {
                     MenuButton exclusionsMenu = new MenuButton("Exclusions");
                     exclusionsMenu.setDisplayPermission(UpdatePermission.class);
 
-                    NavTree excludeAnalytes = new NavTree("Exclude Analytes");
-                    excludeAnalytes.setScript("openExclusionsAnalyteWindow(" + getProtocol().getRowId() + ", " + runId + ");");
-                    exclusionsMenu.addMenuItem(excludeAnalytes);
-
-                    // query to see if we have any non-Standard titrations in this run
-                    SimpleFilter f = new SimpleFilter();
-                    f.addCondition(FieldKey.fromParts("Standard"), false, CompareType.EQUAL);
-                    f.addCondition(FieldKey.fromParts("Run"), Integer.parseInt(runId), CompareType.EQUAL);
-                    TableSelector tbs = new TableSelector(getSchema().getTable("Titration", getContainerFilter()), f, null);
-                    long rows = tbs.getRowCount();
-                    if (rows > 0)
+                    if (NumberUtils.isDigits(runId))
                     {
-                        NavTree excludeTitration = new NavTree("Exclude Titrations");
-                        excludeTitration.setScript("openExclusionsTitrationWindow(" + getProtocol().getRowId() + ", " + runId + ");");
-                        exclusionsMenu.addMenuItem(excludeTitration);
+                        NavTree excludeAnalytes = new NavTree("Exclude Analytes");
+                        excludeAnalytes.setScript("openExclusionsAnalyteWindow(" + getProtocol().getRowId() + ", " + runId + ");");
+                        exclusionsMenu.addMenuItem(excludeAnalytes);
+
+                        // query to see if we have any non-Standard titrations in this run
+                        SimpleFilter f = new SimpleFilter();
+                        f.addCondition(FieldKey.fromParts("Standard"), false, CompareType.EQUAL);
+                        f.addCondition(FieldKey.fromParts("Run"), Integer.parseInt(runId), CompareType.EQUAL);
+                        TableSelector tbs = new TableSelector(getSchema().getTable("Titration", getContainerFilter()), f, null);
+                        long rows = tbs.getRowCount();
+                        if (rows > 0)
+                        {
+                            NavTree excludeTitration = new NavTree("Exclude Titrations");
+                            excludeTitration.setScript("openExclusionsTitrationWindow(" + getProtocol().getRowId() + ", " + runId + ");");
+                            exclusionsMenu.addMenuItem(excludeTitration);
+                        }
+
+                        NavTree excludeSinglepointUnknowns = new NavTree("Exclude Singlepoint Unknowns");
+                        excludeSinglepointUnknowns.setScript("openExclusionsSinglepointUnknownWindow(" + getProtocol().getRowId() + ", " + runId + ");");
+                        exclusionsMenu.addMenuItem(excludeSinglepointUnknowns);
+
+                        exclusionsMenu.addSeparator();
                     }
 
-                    NavTree excludeSinglepointUnknowns = new NavTree("Exclude Singlepoint Unknowns");
-                    excludeSinglepointUnknowns.setScript("openExclusionsSinglepointUnknownWindow(" + getProtocol().getRowId() + ", " + runId + ");");
-                    exclusionsMenu.addMenuItem(excludeSinglepointUnknowns);
-
-                    exclusionsMenu.addSeparator();
                     String dataRegionName = PageFlowUtil.jsString(result.getDataRegion().getName());
 
                     NavTree excludeSelectedRows = new NavTree("Exclude Selected Rows");

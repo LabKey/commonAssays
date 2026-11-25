@@ -38,6 +38,8 @@ import java.util.Set;
 
 public class LuminexSaveExclusionsForm implements ApiJsonForm
 {
+    public static final int MAX_RUNS = 10;
+
     private Integer _assayId;
     private String _tableName;
     private Long _runId;
@@ -191,13 +193,15 @@ public class LuminexSaveExclusionsForm implements ApiJsonForm
         }
 
         if (_runForms.isEmpty())
-            errors.reject(null, "No runs provided for exclusion");
+            errors.reject(null, "No runs provided for exclusion.");
+        else if (_runForms.size() > MAX_RUNS)
+            errors.reject(null, "Exclusions can be saved for at most " + MAX_RUNS + " runs at a time.");
 
         Set<Long> runIds = new HashSet<>();
         for (LuminexSaveExclusionsForm runForm : _runForms)
         {
             if (runForm.getRunId() != null && !runIds.add(runForm.getRunId()))
-                errors.reject(null, "Run " + runForm.getRunId() + " is listed more than once");
+                errors.reject(null, "Run " + runForm.getRunId() + " is listed more than once.");
             runForm.validateCommands(errors);
         }
     }
@@ -269,13 +273,18 @@ public class LuminexSaveExclusionsForm implements ApiJsonForm
         @Test
         public void testValidateRuns()
         {
-            assertEquals(List.of("No runs provided for exclusion"), messages(bind(new JSONObject().put("runs", new JSONArray()))));
+            assertEquals(List.of("No runs provided for exclusion."), messages(bind(new JSONObject().put("runs", new JSONArray()))));
 
             LuminexSaveExclusionsForm form = bind(new JSONObject().put("runs", new JSONArray()
                     .put(new JSONObject().put("runId", 10).put("commands", new JSONArray().put(command(100))))
                     .put(new JSONObject().put("runId", 10).put("commands", new JSONArray().put(command(101))))
                     .put(new JSONObject().put("runId", 20))));
-            assertEquals(List.of("Run 10 is listed more than once", "No commands provided for exclusion for run 20"), messages(form));
+            assertEquals(List.of("Run 10 is listed more than once.", "No commands provided for exclusion for run 20"), messages(form));
+
+            JSONArray tooManyRuns = new JSONArray();
+            for (int runId = 1; runId <= MAX_RUNS + 1; runId++)
+                tooManyRuns.put(new JSONObject().put("runId", runId).put("commands", new JSONArray().put(command(runId * 100L))));
+            assertEquals(List.of("Exclusions can be saved for at most " + MAX_RUNS + " runs at a time."), messages(bind(new JSONObject().put("runs", tooManyRuns))));
         }
 
         private static JSONObject command(long dataId)

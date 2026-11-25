@@ -27,6 +27,7 @@ import org.labkey.remoteapi.query.Row;
 import org.labkey.remoteapi.query.SelectRowsCommand;
 import org.labkey.remoteapi.query.SelectRowsResponse;
 import org.labkey.test.Locator;
+import org.labkey.test.WebTestHelper;
 import org.labkey.test.categories.Assays;
 import org.labkey.test.categories.Daily;
 import org.labkey.test.components.luminex.dialogs.SelectedRowsExclusionDialog;
@@ -39,6 +40,7 @@ import org.labkey.test.util.luminex.LuminexSaveExclusionCommand;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -52,7 +54,7 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
 {
     private static final TestRun SUMMARY_RUN = new TestRun("SelectedRowsRun", TEST_ASSAY_LUM_FILE10, "Standard1");
     private static final TestRun RAW_RUN = new TestRun("SelectedRowsRawRun", TEST_ASSAY_MULTIPLE_STANDARDS_1_XLSX, "Standard2");
-    private static final String OTHER_RUN_NAME = "SelectedRowsOtherRun";
+    private static final TestRun OTHER_RUN = new TestRun("SelectedRowsOtherRun", TEST_ASSAY_LUM_FILE10, "Standard1");
     private static final String ANALYTE_2 = "Analyte2";
     private static final String ANALYTE_3 = "Analyte3";
     private static final String ENV6 = "ENV6";
@@ -75,7 +77,7 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
 
         init.importRun(SUMMARY_RUN.name(), SUMMARY_RUN.file());
         init.importRun(RAW_RUN.name(), RAW_RUN.file());
-        init.importRun(OTHER_RUN_NAME, SUMMARY_RUN.file());
+        init.importRun(OTHER_RUN.name(), OTHER_RUN.file());
     }
 
     @Before
@@ -189,12 +191,41 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
     {
         goToRunResults(SUMMARY_RUN.name());
         assertEquals("No rows are selected.", SelectedRowsExclusionDialog.getSelectionError(getDriver(), false));
+    }
 
-        log("Select rows from two runs; the selection is kept across the runs' results grids");
-        selectRowsInRun(SUMMARY_RUN.name(), wellAnalytes("S6", "G6", ANALYTE_2));
-        selectRowsInRun(OTHER_RUN_NAME, wellAnalytes("S6", "G6", ANALYTE_2));
-        assertEquals("The selection includes rows from more than one run. Select rows from a single run.",
-                SelectedRowsExclusionDialog.getSelectionError(getDriver(), false));
+    @Test
+    public void testExcludeAcrossRuns()
+    {
+        DataRegionTable results = goToAllRunsResultsWithoutSelection();
+        assertEquals("The results for all runs should only offer the selected rows items",
+                List.of(SelectedRowsExclusionDialog.EXCLUDE_MENU_ITEM, SelectedRowsExclusionDialog.REMOVE_MENU_ITEM),
+                results.getHeaderMenuOptions("Exclusions").stream().filter(option -> !option.isBlank()).toList());
+
+        selectRowsInAllRunsResults(SUMMARY_RUN, wellAnalytes("S6", "G6", ANALYTE_2));
+        selectRowsInAllRunsResults(OTHER_RUN, wellAnalytes("S6", "G6", ANALYTE_2, ANALYTE_3));
+        SelectedRowsExclusionDialog dialog = SelectedRowsExclusionDialog.beginAt(getDriver(), false);
+        assertEquals("Wrong proposed exclusions", List.of(
+                row(SUMMARY_RUN, "S6", "G6,H6", "Analyte2", "Add"),
+                row(OTHER_RUN, "S6", "G6,H6", "Analyte2, Analyte3", "Add")
+        ), dialog.getRows());
+        dialog.saveAndGoToPipeline();
+        waitForPipelineJobsToComplete(2, false);
+        assertWellExclusions(SUMMARY_RUN, "S6", Map.of(REPLICATE_GROUP, "Analyte2"));
+        assertWellExclusions(OTHER_RUN, "S6", Map.of(REPLICATE_GROUP, "Analyte2, Analyte3"));
+
+        log("Remove an analyte from both runs' exclusions");
+        goToAllRunsResultsWithoutSelection();
+        selectRowsInAllRunsResults(SUMMARY_RUN, wellAnalytes("S6", "G6", ANALYTE_2));
+        selectRowsInAllRunsResults(OTHER_RUN, wellAnalytes("S6", "G6", ANALYTE_2));
+        dialog = SelectedRowsExclusionDialog.beginAt(getDriver(), true);
+        assertEquals("Wrong proposed removals", List.of(
+                row(SUMMARY_RUN, "S6", "G6,H6", "Analyte2", "Remove"),
+                row(OTHER_RUN, "S6", "G6,H6", "Analyte2", "Update")
+        ), dialog.getRows());
+        dialog.saveAndGoToPipeline();
+        waitForPipelineJobsToComplete(4, false);
+        assertWellExclusions(SUMMARY_RUN, "S6", Map.of());
+        assertWellExclusions(OTHER_RUN, "S6", Map.of(REPLICATE_GROUP, "Analyte3"));
     }
 
     @Test
@@ -203,7 +234,7 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
         Connection connection = createDefaultConnection();
         Row dataRow = getS6G6DataRow(connection, SUMMARY_RUN.name());
         long dataId = ((Number) dataRow.getValue("Data")).longValue();
-        long otherRunId = ((Number) getS6G6DataRow(connection, OTHER_RUN_NAME).getValue("Data/Run/RowId")).longValue();
+        long otherRunId = ((Number) getS6G6DataRow(connection, OTHER_RUN.name()).getValue("Data/Run/RowId")).longValue();
 
         int assayId = new APIAssayHelper(this).getIdFromAssayName(TEST_ASSAY_LUM, getProjectName());
         LuminexSaveExclusionCommand save = new LuminexSaveExclusionCommand(assayId, otherRunId)
@@ -241,17 +272,36 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
         return new DataRegionTable(DATA_TABLE_NAME, getDriver());
     }
 
-    /** Opens the run's results with the Type filter on the URL, since setting one in the grid clears the selection, and checks the rows. */
-    private void selectRowsInRun(String runName, WellAnalytes selection)
-    {
-        goToRunResults(runName);
-        beginAt(getCurrentRelativeURL() + "&" + DATA_TABLE_NAME + ".Type~eq=" + selection.type());
-        checkRows(new DataRegionTable(DATA_TABLE_NAME, getDriver()), selection);
-    }
-
     private DataRegionTable goToRunResultsWithoutSelection(String runName)
     {
-        DataRegionTable results = goToRunResults(runName);
+        return clearSelection(goToRunResults(runName));
+    }
+
+    private DataRegionTable goToAllRunsResultsWithoutSelection()
+    {
+        return clearSelection(goToAllRunsResults(Map.of()));
+    }
+
+    /** Opens the results for all runs with the run and type filters on the URL, since setting one in the grid clears the selection, and checks the rows. */
+    private void selectRowsInAllRunsResults(TestRun run, WellAnalytes selection)
+    {
+        DataRegionTable results = goToAllRunsResults(Map.of(
+                DATA_TABLE_NAME + ".Data/Run/Name~eq", run.name(),
+                DATA_TABLE_NAME + ".Type~eq", selection.type()));
+        checkRows(results, selection);
+    }
+
+    // Not the "view results" link, which restores the grid's last filter, such as a single run from an earlier test
+    private DataRegionTable goToAllRunsResults(Map<String, String> filters)
+    {
+        Map<String, Object> params = new HashMap<>(filters);
+        params.put("rowId", new APIAssayHelper(this).getIdFromAssayName(TEST_ASSAY_LUM, getProjectName()));
+        beginAt(WebTestHelper.buildURL("assay", getProjectName(), "assayResults", params));
+        return new DataRegionTable(DATA_TABLE_NAME, getDriver());
+    }
+
+    private DataRegionTable clearSelection(DataRegionTable results)
+    {
         results.doAndWaitForUpdate(() -> results.rowSelector().clickSubMenu(false, "Select None"));
         return results;
     }

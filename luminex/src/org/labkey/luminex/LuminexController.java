@@ -716,9 +716,10 @@ public class LuminexController extends SpringActionController
                 errors.reject(ERROR_MSG, "The selection includes rows from another assay.");
                 return null;
             }
-            if (dataRows.stream().map(SelectedDataRow::runId).distinct().count() > 1)
+            long runCount = dataRows.stream().map(SelectedDataRow::runId).distinct().count();
+            if (runCount > LuminexSaveExclusionsForm.MAX_RUNS)
             {
-                errors.reject(ERROR_MSG, "The selection includes rows from more than one run. Select rows from a single run.");
+                errors.reject(ERROR_MSG, "The selection includes rows from " + runCount + " runs. Select rows from at most " + LuminexSaveExclusionsForm.MAX_RUNS + " runs.");
                 return null;
             }
 
