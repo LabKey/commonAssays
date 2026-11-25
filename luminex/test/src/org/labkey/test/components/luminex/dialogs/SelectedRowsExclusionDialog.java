@@ -38,7 +38,7 @@ public class SelectedRowsExclusionDialog extends BaseExclusionDialog
     private final boolean _remove;
 
     /** One row of the dialog's table. wells is "Replicate Group" for a replicate group exclusion; analytes is comma separated. */
-    public record ExclusionRow(String run, String dataFile, String description, String type, String wells, String analytes, String action)
+    public record ExclusionRow(String run, String dataFile, String description, String type, String wells, String analytes, String exclusionType)
     {
     }
 

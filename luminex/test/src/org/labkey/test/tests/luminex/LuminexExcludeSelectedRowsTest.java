@@ -83,8 +83,8 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
 
         SelectedRowsExclusionDialog dialog = SelectedRowsExclusionDialog.beginAt(getDriver(), false);
         assertEquals("Wrong proposed exclusions", List.of(
-                row(RAW_RUN, "S1", "C1", "ENV6, ENV7", "Insert"),
-                row(RAW_RUN, "S2", "D2", "ENV6", "Insert")
+                row(RAW_RUN, "S1", "C1", "ENV6, ENV7", "Add"),
+                row(RAW_RUN, "S2", "D2", "ENV6", "Add")
         ), dialog.getRows());
         assertTextPresent("Analytes excluded for a singlepoint unknown, titration, or at the assay level will not be re-included");
         dialog.setComment("exclude selected rows");
@@ -122,8 +122,8 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
 
         SelectedRowsExclusionDialog dialog = SelectedRowsExclusionDialog.beginAt(getDriver(), false);
         assertEquals("Rows in a replicate group with summary rows should exclude the whole group, as the well exclusion dialog does", List.of(
-                row(SUMMARY_RUN, "S1", "G1,H1", "Analyte2, Analyte3", "Insert"),
-                row(SUMMARY_RUN, "S3", "G3,H3", "Analyte2, Analyte3", "Insert")
+                row(SUMMARY_RUN, "S1", "G1,H1", "Analyte2, Analyte3", "Add"),
+                row(SUMMARY_RUN, "S3", "G3,H3", "Analyte2, Analyte3", "Add")
         ), dialog.getRows());
         dialog.saveAndGoToPipeline();
         waitForPipelineJobsToComplete(1, false);
@@ -249,9 +249,9 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
         }
     }
 
-    private static ExclusionRow row(TestRun run, String type, String wells, String analytes, String action)
+    private static ExclusionRow row(TestRun run, String type, String wells, String analytes, String exclusionType)
     {
-        return new ExclusionRow(run.name(), run.file().getName(), run.description(), type, wells, analytes, action);
+        return new ExclusionRow(run.name(), run.file().getName(), run.description(), type, wells, analytes, exclusionType);
     }
 
     /** Checks the run's well and replicate group exclusions for the type, keyed by well ("Replicate Group" for a group exclusion). */

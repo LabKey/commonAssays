@@ -122,7 +122,7 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
     getTableHtml : function()
     {
-        var headers = ['Run', 'Data File', 'Description', 'Type', 'Well(s)', this.removeMode ? 'Analytes to Remove' : 'Analytes to Exclude', 'Action'];
+        var headers = ['Run', 'Data File', 'Description', 'Type', 'Well(s)', this.removeMode ? 'Analytes to Remove' : 'Analytes to Exclude', 'Exclusion Type'];
         var html = '<table class="labkey-data-region-legacy labkey-show-borders" style="width: 100%;"><tr>';
         Ext.each(headers, function(header)
         {
@@ -133,7 +133,7 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         Ext.each(this.getTableRecords(), function(record, index)
         {
             html += '<tr class="' + (index % 2 === 0 ? 'labkey-alternate-row' : 'labkey-row') + '">';
-            Ext.each([record.runName, record.dataFileName, record.description, record.type, record.wells, record.analyteNames, record.action], function(value)
+            Ext.each([record.runName, record.dataFileName, record.description, record.type, record.wells, record.analyteNames, record.exclusionType], function(value)
             {
                 html += '<td style="vertical-align: top;">' + this.getCellHtml(value) + '</td>';
             }, this);
@@ -167,17 +167,17 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                     type: exclusion.type,
                     wells: exclusion.well != null ? exclusion.well : exclusion.groupWells.join(','),
                     analyteNames: exclusion.changedAnalyteNames,
-                    action: this.getActionText(exclusion.command)
+                    exclusionType: this.getExclusionTypeText(exclusion.command)
                 });
             }, this);
         }, this);
         return records;
     },
 
-    getActionText : function(command)
+    getExclusionTypeText : function(command)
     {
         if (command === 'insert')
-            return 'Insert';
+            return 'Add';
         if (command === 'delete')
             return 'Remove';
         return 'Update';
