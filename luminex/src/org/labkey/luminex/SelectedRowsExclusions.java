@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -96,67 +97,49 @@ public class SelectedRowsExclusions
             .thenComparing(ProposedExclusion::well, Comparator.nullsFirst(Comparator.naturalOrder()));
 
     /**
-     * Each selected well gets its own exclusion, except summary rows, which can only be excluded with a replicate group
-     * exclusion. An existing replicate group exclusion absorbs all of the group's selected analytes.
+     * Each selected well gets its own exclusion, except in a replicate group with summary rows, which can only be
+     * excluded as a whole, as in WellExclusionPanel. An existing replicate group exclusion absorbs all of the group's
+     * selected analytes.
      *
      * @param existing existing well and replicate group exclusions for the selection's replicate groups
+     * @param summaryGroups the selection's replicate groups that have summary rows, selected or not
      */
-    public static Result exclude(Collection<SelectedRow> rows, Collection<ExistingExclusion> existing)
+    public static Result exclude(Collection<SelectedRow> rows, Collection<ExistingExclusion> existing, Set<ReplicateGroup> summaryGroups)
     {
-        Map<ReplicateGroup, Long> runIds = new LinkedHashMap<>();
-        Map<ReplicateGroup, Map<Long, String>> summaryAnalytesByGroup = new HashMap<>();
-        Map<ReplicateGroup, Map<String, Map<Long, String>>> wellAnalytesByGroup = new HashMap<>();
-        for (SelectedRow row : rows)
-        {
-            runIds.put(row.group(), row.runId());
-            if (row.summary())
-                summaryAnalytesByGroup.computeIfAbsent(row.group(), _ -> new HashMap<>()).put(row.analyteId(), row.analyteName());
-            else
-                wellAnalytesByGroup.computeIfAbsent(row.group(), _ -> new HashMap<>())
-                        .computeIfAbsent(row.well(), _ -> new HashMap<>())
-                        .put(row.analyteId(), row.analyteName());
-        }
         Map<ReplicateGroup, List<ExistingExclusion>> existingByGroup = existing.stream()
                 .collect(Collectors.groupingBy(ExistingExclusion::group));
 
         List<ProposedExclusion> proposed = new ArrayList<>();
-        runIds.forEach((group, runId) -> {
-            Map<Long, String> summaryAnalytes = summaryAnalytesByGroup.getOrDefault(group, Map.of());
-            Map<String, Map<Long, String>> selectedWells = wellAnalytesByGroup.getOrDefault(group, Map.of());
+        rows.stream().collect(Collectors.groupingBy(SelectedRow::group)).forEach((group, groupRows) -> {
+            long runId = groupRows.getFirst().runId();
             List<ExistingExclusion> groupExisting = existingByGroup.getOrDefault(group, List.of());
             ExistingExclusion groupExclusion = groupExisting.stream().filter(e -> e.well() == null).findFirst().orElse(null);
-            Map<String, ExistingExclusion> wellExclusions = groupExisting.stream()
-                    .filter(e -> e.well() != null)
-                    .collect(Collectors.toMap(ExistingExclusion::well, e -> e, (a, _) -> a));
 
             if (groupExclusion != null)
+                addMerged(proposed, runId, groupExclusion, analytesOf(groupRows));
+            else if (summaryGroups.contains(group) || groupRows.stream().anyMatch(SelectedRow::summary))
+                addInsert(proposed, runId, group, null, analytesOf(groupRows));
+            else
             {
-                Map<Long, String> all = new HashMap<>(summaryAnalytes);
-                selectedWells.values().forEach(all::putAll);
-                addMerged(proposed, runId, groupExclusion, all);
-                return;
+                Map<String, ExistingExclusion> wellExclusions = groupExisting.stream()
+                        .filter(e -> e.well() != null)
+                        .collect(Collectors.toMap(ExistingExclusion::well, e -> e, (a, _) -> a));
+                groupRows.stream().collect(Collectors.groupingBy(SelectedRow::well)).forEach((well, wellRows) -> {
+                    ExistingExclusion wellExclusion = wellExclusions.get(well);
+                    if (wellExclusion != null)
+                        addMerged(proposed, runId, wellExclusion, analytesOf(wellRows));
+                    else
+                        addInsert(proposed, runId, group, well, analytesOf(wellRows));
+                });
             }
-
-            if (!summaryAnalytes.isEmpty())
-                addInsert(proposed, runId, group, null, summaryAnalytes);
-
-            selectedWells.forEach((well, analytes) -> {
-                // The new replicate group exclusion already covers these analytes for every well
-                Map<Long, String> wellAnalytes = new HashMap<>(analytes);
-                wellAnalytes.keySet().removeAll(summaryAnalytes.keySet());
-                if (wellAnalytes.isEmpty())
-                    return;
-
-                ExistingExclusion wellExclusion = wellExclusions.get(well);
-                if (wellExclusion != null)
-                    addMerged(proposed, runId, wellExclusion, wellAnalytes);
-                else
-                    addInsert(proposed, runId, group, well, wellAnalytes);
-            });
         });
 
         proposed.sort(ORDER);
         return new Result(proposed, 0);
+    }
+
+    private record Removal(ExistingExclusion exclusion, long runId, Map<Long, String> removed)
+    {
     }
 
     /**
@@ -169,8 +152,7 @@ public class SelectedRowsExclusions
     {
         Map<ReplicateGroup, List<ExistingExclusion>> existingByGroup = existing.stream()
                 .collect(Collectors.groupingBy(ExistingExclusion::group));
-        Map<ExistingExclusion, Long> runIds = new HashMap<>();
-        Map<ExistingExclusion, Map<Long, String>> removals = new LinkedHashMap<>();
+        Map<Integer, Removal> removals = new HashMap<>();
         int skipped = 0;
 
         for (SelectedRow row : rows)
@@ -183,23 +165,27 @@ public class SelectedRowsExclusions
                 skipped++;
 
             for (ExistingExclusion exclusion : covering)
-            {
-                runIds.put(exclusion, row.runId());
-                removals.computeIfAbsent(exclusion, _ -> new HashMap<>()).put(row.analyteId(), row.analyteName());
-            }
+                removals.computeIfAbsent(exclusion.rowId(), _ -> new Removal(exclusion, row.runId(), new HashMap<>()))
+                        .removed().put(row.analyteId(), row.analyteName());
         }
 
         List<ProposedExclusion> proposed = new ArrayList<>();
-        removals.forEach((exclusion, removed) -> {
+        removals.values().forEach(removal -> {
+            ExistingExclusion exclusion = removal.exclusion();
             Map<Long, String> remaining = new HashMap<>(exclusion.analytes());
-            remaining.keySet().removeAll(removed.keySet());
+            remaining.keySet().removeAll(removal.removed().keySet());
             String command = remaining.isEmpty() ? DELETE : UPDATE;
-            proposed.add(new ProposedExclusion(runIds.get(exclusion), command, exclusion.rowId(), exclusion.group(),
-                    exclusion.well(), sortByName(remaining), sortByName(removed)));
+            proposed.add(new ProposedExclusion(removal.runId(), command, exclusion.rowId(), exclusion.group(),
+                    exclusion.well(), sortByName(remaining), sortByName(removal.removed())));
         });
 
         proposed.sort(ORDER);
         return new Result(proposed, skipped);
+    }
+
+    private static Map<Long, String> analytesOf(List<SelectedRow> rows)
+    {
+        return rows.stream().collect(Collectors.toMap(SelectedRow::analyteId, SelectedRow::analyteName, (a, _) -> a));
     }
 
     private static void addInsert(List<ProposedExclusion> proposed, long runId, ReplicateGroup group, @Nullable String well, Map<Long, String> analytes)
@@ -261,7 +247,7 @@ public class SelectedRowsExclusions
         @Test
         public void testWellExclusions()
         {
-            Result result = exclude(List.of(row(GROUP_X1, "A1", 1), row(GROUP_X1, "A1", 2), row(GROUP_X1, "B1", 1)), List.of());
+            Result result = exclude(List.of(row(GROUP_X1, "A1", 1), row(GROUP_X1, "A1", 2), row(GROUP_X1, "B1", 1)), List.of(), Set.of());
             assertEquals(2, result.exclusions().size());
             assertExclusion(result.exclusions().get(0), 1, INSERT, null, GROUP_X1, "A1", analytes(1, 2), analytes(1, 2));
             assertExclusion(result.exclusions().get(1), 1, INSERT, null, GROUP_X1, "B1", analytes(1), analytes(1));
@@ -270,21 +256,58 @@ public class SelectedRowsExclusions
         @Test
         public void testSummaryRows()
         {
-            Result result = exclude(List.of(row(GROUP_X1, "A1,B1", 1), row(GROUP_X1, "A1", 1), row(GROUP_X1, "A1", 2)), List.of());
-            assertEquals("Raw rows already covered by the summary row's replicate group exclusion need no well exclusion", 2, result.exclusions().size());
-            assertExclusion(result.exclusions().get(0), 1, INSERT, null, GROUP_X1, null, analytes(1), analytes(1));
-            assertExclusion(result.exclusions().get(1), 1, INSERT, null, GROUP_X1, "A1", analytes(2), analytes(2));
+            Result result = exclude(List.of(row(GROUP_X1, "A1,B1", 1), row(GROUP_X1, "A1", 1), row(GROUP_X1, "A1", 2)), List.of(), Set.of());
+            assertEquals("A selected summary row puts the group's raw rows in its replicate group exclusion", 1, result.exclusions().size());
+            assertExclusion(result.exclusions().getFirst(), 1, INSERT, null, GROUP_X1, null, analytes(1, 2), analytes(1, 2));
+        }
+
+        @Test
+        public void testRawRowsInSummaryGroup()
+        {
+            Result result = exclude(List.of(row(GROUP_X1, "A1", 1), row(GROUP_X1, "B1", 2), row(GROUP_X2, "A2", 1)), List.of(), Set.of(GROUP_X1));
+            assertEquals(2, result.exclusions().size());
+            assertExclusion(result.exclusions().get(0), 1, INSERT, null, GROUP_X1, null, analytes(1, 2), analytes(1, 2));
+            assertExclusion(result.exclusions().get(1), 1, INSERT, null, GROUP_X2, "A2", analytes(1), analytes(1));
+        }
+
+        @Test
+        public void testSummaryGroupLeavesWellExclusions()
+        {
+            ExistingExclusion wellExclusion = new ExistingExclusion(101, GROUP_X1, "A1", analytes(3));
+            Result result = exclude(List.of(row(GROUP_X1, "A1", 1)), List.of(wellExclusion), Set.of(GROUP_X1));
+            assertEquals("The existing well exclusion is left as is", 1, result.exclusions().size());
+            assertExclusion(result.exclusions().getFirst(), 1, INSERT, null, GROUP_X1, null, analytes(1), analytes(1));
+        }
+
+        @Test
+        public void testRawRowsInSummaryGroupMergeIntoGroupExclusion()
+        {
+            ExistingExclusion groupExclusion = new ExistingExclusion(100, GROUP_X1, null, analytes(1));
+            Result result = exclude(List.of(row(GROUP_X1, "A1", 2), row(GROUP_X1, "B1", 3)), List.of(groupExclusion), Set.of(GROUP_X1));
+            assertEquals("The existing replicate group exclusion is updated, not joined by a second one", 1, result.exclusions().size());
+            assertExclusion(result.exclusions().getFirst(), 1, UPDATE, 100, GROUP_X1, null, analytes(1, 2, 3), analytes(2, 3));
+        }
+
+        @Test
+        public void testNullDescription()
+        {
+            ReplicateGroup group = new ReplicateGroup(10, null, "X3");
+            ExistingExclusion wellExclusion = new ExistingExclusion(101, new ReplicateGroup(10, null, "X3"), "A3", analytes(1));
+            Result result = exclude(List.of(row(GROUP_X1, "A1", 1), row(group, "A3", 2)), List.of(wellExclusion), Set.of());
+            assertEquals(2, result.exclusions().size());
+            assertExclusion(result.exclusions().get(0), 1, UPDATE, 101, group, "A3", analytes(1, 2), analytes(2));
+            assertExclusion(result.exclusions().get(1), 1, INSERT, null, GROUP_X1, "A1", analytes(1), analytes(1));
         }
 
         @Test
         public void testMergeIntoGroupExclusion()
         {
             ExistingExclusion groupExclusion = new ExistingExclusion(100, GROUP_X1, null, analytes(1));
-            Result result = exclude(List.of(row(GROUP_X1, "A1", 2)), List.of(groupExclusion));
+            Result result = exclude(List.of(row(GROUP_X1, "A1", 2)), List.of(groupExclusion), Set.of());
             assertEquals(1, result.exclusions().size());
             assertExclusion(result.exclusions().getFirst(), 1, UPDATE, 100, GROUP_X1, null, analytes(1, 2), analytes(2));
 
-            result = exclude(List.of(row(GROUP_X1, "A1", 1)), List.of(groupExclusion));
+            result = exclude(List.of(row(GROUP_X1, "A1", 1)), List.of(groupExclusion), Set.of());
             assertTrue("Already excluded analytes need no change", result.exclusions().isEmpty());
         }
 
@@ -292,7 +315,7 @@ public class SelectedRowsExclusions
         public void testSummaryRowMergesIntoGroupExclusion()
         {
             ExistingExclusion groupExclusion = new ExistingExclusion(100, GROUP_X1, null, analytes(1));
-            Result result = exclude(List.of(row(GROUP_X1, "A1,B1", 2)), List.of(groupExclusion));
+            Result result = exclude(List.of(row(GROUP_X1, "A1,B1", 2)), List.of(groupExclusion), Set.of());
             assertEquals(1, result.exclusions().size());
             assertExclusion(result.exclusions().getFirst(), 1, UPDATE, 100, GROUP_X1, null, analytes(1, 2), analytes(2));
         }
@@ -302,7 +325,7 @@ public class SelectedRowsExclusions
         {
             ExistingExclusion groupExclusion = new ExistingExclusion(100, GROUP_X1, null, analytes(1));
             ExistingExclusion wellExclusion = new ExistingExclusion(101, GROUP_X1, "A1", analytes(3));
-            Result result = exclude(List.of(row(GROUP_X1, "A1", 2)), List.of(groupExclusion, wellExclusion));
+            Result result = exclude(List.of(row(GROUP_X1, "A1", 2)), List.of(groupExclusion, wellExclusion), Set.of());
             assertEquals("The existing well exclusion is left as is", 1, result.exclusions().size());
             assertExclusion(result.exclusions().getFirst(), 1, UPDATE, 100, GROUP_X1, null, analytes(1, 2), analytes(2));
         }
@@ -311,7 +334,7 @@ public class SelectedRowsExclusions
         public void testAlreadyExcludedWell()
         {
             ExistingExclusion wellExclusion = new ExistingExclusion(101, GROUP_X1, "A1", analytes(1, 2));
-            Result result = exclude(List.of(row(GROUP_X1, "A1", 1)), List.of(wellExclusion));
+            Result result = exclude(List.of(row(GROUP_X1, "A1", 1)), List.of(wellExclusion), Set.of());
             assertTrue(result.exclusions().isEmpty());
         }
 
@@ -319,7 +342,7 @@ public class SelectedRowsExclusions
         public void testExistingWellExclusionsStayPerWell()
         {
             ExistingExclusion wellExclusion = new ExistingExclusion(101, GROUP_X1, "A1", analytes(3));
-            Result result = exclude(List.of(row(GROUP_X1, "A1", 1), row(GROUP_X1, "B1", 1)), List.of(wellExclusion));
+            Result result = exclude(List.of(row(GROUP_X1, "A1", 1), row(GROUP_X1, "B1", 1)), List.of(wellExclusion), Set.of());
             assertEquals(2, result.exclusions().size());
             assertExclusion(result.exclusions().get(0), 1, UPDATE, 101, GROUP_X1, "A1", analytes(1, 3), analytes(1));
             assertExclusion(result.exclusions().get(1), 1, INSERT, null, GROUP_X1, "B1", analytes(1), analytes(1));
@@ -328,7 +351,7 @@ public class SelectedRowsExclusions
         @Test
         public void testMultipleGroupsAndRuns()
         {
-            Result result = exclude(List.of(row(GROUP_RUN2, "A1", 1), row(GROUP_X2, "A2", 1), row(GROUP_X1, "A1", 1)), List.of());
+            Result result = exclude(List.of(row(GROUP_RUN2, "A1", 1), row(GROUP_X2, "A2", 1), row(GROUP_X1, "A1", 1)), List.of(), Set.of());
             assertEquals(3, result.exclusions().size());
             assertExclusion(result.exclusions().get(0), 1, INSERT, null, GROUP_X1, "A1", analytes(1), analytes(1));
             assertExclusion(result.exclusions().get(1), 1, INSERT, null, GROUP_X2, "A2", analytes(1), analytes(1));
@@ -355,6 +378,19 @@ public class SelectedRowsExclusions
             assertExclusion(result.exclusions().get(0), 1, DELETE, 102, GROUP_X1, "B1", analytes(), analytes(1));
             assertExclusion(result.exclusions().get(1), 1, UPDATE, 101, GROUP_X1, "A1", analytes(2), analytes(1));
             assertExclusion(result.exclusions().get(2), 1, UPDATE, 103, GROUP_X2, null, analytes(1), analytes(2));
+        }
+
+        @Test
+        public void testRemoveAcrossRuns()
+        {
+            ExistingExclusion run1Group = new ExistingExclusion(104, GROUP_X1, null, analytes(1, 2));
+            ExistingExclusion run2Well = new ExistingExclusion(105, GROUP_RUN2, "A1", analytes(1));
+            Result result = remove(List.of(row(GROUP_RUN2, "A1", 1), row(GROUP_X1, "B1", 1)), List.of(run1Group, run2Well));
+
+            assertEquals(0, result.skippedRowCount());
+            assertEquals(2, result.exclusions().size());
+            assertExclusion(result.exclusions().get(0), 1, UPDATE, 104, GROUP_X1, null, analytes(2), analytes(1));
+            assertExclusion(result.exclusions().get(1), 2, DELETE, 105, GROUP_RUN2, "A1", analytes(), analytes(1));
         }
 
         @Test

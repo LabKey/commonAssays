@@ -98,7 +98,9 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -650,6 +652,10 @@ public class LuminexController extends SpringActionController
         }
     }
 
+    private record GroupWells(Map<SelectedRowsExclusions.ReplicateGroup, Set<String>> wellValues, Set<SelectedRowsExclusions.ReplicateGroup> summaryGroups)
+    {
+    }
+
     private record SelectedDataRow(long runId, String runName, String runContainerId, String protocolLsid, String dataFileName,
                                    long dataId, @Nullable String description, @Nullable String type, String well, boolean summary, long analyteId, String analyteName)
     {
@@ -722,10 +728,11 @@ public class LuminexController extends SpringActionController
             List<SelectedRowsExclusions.ExistingExclusion> existing = getExistingWellExclusions(dataIds);
             Map<Integer, String> existingComments = new HashMap<>();
             existing.forEach(e -> existingComments.put(e.rowId(), e.comment()));
+            GroupWells groupWells = getGroupWells(dataIds);
 
             SelectedRowsExclusions.Result result = form.isRemove()
                     ? SelectedRowsExclusions.remove(rows, existing)
-                    : SelectedRowsExclusions.exclude(rows, existing);
+                    : SelectedRowsExclusions.exclude(rows, existing, groupWells.summaryGroups());
 
             if (result.exclusions().isEmpty())
             {
@@ -754,6 +761,15 @@ public class LuminexController extends SpringActionController
                 props.put("description", command.getDescription());
                 props.put("type", command.getType());
                 props.put("well", command.getWell());
+                if (exclusion.well() == null)
+                {
+                    props.put("groupWells", groupWells.wellValues().getOrDefault(exclusion.group(), Set.of()).stream()
+                            .flatMap(w -> Arrays.stream(w.split(",")))
+                            .map(String::trim)
+                            .distinct()
+                            .sorted()
+                            .toList());
+                }
                 props.put("analyteRowIds", command.getAnalyteRowIds());
                 props.put("analyteNames", command.getAnalyteNames());
                 props.put("changedAnalyteNames", List.copyOf(exclusion.changedAnalytes().values()));
@@ -793,6 +809,27 @@ public class LuminexController extends SpringActionController
                     rs.getString("DataFileName"), rs.getLong("DataId"), rs.getString("Description"), rs.getString("Type"),
                     rs.getString("Well"), rs.getBoolean("Summary"), rs.getLong("AnalyteId"), rs.getString("AnalyteName"))));
             return rows;
+        }
+
+        /**
+         * The distinct Well values of each replicate group in the data files, including summary rows' lists of wells,
+         * and the groups with a summary row.
+         */
+        private GroupWells getGroupWells(Set<Long> dataIds)
+        {
+            SQLFragment sql = SQLFragment.unsafe("SELECT DISTINCT dr.DataId, dr.Description, dr.Type, dr.Well, dr.Summary FROM ")
+                    .append(LuminexProtocolSchema.getTableInfoDataRow(), "dr")
+                    .append(SQLFragment.unsafe(" WHERE dr.Type IS NOT NULL AND dr.Well IS NOT NULL AND dr.DataId "))
+                    .appendInClause(dataIds, LuminexProtocolSchema.getSchema().getSqlDialect());
+
+            GroupWells groupWells = new GroupWells(new HashMap<>(), new HashSet<>());
+            new SqlSelector(LuminexProtocolSchema.getSchema(), sql).forEach(rs -> {
+                SelectedRowsExclusions.ReplicateGroup group = new SelectedRowsExclusions.ReplicateGroup(rs.getLong("DataId"), rs.getString("Description"), rs.getString("Type"));
+                groupWells.wellValues().computeIfAbsent(group, _ -> new HashSet<>()).add(rs.getString("Well"));
+                if (rs.getBoolean("Summary"))
+                    groupWells.summaryGroups().add(group);
+            });
+            return groupWells;
         }
 
         private List<SelectedRowsExclusions.ExistingExclusion> getExistingWellExclusions(Set<Long> dataIds)

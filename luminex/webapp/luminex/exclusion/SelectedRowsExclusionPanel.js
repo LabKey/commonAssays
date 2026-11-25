@@ -165,7 +165,7 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                     dataFileName: exclusion.dataFileName,
                     description: exclusion.description,
                     type: exclusion.type,
-                    wells: exclusion.well != null ? exclusion.well : 'Replicate Group',
+                    wells: exclusion.well != null ? exclusion.well : exclusion.groupWells.join(','),
                     analyteNames: exclusion.changedAnalyteNames,
                     action: this.getActionText(exclusion.command)
                 });
