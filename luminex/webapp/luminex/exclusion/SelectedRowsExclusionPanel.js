@@ -123,7 +123,7 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
 
     getTableHtml : function()
     {
-        var headers = ['Run', 'Data File', 'Description', 'Type', 'Well(s)', this.removeMode ? 'Analytes to Remove' : 'Analytes to Exclude', 'Exclusion Type'];
+        var headers = ['Assay ID', 'Data File', 'Description', 'Type', 'Well(s)', 'Selected Analyte(s)', 'Exclusion Type'];
         var html = '<table class="labkey-data-region-legacy labkey-show-borders" style="width: 100%;"><tr>';
         Ext.each(headers, function(header)
         {
