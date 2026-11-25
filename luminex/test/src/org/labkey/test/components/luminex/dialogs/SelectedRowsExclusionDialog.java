@@ -71,6 +71,7 @@ public class SelectedRowsExclusionDialog extends BaseExclusionDialog
         SelectedRowsExclusionDialog dialog = new SelectedRowsExclusionDialog(driver, remove);
         clickMenuItem(driver, remove);
         dialog._extHelper.waitForExtDialog(remove ? REMOVE_TITLE : EXCLUDE_TITLE);
+        dialog.waitForElementToBeVisible(Locator.extButton("OK"));
         String message = dialog.waitForElement(Locator.css(".ext-mb-text")).getText();
         dialog.clickButton("OK", 0);
         return message;
