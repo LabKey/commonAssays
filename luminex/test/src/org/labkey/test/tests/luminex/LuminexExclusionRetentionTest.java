@@ -121,16 +121,18 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
 
         String singleWellRemovedFromTheReplicate = "Replicate group with single well excluded";
         String description = "116";
-        String type = "X6";
         String well = "A6";
         excludeOneWellFromReplicateGroup("Unknown",well,singleWellRemovedFromTheReplicate,description);
         clickButton("No", 0);
 
-        // wait for the last pipeline job to finish
+        // Single-well exclusions in the same replicate group each count as retained.
+        // The dialog keeps A6 checked, so this save also updates A6 and its job is a MULTIPLE one.
+        excludeOneWellFromReplicateGroup("Unknown", "B6", singleWellRemovedFromTheReplicate, description);
+        clickButton("No", 0);
+
+        // wait for all seven exclusion jobs to finish
         goToModule("Pipeline");
-        DataRegionTable table = new DataRegionTable("StatusFiles", getDriver());
-        table.setFilter("Info", "Equals", "INSERT well exclusion (Description: " + description + ", Type: " + type + ", Well: " + well + ")");
-        waitForPipelineJobsToComplete(1, "Luminex Exclusion: " + RUN_NAME, false);
+        waitForPipelineJobsToComplete(7, "Luminex Exclusion: " + RUN_NAME, false);
 
         // go to the run results grid from the pipeline job list
         clickAndWait(Locator.linkContainingText("Luminex Exclusion: " + RUN_NAME));
@@ -145,7 +147,7 @@ public final class LuminexExclusionRetentionTest extends LuminexTest
         clickAndWait(Locator.linkWithText("view excluded data"));
         assertTextPresent(wellMatchComment);
         assertTextPresent(partialMatchComment);
-        assertTextPresent(matchingAnalyte, 3);  //Once each for: match, partial-match, and single well exclusion
+        assertTextPresent(matchingAnalyte, 4);  //Once each for: match, partial-match, and the two single well exclusions
 
         assertTextNotPresent(wellNonMatchAnalyteComment);
         assertTextNotPresent(wellNonMatchTypeComment);
