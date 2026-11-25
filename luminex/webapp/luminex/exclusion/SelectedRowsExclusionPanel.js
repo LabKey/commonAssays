@@ -31,8 +31,10 @@ function openExclusionsSelectedRowsWindow(assayId, dataRegionName, remove)
             var win = new LABKEY.Exclusions.BaseWindow({
                 title: title,
                 width: Math.max(800, Ext.getBody().getViewSize().width * .6),
-                height: Math.max(500, Ext.getBody().getViewSize().height * .6),
+                layout: 'auto',
+                autoHeight: true,
                 items: new LABKEY.Exclusions.SelectedRowsPanel({
+                    autoHeight: true,
                     assayId: assayId,
                     removeMode: remove,
                     runs: response.runs,
@@ -110,7 +112,7 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             id: 'selectedrowsexclusions',
             autoEl: {
                 tag: 'div',
-                style: 'max-height: 250px; overflow-y: auto; padding: 1px;',
+                style: 'max-height: 50vh; overflow-y: auto; overflow-x: hidden; padding: 1px;',
                 html: this.getTableHtml()
             }
         }));
@@ -134,7 +136,7 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             html += '<tr class="' + (index % 2 === 0 ? 'labkey-alternate-row' : 'labkey-row') + '">';
             Ext.each([record.runName, record.dataFileName, record.description, record.type, record.wells, record.analyteNames, record.exclusionType], function(value)
             {
-                html += '<td style="vertical-align: top;">' + this.getCellHtml(value) + '</td>';
+                html += '<td style="vertical-align: top; overflow-wrap: anywhere;">' + this.getCellHtml(value) + '</td>';
             }, this);
             html += '</tr>';
         }, this);
