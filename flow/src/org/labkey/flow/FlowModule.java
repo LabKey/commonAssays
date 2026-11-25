@@ -64,6 +64,7 @@ import org.labkey.flow.controllers.editscript.ScriptController;
 import org.labkey.flow.controllers.executescript.AnalysisScriptController;
 import org.labkey.flow.controllers.protocol.ProtocolController;
 import org.labkey.flow.controllers.run.RunController;
+import org.labkey.flow.controllers.run.StatusJsonHelper;
 import org.labkey.flow.controllers.well.WellController;
 import org.labkey.flow.data.FlowAssayProvider;
 import org.labkey.flow.data.FlowDataType;
@@ -331,6 +332,7 @@ public class FlowModule extends SpringModule
             FlowJoWorkspace.LoadTests.class,
             PopulationName.NameTests.class,
             StatisticSpec.TestCase.class,
+            StatusJsonHelper.TestCase.class,
             SubsetParser.TestLexer.class,
             SubsetTests.class,
             LogicleRangeFunction.TestCase.class,
