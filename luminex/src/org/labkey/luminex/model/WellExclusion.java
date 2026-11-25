@@ -30,7 +30,17 @@ public class WellExclusion
     private String _description;
     private String _type;
     private String _dilution;
+    private String _well;
 
+    /** The single well, or null for a whole replicate group */
+    public String getWell()
+    {
+        return _well;
+    }
+    public void setWell(String well)
+    {
+        _well = well;
+    }
 
     public String getDilution()
     {
@@ -91,13 +101,14 @@ public class WellExclusion
         return LuminexManager.get().getDataFileHeaderKey(getReaderSerialNumber(), getAcquisitionDate());
     }
 
-    public boolean wouldExclude(String dataFileHeaderKey, String analyteName, String description, String type, String dilution)
+    public boolean wouldExclude(String dataFileHeaderKey, String analyteName, String description, String type, String dilution, String well)
     {
         return getDataFileHeaderKey().equals(dataFileHeaderKey)
                 && getAnalyte().equals(analyteName)
                 && isNullOrValue(getDescription(), description)
                 && isNullOrValue(getType(), type)
-                && isNullOrValue(getDilution(), dilution);
+                && isNullOrValue(getDilution(), dilution)
+                && isNullOrValue(getWell(), well);
     }
 
     private boolean isNullOrValue(String expected, String value)

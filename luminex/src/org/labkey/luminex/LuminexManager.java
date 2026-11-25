@@ -436,7 +436,7 @@ public class LuminexManager
             Double dilution = exclusion.get("Dilution") != null ? Double.parseDouble(exclusion.get("Dilution").toString()) : null; // == null for well replicate group and titration exclusions
 
             //Get existing command
-            String key = createExclusionCommandKey(dataFileHeaderKey, description, type, dilution);
+            String key = createExclusionCommandKey(dataFileHeaderKey, description, type, dilution, (String)exclusion.get("well"));
             LuminexSingleExclusionCommand command = replacementCommands.get(key);
 
             if (command == null)
@@ -489,7 +489,7 @@ public class LuminexManager
     {
         SQLFragment sql = new SQLFragment();
         sql.append( "SELECT opvRSN.StringValue AS ReaderSerialNumber, opvAD.DateTimeValue AS AcquisitionDate, ")
-            .append("a.Name AS Analyte, we.Description, we.Type, we.Dilution\n")
+            .append("a.Name AS Analyte, we.Description, we.Type, we.Dilution, we.Well\n")
             .append("FROM ").append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we").append(",")
             .append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "wea").append(",")
             .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a").append(",")
@@ -721,9 +721,10 @@ public class LuminexManager
     }
 
     /** Create a simple object to use as a key, combining the three properties */
-    private String createExclusionCommandKey(String dataFileHeaderKey, String description, String type, Double dilution)
+    // The well keeps single-well exclusions in one replicate group from merging into one command
+    private String createExclusionCommandKey(String dataFileHeaderKey, String description, String type, Double dilution, String well)
     {
-        return dataFileHeaderKey  + "|" + description + "|" + type + "|" + dilution;
+        return dataFileHeaderKey  + "|" + description + "|" + type + "|" + dilution + "|" + well;
     }
 
     /** Refine the key object with the individual analyte */

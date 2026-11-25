@@ -511,13 +511,14 @@ public class LuminexUploadWizardAction extends UploadWizardAction<LuminexRunUplo
                 String description = row.getDescription();
                 String type = row.getType();
                 String dilution = row.getDilution().toString();
+                String well = row.getWell();
 
                 for (WellExclusion ex : notRetained)
                 {
-                    if (ex.wouldExclude(dataFileHeaderKey, analyteName, description, type, dilution))
+                    if (ex.wouldExclude(dataFileHeaderKey, analyteName, description, type, dilution, well))
                     {
-                        //Aggregate retained exclusions by analyte
-                        retainedExclusions.add(new MultiKey<>(ex.getDataFileHeaderKey(), ex.getDescription(), ex.getType(), ex.getDilution()));
+                        //Aggregate retained exclusions by analyte; the well keeps single-well exclusions in one replicate group apart
+                        retainedExclusions.add(new MultiKey<>(ex.getDataFileHeaderKey(), ex.getDescription(), ex.getType(), ex.getDilution(), ex.getWell()));
                         notRetained.remove(ex);
                         return;
                     }
