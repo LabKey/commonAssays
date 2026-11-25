@@ -146,6 +146,10 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             }
         });
         this.isotypeCombobox.getStore().on('load', function(store, records, options) {
+            // pre-select the isotype when there is only one option
+            if (store.getCount() === 1 && store.findExact('value', this.isotype) === -1)
+                this.isotype = store.getAt(0).get('value');
+
             var index = store.findExact('value', this.isotype);
             if (this.isotype != undefined && index > -1)
             {
@@ -186,6 +190,10 @@ LABKEY.LeveyJenningsGraphParamsPanel = Ext.extend(Ext.FormPanel, {
             }
         });
         this.conjugateCombobox.getStore().on('load', function(store, records, options) {
+            // pre-select the conjugate when there is only one option
+            if (store.getCount() === 1 && store.findExact('value', this.conjugate) === -1)
+                this.conjugate = store.getAt(0).get('value');
+
             if (this.conjugate != undefined && store.findExact('value', this.conjugate) > -1)
             {
                 this.conjugateCombobox.setValue(this.conjugate);

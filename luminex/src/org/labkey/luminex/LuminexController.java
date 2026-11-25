@@ -329,17 +329,17 @@ public class LuminexController extends SpringActionController
     }
 
     @RequiresPermission(ReadPermission.class)
-    public static class LeveyJenningsMenuAction extends SimpleViewAction<ProtocolIdForm>
+    public static class LeveyJenningsMenuAction extends SimpleViewAction<LeveyJenningsMenuForm>
     {
-        private ProtocolIdForm _form;
+        private LeveyJenningsMenuForm _form;
 
         @Override
-        public ModelAndView getView(ProtocolIdForm form, BindException errors)
+        public ModelAndView getView(LeveyJenningsMenuForm form, BindException errors)
         {
             _form = form;
             VBox result = new VBox();
             result.addView(new AssayHeaderView(form.getProtocol(), form.getProvider(), false, true, null));
-            result.addView(new LeveyJenningsMenuView(form.getProtocol()));
+            result.addView(new LeveyJenningsMenuView(form.getProtocol(), form.getAnalyte()));
             return result;
         }
 

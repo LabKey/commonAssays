@@ -27,17 +27,22 @@
     LeveyJenningsMenuView.Bean bean = me.getModelBean();
 %>
 
+<p style="padding-top: 10px">
+    Click on a titration or single point control to view its Levey-Jennings report.
+    Click on an antigen to filter the Titrations and Single Point Controls lists to those used with that antigen.
+</p>
+<div style="display: flex; gap: 30px; align-items: flex-start">
 <table class="labkey-data-region-legacy labkey-show-borders">
     <tr>
-        <td valign="top" style="padding: 5px" class="labkey-column-header">
+        <th scope="col" style="padding: 5px; vertical-align: top; text-align: left" class="labkey-column-header">
             <strong>Titrations</strong>
-        </td>
-        <td valign="top" style="padding: 5px" class="labkey-column-header">
+        </th>
+        <th scope="col" style="padding: 5px; vertical-align: top; text-align: left" class="labkey-column-header">
             <strong>Single Point Controls</strong>
-        </td>
+        </th>
     </tr>
     <tr>
-        <td valign="top" style="padding: 5px" >
+        <td style="padding: 5px; vertical-align: top">
             <% if (bean.getTitrations().isEmpty()) { %>
                 <em>No titrations</em> <%
             }
@@ -47,10 +52,12 @@
                 url.addParameter("rowId", bean.getProtocol().getRowId());
                 url.addParameter("controlName", titrationName);
                 url.addParameter("controlType", LeveyJenningsForm.ControlType.Titration.toString());
+                if (bean.getAnalyte() != null)
+                    url.addParameter("analyte", bean.getAnalyte());
                 %><%= link(titrationName, url) %><br/><%
             }%>
         </td>
-        <td valign="top" style="padding: 5px" >
+        <td style="padding: 5px; vertical-align: top">
             <% if (bean.getSinglePointControls().isEmpty()) { %>
                 <em>No single point controls</em> <%
             }
@@ -60,8 +67,41 @@
                 url.addParameter("rowId", bean.getProtocol().getRowId());
                 url.addParameter("controlName", singlePointControl);
                 url.addParameter("controlType", LeveyJenningsForm.ControlType.SinglePoint.toString());
+                if (bean.getAnalyte() != null)
+                    url.addParameter("analyte", bean.getAnalyte());
                 %><%= link(singlePointControl, url) %><br/><%
             }%>
         </td>
     </tr>
 </table>
+<table class="labkey-data-region-legacy labkey-show-borders">
+    <tr>
+        <th scope="col" style="padding: 5px; vertical-align: top; text-align: left" class="labkey-column-header">
+            <strong>Antigens</strong>
+        </th>
+    </tr>
+    <tr>
+        <td style="padding: 5px; vertical-align: top">
+            <% if (bean.getAnalyte() != null) {
+                ActionURL clearUrl = new ActionURL(LuminexController.LeveyJenningsMenuAction.class, getContainer());
+                clearUrl.addParameter("rowId", bean.getProtocol().getRowId());
+            %>
+                Selected: <strong><%=h(bean.getAnalyte())%></strong> <%=iconLink("fa fa-times", "Clear selection", clearUrl)%> <%
+            }
+            else if (bean.getAnalytes().isEmpty()) { %>
+                <em>No antigens</em> <%
+            }
+            else
+            {
+                for (String analyte : bean.getAnalytes())
+                {
+                    ActionURL url = new ActionURL(LuminexController.LeveyJenningsMenuAction.class, getContainer());
+                    url.addParameter("rowId", bean.getProtocol().getRowId());
+                    url.addParameter("analyte", analyte);
+                    %><%= link(analyte, url) %><br/><%
+                }
+            }%>
+        </td>
+    </tr>
+</table>
+</div>
