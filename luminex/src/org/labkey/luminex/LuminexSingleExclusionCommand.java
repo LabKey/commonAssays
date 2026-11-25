@@ -184,6 +184,10 @@ public class LuminexSingleExclusionCommand
         {
             errors.reject(null, "Invalid command provided for exclusion: " + getCommand());
         }
+        else if (!"insert".equals(getCommand()) && getKey() == null)
+        {
+            errors.reject(null, "A key is required to " + getCommand() + " an exclusion.");
+        }
     }
 
     public void addAnalyte(Analyte analyte)

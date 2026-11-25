@@ -11,14 +11,16 @@ if (!LABKEY.Exclusions)
 
 LABKEY.Exclusions.BasePanel = Ext.extend(Ext.Panel, {
 
+    singleRun: true,
+
     constructor : function(config)
     {
         // check that the config properties needed are present
-        if (!config.protocolSchemaName)
+        if (this.singleRun && !config.protocolSchemaName)
             throw "You must specify a protocolSchemaName!";
         if (!config.assayId)
             throw "You must specify a assayId!";
-        if (!config.runId)
+        if (this.singleRun && !config.runId)
             throw "You must specify a runId!";
 
         Ext.apply(config, {

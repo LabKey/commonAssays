@@ -236,7 +236,14 @@ public class LuminexSaveExclusionsForm implements ApiJsonForm
 
             form = new LuminexSaveExclusionsForm();
             form.bindJson(new JSONObject().put("tableName", "TitrationExclusion")
-                    .put("commands", new JSONArray().put(new JSONObject().put("command", "insert"))));
+                    .put("commands", new JSONArray().put(new JSONObject().put("command", "update")).put(new JSONObject().put("command", "delete"))));
+            assertEquals(List.of("A key is required to update an exclusion.", "A key is required to delete an exclusion."), messages(form));
+
+            form = new LuminexSaveExclusionsForm();
+            form.bindJson(new JSONObject().put("tableName", "TitrationExclusion")
+                    .put("commands", new JSONArray().put(new JSONObject().put("command", "insert"))
+                            .put(new JSONObject().put("command", "update").put("key", 1))
+                            .put(new JSONObject().put("command", "delete").put("key", 2))));
             assertEquals(List.of(), messages(form));
         }
 

@@ -33,9 +33,6 @@ function openExclusionsSelectedRowsWindow(assayId, dataRegionName, remove)
                 width: Math.max(800, Ext.getBody().getViewSize().width * .6),
                 height: Math.max(500, Ext.getBody().getViewSize().height * .6),
                 items: new LABKEY.Exclusions.SelectedRowsPanel({
-                    // the base panel requires these; the selection's runs come from the response
-                    protocolSchemaName: 'n/a',
-                    runId: response.runs[0].runId,
                     assayId: assayId,
                     removeMode: remove,
                     runs: response.runs,
@@ -71,6 +68,8 @@ function openExclusionsSelectedRowsWindow(assayId, dataRegionName, remove)
  * @params skippedRowCount = the number of selected rows that will not change
  */
 LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
+
+    singleRun: false,
 
     initComponent : function()
     {
