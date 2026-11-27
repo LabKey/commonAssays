@@ -658,8 +658,14 @@ public class LuminexController extends SpringActionController
         }
     }
 
-    private record GroupWells(Map<SelectedRowsExclusions.ReplicateGroup, Set<String>> wellValues, Set<SelectedRowsExclusions.ReplicateGroup> summaryGroups)
+    /** groupDilutions holds the summary row's dilution, or a raw row's when the group has no summary row. */
+    private record GroupWells(Map<SelectedRowsExclusions.ReplicateGroup, Set<String>> wellValues, Set<SelectedRowsExclusions.ReplicateGroup> summaryGroups,
+                              Map<SelectedRowsExclusions.ReplicateGroup, Map<String, Double>> wellDilutions, Map<SelectedRowsExclusions.ReplicateGroup, Double> groupDilutions)
     {
+        public @Nullable Double getDilution(SelectedRowsExclusions.ReplicateGroup group, @Nullable String well)
+        {
+            return well != null ? wellDilutions.getOrDefault(group, Map.of()).get(well) : groupDilutions.get(group);
+        }
     }
 
     private record SelectedDataRow(long runId, String runName, String runContainerId, String protocolLsid, String dataFileName,
@@ -756,6 +762,17 @@ public class LuminexController extends SpringActionController
                 dataFileNames.put(r.dataId(), r.dataFileName());
             });
 
+            DomainProperty plateIdProperty = getPlateIdProperty();
+            Map<Long, String> plateIds = new HashMap<>();
+            if (plateIdProperty != null)
+            {
+                dataFileNames.keySet().forEach(dataId -> {
+                    ExpData data = ExperimentService.get().getExpData(dataId);
+                    Object plateId = data != null ? data.getProperty(plateIdProperty) : null;
+                    plateIds.put(dataId, plateId != null ? plateId.toString() : null);
+                });
+            }
+
             Map<Long, List<Map<String, Object>>> exclusionsByRun = new LinkedHashMap<>();
             for (SelectedRowsExclusions.ProposedExclusion exclusion : result.exclusions())
             {
@@ -765,6 +782,9 @@ public class LuminexController extends SpringActionController
                 props.put("key", command.getKey());
                 props.put("dataId", command.getDataId());
                 props.put("dataFileName", dataFileNames.get(command.getDataId()));
+                props.put("plateId", plateIds.get(command.getDataId()));
+                Double dilution = groupWells.getDilution(exclusion.group(), exclusion.well());
+                props.put("dilution", dilution != null ? dilution.toString() : null); // JSON drops the ".0" the grid shows
                 props.put("description", command.getDescription());
                 props.put("type", command.getType());
                 props.put("well", command.getWell());
@@ -803,6 +823,7 @@ public class LuminexController extends SpringActionController
             ApiSimpleResponse response = new ApiSimpleResponse();
             response.put("success", true);
             response.put("hasNotebookNo", notebookNoProperty != null);
+            response.put("hasPlateId", plateIdProperty != null);
             response.put("runs", runs);
             response.put("skippedRowCount", result.skippedRowCount() + (dataRows.size() - rows.size()));
             return response;
@@ -814,6 +835,12 @@ public class LuminexController extends SpringActionController
             AssayProvider provider = AssayService.get().getProvider(_protocol);
             Domain runDomain = provider != null ? provider.getRunDomain(_protocol) : null;
             return runDomain != null ? runDomain.getPropertyByName("NotebookNo") : null;
+        }
+
+        private @Nullable DomainProperty getPlateIdProperty()
+        {
+            Domain excelRunDomain = LuminexAssayProvider.getExcelRunDomain(_protocol);
+            return excelRunDomain != null ? excelRunDomain.getPropertyByName("PlateID") : null;
         }
 
         private List<SelectedDataRow> getSelectedDataRows(Set<Long> dataRowIds)
@@ -836,21 +863,30 @@ public class LuminexController extends SpringActionController
 
         /**
          * The distinct Well values of each replicate group in the data files, including summary rows' lists of wells,
-         * and the groups with a summary row.
+         * the groups with a summary row, and the wells' and groups' dilutions.
          */
         private GroupWells getGroupWells(Set<Long> dataIds)
         {
-            SQLFragment sql = SQLFragment.unsafe("SELECT DISTINCT dr.DataId, dr.Description, dr.Type, dr.Well, dr.Summary FROM ")
+            // Summary rows first so a group's dilution comes from its summary row
+            SQLFragment sql = SQLFragment.unsafe("SELECT DISTINCT dr.DataId, dr.Description, dr.Type, dr.Well, dr.Summary, dr.Dilution FROM ")
                     .append(LuminexProtocolSchema.getTableInfoDataRow(), "dr")
                     .append(SQLFragment.unsafe(" WHERE dr.Type IS NOT NULL AND dr.Well IS NOT NULL AND dr.DataId "))
-                    .appendInClause(dataIds, LuminexProtocolSchema.getSchema().getSqlDialect());
+                    .appendInClause(dataIds, LuminexProtocolSchema.getSchema().getSqlDialect())
+                    .append(SQLFragment.unsafe(" ORDER BY dr.Summary DESC, dr.Well"));
 
-            GroupWells groupWells = new GroupWells(new HashMap<>(), new HashSet<>());
+            GroupWells groupWells = new GroupWells(new HashMap<>(), new HashSet<>(), new HashMap<>(), new HashMap<>());
             new SqlSelector(LuminexProtocolSchema.getSchema(), sql).forEach(rs -> {
                 SelectedRowsExclusions.ReplicateGroup group = new SelectedRowsExclusions.ReplicateGroup(rs.getLong("DataId"), rs.getString("Description"), rs.getString("Type"));
-                groupWells.wellValues().computeIfAbsent(group, _ -> new HashSet<>()).add(rs.getString("Well"));
+                String well = rs.getString("Well");
+                groupWells.wellValues().computeIfAbsent(group, _ -> new HashSet<>()).add(well);
                 if (rs.getBoolean("Summary"))
                     groupWells.summaryGroups().add(group);
+                double dilution = rs.getDouble("Dilution");
+                if (!rs.wasNull())
+                {
+                    groupWells.wellDilutions().computeIfAbsent(group, _ -> new HashMap<>()).putIfAbsent(well, dilution);
+                    groupWells.groupDilutions().putIfAbsent(group, dilution);
+                }
             });
             return groupWells;
         }

@@ -43,10 +43,11 @@ public class SelectedRowsExclusionDialog extends BaseExclusionDialog
     private final boolean _remove;
 
     /**
-     * One row of the dialog's table; analytes is comma separated. notebookNo is null when the assay design has no NotebookNo run field,
-     * and dataFile is null when the dialog hides that column, as it does unless a run's rows span data files.
+     * One row of the dialog's table; analytes is comma separated. notebookNo and plateId are null when the assay design has no NotebookNo run field
+     * or PlateID Excel file run field, and dataFile is null when the dialog hides that column, as it does unless a run's rows span data files.
      */
-    public record ExclusionRow(String run, @Nullable String notebookNo, @Nullable String dataFile, String description, String type, String wells, String analytes, String exclusionType)
+    public record ExclusionRow(String run, @Nullable String notebookNo, @Nullable String plateId, @Nullable String dataFile, String description, String type,
+                               String wells, String dilution, String analytes, String exclusionType)
     {
     }
 
@@ -99,8 +100,8 @@ public class SelectedRowsExclusionDialog extends BaseExclusionDialog
             for (int i = 0; i < headers.size(); i++)
                 values.put(headers.get(i), cells.get(i));
             String analytes = String.join(", ", values.get("Selected Analyte(s)").split("\n")); // one analyte per line
-            return new ExclusionRow(values.get("Assay ID"), values.get("Notebook No."), values.get(DATA_FILE_HEADER), values.get("Description"), values.get("Type"),
-                    values.get("Well(s)"), analytes, values.get("Exclusion Type"));
+            return new ExclusionRow(values.get("Assay ID"), values.get("Notebook No."), values.get("Plate ID"), values.get(DATA_FILE_HEADER), values.get("Description"),
+                    values.get("Type"), values.get("Well(s)"), values.get("Dilution"), analytes, values.get("Exclusion Type"));
         }).toList();
     }
 

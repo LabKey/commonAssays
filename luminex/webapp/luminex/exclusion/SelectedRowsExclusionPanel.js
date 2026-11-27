@@ -39,6 +39,7 @@ function openExclusionsSelectedRowsWindow(assayId, dataRegionName, remove)
                     removeMode: remove,
                     runs: response.runs,
                     hasNotebookNo: response.hasNotebookNo,
+                    hasPlateId: response.hasPlateId,
                     skippedRowCount: response.skippedRowCount,
                     listeners: {
                         closeWindow: function()
@@ -127,10 +128,12 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
         var columns = [
             {header: 'Assay ID', field: 'runName'},
             {header: 'Notebook No.', field: 'notebookNo'},
+            {header: 'Plate ID', field: 'plateId'},
             {header: 'Data File', field: 'dataFileName'},
             {header: 'Description', field: 'description'},
             {header: 'Type', field: 'type'},
             {header: 'Well(s)', field: 'wells'},
+            {header: 'Dilution', field: 'dilution'},
             {header: 'Selected Analyte(s)', field: 'analyteNames'},
             {header: 'Exclusion Type', field: 'exclusionType'}
         ];
@@ -138,6 +141,8 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
             columns = columns.filter(function(column) { return column.field !== 'dataFileName'; });
         if (!this.hasNotebookNo)
             columns = columns.filter(function(column) { return column.field !== 'notebookNo'; });
+        if (!this.hasPlateId)
+            columns = columns.filter(function(column) { return column.field !== 'plateId'; });
 
         var html = '<table class="labkey-data-region-legacy labkey-show-borders" style="width: 100%;"><tr>';
         Ext.each(columns, function(column)
@@ -188,7 +193,9 @@ LABKEY.Exclusions.SelectedRowsPanel = Ext.extend(LABKEY.Exclusions.BasePanel, {
                 records.push({
                     runName: run.runName,
                     notebookNo: run.notebookNo,
+                    plateId: exclusion.plateId,
                     dataFileName: exclusion.dataFileName,
+                    dilution: exclusion.dilution,
                     description: exclusion.description,
                     type: exclusion.type,
                     wells: exclusion.well != null ? exclusion.well : exclusion.groupWells.join(','),

@@ -54,9 +54,10 @@ import static org.junit.Assert.assertThrows;
 @Category({Daily.class, Assays.class})
 public final class LuminexExcludeSelectedRowsTest extends LuminexTest
 {
-    private static final TestRun SUMMARY_RUN = new TestRun("SelectedRowsRun", TEST_ASSAY_LUM_FILE10, "Standard1", "NB-101");
-    private static final TestRun RAW_RUN = new TestRun("SelectedRowsRawRun", TEST_ASSAY_MULTIPLE_STANDARDS_1_XLSX, "Standard2", "NB-102");
-    private static final TestRun OTHER_RUN = new TestRun("SelectedRowsOtherRun", TEST_ASSAY_LUM_FILE10, "Standard1", null);
+    private static final TestRun SUMMARY_RUN = new TestRun("SelectedRowsRun", TEST_ASSAY_LUM_FILE10, "Standard1", "NB-101", "");
+    private static final TestRun RAW_RUN = new TestRun("SelectedRowsRawRun", TEST_ASSAY_MULTIPLE_STANDARDS_1_XLSX, "Standard2", "NB-102", "plate 1 IgA-Biot + Standard2");
+    private static final TestRun OTHER_RUN = new TestRun("SelectedRowsOtherRun", TEST_ASSAY_LUM_FILE10, "Standard1", null, "");
+    private static final String DILUTION = "1.0";
     private static final String ANALYTE_2 = "Analyte2";
     private static final String ANALYTE_3 = "Analyte3";
     private static final String ENV6 = "ENV6";
@@ -317,7 +318,7 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
         return results;
     }
 
-    private record TestRun(String name, File file, String description, @Nullable String notebookNo) {}
+    private record TestRun(String name, File file, String description, @Nullable String notebookNo, String plateId) {}
 
     private record WellAnalytes(String type, String well, List<String> analytes) {}
 
@@ -352,7 +353,7 @@ public final class LuminexExcludeSelectedRowsTest extends LuminexTest
     private static ExclusionRow row(TestRun run, String type, String wells, String analytes, String exclusionType)
     {
         // Each test run has one data file, so the dialog hides the Data File column
-        return new ExclusionRow(run.name(), Objects.toString(run.notebookNo(), ""), null, run.description(), type, wells, analytes, exclusionType);
+        return new ExclusionRow(run.name(), Objects.toString(run.notebookNo(), ""), run.plateId(), null, run.description(), type, wells, DILUTION, analytes, exclusionType);
     }
 
     /** Checks the run's well and replicate group exclusions for the type, keyed by well ("Replicate Group" for a group exclusion). */
