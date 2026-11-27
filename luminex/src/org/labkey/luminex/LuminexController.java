@@ -24,9 +24,11 @@ import org.labkey.api.action.ApiSimpleResponse;
 import org.labkey.api.action.ExportAction;
 import org.labkey.api.action.FormViewAction;
 import org.labkey.api.action.MutatingApiAction;
+import org.labkey.api.action.ReadOnlyApiAction;
 import org.labkey.api.action.SimpleViewAction;
 import org.labkey.api.action.SpringActionController;
 import org.labkey.api.assay.AssayProvider;
+import org.labkey.api.assay.AssayService;
 import org.labkey.api.assay.AssaySchema;
 import org.labkey.api.assay.AssayUrls;
 import org.labkey.api.assay.AssayView;
@@ -38,6 +40,7 @@ import org.labkey.api.audit.TransactionAuditProvider;
 import org.labkey.api.data.ActionButton;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.ContainerFilter;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.DataRegionSelection;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleDisplayColumn;
@@ -47,9 +50,12 @@ import org.labkey.api.data.SqlSelector;
 import org.labkey.api.data.TSVWriter;
 import org.labkey.api.data.TableSelector;
 import org.labkey.api.data.UrlColumn;
+import org.labkey.api.exp.api.ExpData;
 import org.labkey.api.exp.api.ExpProtocol;
 import org.labkey.api.exp.api.ExpRun;
 import org.labkey.api.exp.api.ExperimentService;
+import org.labkey.api.exp.property.Domain;
+import org.labkey.api.exp.property.DomainProperty;
 import org.labkey.api.exp.DeleteForm;
 import org.labkey.api.gwt.client.AuditBehaviorType;
 import org.labkey.api.pipeline.PipeRoot;
@@ -77,6 +83,7 @@ import org.labkey.api.util.StringExpressionFactory;
 import org.labkey.api.util.URLHelper;
 import org.labkey.api.view.ActionURL;
 import org.labkey.api.view.DataView;
+import org.labkey.api.view.DataViewSelectionForm;
 import org.labkey.api.view.HttpView;
 import org.labkey.api.view.JspView;
 import org.labkey.api.view.NavTree;
@@ -96,10 +103,15 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Actions for Luminex specific features (Levey-Jennings, QC Report, Excluded Data)
@@ -620,6 +632,291 @@ public class LuminexController extends SpringActionController
         }
     }
 
+    public static class GetSelectedRowsExclusionsForm extends DataViewSelectionForm
+    {
+        private Integer _assayId;
+        private boolean _remove;
+
+        public Integer getAssayId()
+        {
+            return _assayId;
+        }
+
+        public void setAssayId(Integer assayId)
+        {
+            _assayId = assayId;
+        }
+
+        public boolean isRemove()
+        {
+            return _remove;
+        }
+
+        public void setRemove(boolean remove)
+        {
+            _remove = remove;
+        }
+    }
+
+    /** groupDilutions holds the summary row's dilution, or a raw row's when the group has no summary row. */
+    private record GroupWells(Map<SelectedRowsExclusions.ReplicateGroup, Set<String>> wellValues, Set<SelectedRowsExclusions.ReplicateGroup> summaryGroups,
+                              Map<SelectedRowsExclusions.ReplicateGroup, Map<String, Double>> wellDilutions, Map<SelectedRowsExclusions.ReplicateGroup, Double> groupDilutions)
+    {
+        public @Nullable Double getDilution(SelectedRowsExclusions.ReplicateGroup group, @Nullable String well)
+        {
+            return well != null ? wellDilutions.getOrDefault(group, Map.of()).get(well) : groupDilutions.get(group);
+        }
+    }
+
+    private record SelectedDataRow(long runId, String runName, String runContainerId, String protocolLsid, String dataFileName,
+                                   long dataId, @Nullable String description, @Nullable String type, String well, boolean summary, long analyteId, String analyteName)
+    {
+    }
+
+    /**
+     * Proposes the well and replicate group exclusions to insert, update or delete for the selected results grid rows,
+     * grouped by run, for the client to confirm and pass to SaveExclusionAction.
+     */
+    @RequiresPermission(UpdatePermission.class)
+    public class GetSelectedRowsExclusionsAction extends ReadOnlyApiAction<GetSelectedRowsExclusionsForm>
+    {
+        private static final int MAX_SELECTED_ROWS = 10_000;
+
+        private ExpProtocol _protocol;
+
+        @Override
+        public void validateForm(GetSelectedRowsExclusionsForm form, Errors errors)
+        {
+            _protocol = LuminexSaveExclusionsForm.getProtocol(getContainer(), form.getAssayId());
+            if (_protocol == null)
+                errors.reject(ERROR_MSG, "Luminex assay protocol not found: " + form.getAssayId());
+            if (form.getDataRegionSelectionKey() == null && form.getRowIds() == null)
+                errors.reject(ERROR_REQUIRED, "You must provide either a set of rowIds or a dataRegionSelectionKey.");
+        }
+
+        @Override
+        public Object execute(GetSelectedRowsExclusionsForm form, BindException errors)
+        {
+            Set<Long> dataRowIds = form.getIds(false);
+            if (dataRowIds.isEmpty())
+            {
+                errors.reject(ERROR_MSG, "No rows are selected.");
+                return null;
+            }
+            if (dataRowIds.size() > MAX_SELECTED_ROWS)
+            {
+                errors.reject(ERROR_MSG, String.format("At most %,d rows can be selected; %,d are selected. Filter the grid to narrow the selection.", MAX_SELECTED_ROWS, dataRowIds.size()));
+                return null;
+            }
+
+            List<SelectedDataRow> dataRows = getSelectedDataRows(dataRowIds);
+            if (dataRows.size() < dataRowIds.size())
+            {
+                errors.reject(ERROR_MSG, "Some of the selected rows no longer exist. Refresh the grid and select them again.");
+                return null;
+            }
+            if (dataRows.stream().anyMatch(r -> !getContainer().getId().equals(r.runContainerId())))
+            {
+                errors.reject(ERROR_MSG, "The selection includes rows from another folder. Select rows from runs in this folder only.");
+                return null;
+            }
+            if (dataRows.stream().anyMatch(r -> !_protocol.getLSID().equals(r.protocolLsid())))
+            {
+                errors.reject(ERROR_MSG, "The selection includes rows from another assay.");
+                return null;
+            }
+            long runCount = dataRows.stream().map(SelectedDataRow::runId).distinct().count();
+            if (runCount > LuminexSaveExclusionsForm.MAX_RUNS)
+            {
+                errors.reject(ERROR_MSG, "The selection includes rows from " + runCount + " runs. Select rows from at most " + LuminexSaveExclusionsForm.MAX_RUNS + " runs.");
+                return null;
+            }
+
+            List<SelectedRowsExclusions.SelectedRow> rows = dataRows.stream()
+                    .filter(r -> r.type() != null && r.well() != null) // Rows without a type or well aren't part of a replicate group
+                    .map(r -> new SelectedRowsExclusions.SelectedRow(r.runId(), new SelectedRowsExclusions.ReplicateGroup(r.dataId(), r.description(), r.type()),
+                            r.well(), r.summary(), r.analyteId(), r.analyteName()))
+                    .toList();
+            Set<Long> dataIds = rows.stream().map(r -> r.group().dataId()).collect(Collectors.toSet());
+            List<SelectedRowsExclusions.ExistingExclusion> existing = getExistingWellExclusions(dataIds);
+            Map<Integer, String> existingComments = new HashMap<>();
+            existing.forEach(e -> existingComments.put(e.rowId(), e.comment()));
+            GroupWells groupWells = getGroupWells(dataIds);
+
+            SelectedRowsExclusions.Result result = form.isRemove()
+                    ? SelectedRowsExclusions.remove(rows, existing)
+                    : SelectedRowsExclusions.exclude(rows, existing, groupWells.summaryGroups());
+
+            if (result.exclusions().isEmpty())
+            {
+                errors.reject(ERROR_MSG, form.isRemove()
+                        ? "None of the selected rows have a well or replicate group exclusion to remove."
+                        : "The selected rows are already excluded.");
+                return null;
+            }
+
+            Map<Long, String> runNames = new HashMap<>();
+            Map<Long, String> dataFileNames = new HashMap<>();
+            dataRows.forEach(r -> {
+                runNames.put(r.runId(), r.runName());
+                dataFileNames.put(r.dataId(), r.dataFileName());
+            });
+
+            DomainProperty plateIdProperty = getPlateIdProperty();
+            Map<Long, String> plateIds = new HashMap<>();
+            if (plateIdProperty != null)
+            {
+                dataFileNames.keySet().forEach(dataId -> {
+                    ExpData data = ExperimentService.get().getExpData(dataId);
+                    Object plateId = data != null ? data.getProperty(plateIdProperty) : null;
+                    plateIds.put(dataId, plateId != null ? plateId.toString() : null);
+                });
+            }
+
+            Map<Long, List<Map<String, Object>>> exclusionsByRun = new LinkedHashMap<>();
+            for (SelectedRowsExclusions.ProposedExclusion exclusion : result.exclusions())
+            {
+                LuminexSingleExclusionCommand command = exclusion.toCommand();
+                Map<String, Object> props = new HashMap<>();
+                props.put("command", command.getCommand());
+                props.put("key", command.getKey());
+                props.put("dataId", command.getDataId());
+                props.put("dataFileName", dataFileNames.get(command.getDataId()));
+                props.put("plateId", plateIds.get(command.getDataId()));
+                Double dilution = groupWells.getDilution(exclusion.group(), exclusion.well());
+                props.put("dilution", dilution != null ? dilution.toString() : null); // JSON drops the ".0" the grid shows
+                props.put("description", command.getDescription());
+                props.put("type", command.getType());
+                props.put("well", command.getWell());
+                if (exclusion.well() == null)
+                {
+                    props.put("groupWells", groupWells.wellValues().getOrDefault(exclusion.group(), Set.of()).stream()
+                            .flatMap(w -> Arrays.stream(w.split(",")))
+                            .map(String::trim)
+                            .distinct()
+                            .sorted()
+                            .toList());
+                }
+                props.put("analyteRowIds", command.getAnalyteRowIds());
+                props.put("analyteNames", command.getAnalyteNames());
+                props.put("changedAnalyteNames", List.copyOf(exclusion.changedAnalytes().values()));
+                props.put("existingComment", exclusion.key() != null ? existingComments.get(exclusion.key()) : null);
+                exclusionsByRun.computeIfAbsent(exclusion.runId(), _ -> new ArrayList<>()).add(props);
+            }
+
+            DomainProperty notebookNoProperty = getNotebookNoProperty();
+            List<Map<String, Object>> runs = new ArrayList<>();
+            exclusionsByRun.forEach((runId, exclusions) -> {
+                Map<String, Object> run = new HashMap<>();
+                run.put("runId", runId);
+                run.put("runName", runNames.get(runId));
+                if (notebookNoProperty != null)
+                {
+                    ExpRun expRun = ExperimentService.get().getExpRun(runId);
+                    Object notebookNo = expRun != null ? expRun.getProperty(notebookNoProperty) : null;
+                    run.put("notebookNo", notebookNo != null ? notebookNo.toString() : null);
+                }
+                run.put("exclusions", exclusions);
+                runs.add(run);
+            });
+
+            ApiSimpleResponse response = new ApiSimpleResponse();
+            response.put("success", true);
+            response.put("hasNotebookNo", notebookNoProperty != null);
+            response.put("hasPlateId", plateIdProperty != null);
+            response.put("runs", runs);
+            response.put("skippedRowCount", result.skippedRowCount() + (dataRows.size() - rows.size()));
+            return response;
+        }
+
+        // The optional run field the Levey-Jennings report also shows
+        private @Nullable DomainProperty getNotebookNoProperty()
+        {
+            AssayProvider provider = AssayService.get().getProvider(_protocol);
+            Domain runDomain = provider != null ? provider.getRunDomain(_protocol) : null;
+            return runDomain != null ? runDomain.getPropertyByName("NotebookNo") : null;
+        }
+
+        private @Nullable DomainProperty getPlateIdProperty()
+        {
+            Domain excelRunDomain = LuminexAssayProvider.getExcelRunDomain(_protocol);
+            return excelRunDomain != null ? excelRunDomain.getPropertyByName("PlateID") : null;
+        }
+
+        private List<SelectedDataRow> getSelectedDataRows(Set<Long> dataRowIds)
+        {
+            SQLFragment sql = SQLFragment.unsafe("SELECT r.RowId AS RunId, r.Name AS RunName, r.Container, r.ProtocolLSID, d.Name AS DataFileName,"
+                    + " dr.DataId, dr.Description, dr.Type, dr.Well, dr.Summary, dr.AnalyteId, a.Name AS AnalyteName FROM ")
+                    .append(LuminexProtocolSchema.getTableInfoDataRow(), "dr")
+                    .append(SQLFragment.unsafe(" JOIN ")).append(ExperimentService.get().getTinfoData(), "d").append(SQLFragment.unsafe(" ON d.RowId = dr.DataId JOIN "))
+                    .append(ExperimentService.get().getTinfoExperimentRun(), "r").append(SQLFragment.unsafe(" ON r.RowId = d.RunId JOIN "))
+                    .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a").append(SQLFragment.unsafe(" ON a.RowId = dr.AnalyteId WHERE dr.RowId "))
+                    .appendInClause(dataRowIds, LuminexProtocolSchema.getSchema().getSqlDialect());
+
+            List<SelectedDataRow> rows = new ArrayList<>();
+            new SqlSelector(LuminexProtocolSchema.getSchema(), sql).forEach(rs -> rows.add(new SelectedDataRow(
+                    rs.getLong("RunId"), rs.getString("RunName"), rs.getString("Container"), rs.getString("ProtocolLSID"),
+                    rs.getString("DataFileName"), rs.getLong("DataId"), rs.getString("Description"), rs.getString("Type"),
+                    rs.getString("Well"), rs.getBoolean("Summary"), rs.getLong("AnalyteId"), rs.getString("AnalyteName"))));
+            return rows;
+        }
+
+        /**
+         * The distinct Well values of each replicate group in the data files, including summary rows' lists of wells,
+         * the groups with a summary row, and the wells' and groups' dilutions.
+         */
+        private GroupWells getGroupWells(Set<Long> dataIds)
+        {
+            // Summary rows first so a group's dilution comes from its summary row
+            SQLFragment sql = SQLFragment.unsafe("SELECT DISTINCT dr.DataId, dr.Description, dr.Type, dr.Well, dr.Summary, dr.Dilution FROM ")
+                    .append(LuminexProtocolSchema.getTableInfoDataRow(), "dr")
+                    .append(SQLFragment.unsafe(" WHERE dr.Type IS NOT NULL AND dr.Well IS NOT NULL AND dr.DataId "))
+                    .appendInClause(dataIds, LuminexProtocolSchema.getSchema().getSqlDialect())
+                    .append(SQLFragment.unsafe(" ORDER BY dr.Summary DESC, dr.Well"));
+
+            GroupWells groupWells = new GroupWells(new HashMap<>(), new HashSet<>(), new HashMap<>(), new HashMap<>());
+            new SqlSelector(LuminexProtocolSchema.getSchema(), sql).forEach(rs -> {
+                SelectedRowsExclusions.ReplicateGroup group = new SelectedRowsExclusions.ReplicateGroup(rs.getLong("DataId"), rs.getString("Description"), rs.getString("Type"));
+                String well = rs.getString("Well");
+                groupWells.wellValues().computeIfAbsent(group, _ -> new HashSet<>()).add(well);
+                if (rs.getBoolean("Summary"))
+                    groupWells.summaryGroups().add(group);
+                double dilution = rs.getDouble("Dilution");
+                if (!rs.wasNull())
+                {
+                    groupWells.wellDilutions().computeIfAbsent(group, _ -> new HashMap<>()).putIfAbsent(well, dilution);
+                    groupWells.groupDilutions().putIfAbsent(group, dilution);
+                }
+            });
+            return groupWells;
+        }
+
+        private List<SelectedRowsExclusions.ExistingExclusion> getExistingWellExclusions(Set<Long> dataIds)
+        {
+            // Titration and singlepoint unknown exclusions share the table but have no Type or have a Dilution
+            SQLFragment sql = SQLFragment.unsafe("SELECT we.RowId, we.DataId, we.Description, we.Type, we.Well, we.Comment, wea.AnalyteId, a.Name AS AnalyteName FROM ")
+                    .append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we")
+                    .append(SQLFragment.unsafe(" LEFT JOIN ")).append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "wea").append(SQLFragment.unsafe(" ON wea.WellExclusionId = we.RowId LEFT JOIN "))
+                    .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a")
+                    .append(SQLFragment.unsafe(" ON a.RowId = wea.AnalyteId WHERE we.Type IS NOT NULL AND we.Dilution IS NULL AND we.DataId "))
+                    .appendInClause(dataIds, LuminexProtocolSchema.getSchema().getSqlDialect());
+
+            Map<Integer, SelectedRowsExclusions.ExistingExclusion> exclusions = new LinkedHashMap<>();
+            new SqlSelector(LuminexProtocolSchema.getSchema(), sql).forEach(rs -> {
+                int rowId = rs.getInt("RowId");
+                SelectedRowsExclusions.ReplicateGroup group = new SelectedRowsExclusions.ReplicateGroup(rs.getLong("DataId"), rs.getString("Description"), rs.getString("Type"));
+                String well = rs.getString("Well");
+                String comment = rs.getString("Comment");
+                SelectedRowsExclusions.ExistingExclusion exclusion = exclusions.computeIfAbsent(rowId,
+                        _ -> new SelectedRowsExclusions.ExistingExclusion(rowId, group, well, new HashMap<>(), comment));
+                long analyteId = rs.getLong("AnalyteId");
+                if (!rs.wasNull())
+                    exclusion.analytes().put(analyteId, rs.getString("AnalyteName"));
+            });
+            return new ArrayList<>(exclusions.values());
+        }
+    }
+
     @RequiresPermission(UpdatePermission.class)
     public class SaveExclusionAction extends MutatingApiAction<LuminexSaveExclusionsForm>
     {
@@ -627,19 +924,81 @@ public class LuminexController extends SpringActionController
         public void validateForm(LuminexSaveExclusionsForm form, Errors errors)
         {
             // verify the assayName provided is valid and of type LuminexAssayProvider
-            if (form.getProtocol(getContainer()) == null)
+            ExpProtocol protocol = form.getProtocol(getContainer());
+            if (protocol == null)
             {
                 errors.reject(ERROR_MSG, "Luminex assay protocol not found: " + form.getAssayId());
             }
 
-            // verify that the runId is valid and matches an existing run
-            ExpRun run = form.getRunId() != null ? ExperimentService.get().getExpRun(getContainer(), form.getRunId()) : null;
-            if (run == null)
+            // verify that each runId is valid and matches an existing run, before any job is queued
+            for (LuminexSaveExclusionsForm runForm : form.getRunForms())
             {
-                errors.reject(ERROR_MSG, "No run found for id " + form.getRunId());
+                ExpRun run = runForm.getRunId() != null ? ExperimentService.get().getExpRun(getContainer(), runForm.getRunId()) : null;
+                if (run == null)
+                {
+                    errors.reject(ERROR_MSG, "No run found for id " + runForm.getRunId());
+                }
+                else
+                {
+                    if (protocol != null && !protocol.getLSID().equals(run.getProtocol().getLSID()))
+                        errors.reject(ERROR_MSG, "Run " + run.getRowId() + " is not a run of assay " + protocol.getName() + ".");
+                    validateDataIds(runForm, run, errors);
+                    validateKeys(runForm, run, errors);
+                }
             }
 
             form.validate(errors);
+        }
+
+        // The job is logged against the form's run, so each command's data file must be one of that run's
+        private void validateDataIds(LuminexSaveExclusionsForm form, ExpRun run, Errors errors)
+        {
+            Set<Long> dataIds = form.getCommands().stream()
+                    .map(LuminexSingleExclusionCommand::getDataId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            if (dataIds.isEmpty())
+                return;
+
+            Set<Long> runDataIds = ExperimentService.get().getExpDatas(dataIds).stream()
+                    .filter(data -> Objects.equals(data.getRunId(), run.getRowId()))
+                    .map(ExpData::getRowId)
+                    .collect(Collectors.toSet());
+            dataIds.stream()
+                    .filter(dataId -> !runDataIds.contains(dataId))
+                    .sorted()
+                    .forEach(dataId -> errors.reject(ERROR_MSG, "Data file " + dataId + " does not belong to run " + run.getRowId() + "."));
+        }
+
+        // An update or delete must change one of the form's run's exclusions
+        private void validateKeys(LuminexSaveExclusionsForm form, ExpRun run, Errors errors)
+        {
+            Set<Integer> keys = form.getCommands().stream()
+                    .filter(command -> !"insert".equals(command.getCommand()))
+                    .map(LuminexSingleExclusionCommand::getKey)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            if (keys.isEmpty())
+                return;
+
+            Set<Integer> runKeys;
+            if (LuminexManager.ExclusionType.RunExclusion.name().equals(form.getTableName()))
+            {
+                // An analyte exclusion is keyed by its RunId
+                runKeys = keys.stream().filter(key -> key == run.getRowId()).collect(Collectors.toSet());
+            }
+            else
+            {
+                SQLFragment sql = SQLFragment.unsafe("SELECT we.RowId FROM ").append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we")
+                        .append(SQLFragment.unsafe(" JOIN ")).append(ExperimentService.get().getTinfoData(), "d")
+                        .append(SQLFragment.unsafe(" ON d.RowId = we.DataId WHERE d.RunId = ? AND we.RowId ", run.getRowId()))
+                        .appendInClause(keys, LuminexProtocolSchema.getSchema().getSqlDialect());
+                runKeys = new HashSet<>(new SqlSelector(LuminexProtocolSchema.getSchema(), sql).getArrayList(Integer.class));
+            }
+            keys.stream()
+                    .filter(key -> !runKeys.contains(key))
+                    .sorted()
+                    .forEach(key -> errors.reject(ERROR_MSG, "Exclusion " + key + " does not belong to run " + run.getRowId() + "."));
         }
 
         @Override
@@ -648,10 +1007,19 @@ public class LuminexController extends SpringActionController
             ApiSimpleResponse response = new ApiSimpleResponse();
 
             PipeRoot root = PipelineService.get().findPipelineRoot(getContainer());
-            PipelineJob job = new LuminexExclusionPipelineJob(getViewBackgroundInfo(), root, form);
-            PipelineService.get().queueJob(job);
+            List<LuminexSaveExclusionsForm> runForms = form.getRunForms();
+            try (DbScope.Transaction transaction = ExperimentService.get().ensureTransaction())
+            {
+                for (LuminexSaveExclusionsForm runForm : runForms)
+                {
+                    PipelineJob job = new LuminexExclusionPipelineJob(getViewBackgroundInfo(), root, runForm);
+                    PipelineService.get().queueJob(job);
+                }
+                transaction.commit();
+            }
 
             response.put("success", true);
+            response.put("jobCount", runForms.size());
             response.put(ActionURL.Param.returnUrl.name(), urlProvider(AssayUrls.class).getShowUploadJobsURL(getContainer(), form.getProtocol(getContainer()), ContainerFilter.current(this)));
             return response;
         }

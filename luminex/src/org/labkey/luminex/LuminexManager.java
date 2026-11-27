@@ -24,6 +24,7 @@ import org.labkey.api.data.ColumnInfo;
 import org.labkey.api.data.CompareType;
 import org.labkey.api.data.Container;
 import org.labkey.api.data.DbSchema;
+import org.labkey.api.data.DbScope;
 import org.labkey.api.data.DbSchemaType;
 import org.labkey.api.data.SQLFragment;
 import org.labkey.api.data.SimpleFilter;
@@ -435,7 +436,7 @@ public class LuminexManager
             Double dilution = exclusion.get("Dilution") != null ? Double.parseDouble(exclusion.get("Dilution").toString()) : null; // == null for well replicate group and titration exclusions
 
             //Get existing command
-            String key = createExclusionCommandKey(dataFileHeaderKey, description, type, dilution);
+            String key = createExclusionCommandKey(dataFileHeaderKey, description, type, dilution, (String)exclusion.get("well"));
             LuminexSingleExclusionCommand command = replacementCommands.get(key);
 
             if (command == null)
@@ -450,7 +451,12 @@ public class LuminexManager
                 else if (isSinglepointUnknownExclusion)
                     hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getTitrationKey(dataFileHeaderKey, analyteName, description)) && k.endsWith("|" + dilution + "|null"));
                 else if (isWellReplicateGroupTypeExclusion)
-                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(getReplicateGroupKey(dataFileHeaderKey, analyteName, description, type)));
+                {
+                    String groupKey = getReplicateGroupKey(dataFileHeaderKey, analyteName, description, type);
+                    String well = (String)exclusion.get("well");
+                    // A single-well exclusion needs its well in the new file, as the re-import warning counts it
+                    hasWellKeyMatch = wellKeys.stream().anyMatch(k -> k.startsWith(groupKey) && (well == null || k.endsWith("|" + well)));
+                }
 
                 if (hasWellKeyMatch)
                     command = generateExclusionCommands(exclusion, file.getRowId());
@@ -488,7 +494,7 @@ public class LuminexManager
     {
         SQLFragment sql = new SQLFragment();
         sql.append( "SELECT opvRSN.StringValue AS ReaderSerialNumber, opvAD.DateTimeValue AS AcquisitionDate, ")
-            .append("a.Name AS Analyte, we.Description, we.Type, we.Dilution\n")
+            .append("a.Name AS Analyte, we.Description, we.Type, we.Dilution, we.Well\n")
             .append("FROM ").append(LuminexProtocolSchema.getTableInfoWellExclusion(), "we").append(",")
             .append(LuminexProtocolSchema.getTableInfoWellExclusionAnalyte(), "wea").append(",")
             .append(LuminexProtocolSchema.getTableInfoAnalytes(), "a").append(",")
@@ -592,53 +598,65 @@ public class LuminexManager
                 Map<Enum, Object> options = new HashMap<>();
                 options.put(QueryUpdateService.ConfigParameters.Logger, logger);
 
-                Map<String, Object> additionalContext = Collections.singletonMap(RERUN_TRANSFORM, rerunTransform);
-
-                for (LuminexSingleExclusionCommand command : commands)
+                // One transaction for all commands so a failed transform rerun rolls back every exclusion in the batch
+                synchronized (LuminexRunCreator.LOCK_OBJECT)
                 {
-                    List<Map<String, Object>> rows = new ArrayList<>();
-                    List<Map<String, Object>> keys = new ArrayList<>();
-                    BatchValidationException errors = new BatchValidationException();
-                    List<Map<String, Object>> results;
-
-                    // if the baseExclusionType is null, determine the type based on the command details
-                    ExclusionType exclusionType = baseExclusionType;
-                    if (exclusionType == null)
-                        exclusionType = command.getExclusionType();
-
-                    logger.info("Starting {} {}", command.getCommand(), exclusionType.getDescription(command).toLowerCase());
-
-                    rows.add(exclusionType.getRowMap(command, runId, false));
-                    keys.add(exclusionType.getRowMap(command, runId, true));
-
-                    String logVerb = switch (command.getCommand())
+                    try (DbScope.Transaction transaction = LuminexProtocolSchema.getSchema().getScope().ensureTransaction())
                     {
-                        case "insert" ->
+                        int remaining = commands.size();
+                        for (LuminexSingleExclusionCommand command : commands)
                         {
-                            results = qus.insertRows(user, c, rows, errors, options, additionalContext);
-                            yield " inserted into ";
-                        }
-                        case "update" ->
-                        {
-                            results = qus.updateRows(user, c, rows, keys, errors, options, additionalContext);
-                            yield " updated in ";
-                        }
-                        case "delete" ->
-                        {
-                            results = qus.deleteRows(user, c, keys, options, additionalContext);
-                            yield " deleted from ";
-                        }
-                        default -> throw new IllegalArgumentException("Invalid command type: " + command.getCommand());
-                    };
+                            // The update service accumulates the runs to refresh, so rerun the transform once after the last command
+                            boolean isLast = --remaining == 0;
+                            Map<String, Object> additionalContext = Collections.singletonMap(RERUN_TRANSFORM, rerunTransform && isLast);
 
-                    logger.info("{}{}{}", StringUtilsLabKey.pluralize(results.size(), "record"), logVerb, tableInfo.getName());
+                            List<Map<String, Object>> rows = new ArrayList<>();
+                            List<Map<String, Object>> keys = new ArrayList<>();
+                            BatchValidationException errors = new BatchValidationException();
+                            List<Map<String, Object>> results;
 
-                    if (errors.hasErrors())
-                    {
-                        throw errors;
+                            // if the baseExclusionType is null, determine the type based on the command details
+                            ExclusionType exclusionType = baseExclusionType;
+                            if (exclusionType == null)
+                                exclusionType = command.getExclusionType();
+
+                            logger.info("Starting {} {}", command.getCommand(), exclusionType.getDescription(command).toLowerCase());
+
+                            rows.add(exclusionType.getRowMap(command, runId, false));
+                            keys.add(exclusionType.getRowMap(command, runId, true));
+
+                            String logVerb = switch (command.getCommand())
+                            {
+                                case "insert" ->
+                                {
+                                    results = qus.insertRows(user, c, rows, errors, options, additionalContext);
+                                    yield " inserted into ";
+                                }
+                                case "update" ->
+                                {
+                                    results = qus.updateRows(user, c, rows, keys, errors, options, additionalContext);
+                                    yield " updated in ";
+                                }
+                                case "delete" ->
+                                {
+                                    results = qus.deleteRows(user, c, keys, options, additionalContext);
+                                    yield " deleted from ";
+                                }
+                                default -> throw new IllegalArgumentException("Invalid command type: " + command.getCommand());
+                            };
+
+                            logger.info("{}{}{}", StringUtilsLabKey.pluralize(results.size(), "record"), logVerb, tableInfo.getName());
+
+                            if (errors.hasErrors())
+                            {
+                                throw errors;
+                            }
+
+                            logger.info("Finished {} {}", command.getCommand(), exclusionType.getDescription(command).toLowerCase());
+                        }
+
+                        transaction.commit();
                     }
-
-                    logger.info("Finished {} {}", command.getCommand(), exclusionType.getDescription(command).toLowerCase());
                 }
             }
         }
@@ -699,18 +717,22 @@ public class LuminexManager
             String type = (String)cols.get(typeFK).getValue(row);
             Object dilutionObj = cols.get(dilutionFK).getValue(row);
             Double dilution = dilutionObj != null ? Double.parseDouble(dilutionObj.toString()) : null;
-            String well = onlyExcludedWells ? (String)cols.get(wellFK).getValue(row) : null;
+            String well = (String)cols.get(wellFK).getValue(row);
 
-            excludedWellKeys.add(createWellKey(dataFileHeaderKey, analyteName, description, type, dilution, well));
+            excludedWellKeys.add(createWellKey(dataFileHeaderKey, analyteName, description, type, dilution, onlyExcludedWells ? well : null));
+            // Re-import also matches single-well exclusions to their well; the well-less key stays for the other exclusion types
+            if (!onlyExcludedWells && well != null)
+                excludedWellKeys.add(createWellKey(dataFileHeaderKey, analyteName, description, type, dilution, well));
         });
 
         return excludedWellKeys;
     }
 
     /** Create a simple object to use as a key, combining the three properties */
-    private String createExclusionCommandKey(String dataFileHeaderKey, String description, String type, Double dilution)
+    // The well keeps single-well exclusions in one replicate group from merging into one command
+    private String createExclusionCommandKey(String dataFileHeaderKey, String description, String type, Double dilution, String well)
     {
-        return dataFileHeaderKey  + "|" + description + "|" + type + "|" + dilution;
+        return dataFileHeaderKey  + "|" + description + "|" + type + "|" + dilution + "|" + well;
     }
 
     /** Refine the key object with the individual analyte */

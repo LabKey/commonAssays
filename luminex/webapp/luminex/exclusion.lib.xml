@@ -5,6 +5,7 @@
         <script path="luminex/exclusion/SinglepointUnknownExclusionPanel.js"/>
         <script path="luminex/exclusion/TitrationExclusionPanel.js"/>
         <script path="luminex/exclusion/AnalyteExclusionPanel.js"/>
+        <script path="luminex/exclusion/SelectedRowsExclusionPanel.js"/>
         <script path="luminex/exclusion/Exclusion.css"/>
     </library>
     <dependencies>

@@ -100,7 +100,8 @@ public class LuminexModule extends DefaultModule
             LuminexDataHandler.TestCase.class,
             LuminexExcelParser.TestCase.class,
             LuminexRunAsyncContext.TestCase.class,
-            LuminexSaveExclusionsForm.TestCase.class
+            LuminexSaveExclusionsForm.TestCase.class,
+            SelectedRowsExclusions.TestCase.class
         );
     }
 

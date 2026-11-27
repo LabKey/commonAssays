@@ -15,6 +15,7 @@
  */
 package org.labkey.luminex.query;
 
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.labkey.api.data.Container;
@@ -49,6 +50,7 @@ import org.labkey.api.assay.AssayProvider;
 import org.labkey.api.assay.AssayRunDatabaseContext;
 import org.labkey.api.assay.AssayService;
 import org.labkey.api.util.HtmlString;
+import org.labkey.api.util.logging.LogHelper;
 import org.labkey.api.view.UnauthorizedException;
 import org.labkey.api.writer.HtmlWriter;
 import org.labkey.luminex.LuminexManager;
@@ -69,6 +71,8 @@ import java.util.TreeSet;
  */
 public class WellExclusionTable extends AbstractExclusionTable
 {
+    private static final Logger LOG = LogHelper.getLogger(WellExclusionTable.class, "Luminex well exclusion transform reruns");
+
     public WellExclusionTable(LuminexProtocolSchema schema, ContainerFilter cf, boolean filter)
     {
         super(LuminexProtocolSchema.getTableInfoWellExclusion(), schema, cf, filter);
@@ -262,7 +266,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                         List<Map<String, Object>> result = super.insertRows(user, container, rows, errors, configParameters, extraScriptContext);
 
                         if (extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
-                            rerunTransformScripts(errors);
+                            rerunTransformScripts(errors, configParameters);
 
                         if (errors.hasErrors())
                             throw errors;
@@ -290,7 +294,7 @@ public class WellExclusionTable extends AbstractExclusionTable
 
                         BatchValidationException errors = new BatchValidationException();
                         if (extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
-                            rerunTransformScripts(errors);
+                            rerunTransformScripts(errors, configParameters);
 
                         if (errors.hasErrors())
                             throw errors;
@@ -313,7 +317,7 @@ public class WellExclusionTable extends AbstractExclusionTable
                         List<Map<String, Object>> result = super.updateRows(user, container, rows, oldKeys, errors, configParameters, extraScriptContext);
 
                         if (extraScriptContext != null && (Boolean)extraScriptContext.getOrDefault(LuminexManager.RERUN_TRANSFORM, false))
-                            rerunTransformScripts(errors);
+                            rerunTransformScripts(errors, configParameters);
 
                         if (errors.hasErrors())
                             throw errors;
@@ -324,12 +328,14 @@ public class WellExclusionTable extends AbstractExclusionTable
                 }
             }
 
-            private void rerunTransformScripts(BatchValidationException errors) throws QueryUpdateServiceException
+            private void rerunTransformScripts(BatchValidationException errors, Map<Enum, Object> configParameters) throws QueryUpdateServiceException
             {
+                Logger logger = configParameters != null && configParameters.get(QueryUpdateService.ConfigParameters.Logger) instanceof Logger l ? l : LOG;
                 try
                 {
                     for (ExpRun run : _runsToRefresh)
                     {
+                        logger.info("Rerunning the transform script for run: {} (RowId {})", run.getName(), run.getRowId());
                         AssayProvider provider = AssayService.get().getProvider(run);
                         AssayRunDatabaseContext<?> context = provider.createRunDatabaseContext(run, _userSchema.getUser(), null);
                         provider.getRunCreator().saveExperimentRun(context, AssayService.get().findBatch(run), run, false, null);
